@@ -44,7 +44,7 @@ Authorization: Bearer YOUR_API_KEY
 
   Fixed at 1
 
-  ⚠️ **Note:** Must be a pure number (e.g. 1), do not add quotes, otherwise it will error
+  **⚠️ Note:** Must be a pure number (e.g. 1), do not add quotes, otherwise it will error
 </ParamField>
 
 <ParamField body="resolution" type="string">
@@ -55,7 +55,7 @@ Authorization: Bearer YOUR_API_KEY
     - `2K` - 2K resolution
     - `4K` - 4K resolution
 
-    ⚠️ **Note:** Generating 4K images with base64 format takes longer processing time
+    **⚠️ Note:** Generating 4K images with base64 format takes longer processing time
 </ParamField>
 
 <ParamField body="image_urls" type="array">
@@ -66,7 +66,7 @@ Authorization: Bearer YOUR_API_KEY
   2. Enter the complete image URL address or base64 data
 
   <Expandable title="Detailed field description">
-    <ResponseField name="url" type="string" required>
+    <ParamField body="url"  type="string" required>
       Image URL address
 
       Supports two formats:
@@ -82,13 +82,13 @@ Authorization: Bearer YOUR_API_KEY
       - Format: `data:image/{format};base64,{base64data}`
       - Supported image formats: jpeg, png, webp, etc.
       - Example: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
-      - ⚠️ **Note:** Must include the `data:image/jpeg;base64,` prefix
+      - **⚠️ Note:** Must include the `data:image/jpeg;base64,` prefix
 
       **Limitations:**
 
       - Single image must not exceed 10MB
       - Supported formats: .jpeg, .jpg, .png, .webp
-    </ResponseField>
+    </ParamField>
   </Expandable>
 
   **Limit:** Maximum 5 images
@@ -350,6 +350,213 @@ let task = URLSession.shared.dataTask(with: request) { data, response, error in
 }
 
 task.resume()
+```
+
+```csharp C#
+using System;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
+
+class Program
+{
+    static async Task Main(string[] args)
+    {
+        var url = "https://api.apimart.ai/v1/images/generations";
+
+        var payload = @"{
+            ""model"": ""gemini-3-pro-image-preview"",
+            ""prompt"": ""A bamboo forest path under moonlight"",
+            ""size"": ""1:1"",
+            ""n"": 1,
+            ""resolution"": ""1K""
+        }";
+
+        using var client = new HttpClient();
+        client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+
+        var content = new StringContent(payload, Encoding.UTF8, "application/json");
+        var response = await client.PostAsync(url, content);
+        var result = await response.Content.ReadAsStringAsync();
+
+        Console.WriteLine(result);
+    }
+}
+```
+
+```c C
+#include <stdio.h>
+#include <curl/curl.h>
+
+int main(void) {
+    CURL *curl;
+    CURLcode res;
+
+    curl_global_init(CURL_GLOBAL_DEFAULT);
+    curl = curl_easy_init();
+
+    if(curl) {
+        const char *url = "https://api.apimart.ai/v1/images/generations";
+        const char *payload = "{"
+            "\"model\":\"gemini-3-pro-image-preview\","
+            "\"prompt\":\"A bamboo forest path under moonlight\","
+            "\"size\":\"1:1\","
+            "\"n\":1,"
+            "\"resolution\":\"1K\""
+        "}";
+
+        struct curl_slist *headers = NULL;
+        headers = curl_slist_append(headers, "Authorization: Bearer <token>");
+        headers = curl_slist_append(headers, "Content-Type: application/json");
+
+        curl_easy_setopt(curl, CURLOPT_URL, url);
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+        res = curl_easy_perform(curl);
+
+        if(res != CURLE_OK) {
+            fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                    curl_easy_strerror(res));
+        }
+
+        curl_slist_free_all(headers);
+        curl_easy_cleanup(curl);
+    }
+
+    curl_global_cleanup();
+    return 0;
+}
+```
+
+```objectivec Objective-C
+#import <Foundation/Foundation.h>
+
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        NSURL *url = [NSURL URLWithString:@"https://api.apimart.ai/v1/images/generations"];
+
+        NSDictionary *payload = @{
+            @"model": @"gemini-3-pro-image-preview",
+            @"prompt": @"A bamboo forest path under moonlight",
+            @"size": @"1:1",
+            @"n": @1,
+            @"resolution": @"1K"
+        };
+
+        NSError *error;
+        NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
+                                                          options:0
+                                                            error:&error];
+
+        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+        [request setHTTPMethod:@"POST"];
+        [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
+        [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+        [request setHTTPBody:jsonData];
+
+        NSURLSessionDataTask *task = [[NSURLSession sharedSession]
+            dataTaskWithRequest:request
+            completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+                if (error) {
+                    NSLog(@"Error: %@", error);
+                    return;
+                }
+                NSString *result = [[NSString alloc] initWithData:data
+                                                        encoding:NSUTF8StringEncoding];
+                NSLog(@"%@", result);
+            }];
+
+        [task resume];
+        [[NSRunLoop mainRunLoop] run];
+    }
+    return 0;
+}
+```
+
+```ocaml OCaml
+(* Requires cohttp and yojson libraries *)
+open Lwt
+open Cohttp
+open Cohttp_lwt_unix
+
+let url = "https://api.apimart.ai/v1/images/generations"
+
+let payload = {|{
+  "model": "gemini-3-pro-image-preview",
+  "prompt": "A bamboo forest path under moonlight",
+  "size": "1:1",
+  "n": 1,
+  "resolution": "1K"
+}|}
+
+let () =
+  let headers = Header.init ()
+    |> fun h -> Header.add h "Authorization" "Bearer <token>"
+    |> fun h -> Header.add h "Content-Type" "application/json"
+  in
+  let body = Cohttp_lwt.Body.of_string payload in
+
+  let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
+    body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
+    print_endline body_str
+  in
+  Lwt_main.run response
+```
+
+```dart Dart
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+void main() async {
+  final url = Uri.parse('https://api.apimart.ai/v1/images/generations');
+
+  final payload = {
+    'model': 'gemini-3-pro-image-preview',
+    'prompt': 'A bamboo forest path under moonlight',
+    'size': '1:1',
+    'n': 1,
+    'resolution': '1K'
+  };
+
+  final response = await http.post(
+    url,
+    headers: {
+      'Authorization': 'Bearer <token>',
+      'Content-Type': 'application/json'
+    },
+    body: jsonEncode(payload),
+  );
+
+  print(response.body);
+}
+```
+
+```r R
+library(httr)
+library(jsonlite)
+
+url <- "https://api.apimart.ai/v1/images/generations"
+
+payload <- list(
+  model = "gemini-3-pro-image-preview",
+  prompt = "A bamboo forest path under moonlight",
+  size = "1:1",
+  n = 1,
+  resolution = "1K"
+)
+
+response <- POST(
+  url,
+  add_headers(
+    Authorization = "Bearer <token>",
+    `Content-Type` = "application/json"
+  ),
+  body = toJSON(payload, auto_unbox = TRUE),
+  encode = "raw"
+)
+
+cat(content(response, "text"))
 ```
 
 </RequestExample>
