@@ -3,9 +3,9 @@
   "theme": "mint",
   "name": "Mint Starter Kit",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#2563EB",
+    "light": "#2563EB",
+    "dark": "#3B82F6"
   },
   "favicon": "/favicon.svg",
   "navigation": {
@@ -13,6 +13,19 @@
       {
         "tab": "Guides",
         "groups": [
+        {
+            "group": "Image Series",
+            "icon": "image",
+            "pages": [
+              {
+                "group": "Gemini-3-Pro-Image-preview (Nano banana2)",
+                "icon": "image",
+                "pages": [
+                  "api-reference/endpoint/image-generation"
+                ]
+              }
+            ]
+        },
           {
             "group": "Getting started",
             "pages": [
