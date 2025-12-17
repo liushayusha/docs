@@ -9,92 +9,92 @@
   },
   "favicon": "/favicon.svg",
   "navigation": {
-    "tabs": [
+    "groups": [
       {
-        "tab": "Guides",
-        "groups": [
-        {
-            "group": "Image Series",
+        "group": "Overview",
+        "pages": [
+          "overview"
+        ]
+      },
+      {
+        "group": "Image Series",
+        "icon": "image",
+        "pages": [
+          {
+            "group": "Gemini-3-Pro-Image-preview (Nano banana2)",
             "icon": "image",
             "pages": [
-              {
-                "group": "Gemini-3-Pro-Image-preview (Nano banana2)",
-                "icon": "image",
-                "pages": [
-                  "api-reference/endpoint/image-generation"
-                ]
-              }
-            ]
-        },
-          {
-            "group": "Getting started",
-            "pages": [
-              "index",
-              "quickstart",
-              "development"
+              "api-reference/images/gemini-3-pro/generation"
             ]
           },
           {
-            "group": "Customization",
+            "group": "Gemini-2.5-Flash-Image-preview (Nano banana)",
+            "icon": "image",
             "pages": [
-              "essentials/settings",
-              "essentials/navigation"
+              "api-reference/images/nano-banana/generation"
             ]
           },
           {
-            "group": "Writing content",
+            "group": "GPT-4o-image",
+            "icon": "image",
             "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/reusable-snippets"
+              "api-reference/images/gpt-4o/generation"
             ]
           },
           {
-            "group": "AI tools",
+            "group": "Seedream-4.0",
+            "icon": "image",
             "pages": [
-              "ai-tools/cursor",
-              "ai-tools/claude-code",
-              "ai-tools/windsurf"
+              "api-reference/images/seedream-4/generation"
+            ]
+          },
+          {
+            "group": "Seedream-4.5",
+            "icon": "image",
+            "pages": [
+              "api-reference/images/seedream-4.5/generation"
             ]
           }
         ]
       },
       {
-        "tab": "API reference",
-        "groups": [
+        "group": "Video Series",
+        "icon": "video",
+        "pages": [
           {
-            "group": "API documentation",
+            "group": "doubao-seedance-1-0-pro",
+            "icon": "video",
             "pages": [
-              "api-reference/introduction"
+              "api-reference/videos/doubao/generation"
             ]
           },
           {
-            "group": "Endpoint examples",
+            "group": "Sora2",
+            "icon": "video",
             "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              "api-reference/videos/sora-2/generation",
+              "api-reference/videos/sora-2/create-character",
+              "api-reference/videos/sora-2/query-character",
+              "api-reference/videos/sora-2/remix"
+            ]
+          },
+          {
+            "group": "VEO3",
+            "icon": "video",
+            "pages": [
+              "api-reference/videos/veo3/generation"
+            ]
+          },
+          {
+            "group": "MiniMax-Hailuo-02",
+            "icon": "video",
+            "pages": [
+              "api-reference/videos/minimax-hailuo/generation"
             ]
           }
         ]
       }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
+    ]
   },
   "logo": {
     "light": "/logo/light.svg",

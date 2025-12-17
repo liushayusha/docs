@@ -1,0 +1,103 @@
+---
+title: 'APIMart — OpenAI-Compatible API Gateway (GPT-5, Claude, Gemini)'
+description: 'OpenAI-compatible API for GPT-5, Claude, Gemini. Multi-provider routing, transparent pricing, low latency. Enterprise SLA, SDK support, pay-as-you-go.'
+---
+
+One unified OpenAI-compatible endpoint for GPT-5, Claude, and Gemini. Migrate from OpenAI in minutes by simply changing your base URL to `https://api.apimart.ai/v1` — keep your existing SDKs with no code rewrite. Multi-provider routing ensures low latency and high uptime. Transparent pricing, enterprise SLA, and global CDN acceleration.
+
+## Quick Start
+
+<Card title="Get Started Now" icon="rocket" horizontal href="/en/api-reference/images/gpt-4o/generation">
+  Start generating images and videos with our unified API endpoints
+</Card>
+
+## API Endpoints
+
+APIMart provides standardized endpoints for image and video generation with support for multiple AI models and providers.
+
+### Image Creation API
+
+Image creation with GPT-4o Image, Gemini 2.5 Flash Image-preview models. OpenAI-style API for seamless integration.
+
+<Card title="Image Creation API" icon="image" href="/api-reference/images/gpt-4o/generation">
+  Text-to-image generation
+</Card>
+
+### Video Creation API
+
+Video creation with OpenAI Sora2, Google VEO3 models. Async task management with status tracking and webhook support.
+
+<Card title="Video Creation API" icon="video" href="/api-reference/videos/veo3/generation">
+  Async task management with webhooks
+</Card>
+
+## Platform Benefits
+
+### Transparent Pricing
+
+Pay-as-you-go with no subscription required. Clear per-token rates for all models, more affordable than official provider rates while maintaining the same quality and low latency.
+
+* Clear per-token rates for all models
+* Volume discounts for enterprise usage
+* No hidden fees
+* Only pay for what you actually use
+
+### Multi-Provider Routing & Enterprise SLA
+
+Built-in intelligent routing across multiple LLM providers ensures high uptime and low latency. When one provider experiences issues, requests automatically route to backup providers without service interruption.
+
+### 99.9% Uptime SLA
+
+Enterprise-grade reliability with automatic failover. Multi-provider routing ensures your requests are always served with minimal latency.
+
+### Global CDN Acceleration
+
+Edge locations worldwide for lowest latency. Optimized routing reduces response time and improves user experience globally.
+
+### Rate Limit Management
+
+Automatic rate limit handling across providers. Intelligent request distribution prevents throttling and ensures smooth operation.
+
+### Real-Time Status
+
+Monitor endpoint health and performance. Track async task progress for image and video creation with webhook notifications. [Check Status →](/en/api-reference/tasks/status)
+
+## Supported Models
+
+Access leading AI models for image and video generation through unified API endpoints.
+
+### Image Creation Models
+
+Image creation from text prompts:
+
+* **GPT-4o Image**: OpenAI image creation model
+* **Gemini 2.5 Flash Image-preview**: Google efficient image model
+
+### Video Creation Models
+
+Video creation with async task tracking and webhook callbacks:
+
+* **OpenAI Sora2**: OpenAI video creation model
+* **Google VEO3**: Google video creation model
+* **doubao-seedance-1-0-pro**: Fast and high-quality video generation
+* **MiniMax-Hailuo-02**: Efficient video generation with image-to-video support
+
+## FAQ
+
+<AccordionGroup>
+  <Accordion title="How do image and video generation work?">
+    Image generation is synchronous and returns results immediately. Video generation is asynchronous—you submit a request, receive a task_id, then poll the status endpoint to check progress and retrieve the final video URL.
+  </Accordion>
+
+  <Accordion title="What's included in the SLA?">
+    Our enterprise SLA includes 99.9% uptime guarantee, global CDN acceleration, multi-provider routing with automatic failover, and real-time status monitoring. Rate limit management and webhook support are included for async tasks.
+  </Accordion>
+
+  <Accordion title="How does pricing work?">
+    APIMart offers transparent per-request pricing for image and video generation. Pay-as-you-go with no subscription, volume discounts for enterprise usage, and no hidden fees. Only pay for successful generations.
+  </Accordion>
+
+  <Accordion title="What about latency and performance?">
+    Low latency is guaranteed through global CDN acceleration and intelligent multi-provider routing. Image generation is typically instant, while video generation times vary by model (40-300 seconds). Real-time status monitoring lets you track async tasks.
+  </Accordion>
+</AccordionGroup>
