@@ -109,7 +109,7 @@
             ]
           },
           {
-            "group": "图片生成系列",
+            "group": "图片系列",
             "icon": "image",
             "pages": [
               {
@@ -150,7 +150,7 @@
             ]
           },
           {
-            "group": "视频生成系列",
+            "group": "视频系列",
             "icon": "video",
             "pages": [
               {

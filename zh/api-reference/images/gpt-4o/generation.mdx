@@ -1,18 +1,19 @@
 ---
 title: 'GPT-4o-image 图像生成'
-description: '• 异步处理模式，返回任务 ID 以便后续查询<br/>• 支持多种生成模式，包括文本生成图像、图像生成图像及图像编辑<br/>• 生成的图片链接有效期为 24 小时，请及时保存'
+description: '• 异步处理模式，返回任务ID用于后续查询<br/>• 支持文本转图片、图生图、图像编辑等多种生成模式。<br/>• 生成的图像链接，有效期为24小时，请尽快保存 '
 api: 'POST https://api.apimart.ai/v1/images/generations'
 ---
+
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  所有 API 端点都需要 Bearer Token 认证
+  所有接口均需要使用Bearer Token进行认证
 
-  获取您的 API 密钥：
+  获取 API Key：
 
-  访问 [API Key 管理页面](https://apimart.ai/console/token) 以获取您的 API 密钥
+  访问 [API Key 管理页面](https://apimart.ai/console/token) 获取您的 API Key
 
-  将其添加到请求头：
+  使用时在请求头中添加：
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -24,66 +25,76 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 <ParamField body="model" type="string" default="gpt-4o-image" required>
   图像生成模型名称
 
-  例如: `"gpt-4o-image"`
+  Example: `"gpt-4o-image"`
 </ParamField>
 
 <ParamField body="prompt" type="string" required>
   图像生成的文本描述
 
-  最多1000个字符
+  最长 1000 个字符
 </ParamField>
 
 <ParamField body="size" type="string">
-  图像生成尺寸
+  图像生成的尺寸
 
   支持的格式：
 
-  * 纵横比：`1:1`，`2:3`，`3:2`
+  * 比例：`1:1`、`2:3`、`3:2`
 </ParamField>
 
 <ParamField body="n" type="integer">
-  生成图像数量
+  生成图像的数量
 
-  支持1、2、4。费用将按数量预扣
+  支持 1、2、4，会根据生成数量进行预扣费
 
   默认值：1
 
-  **⚠️ 注意：** 必须输入纯数字（例如，`1`），不能使用引号，否则会报错
+  **⚠️ 注意：** 必须输入纯数字（如 `1`），不要加引号，否则会报错
 </ParamField>
 
 <ParamField body="image_urls" type="array">
-  用于图像到图像或图像编辑的参考图像URL列表
+  参考图像的 URL 列表，用于图生图或图像编辑
 
-  **💡 快速填写（试用区）：**
+  **💡 快速填写（Try it 区域）：**
 
-  1. 点击“+ 添加一项”添加图像URL
-  2. 输入完整的图像URL地址
+  1. 点击 "+ Add an item" 添加一个图像URL
+  2. 输入图像的完整 URL 地址或base64数据
 
-  <Expandable title="字段详情">
+  <Expandable title="详细字段说明">
     <ParamField body="url" type="string" required>
       图像URL地址
 
-      可以是：
+      支持两种格式：
+
+      **1. 完整的图像URL地址**
 
       * 公开可访问的图像URL（http\:// 或 https\://）
-      * Base64编码的图像数据
+      * 示例：`https://example.com/image.jpg`
 
-      **限制条件：**
+      **2. Base64 编码格式**
 
-      * 单张图像最大10MB
+      * **必须使用完整的 Data URI 格式**
+      * 格式：`data:image/{格式};base64,{base64数据}`
+      * 支持的图片格式：jpeg、png、webp 等
+      * 示例：`data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+      * ⚠️ 注意：必须包含 `data:image/jpeg;base64,` 前缀部分
+
+      **限制：**
+
+      * 单张图片不超过 10MB
       * 支持格式：.jpeg、.jpg、.png、.webp
     </ParamField>
   </Expandable>
 
-  **限制:** 最多5张图像
+  **限制：** 最多 5 张图片
 </ParamField>
 
 <ParamField body="mask_url" type="string">
-  遮罩图像URL
+  蒙版图像的 URL
 
-  * 必须为PNG格式
-  * 尺寸必须与参考图像匹配
-  * 最大4MB
+  * 必须是 PNG 格式
+  * 大小需要与参考图像一致
+  * 不超过 4MB
 </ParamField>
 
 ## Response
@@ -93,7 +104,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 </ResponseField>
 
 <ResponseField name="data" type="array">
-  响应数据数组
+  返回数据数组
 
   <Expandable title="属性">
     <ResponseField name="status" type="string">
@@ -103,13 +114,13 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
     </ResponseField>
 
     <ResponseField name="task_id" type="string">
-      唯一的任务标识符
+      任务唯一标识符
     </ResponseField>
   </Expandable>
 </ResponseField>
 
 <RequestExample>
-  ```bash cURL theme={null}
+  ```bash cURL
   curl --request POST \
     --url https://api.apimart.ai/v1/images/generations \
     --header 'Authorization: Bearer <token>' \
@@ -125,7 +136,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
     }'
   ```
 
-  ```python Python theme={null}
+  ```python Python
   import requests
 
   url = "https://api.apimart.ai/v1/images/generations"
@@ -136,9 +147,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
       "size": "1:1",
       "n": 1,
       "image_urls": [
-          "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"
-      ]
-  }
+          "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"    ]}
 
   headers = {
       "Authorization": "Bearer <token>",
@@ -150,7 +159,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   print(response.json())
   ```
 
-  ```javascript JavaScript theme={null}
+  ```javascript JavaScript
   const url = "https://api.apimart.ai/v1/images/generations";
 
   const payload = {
@@ -159,9 +168,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
     size: "1:1",
     n: 1,
     image_urls: [
-      "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"
-    ]
-  };
+      "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"  ]};
 
   const headers = {
     "Authorization": "Bearer <token>",
@@ -178,7 +185,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
     .catch(error => console.error('Error:', error));
   ```
 
-  ```go Go theme={null}
+  ```go Go
   package main
 
   import (
@@ -198,9 +205,8 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
           "size":   "1:1",
           "n":      1,
           "image_urls": []string{
-              "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png",
-          },
-      }
+              "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"
+    }    }
 
       jsonData, _ := json.Marshal(payload)
 
@@ -220,7 +226,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   }
   ```
 
-  ```java Java theme={null}
+  ```java Java
   import java.net.http.HttpClient;
   import java.net.http.HttpRequest;
   import java.net.http.HttpResponse;
@@ -238,8 +244,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
             "n": 1,
             "image_urls": [
               "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"
-            ]
-          }
+            ]        }
           """;
 
           HttpClient client = HttpClient.newHttpClient();
@@ -258,7 +263,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   }
   ```
 
-  ```php PHP theme={null}
+  ```php PHP
   <?php
 
   $url = "https://api.apimart.ai/v1/images/generations";
@@ -269,9 +274,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
       "size" => "1:1",
       "n" => 1,
       "image_urls" => [
-          "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"
-      ]
-  ];
+          "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"    ]];
 
   $ch = curl_init($url);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -289,7 +292,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   ?>
   ```
 
-  ```ruby Ruby theme={null}
+  ```ruby Ruby
   require 'net/http'
   require 'json'
   require 'uri'
@@ -302,9 +305,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
     size: "1:1",
     n: 1,
     image_urls: [
-      "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"
-    ]
-  }
+      "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"  ]}
 
   http = Net::HTTP.new(url.host, url.port)
   http.use_ssl = true
@@ -318,7 +319,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   puts response.body
   ```
 
-  ```swift Swift theme={null}
+  ```swift Swift
   import Foundation
 
   let url = URL(string: "https://api.apimart.ai/v1/images/generations")!
@@ -329,9 +330,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
       "size": "1:1",
       "n": 1,
       "image_urls": [
-          "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"
-      ]
-  ]
+          "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"    ]]
 
   var request = URLRequest(url: url)
   request.httpMethod = "POST"
@@ -341,10 +340,10 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   let task = URLSession.shared.dataTask(with: request) { data, response, error in
       if let error = error {
-          print("错误: \(error)")
+          print("Error: \(error)")
           return
       }
-
+      
       if let data = data, let responseString = String(data: data, encoding: .utf8) {
           print(responseString)
       }
@@ -353,7 +352,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   task.resume()
   ```
 
-  ```csharp C# theme={null}
+  ```csharp C#
   using System;
   using System.Net.Http;
   using System.Text;
@@ -371,9 +370,9 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
               ""size"": ""1:1"",
               ""n"": 1,
               ""image_urls"": [
-                  ""https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png""
-              ]
-          }";
+                  ""https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"",
+                  ""
+              ]        }";
 
           using var client = new HttpClient();
           client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
@@ -387,7 +386,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   }
   ```
 
-  ```c C theme={null}
+  ```c C
   #include <stdio.h>
   #include <curl/curl.h>
 
@@ -432,46 +431,46 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   }
   ```
 
-  ```objectivec Objective-C theme={null}
+  ```objectivec Objective-C
   #import <Foundation/Foundation.h>
 
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
           NSURL *url = [NSURL URLWithString:@"https://api.apimart.ai/v1/images/generations"];
-
+          
           NSDictionary *payload = @{
               @"model": @"gpt-4o-image",
               @"prompt": @"星空下的古老城堡",
               @"size": @"1:1",
               @"n": @1,
               @"image_urls": @[
-                  @"https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"
-              ]
-          };
-
+                  @"https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png",
+                  @
+              ]        };
+          
           NSError *error;
           NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
                                                             options:0
                                                               error:&error];
-
+          
           NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
           [request setHTTPMethod:@"POST"];
           [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
           [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
           [request setHTTPBody:jsonData];
-
-          NSURLSessionDataTask *task = [[NSURLSession sharedSession]
+          
+          NSURLSessionDataTask *task = [[NSURLSession sharedSession] 
               dataTaskWithRequest:request
               completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
                   if (error) {
-                      NSLog(@"错误: %@", error);
+                      NSLog(@"Error: %@", error);
                       return;
                   }
-                  NSString *result = [[NSString alloc] initWithData:data
+                  NSString *result = [[NSString alloc] initWithData:data 
                                                           encoding:NSUTF8StringEncoding];
                   NSLog(@"%@", result);
               }];
-
+          
           [task resume];
           [[NSRunLoop mainRunLoop] run];
       }
@@ -479,7 +478,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   }
   ```
 
-  ```ocaml OCaml theme={null}
+  ```ocaml OCaml
   (* Requires cohttp and yojson libraries *)
   open Lwt
   open Cohttp
@@ -493,9 +492,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
     "size": "1:1",
     "n": 1,
     "image_urls": [
-      "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"
-    ]
-  }|}
+      "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"  ]}|}
 
   let () =
     let headers = Header.init ()
@@ -503,7 +500,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
       |> fun h -> Header.add h "Content-Type" "application/json"
     in
     let body = Cohttp_lwt.Body.of_string payload in
-
+    
     let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
       body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
       print_endline body_str
@@ -511,37 +508,35 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
     Lwt_main.run response
   ```
 
-  ```dart Dart theme={null}
+  ```dart Dart
   import 'dart:convert';
   import 'package:http/http.dart' as http;
 
   void main() async {
     final url = Uri.parse('https://api.apimart.ai/v1/images/generations');
-
+    
     final payload = {
       'model': 'gpt-4o-image',
       'prompt': '星空下的古老城堡',
       'size': '1:1',
       'n': 1,
       'image_urls': [
-        'https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png'
-      ]
-    };
-
+        'https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png'    ]  };
+    
     final response = await http.post(
       url,
       headers: {
         'Authorization': 'Bearer <token>',
-        'Content-Type': 'application/json',
-      },
+        'Content-Type': 'application/json'
+    },
       body: jsonEncode(payload),
     );
-
+    
     print(response.body);
   }
   ```
 
-  ```r R theme={null}
+  ```r R
   library(httr)
   library(jsonlite)
 
@@ -553,9 +548,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
     size = "1:1",
     n = 1,
     image_urls = list(
-      "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"
-    )
-  )
+      "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"  ))
 
   response <- POST(
     url,
@@ -572,7 +565,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 </RequestExample>
 
 <ResponseExample>
-  ```json 200 theme={null}
+  ```json 200
   {
     "code": 200,
     "data": [
@@ -584,7 +577,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   }
   ```
 
-  ```json 400 theme={null}
+  ```json 400
   {
     "error": {
       "code": 400,
@@ -594,61 +587,61 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   }
   ```
 
-  ```json 401 theme={null}
+  ```json 401
   {
     "error": {
       "code": 401,
-      "message": "认证凭据无效",
+      "message": "身份验证失败，请检查您的API密钥",
       "type": "authentication_error"
     }
   }
   ```
 
-  ```json 402 theme={null}
+  ```json 402
   {
     "error": {
       "code": 402,
-      "message": "余额不足。请充值",
+      "message": "账户余额不足，请充值后再试",
       "type": "payment_required"
     }
   }
   ```
 
-  ```json 403 theme={null}
+  ```json 403
   {
     "error": {
       "code": 403,
-      "message": "访问被禁止。你没有权限访问此资源",
+      "message": "访问被禁止，您没有权限访问此资源",
       "type": "permission_error"
     }
   }
   ```
 
-  ```json 429 theme={null}
+  ```json 429
   {
     "error": {
       "code": 429,
-      "message": "超过速率限制。请稍后再试",
+      "message": "请求过于频繁，请稍后再试",
       "type": "rate_limit_error"
     }
   }
   ```
 
-  ```json 500 theme={null}
+  ```json 500
   {
     "error": {
       "code": 500,
-      "message": "服务器内部错误。请稍后再试",
+      "message": "服务器内部错误，请稍后重试",
       "type": "server_error"
     }
   }
   ```
 
-  ```json 502 theme={null}
+  ```json 502
   {
     "error": {
       "code": 502,
-      "message": "网关错误。服务器暂时不可用",
+      "message": "网关错误，服务器暂时不可用",
       "type": "bad_gateway"
     }
   }

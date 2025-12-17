@@ -18,20 +18,20 @@
  *   1. 自动按 H2 标题（## xxx）分割段落
  *   2. 只翻译变更的段落，其他段落复用已有翻译
  *   3. 大幅减少翻译时间和成本（80-90%）
- *   4. 支持的语言: en (English), zh (中文), ja (日本語), ko (한국어)
+ *   4. 源语言: zh (中文)，目标语言: en (English), ja (日本語), ko (한국어)
  *
  * 目录结构:
  *   docs/
- *   ├── en/
+ *   ├── zh/                          # 源语言（中文）
  *   │   ├── overview.mdx
  *   │   └── api-reference/
  *   │       └── images/gpt-4o/generation.mdx
- *   ├── zh/
+ *   ├── en/                          # 翻译成英文
  *   │   ├── overview.mdx
  *   │   └── api-reference/
  *   │       └── images/gpt-4o/generation.mdx
- *   ├── ja/
- *   └── ko/
+ *   ├── ja/                          # 翻译成日语
+ *   └── ko/                          # 翻译成韩语
  */
 
 import OpenAI from "openai";
@@ -50,12 +50,14 @@ try {
   console.warn("⚠️  无法加载 translation-config.json，使用默认配置");
 }
 
-// 定义支持的语言（仅保留需要的4种语言）
+// 定义源语言和目标语言
+const SOURCE_LOCALE = { code: "zh", label: "Chinese" };
+
+// 定义目标语言（从中文翻译到这些语言）
 const allLocales = [
   { code: "en", label: "English" },
-  { code: "zh", label: "Chinese" },
-  // { code: "ja", label: "Japanese" },  // 暂时注释，测试中文翻译
-  // { code: "ko", label: "Korean" },     // 暂时注释，测试中文翻译
+  // { code: "ja", label: "Japanese" },  // 暂时注释，测试翻译
+  // { code: "ko", label: "Korean" },     // 暂时注释，测试翻译
 ];
 
 // 并发配置
@@ -66,10 +68,11 @@ const BATCH_DELAY_MS = 200;
 const MAX_CHUNK_SIZE = 5000;
 const CHUNK_BATCH_SIZE = 10;
 
-// 从 allLocales 生成语言映射
-const languageMap: Record<string, string> = Object.fromEntries(
-  allLocales.map((locale: any) => [locale.code, locale.label])
-);
+// 生成语言映射（包含源语言和目标语言）
+const languageMap: Record<string, string> = {
+  [SOURCE_LOCALE.code]: SOURCE_LOCALE.label,
+  ...Object.fromEntries(allLocales.map((locale: any) => [locale.code, locale.label]))
+};
 
 // 添加 tw 的特殊映射（因为 tw 实际对应繁体中文）
 languageMap.tw = "Traditional Chinese";
@@ -350,13 +353,13 @@ function generateMdxFile(frontmatter: string, content: string): string {
   return content;
 }
 
-// 发现英文目录下的所有 MDX 文件
-function findAllEnMdxFiles(projectPath: string): Array<{ filePath: string; relativePath: string }> {
-  const enDir = join(projectPath, "en");
+// 发现源语言目录下的所有 MDX 文件
+function findAllSourceMdxFiles(projectPath: string): Array<{ filePath: string; relativePath: string }> {
+  const sourceDir = join(projectPath, SOURCE_LOCALE.code);
   const results: Array<{ filePath: string; relativePath: string }> = [];
 
-  if (!existsSync(enDir)) {
-    console.log(`⚠️  en/ 目录不存在，请先创建 en/ 目录并将英文文档放入其中`);
+  if (!existsSync(sourceDir)) {
+    console.log(`⚠️  ${SOURCE_LOCALE.code}/ 目录不存在，请先创建 ${SOURCE_LOCALE.code}/ 目录并将源文档放入其中`);
     return results;
   }
 
@@ -373,8 +376,8 @@ function findAllEnMdxFiles(projectPath: string): Array<{ filePath: string; relat
             scanDirectory(itemPath);
           }
         } else if (extname(item) === ".mdx") {
-          // 相对于 en/ 目录的路径
-          const relativePath = relative(enDir, itemPath);
+          // 相对于源语言目录的路径
+          const relativePath = relative(sourceDir, itemPath);
           results.push({ filePath: itemPath, relativePath });
         }
       }
@@ -383,7 +386,7 @@ function findAllEnMdxFiles(projectPath: string): Array<{ filePath: string; relat
     }
   }
 
-  scanDirectory(enDir);
+  scanDirectory(sourceDir);
   return results;
 }
 
@@ -483,7 +486,7 @@ async function translateMdxFiles(
 ) {
   console.log("🚀 开始翻译 MDX 文件（段落级增量）...\n");
 
-  let mdxFiles = findAllEnMdxFiles(projectPath);
+  let mdxFiles = findAllSourceMdxFiles(projectPath);
   if (mdxFiles.length === 0) {
     console.log("❌ 未找到任何 .mdx 文件");
     return;
@@ -492,7 +495,7 @@ async function translateMdxFiles(
   // 如果指定了特定文件，过滤文件列表
   if (specificFiles.length > 0) {
     const normalizedSpecific = specificFiles.map((f) =>
-      f.replace(/^en\//, "").replace(/\\/g, "/")
+      f.replace(new RegExp(`^${SOURCE_LOCALE.code}\\/`), "").replace(/\\/g, "/")
     );
     mdxFiles = mdxFiles.filter((f) =>
       normalizedSpecific.some((spec) => f.relativePath.includes(spec))
@@ -504,11 +507,11 @@ async function translateMdxFiles(
     }
     console.log(`📋 指定翻译 ${mdxFiles.length} 个文件\n`);
   } else {
-    console.log(`🔍 发现 ${mdxFiles.length} 个英文 .mdx 文件\n`);
+    console.log(`🔍 发现 ${mdxFiles.length} 个源语言 (${SOURCE_LOCALE.code}) .mdx 文件\n`);
   }
 
-  // 从 allLocales 获取所有语言代码（排除 en）
-  const targetLanguages = allLocales.filter((locale) => locale.code !== "en");
+  // 目标语言列表（所有配置的语言）
+  const targetLanguages = allLocales;
 
   let successCount = 0;
   let errorCount = 0;
@@ -518,21 +521,21 @@ async function translateMdxFiles(
     // 生成 hash 文件路径（保存段落级 hash 的 JSON 文件）
     const hashPath = join(
       projectPath,
-      "en",
+      SOURCE_LOCALE.code,
       dirname(relativePath),
       `.${basename(relativePath)}.sections.json`
     );
 
     try {
-      // 1. 解析英文源文件，分割成段落
-      const enMdxContent = parseMdxFile(filePath);
-      const enSections = splitMdxIntoSections(enMdxContent);
+      // 1. 解析源语言文件，分割成段落
+      const sourceMdxContent = parseMdxFile(filePath);
+      const sourceSections = splitMdxIntoSections(sourceMdxContent);
 
       // 2. 读取段落 hash 映射
       const storedHashMap = loadSectionHashMap(hashPath);
 
       // 3. 检测变更
-      const changes = detectSectionChanges(enSections, storedHashMap);
+      const changes = detectSectionChanges(sourceSections, storedHashMap);
       const hasChanges =
         changes.added.length > 0 ||
         changes.modified.length > 0 ||
@@ -547,12 +550,12 @@ async function translateMdxFiles(
 
       // 显示变更信息
       if (hasChanges) {
-        console.log(`📄 处理: en/${relativePath}`);
+        console.log(`📄 处理: ${SOURCE_LOCALE.code}/${relativePath}`);
         console.log(
           `  🔍 变更: +${changes.added.length} ~${changes.modified.length} -${changes.deleted.length} =${changes.unchanged.length}`
         );
       } else {
-        console.log(`📄 强制翻译: en/${relativePath}`);
+        console.log(`📄 强制翻译: ${SOURCE_LOCALE.code}/${relativePath}`);
       }
 
       // 4. 翻译每种语言
@@ -586,41 +589,41 @@ async function translateMdxFiles(
             // 构建最终的段落列表
             const finalSections: MdxSection[] = [];
 
-            for (const enSection of enSections) {
+            for (const sourceSection of sourceSections) {
               const needsTranslation =
                 forceUpdate ||
-                changes.added.includes(enSection.id) ||
-                changes.modified.includes(enSection.id);
+                changes.added.includes(sourceSection.id) ||
+                changes.modified.includes(sourceSection.id);
 
               if (needsTranslation) {
                 // 翻译这个段落
-                const sectionObj = { [enSection.id]: enSection.content };
+                const sectionObj = { [sourceSection.id]: sourceSection.content };
                 const translatedObj = await translateText(
-                  "English",
+                  SOURCE_LOCALE.label,
                   locale.label,
                   sectionObj
                 );
-                const translatedContent = translatedObj[enSection.id];
+                const translatedContent = translatedObj[sourceSection.id];
 
                 finalSections.push({
-                  ...enSection,
+                  ...sourceSection,
                   content: translatedContent,
                 });
-              } else if (existingTargetSections.has(enSection.id)) {
+              } else if (existingTargetSections.has(sourceSection.id)) {
                 // 复用现有翻译
-                finalSections.push(existingTargetSections.get(enSection.id)!);
+                finalSections.push(existingTargetSections.get(sourceSection.id)!);
               } else {
                 // 如果既不需要翻译又没有现有翻译，翻译它
-                const sectionObj = { [enSection.id]: enSection.content };
+                const sectionObj = { [sourceSection.id]: sourceSection.content };
                 const translatedObj = await translateText(
-                  "English",
+                  SOURCE_LOCALE.label,
                   locale.label,
                   sectionObj
                 );
-                const translatedContent = translatedObj[enSection.id];
+                const translatedContent = translatedObj[sourceSection.id];
 
                 finalSections.push({
-                  ...enSection,
+                  ...sourceSection,
                   content: translatedContent,
                 });
               }
@@ -633,7 +636,7 @@ async function translateMdxFiles(
             writeFileSync(targetPath, translatedMdxContent.fullText, "utf-8");
 
             const changedCount = forceUpdate
-              ? enSections.length
+              ? sourceSections.length
               : changes.added.length + changes.modified.length;
 
             console.log(
@@ -667,7 +670,7 @@ async function translateMdxFiles(
       }
 
       // 翻译成功后，保存段落 hash 映射
-      const newHashMap = generateSectionHashMap(enSections);
+      const newHashMap = generateSectionHashMap(sourceSections);
       saveSectionHashMap(hashPath, newHashMap);
     } catch (error) {
       console.error(`  ❌ 处理文件失败: ${error}`);

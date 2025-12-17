@@ -1,105 +1,98 @@
 ---
 title: 'Gemini-2.5-Flash-Image-preview (Nano banana) 图像生成'
-description: '• 异步处理模式，返回任务ID以供后续查询<br/>• 快速生成速度，优化以实现快速图像创建<br/>• 生成的图像链接有效期为24小时，请及时保存'
+description: '• 异步处理模式，返回任务ID用于后续查询<br/>• 快速生成速度，针对快速图像创建进行优化<br/>• 生成的图像链接，有效期为24小时，请尽快保存 '
 api: 'POST https://api.apimart.ai/v1/images/generations'
 ---
+
 ## Authorizations
 
-<ParamField header="Authorization" type="string" required >
-  所有 API 都需要使用 Bearer Token 进行身份验证
+<ParamField header="Authorization" type="string" required>
+  所有接口均需要使用Bearer Token进行认证
+
+  获取 API Key：
+
+  访问 [API Key 管理页面](https://apimart.ai/console/token) 获取您的 API Key
+
+  使用时在请求头中添加：
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
 </ParamField>
-
-获取 API Key:
-
-访问 [API Key Management Page](https://apimart.ai/console/token) 获取您的 API Key
-
-添加到请求头:
-
-```
-Authorization: Bearer YOUR_API_KEY
-```
 
 ## Body
 
 <ParamField body="model" type="string" default="gemini-2.5-flash-image-preview" required>
   图像生成模型名称
 
-  示例: `"gemini-2.5-flash-image-preview"`
+  Example: `"gemini-2.5-flash-image-preview"`
 </ParamField>
 
 <ParamField body="prompt" type="string" required>
-  用于图像生成的文本描述
+  图像生成的文本描述
 
-  最多1000个字符
+  最长 1000 个字符
 </ParamField>
 
 <ParamField body="size" type="string">
-  图像生成尺寸
+  图像生成的尺寸
 
-  支持的格式:
-    - 长宽比: `1:1`, `2:3`, `3:2`, `3:4`, `4:3`, `4:5`, `5:4`, `9:16`, `16:9`, `21:9`
+  支持的格式：
+
+  * 比例：`1:1`、`2:3`、`3:2`、`3:4`、`4:3`、`4:5`、`5:4`、`9:16`、`16:9`、`21:9`
 </ParamField>
 
 <ParamField body="n" type="integer">
-  生成图像数量
+  生成图像的数量
 
-  固定为1
+  固定为 1
 
-  **⚠️ 注意:** 必须是纯数字(例如1)，不要加引号，否则会报错
-</ParamField>
-
-<ParamField body="resolution" type="string">
-  输出图像分辨率
-
-  支持的值:
-    - `1K` - 1K 分辨率（默认）
-    - `2K` - 2K 分辨率
-    - `4K` - 4K 分辨率
-
-    **⚠️ 注意:** 生成64位格式的4K图像处理时间较长
+  **⚠️ 注意：** 必须输入纯数字（如 `1`），不要加引号，否则会报错
 </ParamField>
 
 <ParamField body="image_urls" type="array">
-  用于图像转图像或图像编辑的参考图像URL列表
+  参考图像的 URL 列表，用于图生图或图像编辑
 
-  💡 **快速填写（试用区）:**
-  1. 点击 "+ Add an item" 添加图像URL
-  2. 输入完整的图像URL地址或base64数据
+  **💡 快速填写（Try it 区域）：**
+
+  1. 点击 "+ Add an item" 添加一个图像URL
+  2. 输入图像的完整 URL 地址或base64数据
 
   <Expandable title="详细字段说明">
-    <ParamField body="url"  type="string" required>
+    <ParamField body="url" type="string" required>
       图像URL地址
 
-      支持两种格式:
+      支持两种格式：
 
       **1. 完整的图像URL地址**
 
-      - 公共可访问的图像URL（http:// 或 https://）
-      - 示例: `https://example.com/image.jpg`
+      * 公开可访问的图像URL（http\:// 或 https\://）
+      * 示例：`https://example.com/image.jpg`
 
-      **2. Base64编码格式**
+      **2. Base64 编码格式**
 
-      - 必须使用完整的Data URI格式
-      - 格式: `data:image/{format};base64,{base64data}`
-      - 支持的图像格式: jpeg, png, webp 等
-      - 示例: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
-      - **⚠️ 注意:** 必须包含 `data:image/jpeg;base64,` 前缀
+      * **必须使用完整的 Data URI 格式**
+      * 格式：`data:image/{格式};base64,{base64数据}`
+      * 支持的图片格式：jpeg、png、webp 等
+      * 示例：`data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+      * ⚠️ 注意：必须包含 `data:image/jpeg;base64,` 前缀部分
 
-      **限制:**
+      **限制：**
 
-      - 单张图像不得超过10MB
-      - 支持的格式: .jpeg, .jpg, .png, .webp
+      * 单张图片不超过 10MB
+      * 支持格式：.jpeg、.jpg、.png、.webp
     </ParamField>
   </Expandable>
 
-  **限制:** 最多5张图像
+  **限制：** 最多 5 张图片
 </ParamField>
 
 <ParamField body="mask_url" type="string">
-  遮罩图像URL
-  - 必须为PNG格式
-  - 尺寸必须与参考图像一致
-  - 不得超过4MB
+  蒙版图像的 URL
+
+  * 必须是 PNG 格式
+  * 大小需要与参考图像一致
+  * 不超过 4MB
 </ParamField>
 
 ## Response
@@ -109,16 +102,17 @@ Authorization: Bearer YOUR_API_KEY
 </ResponseField>
 
 <ResponseField name="data" type="array">
-  响应数据数组
+  返回数据数组
 
   <Expandable title="属性">
     <ResponseField name="status" type="string">
       任务状态
-      - submitted - 已提交
+
+      * `submitted` - 已提交
     </ResponseField>
 
     <ResponseField name="task_id" type="string">
-      唯一任务标识符
+      任务唯一标识符
     </ResponseField>
   </Expandable>
 </ResponseField>
@@ -359,7 +353,7 @@ Authorization: Bearer YOUR_API_KEY
           print("Error: \(error)")
           return
       }
-      
+
       if let data = data, let responseString = String(data: data, encoding: .utf8) {
           print(responseString)
       }
@@ -453,7 +447,7 @@ Authorization: Bearer YOUR_API_KEY
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
           NSURL *url = [NSURL URLWithString:@"https://api.apimart.ai/v1/images/generations"];
-          
+
           NSDictionary *payload = @{
               @"model": @"gemini-2.5-flash-image-preview",
               @"prompt": @"月光下的竹林小径",
@@ -463,30 +457,30 @@ Authorization: Bearer YOUR_API_KEY
                   @"https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png"
               ]
           };
-          
+
           NSError *error;
           NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
                                                             options:0
                                                               error:&error];
-          
+
           NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
           [request setHTTPMethod:@"POST"];
           [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
           [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
           [request setHTTPBody:jsonData];
-          
-          NSURLSessionDataTask *task = [[NSURLSession sharedSession] 
+
+          NSURLSessionDataTask *task = [[NSURLSession sharedSession]
               dataTaskWithRequest:request
               completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
                   if (error) {
                       NSLog(@"Error: %@", error);
                       return;
                   }
-                  NSString *result = [[NSString alloc] initWithData:data 
+                  NSString *result = [[NSString alloc] initWithData:data
                                                           encoding:NSUTF8StringEncoding];
                   NSLog(@"%@", result);
               }];
-          
+
           [task resume];
           [[NSRunLoop mainRunLoop] run];
       }
@@ -518,7 +512,7 @@ Authorization: Bearer YOUR_API_KEY
       |> fun h -> Header.add h "Content-Type" "application/json"
     in
     let body = Cohttp_lwt.Body.of_string payload in
-    
+
     let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
       body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
       print_endline body_str
@@ -532,7 +526,7 @@ Authorization: Bearer YOUR_API_KEY
 
   void main() async {
     final url = Uri.parse('https://api.apimart.ai/v1/images/generations');
-    
+
     final payload = {
       'model': 'gemini-2.5-flash-image-preview',
       'prompt': '月光下的竹林小径',
@@ -542,16 +536,16 @@ Authorization: Bearer YOUR_API_KEY
         'https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png'
       ]
     };
-    
+
     final response = await http.post(
       url,
       headers: {
         'Authorization': 'Bearer <token>',
-        'Content-Type': 'application/json',
-      },
+        'Content-Type': 'application/json'
+    },
       body: jsonEncode(payload),
     );
-    
+
     print(response.body);
   }
   ```
@@ -584,91 +578,88 @@ Authorization: Bearer YOUR_API_KEY
 
   cat(content(response, "text"))
   ```
-
 </RequestExample>
 
 <ResponseExample>
+  ```json 200
+  {
+    "code": 200,
+    "data": [
+      {
+        "status": "submitted",
+        "task_id": "task_01K8SGYNNNVBQTXNR4MM964S7K"
+      }
+    ]
+  }
+  ```
 
-```json 200
-{
-  "code": 200,
-  "data": [
-    {
-      "status": "submitted",
-      "task_id": "task_01K8SGYNNNVBQTXNR4MM964S7K"
+  ```json 400
+  {
+    "error": {
+      "code": 400,
+      "message": "请求参数无效",
+      "type": "invalid_request_error"
     }
-  ]
-}
-```
-
-```json 400
-{
-  "error": {
-    "code": 400,
-    "message": "请求参数无效",
-    "type": "invalid_request_error"
   }
-}
-```
+  ```
 
-```json 401
-{
-  "error": {
-    "code": 401,
-    "message": "认证失败，请检查您的API密钥",
-    "type": "authentication_error"
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "身份验证失败，请检查您的API密钥",
+      "type": "authentication_error"
+    }
   }
-}
-```
+  ```
 
-```json 402
-{
-  "error": {
-    "code": 402,
-    "message": "账户余额不足，请充值",
-    "type": "payment_required"
+  ```json 402
+  {
+    "error": {
+      "code": 402,
+      "message": "账户余额不足，请充值后再试",
+      "type": "payment_required"
+    }
   }
-}
-```
+  ```
 
-```json 403
-{
-  "error": {
-    "code": 403,
-    "message": "访问被禁止，您无权访问该资源",
-    "type": "permission_error"
+  ```json 403
+  {
+    "error": {
+      "code": 403,
+      "message": "访问被禁止，您没有权限访问此资源",
+      "type": "permission_error"
+    }
   }
-}
-```
+  ```
 
-```json 429
-{
-  "error": {
-    "code": 429,
-    "message": "请求过多，请稍后再试",
-    "type": "rate_limit_error"
+  ```json 429
+  {
+    "error": {
+      "code": 429,
+      "message": "请求过于频繁，请稍后再试",
+      "type": "rate_limit_error"
+    }
   }
-}
-```
+  ```
 
-```json 500
-{
-  "error": {
-    "code": 500,
-    "message": "服务器内部错误，请稍后再试",
-    "type": "server_error"
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "服务器内部错误，请稍后重试",
+      "type": "server_error"
+    }
   }
-}
-```
+  ```
 
-```json 502
-{
-  "error": {
-    "code": 502,
-    "message": "网关错误，服务器暂时不可用",
-    "type": "bad_gateway"
+  ```json 502
+  {
+    "error": {
+      "code": 502,
+      "message": "网关错误，服务器暂时不可用",
+      "type": "bad_gateway"
+    }
   }
-}
-```
-
+  ```
 </ResponseExample>
