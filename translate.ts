@@ -54,8 +54,8 @@ try {
 const allLocales = [
   { code: "en", label: "English" },
   { code: "zh", label: "Chinese" },
-  { code: "ja", label: "Japanese" },
-  { code: "ko", label: "Korean" },
+  // { code: "ja", label: "Japanese" },  // 暂时注释，测试中文翻译
+  // { code: "ko", label: "Korean" },     // 暂时注释，测试中文翻译
 ];
 
 // 并发配置
@@ -102,19 +102,38 @@ Your task is to translate the string values within JSON objects.
 Rules:
 1. Translate accurately, conveying the original meaning.
 2. **Maintain the original JSON structure.** Do not translate keys, only string values.
-3. Preserve proper nouns, brand names, technical terms.
-4. Keep original formatting within strings (e.g., Markdown, HTML, MDX).
-5. **Ensure all quotes within JSON string values are properly escaped.**
-6. **Do NOT translate:**
+3. **TRANSLATE all user-facing text**, including:
+   - Text content in component attribute values (e.g., title="Properties" → title="属性")
+   - Descriptions, explanations, and documentation text
+   - Section titles and headings (unless specified in do-not-translate list)
+   - Any text that users will read in the UI or documentation
+4. Preserve proper nouns, brand names, and specific technical terms.
+5. **Keep original Markdown formatting EXACTLY**, including:
+   - Bold: **text** → **翻译** (NO space between ** and text)
+   - Italic: *text* → *翻译*
+   - Links: [text](url) → [翻译](url)
+   - Lists, code formatting, etc.
+   - ⚠️ CRITICAL: **text** must become **翻译**, NOT ** 翻译** (no space after opening **)
+   - **Punctuation: Keep English colons (:) as-is, do NOT convert to Chinese colon (：)**
+   - Example: "Limitation: text" → "限制: 文本" (keep the English colon :)
+6. **Ensure all quotes within JSON string values are properly escaped.**
+7. **Do NOT translate:**
    - Code blocks (content between \`\`\` markers)
    - Inline code (content between \` markers)
    - URLs and file paths
-   - Component names and HTML/MDX tags (e.g., <Card>, <ParamField>)
-   - Component props and attribute names
-   - Technical terms in code contexts
+   - Component names (e.g., <Card>, <ParamField>, <Expandable>)
+   - Component attribute names (e.g., "title", "type", "required" - the key names themselves)
+   - Technical terms in code contexts (variable names, function names)
    - API endpoints and method names${preserveH2 ? "\n   - **Markdown headers starting with ## (keep them in original language)**" : ""}
    - Lines that contain only technical terms or API names${termsSection}
-7. **Preserve all MDX/JSX component syntax exactly as-is.**${headersSection}
+
+8. **Important distinction:**
+   - ❌ DO NOT translate: <Expandable title="Properties"> (the component name and attribute name)
+   - ✅ DO translate: The attribute VALUE "Properties" → <Expandable title="属性">
+   - ❌ DO NOT translate: <ParamField body="model" type="string"> (attribute names like "body", "type")
+   - ✅ DO translate: Text content inside components
+
+9. **Preserve all MDX/JSX component syntax exactly as-is.**${headersSection}
 
 Output Format:
 Provide ONLY the resulting JSON object where the original string values have been replaced by their translations.

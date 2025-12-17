@@ -1,158 +1,142 @@
 ---
-title: 'Gemini-2.5-Flash-Image-preview (Nano banana) Image Generation'
-description: '• Asynchronous processing mode, returns task ID for subsequent queries<br/>• Fast generation speed, optimized for quick image creation<br/>• Generated image links are valid for 24 hours, please save them promptly'
+title: 'GPT-4o-image 图像生成'
+description: '• 异步处理模式，返回任务 ID 以便后续查询<br/>• 支持多种生成模式，包括文本生成图像、图像生成图像及图像编辑<br/>• 生成的图片链接有效期为 24 小时，请及时保存'
 api: 'POST https://api.apimart.ai/v1/images/generations'
 ---
-
 ## Authorizations
 
-<ParamField header="Authorization" type="string" required >
-  All APIs require authentication using Bearer Token
+<ParamField header="Authorization" type="string" required>
+  所有 API 端点都需要 Bearer Token 认证
+
+  获取您的 API 密钥：
+
+  访问 [API Key 管理页面](https://apimart.ai/console/token) 以获取您的 API 密钥
+
+  将其添加到请求头：
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
 </ParamField>
-
-Get API Key:
-
-Visit [API Key Management Page](https://apimart.ai/console/token) to obtain your API Key
-
-Add to request header:
-
-```
-Authorization: Bearer YOUR_API_KEY
-```
 
 ## Body
 
-<ParamField body="model" type="string" default="gemini-2.5-flash-image-preview" required>
-  Image generation model name
+<ParamField body="model" type="string" default="gpt-4o-image" required>
+  图像生成模型名称
 
-  Example: `"gemini-2.5-flash-image-preview"`
+  例如: `"gpt-4o-image"`
 </ParamField>
 
 <ParamField body="prompt" type="string" required>
-  Text description for image generation
+  图像生成的文本描述
 
-  Maximum 1000 characters
+  最多1000个字符
 </ParamField>
 
 <ParamField body="size" type="string">
-  Image generation size
+  图像生成尺寸
 
-  Supported formats:
-    - Ratios: `1:1`, `2:3`, `3:2`, `3:4`, `4:3`, `4:5`, `5:4`, `9:16`, `16:9`, `21:9`
+  支持的格式：
+
+  * 纵横比：`1:1`，`2:3`，`3:2`
 </ParamField>
 
 <ParamField body="n" type="integer">
-  Number of images to generate
+  生成图像数量
 
-  Fixed at 1
+  支持1、2、4。费用将按数量预扣
 
-  **⚠️ Note:** Must be a pure number (e.g. 1), do not add quotes, otherwise it will error
-</ParamField>
+  默认值：1
 
-<ParamField body="resolution" type="string">
-  Output image resolution
-
-  Supported values:
-    - `1K` - 1K resolution (default)
-    - `2K` - 2K resolution
-    - `4K` - 4K resolution
-
-    **⚠️ Note:** Generating 4K images with base64 format takes longer processing time
+  **⚠️ 注意：** 必须输入纯数字（例如，`1`），不能使用引号，否则会报错
 </ParamField>
 
 <ParamField body="image_urls" type="array">
-  List of reference image URLs for image-to-image or image editing
+  用于图像到图像或图像编辑的参考图像URL列表
 
-  💡 **Quick Fill (Try it area):**
-  1. Click "+ Add an item" to add an image URL
-  2. Enter the complete image URL address or base64 data
+  **💡 快速填写（试用区）：**
 
-  <Expandable title="Detailed field description">
-    <ParamField body="url"  type="string" required>
-      Image URL address
+  1. 点击“+ 添加一项”添加图像URL
+  2. 输入完整的图像URL地址
 
-      Supports two formats:
+  <Expandable title="字段详情">
+    <ParamField body="url" type="string" required>
+      图像URL地址
 
-      **1. Complete image URL address**
+      可以是：
 
-      - Publicly accessible image URL (http:// or https://)
-      - Example: `https://example.com/image.jpg`
+      * 公开可访问的图像URL（http\:// 或 https\://）
+      * Base64编码的图像数据
 
-      **2. Base64 encoded format**
+      **限制条件：**
 
-      - Must use complete Data URI format
-      - Format: `data:image/{format};base64,{base64data}`
-      - Supported image formats: jpeg, png, webp, etc.
-      - Example: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
-      - **⚠️ Note:** Must include the `data:image/jpeg;base64,` prefix
-
-      **Limitations:**
-
-      - Single image must not exceed 10MB
-      - Supported formats: .jpeg, .jpg, .png, .webp
+      * 单张图像最大10MB
+      * 支持格式：.jpeg、.jpg、.png、.webp
     </ParamField>
   </Expandable>
 
-  **Limit:** Maximum 5 images
+  **限制:** 最多5张图像
 </ParamField>
 
 <ParamField body="mask_url" type="string">
-  Mask image URL
-  - Must be PNG format
-  - Size must match reference image
-  - Must not exceed 4MB
+  遮罩图像URL
+
+  * 必须为PNG格式
+  * 尺寸必须与参考图像匹配
+  * 最大4MB
 </ParamField>
 
 ## Response
 
 <ResponseField name="code" type="integer">
-  Response status code
+  响应状态码
 </ResponseField>
 
 <ResponseField name="data" type="array">
-  Response data array
+  响应数据数组
 
-  <Expandable title="Properties">
+  <Expandable title="属性">
     <ResponseField name="status" type="string">
-      Task status
-      - submitted - Submitted
+      任务状态
+
+      * `submitted` - 已提交
     </ResponseField>
 
     <ResponseField name="task_id" type="string">
-      Unique task identifier
+      唯一的任务标识符
     </ResponseField>
   </Expandable>
 </ResponseField>
 
 <RequestExample>
-  ```bash cURL
+  ```bash cURL theme={null}
   curl --request POST \
     --url https://api.apimart.ai/v1/images/generations \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
-      "model": "gemini-2.5-flash-image-preview",
-      "prompt": "A bamboo forest path under moonlight",
+      "model": "gpt-4o-image",
+      "prompt": "星空下的古老城堡",
       "size": "1:1",
       "n": 1,
       "image_urls": [
-        "https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png"
+        "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"
       ]
     }'
   ```
 
-  ```python Python
+  ```python Python theme={null}
   import requests
 
   url = "https://api.apimart.ai/v1/images/generations"
 
   payload = {
-      "model": "gemini-2.5-flash-image-preview",
-      "prompt": "A bamboo forest path under moonlight",
+      "model": "gpt-4o-image",
+      "prompt": "星空下的古老城堡",
       "size": "1:1",
       "n": 1,
       "image_urls": [
-          "https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png"
+          "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"
       ]
   }
 
@@ -166,16 +150,16 @@ Authorization: Bearer YOUR_API_KEY
   print(response.json())
   ```
 
-  ```javascript JavaScript
+  ```javascript JavaScript theme={null}
   const url = "https://api.apimart.ai/v1/images/generations";
 
   const payload = {
-    model: "gemini-2.5-flash-image-preview",
-    prompt: "A bamboo forest path under moonlight",
+    model: "gpt-4o-image",
+    prompt: "星空下的古老城堡",
     size: "1:1",
     n: 1,
     image_urls: [
-      "https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png"
+      "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"
     ]
   };
 
@@ -194,7 +178,7 @@ Authorization: Bearer YOUR_API_KEY
     .catch(error => console.error('Error:', error));
   ```
 
-  ```go Go
+  ```go Go theme={null}
   package main
 
   import (
@@ -209,12 +193,12 @@ Authorization: Bearer YOUR_API_KEY
       url := "https://api.apimart.ai/v1/images/generations"
 
       payload := map[string]interface{}{
-          "model":  "gemini-2.5-flash-image-preview",
-          "prompt": "A bamboo forest path under moonlight",
+          "model":  "gpt-4o-image",
+          "prompt": "星空下的古老城堡",
           "size":   "1:1",
           "n":      1,
           "image_urls": []string{
-              "https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png",
+              "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png",
           },
       }
 
@@ -236,7 +220,7 @@ Authorization: Bearer YOUR_API_KEY
   }
   ```
 
-  ```java Java
+  ```java Java theme={null}
   import java.net.http.HttpClient;
   import java.net.http.HttpRequest;
   import java.net.http.HttpResponse;
@@ -248,12 +232,12 @@ Authorization: Bearer YOUR_API_KEY
 
           String payload = """
           {
-            "model": "gemini-2.5-flash-image-preview",
-            "prompt": "A bamboo forest path under moonlight",
+            "model": "gpt-4o-image",
+            "prompt": "星空下的古老城堡",
             "size": "1:1",
             "n": 1,
             "image_urls": [
-              "https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png"
+              "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"
             ]
           }
           """;
@@ -274,18 +258,18 @@ Authorization: Bearer YOUR_API_KEY
   }
   ```
 
-  ```php PHP
+  ```php PHP theme={null}
   <?php
 
   $url = "https://api.apimart.ai/v1/images/generations";
 
   $payload = [
-      "model" => "gemini-2.5-flash-image-preview",
-      "prompt" => "A bamboo forest path under moonlight",
+      "model" => "gpt-4o-image",
+      "prompt" => "星空下的古老城堡",
       "size" => "1:1",
       "n" => 1,
       "image_urls" => [
-          "https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png"
+          "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"
       ]
   ];
 
@@ -305,7 +289,7 @@ Authorization: Bearer YOUR_API_KEY
   ?>
   ```
 
-  ```ruby Ruby
+  ```ruby Ruby theme={null}
   require 'net/http'
   require 'json'
   require 'uri'
@@ -313,12 +297,12 @@ Authorization: Bearer YOUR_API_KEY
   url = URI("https://api.apimart.ai/v1/images/generations")
 
   payload = {
-    model: "gemini-2.5-flash-image-preview",
-    prompt: "A bamboo forest path under moonlight",
+    model: "gpt-4o-image",
+    prompt: "星空下的古老城堡",
     size: "1:1",
     n: 1,
     image_urls: [
-      "https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png"
+      "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"
     ]
   }
 
@@ -334,18 +318,18 @@ Authorization: Bearer YOUR_API_KEY
   puts response.body
   ```
 
-  ```swift Swift
+  ```swift Swift theme={null}
   import Foundation
 
   let url = URL(string: "https://api.apimart.ai/v1/images/generations")!
 
   let payload: [String: Any] = [
-      "model": "gemini-2.5-flash-image-preview",
-      "prompt": "A bamboo forest path under moonlight",
+      "model": "gpt-4o-image",
+      "prompt": "星空下的古老城堡",
       "size": "1:1",
       "n": 1,
       "image_urls": [
-          "https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png"
+          "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"
       ]
   ]
 
@@ -357,10 +341,10 @@ Authorization: Bearer YOUR_API_KEY
 
   let task = URLSession.shared.dataTask(with: request) { data, response, error in
       if let error = error {
-          print("Error: \(error)")
+          print("错误: \(error)")
           return
       }
-      
+
       if let data = data, let responseString = String(data: data, encoding: .utf8) {
           print(responseString)
       }
@@ -369,7 +353,7 @@ Authorization: Bearer YOUR_API_KEY
   task.resume()
   ```
 
-  ```csharp C#
+  ```csharp C# theme={null}
   using System;
   using System.Net.Http;
   using System.Text;
@@ -382,12 +366,12 @@ Authorization: Bearer YOUR_API_KEY
           var url = "https://api.apimart.ai/v1/images/generations";
 
           var payload = @"{
-              ""model"": ""gemini-2.5-flash-image-preview"",
-              ""prompt"": ""A bamboo forest path under moonlight"",
+              ""model"": ""gpt-4o-image"",
+              ""prompt"": ""星空下的古老城堡"",
               ""size"": ""1:1"",
               ""n"": 1,
               ""image_urls"": [
-                  ""https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png""
+                  ""https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png""
               ]
           }";
 
@@ -403,7 +387,7 @@ Authorization: Bearer YOUR_API_KEY
   }
   ```
 
-  ```c C
+  ```c C theme={null}
   #include <stdio.h>
   #include <curl/curl.h>
 
@@ -417,11 +401,11 @@ Authorization: Bearer YOUR_API_KEY
       if(curl) {
           const char *url = "https://api.apimart.ai/v1/images/generations";
           const char *payload = "{"
-              "\"model\":\"gemini-2.5-flash-image-preview\","
-              "\"prompt\":\"A bamboo forest path under moonlight\","
+              "\"model\":\"gpt-4o-image\","
+              "\"prompt\":\"星空下的古老城堡\","
               "\"size\":\"1:1\","
               "\"n\":1,"
-              "\"image_urls\":[\"https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png\"]"
+              "\"image_urls\":[\"https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png\"]"
           "}";
 
           struct curl_slist *headers = NULL;
@@ -448,46 +432,46 @@ Authorization: Bearer YOUR_API_KEY
   }
   ```
 
-  ```objectivec Objective-C
+  ```objectivec Objective-C theme={null}
   #import <Foundation/Foundation.h>
 
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
           NSURL *url = [NSURL URLWithString:@"https://api.apimart.ai/v1/images/generations"];
-          
+
           NSDictionary *payload = @{
-              @"model": @"gemini-2.5-flash-image-preview",
-              @"prompt": @"A bamboo forest path under moonlight",
+              @"model": @"gpt-4o-image",
+              @"prompt": @"星空下的古老城堡",
               @"size": @"1:1",
               @"n": @1,
               @"image_urls": @[
-                  @"https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png"
+                  @"https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"
               ]
           };
-          
+
           NSError *error;
           NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
                                                             options:0
                                                               error:&error];
-          
+
           NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
           [request setHTTPMethod:@"POST"];
           [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
           [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
           [request setHTTPBody:jsonData];
-          
-          NSURLSessionDataTask *task = [[NSURLSession sharedSession] 
+
+          NSURLSessionDataTask *task = [[NSURLSession sharedSession]
               dataTaskWithRequest:request
               completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
                   if (error) {
-                      NSLog(@"Error: %@", error);
+                      NSLog(@"错误: %@", error);
                       return;
                   }
-                  NSString *result = [[NSString alloc] initWithData:data 
+                  NSString *result = [[NSString alloc] initWithData:data
                                                           encoding:NSUTF8StringEncoding];
                   NSLog(@"%@", result);
               }];
-          
+
           [task resume];
           [[NSRunLoop mainRunLoop] run];
       }
@@ -495,7 +479,7 @@ Authorization: Bearer YOUR_API_KEY
   }
   ```
 
-  ```ocaml OCaml
+  ```ocaml OCaml theme={null}
   (* Requires cohttp and yojson libraries *)
   open Lwt
   open Cohttp
@@ -504,12 +488,12 @@ Authorization: Bearer YOUR_API_KEY
   let url = "https://api.apimart.ai/v1/images/generations"
 
   let payload = {|{
-    "model": "gemini-2.5-flash-image-preview",
-    "prompt": "A bamboo forest path under moonlight",
+    "model": "gpt-4o-image",
+    "prompt": "星空下的古老城堡",
     "size": "1:1",
     "n": 1,
     "image_urls": [
-      "https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png"
+      "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"
     ]
   }|}
 
@@ -519,7 +503,7 @@ Authorization: Bearer YOUR_API_KEY
       |> fun h -> Header.add h "Content-Type" "application/json"
     in
     let body = Cohttp_lwt.Body.of_string payload in
-    
+
     let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
       body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
       print_endline body_str
@@ -527,23 +511,23 @@ Authorization: Bearer YOUR_API_KEY
     Lwt_main.run response
   ```
 
-  ```dart Dart
+  ```dart Dart theme={null}
   import 'dart:convert';
   import 'package:http/http.dart' as http;
 
   void main() async {
     final url = Uri.parse('https://api.apimart.ai/v1/images/generations');
-    
+
     final payload = {
-      'model': 'gemini-2.5-flash-image-preview',
-      'prompt': 'A bamboo forest path under moonlight',
+      'model': 'gpt-4o-image',
+      'prompt': '星空下的古老城堡',
       'size': '1:1',
       'n': 1,
       'image_urls': [
-        'https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png'
+        'https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png'
       ]
     };
-    
+
     final response = await http.post(
       url,
       headers: {
@@ -552,24 +536,24 @@ Authorization: Bearer YOUR_API_KEY
       },
       body: jsonEncode(payload),
     );
-    
+
     print(response.body);
   }
   ```
 
-  ```r R
+  ```r R theme={null}
   library(httr)
   library(jsonlite)
 
   url <- "https://api.apimart.ai/v1/images/generations"
 
   payload <- list(
-    model = "gemini-2.5-flash-image-preview",
-    prompt = "A bamboo forest path under moonlight",
+    model = "gpt-4o-image",
+    prompt = "星空下的古老城堡",
     size = "1:1",
     n = 1,
     image_urls = list(
-      "https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png"
+      "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"
     )
   )
 
@@ -585,91 +569,88 @@ Authorization: Bearer YOUR_API_KEY
 
   cat(content(response, "text"))
   ```
-
 </RequestExample>
 
 <ResponseExample>
+  ```json 200 theme={null}
+  {
+    "code": 200,
+    "data": [
+      {
+        "status": "submitted",
+        "task_id": "task_01K8SGYNNNVBQTXNR4MM964S7K"
+      }
+    ]
+  }
+  ```
 
-```json 200
-{
-  "code": 200,
-  "data": [
-    {
-      "status": "submitted",
-      "task_id": "task_01K8SGYNNNVBQTXNR4MM964S7K"
+  ```json 400 theme={null}
+  {
+    "error": {
+      "code": 400,
+      "message": "请求参数无效",
+      "type": "invalid_request_error"
     }
-  ]
-}
-```
-
-```json 400
-{
-  "error": {
-    "code": 400,
-    "message": "Invalid request parameters",
-    "type": "invalid_request_error"
   }
-}
-```
+  ```
 
-```json 401
-{
-  "error": {
-    "code": 401,
-    "message": "Authentication failed, please check your API key",
-    "type": "authentication_error"
+  ```json 401 theme={null}
+  {
+    "error": {
+      "code": 401,
+      "message": "认证凭据无效",
+      "type": "authentication_error"
+    }
   }
-}
-```
+  ```
 
-```json 402
-{
-  "error": {
-    "code": 402,
-    "message": "Insufficient account balance, please recharge",
-    "type": "payment_required"
+  ```json 402 theme={null}
+  {
+    "error": {
+      "code": 402,
+      "message": "余额不足。请充值",
+      "type": "payment_required"
+    }
   }
-}
-```
+  ```
 
-```json 403
-{
-  "error": {
-    "code": 403,
-    "message": "Access forbidden, you do not have permission to access this resource",
-    "type": "permission_error"
+  ```json 403 theme={null}
+  {
+    "error": {
+      "code": 403,
+      "message": "访问被禁止。你没有权限访问此资源",
+      "type": "permission_error"
+    }
   }
-}
-```
+  ```
 
-```json 429
-{
-  "error": {
-    "code": 429,
-    "message": "Too many requests, please try again later",
-    "type": "rate_limit_error"
+  ```json 429 theme={null}
+  {
+    "error": {
+      "code": 429,
+      "message": "超过速率限制。请稍后再试",
+      "type": "rate_limit_error"
+    }
   }
-}
-```
+  ```
 
-```json 500
-{
-  "error": {
-    "code": 500,
-    "message": "Internal server error, please try again later",
-    "type": "server_error"
+  ```json 500 theme={null}
+  {
+    "error": {
+      "code": 500,
+      "message": "服务器内部错误。请稍后再试",
+      "type": "server_error"
+    }
   }
-}
-```
+  ```
 
-```json 502
-{
-  "error": {
-    "code": 502,
-    "message": "Gateway error, server temporarily unavailable",
-    "type": "bad_gateway"
+  ```json 502 theme={null}
+  {
+    "error": {
+      "code": 502,
+      "message": "网关错误。服务器暂时不可用",
+      "type": "bad_gateway"
+    }
   }
-}
-```
-
+  ```
 </ResponseExample>

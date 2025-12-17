@@ -1,0 +1,764 @@
+---
+title: 'Seedream-4.5 图像生成'
+description: '• 异步处理模式，返回任务 ID 以供后续查询<br/>• 高质量图像生成，专业级图像创作<br/>• 生成的图片链接有效期为24小时，请及时保存'
+api: 'POST https://api.apimart.ai/v1/images/generations'
+---
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  所有 API 端点都需要 Bearer Token 认证
+
+  获取您的 API 密钥：
+
+  访问 [API Key Management Page](https://apimart.ai/console/token) 获取您的 API 密钥
+
+  将其添加到请求头：
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" default="doubao-seedance-4-5" required>
+  图像生成模型名称
+
+  示例: `"doubao-seedance-4-5"`
+</ParamField>
+
+<ParamField body="prompt" type="string" required>
+  用于图像生成的文本描述
+</ParamField>
+
+<ParamField body="size" type="string" default="1:1">
+  图像长宽比
+
+  支持的长宽比：
+
+  * `1:1` - 正方形（默认）
+  * `4:3` - 横向4:3
+  * `3:4` - 纵向3:4
+  * `16:9` - 横向宽屏
+  * `9:16` - 纵向竖屏
+  * `3:2` - 横向3:2
+  * `2:3` - 纵向2:3
+  * `21:9` - 超宽屏
+  * `9:21` - 超高屏
+</ParamField>
+
+<ParamField body="resolution" type="string" default="2K">
+  图像分辨率
+
+  支持的分辨率：
+
+  * `2K` - 标准分辨率（默认）
+  * `4K` - 高清
+
+  > **注意：** Seedream-4.5 不支持1K分辨率
+
+  **分辨率参考尺寸：**
+
+  | 分辨率   | 1:1 尺寸  | 16:9 尺寸 |
+  | -------- | --------- | --------- |
+  | 2K       | 2048x2048 | 2560x1440 |
+  | 4K       | 4096x4096 | 5404x3040 |
+
+  <Expandable title="完整像素映射表">
+    **2K 分辨率**
+
+    | 长宽比 | 像素       |
+    | ------ | ---------- |
+    | 1:1    | 2048x2048  |
+    | 4:3    | 2304x1728  |
+    | 3:4    | 1728x2304  |
+    | 16:9   | 2560x1440  |
+    | 9:16   | 1440x2560  |
+    | 3:2    | 2496x1664  |
+    | 2:3    | 1664x2496  |
+    | 21:9   | 3024x1296  |
+    | 9:21   | 1296x3024  |
+
+    **4K 分辨率**
+
+    | 长宽比 | 像素       |
+    | ------ | ---------- |
+    | 1:1    | 4096x4096  |
+    | 4:3    | 4694x3520  |
+    | 3:4    | 3520x4694  |
+    | 16:9   | 5404x3040  |
+    | 9:16   | 3040x5404  |
+    | 3:2    | 4992x3328  |
+    | 2:3    | 3328x4992  |
+    | 21:9   | 6198x2656  |
+    | 9:21   | 2656x6198  |
+  </Expandable>
+</ParamField>
+
+<ParamField body="n" type="integer">
+  生成图像的数量
+
+  范围：1-15（最少1，最多15）
+
+  默认：1
+
+  **注意：**
+
+  * 实际可生成的图像数量受此参数和输入参考图像数量双重影响。参考图像 + 生成图像 总和必须 ≤ 15
+  * **必须输入纯数字（例如 `1`），不要使用引号，否则会导致错误**
+
+  将根据数量预先扣费
+</ParamField>
+
+<ParamField body="image_urls" type="array">
+  用于图像转图像或图像编辑的参考图像URL列表
+
+  * 最多10张图
+  * 图像格式：jpeg，png
+  * 宽高比（宽/高）范围：\[1/3, 3]
+  * 宽度和高度（像素）> 14
+  * 大小：不超过10MB
+  * 总像素数：不超过6000×6000像素
+</ParamField>
+
+<ParamField body="optimize_prompt_options.mode" type="string" default="standard">
+  提示词优化模式
+
+  * `standard`：标准模式，生成更高质量内容但处理时间更长
+  * `fast`：快速模式，生成内容时间更短但质量一般
+
+  默认：`standard`
+</ParamField>
+
+<ParamField body="sequential_image_generation" type="string" default="disabled">
+  顺序图像生成模式（Doubao专用功能）
+
+  控制是否生成多张图像：
+
+  * `disabled`：禁用顺序模式，即使有多张参考图也只生成1张图（默认）
+  * `auto`：启用顺序模式，可生成多张图
+
+  **使用说明：**
+
+  * ✅ 必须提供 `image_urls` - 至少一张参考图
+  * ✅ 设置 `n: 3` 或使用 `sequential_image_generation: "auto"` + `max_images: 3`
+  * ✅ 此操作将基于参考图生成3张不同的图
+  * ⚠️ 当 `n > 1` 时，会自动设置为 `auto`
+
+  **限制：**
+
+  * 纯文本生成图像（无 `image_urls`）无法生成多张图 - 这是Doubao API的限制
+</ParamField>
+
+<ParamField body="sequential_image_generation_options" type="object">
+  顺序图像生成选项
+
+  当 `sequential_image_generation` 设置为 `auto` 时可用
+
+  **属性：**
+
+  * `max_images`（整数）：指定生成图像数量，范围：1-15
+
+  **示例：**
+
+  ```json
+  "sequential_image_generation": "auto",
+  "sequential_image_generation_options": {
+    "max_images": 3
+  }
+  ```
+</ParamField>
+
+<ParamField body="watermark" type="boolean" default="false">
+  是否给生成的图像添加水印
+
+  * `true`：添加水印
+  * `false`：不添加水印（默认）
+</ParamField>
+
+## Response
+
+<ResponseField name="code" type="integer">
+  响应状态码
+</ResponseField>
+
+<ResponseField name="data" type="array">
+  响应数据数组
+
+  <Expandable title="属性">
+    <ResponseField name="status" type="string">
+      任务状态
+
+      * `submitted` - 已提交
+    </ResponseField>
+
+    <ResponseField name="task_id" type="string">
+      唯一任务标识符
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+
+```bash cURL
+curl --request POST \
+  --url https://api.apimart.ai/v1/images/generations \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "model": "doubao-seedance-4-5",
+    "prompt": "一只可爱的熊猫在竹林中玩耍",
+    "size": "1:1",
+    "resolution": "2K",
+    "n": 1,
+    "image_urls": [
+      "https://cdn.apimart.ai/doc/1761215838466614297_9852.png"
+    ]
+  }'
+```
+
+```python Python
+import requests
+
+url = "https://api.apimart.ai/v1/images/generations"
+
+payload = {
+    "model": "doubao-seedance-4-5",
+    "prompt": "一只可爱的熊猫在竹林中玩耍",
+    "size": "1:1",
+    "resolution": "2K",
+    "n": 1,
+    "image_urls": [
+        "https://cdn.apimart.ai/doc/1761215838466614297_9852.png"
+    ]
+}
+
+headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(url, json=payload, headers=headers)
+
+print(response.json())
+```
+
+```javascript JavaScript
+const url = "https://api.apimart.ai/v1/images/generations";
+
+const payload = {
+  model: "doubao-seedance-4-5",
+  prompt: "一只可爱的熊猫在竹林中玩耍",
+  size: "1:1",
+  resolution: "2K",
+  n: 1,
+  image_urls: [
+    "https://cdn.apimart.ai/doc/1761215838466614297_9852.png"
+  ]
+};
+
+const headers = {
+  "Authorization": "Bearer <token>",
+  "Content-Type": "application/json"
+};
+
+fetch(url, {
+  method: "POST",
+  headers: headers,
+  body: JSON.stringify(payload)
+})
+  .then(response => response.json())
+  .then(data => console.log(data))
+  .catch(error => console.error('Error:', error));
+```
+
+```go Go
+package main
+
+import (
+    "bytes"
+    "encoding/json"
+    "fmt"
+    "io/ioutil"
+    "net/http"
+)
+
+func main() {
+    url := "https://api.apimart.ai/v1/images/generations"
+
+    payload := map[string]interface{}{
+        "model":      "doubao-seedance-4-5",
+        "prompt":     "一只可爱的熊猫在竹林中玩耍",
+        "size":       "1:1",
+        "resolution": "2K",
+        "n":          1,
+        "image_urls": []string{
+            "https://cdn.apimart.ai/doc/1761215838466614297_9852.png",
+        },
+    }
+
+    jsonData, _ := json.Marshal(payload)
+
+    req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+    req.Header.Set("Authorization", "Bearer <token>")
+    req.Header.Set("Content-Type", "application/json")
+
+    client := &http.Client{}
+    resp, err := client.Do(req)
+    if err != nil {
+        panic(err)
+    }
+    defer resp.Body.Close()
+
+    body, _ := ioutil.ReadAll(resp.Body)
+    fmt.Println(string(body))
+}
+```
+
+```java Java
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.URI;
+
+public class Main {
+    public static void main(String[] args) throws Exception {
+        String url = "https://api.apimart.ai/v1/images/generations";
+
+        String payload = """
+        {
+          "model": "doubao-seedance-4-5",
+          "prompt": "一只可爱的熊猫在竹林中玩耍",
+          "size": "1:1",
+          "resolution": "2K",
+          "n": 1,
+          "image_urls": [
+            "https://cdn.apimart.ai/doc/1761215838466614297_9852.png"
+          ]
+        }
+        """;
+
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create(url))
+            .header("Authorization", "Bearer <token>")
+            .header("Content-Type", "application/json")
+            .POST(HttpRequest.BodyPublishers.ofString(payload))
+            .build();
+
+        HttpResponse<String> response = client.send(request,
+            HttpResponse.BodyHandlers.ofString());
+
+        System.out.println(response.body());
+    }
+}
+```
+
+```php PHP
+<?php
+
+$url = "https://api.apimart.ai/v1/images/generations";
+
+$payload = [
+    "model" => "doubao-seedance-4-5",
+    "prompt" => "一只可爱的熊猫在竹林中玩耍",
+    "size" => "1:1",
+    "resolution" => "2K",
+    "n" => 1,
+    "image_urls" => [
+        "https://cdn.apimart.ai/doc/1761215838466614297_9852.png"
+    ]
+];
+
+$ch = curl_init($url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    "Authorization: Bearer <token>",
+    "Content-Type: application/json"
+]);
+
+$response = curl_exec($ch);
+curl_close($ch);
+
+echo $response;
+?>
+```
+
+```ruby Ruby
+require 'net/http'
+require 'json'
+require 'uri'
+
+url = URI("https://api.apimart.ai/v1/images/generations")
+
+payload = {
+  model: "doubao-seedance-4-5",
+  prompt: "一只可爱的熊猫在竹林中玩耍",
+  size: "1:1",
+  resolution: "2K",
+  n: 1,
+  image_urls: [
+    "https://cdn.apimart.ai/doc/1761215838466614297_9852.png"
+  ]
+}
+
+http = Net::HTTP.new(url.host, url.port)
+http.use_ssl = true
+
+request = Net::HTTP::Post.new(url)
+request["Authorization"] = "Bearer <token>"
+request["Content-Type"] = "application/json"
+request.body = payload.to_json
+
+response = http.request(request)
+puts response.body
+```
+
+```swift Swift
+import Foundation
+
+let url = URL(string: "https://api.apimart.ai/v1/images/generations")!
+
+let payload: [String: Any] = [
+    "model": "doubao-seedance-4-5",
+    "prompt": "一只可爱的熊猫在竹林中玩耍",
+    "size": "1:1",
+    "resolution": "2K",
+    "n": 1,
+    "image_urls": [
+        "https://cdn.apimart.ai/doc/1761215838466614297_9852.png"
+    ]
+]
+
+var request = URLRequest(url: url)
+request.httpMethod = "POST"
+request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+let task = URLSession.shared.dataTask(with: request) { data, response, error in
+    if let error = error {
+        print("Error: \(error)")
+        return
+    }
+
+    if let data = data, let responseString = String(data: data, encoding: .utf8) {
+        print(responseString)
+    }
+}
+
+task.resume()
+```
+
+```csharp C#
+using System;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
+
+class Program
+{
+    static async Task Main(string[] args)
+    {
+        var url = "https://api.apimart.ai/v1/images/generations";
+
+        var payload = @"{
+            ""model"": ""doubao-seedance-4-5"",
+            ""prompt"": ""一只可爱的熊猫在竹林中玩耍"",
+            ""size"": ""1:1"",
+            ""resolution"": ""2K"",
+            ""n"": 1,
+            ""image_urls"": [
+                ""https://cdn.apimart.ai/doc/1761215838466614297_9852.png""
+            ]
+        }";
+
+        using var client = new HttpClient();
+        client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+
+        var content = new StringContent(payload, Encoding.UTF8, "application/json");
+        var response = await client.PostAsync(url, content);
+        var result = await response.Content.ReadAsStringAsync();
+
+        Console.WriteLine(result);
+    }
+}
+```
+
+```c C
+#include <stdio.h>
+#include <curl/curl.h>
+
+int main(void) {
+    CURL *curl;
+    CURLcode res;
+
+    curl_global_init(CURL_GLOBAL_DEFAULT);
+    curl = curl_easy_init();
+
+    if(curl) {
+        const char *url = "https://api.apimart.ai/v1/images/generations";
+        const char *payload = "{"
+            "\"model\":\"doubao-seedance-4-5\","
+            "\"prompt\":\"一只可爱的熊猫在竹林中玩耍\","
+            "\"size\":\"1:1\","
+            "\"resolution\":\"2K\","
+            "\"n\":1,"
+            "\"image_urls\":[\"https://cdn.apimart.ai/doc/1761215838466614297_9852.png\"]"
+        "}";
+
+        struct curl_slist *headers = NULL;
+        headers = curl_slist_append(headers, "Authorization: Bearer <token>");
+        headers = curl_slist_append(headers, "Content-Type: application/json");
+
+        curl_easy_setopt(curl, CURLOPT_URL, url);
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+        res = curl_easy_perform(curl);
+
+        if(res != CURLE_OK) {
+            fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                    curl_easy_strerror(res));
+        }
+
+        curl_slist_free_all(headers);
+        curl_easy_cleanup(curl);
+    }
+
+    curl_global_cleanup();
+    return 0;
+}
+```
+
+```objectivec Objective-C
+#import <Foundation/Foundation.h>
+
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        NSURL *url = [NSURL URLWithString:@"https://api.apimart.ai/v1/images/generations"];
+
+        NSDictionary *payload = @{
+            @"model": @"doubao-seedance-4-5",
+            @"prompt": @"一只可爱的熊猫在竹林中玩耍",
+            @"size": @"1:1",
+            @"resolution": @"2K",
+            @"n": @1,
+            @"image_urls": @[
+                @"https://cdn.apimart.ai/doc/1761215838466614297_9852.png"
+            ]
+        };
+
+        NSError *error;
+        NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
+                                                          options:0
+                                                            error:&error];
+
+        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+        [request setHTTPMethod:@"POST"];
+        [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
+        [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+        [request setHTTPBody:jsonData];
+
+        NSURLSessionDataTask *task = [[NSURLSession sharedSession]
+            dataTaskWithRequest:request
+            completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+                if (error) {
+                    NSLog(@"Error: %@", error);
+                    return;
+                }
+                NSString *result = [[NSString alloc] initWithData:data
+                                                        encoding:NSUTF8StringEncoding];
+                NSLog(@"%@", result);
+            }];
+
+        [task resume];
+        [[NSRunLoop mainRunLoop] run];
+    }
+    return 0;
+}
+```
+
+```ocaml OCaml
+(* Requires cohttp and yojson libraries *)
+open Lwt
+open Cohttp
+open Cohttp_lwt_unix
+
+let url = "https://api.apimart.ai/v1/images/generations"
+
+let payload = {|{
+  "model": "doubao-seedance-4-5",
+  "prompt": "一只可爱的熊猫在竹林中玩耍",
+  "size": "1:1",
+  "resolution": "2K",
+  "n": 1,
+  "image_urls": [
+    "https://cdn.apimart.ai/doc/1761215838466614297_9852.png"
+  ]
+}|}
+
+let () =
+  let headers = Header.init ()
+    |> fun h -> Header.add h "Authorization" "Bearer <token>"
+    |> fun h -> Header.add h "Content-Type" "application/json"
+  in
+  let body = Cohttp_lwt.Body.of_string payload in
+
+  let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
+    body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
+    print_endline body_str
+  in
+  Lwt_main.run response
+```
+
+```dart Dart
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+void main() async {
+  final url = Uri.parse('https://api.apimart.ai/v1/images/generations');
+
+  final payload = {
+    'model': 'doubao-seedance-4-5',
+    'prompt': '一只可爱的熊猫在竹林中玩耍',
+    'size': '1:1',
+    'resolution': '2K',
+    'n': 1,
+    'image_urls': [
+      'https://cdn.apimart.ai/doc/1761215838466614297_9852.png'
+    ]
+  };
+
+  final response = await http.post(
+    url,
+    headers: {
+      'Authorization': 'Bearer <token>',
+      'Content-Type': 'application/json',
+    },
+    body: jsonEncode(payload),
+  );
+
+  print(response.body);
+}
+```
+
+```r R
+library(httr)
+library(jsonlite)
+
+url <- "https://api.apimart.ai/v1/images/generations"
+
+payload <- list(
+  model = "doubao-seedance-4-5",
+  prompt = "一只可爱的熊猫在竹林中玩耍",
+  size = "1:1",
+  resolution = "2K",
+  n = 1,
+  image_urls = list(
+    "https://cdn.apimart.ai/doc/1761215838466614297_9852.png"
+  )
+)
+
+response <- POST(
+  url,
+  add_headers(
+    Authorization = "Bearer <token>",
+    `Content-Type` = "application/json"
+  ),
+  body = toJSON(payload, auto_unbox = TRUE),
+  encode = "raw"
+)
+
+cat(content(response, "text"))
+```
+
+</RequestExample>
+
+<ResponseExample>
+
+```json 200
+{
+  "code": 200,
+  "data": [
+    {
+      "status": "submitted",
+      "task_id": "task_01K8SGYNNNVBQTXNR4MM964S7K"
+    }
+  ]
+}
+```
+
+```json 400
+{
+  "error": {
+    "code": 400,
+    "message": "请求参数无效",
+    "type": "invalid_request_error"
+  }
+}
+```
+
+```json 401
+{
+  "error": {
+    "code": 401,
+    "message": "身份验证凭据无效",
+    "type": "authentication_error"
+  }
+}
+```
+
+```json 402
+{
+  "error": {
+    "code": 402,
+    "message": "余额不足。请充值您的账户",
+    "type": "payment_required"
+  }
+}
+```
+
+```json 403
+{
+  "error": {
+    "code": 403,
+    "message": "禁止访问。您无权访问该资源",
+    "type": "permission_error"
+  }
+}
+```
+
+```json 429
+{
+  "error": {
+    "code": 429,
+    "message": "超出速率限制。请稍后再试",
+    "type": "rate_limit_error"
+  }
+}
+```
+
+```json 500
+{
+  "error": {
+    "code": 500,
+    "message": "服务器内部错误。请稍后再试",
+    "type": "server_error"
+  }
+}
+```
+
+```json 502
+{
+  "error": {
+    "code": 502,
+    "message": "错误的网关。服务器暂时不可用",
+    "type": "bad_gateway"
+  }
+}
+```
+
+</ResponseExample>

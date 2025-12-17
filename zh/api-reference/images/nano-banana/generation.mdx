@@ -1,20 +1,19 @@
 ---
-title: 'Gemini-2.5-Flash-Image-preview (Nano banana) Image Generation'
-description: '• Asynchronous processing mode, returns task ID for subsequent queries<br/>• Fast generation speed, optimized for quick image creation<br/>• Generated image links are valid for 24 hours, please save them promptly'
+title: 'Gemini-2.5-Flash-Image-preview (Nano banana) 图像生成'
+description: '• 异步处理模式，返回任务ID以供后续查询<br/>• 快速生成速度，优化以实现快速图像创建<br/>• 生成的图像链接有效期为24小时，请及时保存'
 api: 'POST https://api.apimart.ai/v1/images/generations'
 ---
-
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required >
-  All APIs require authentication using Bearer Token
+  所有 API 都需要使用 Bearer Token 进行身份验证
 </ParamField>
 
-Get API Key:
+获取 API Key:
 
-Visit [API Key Management Page](https://apimart.ai/console/token) to obtain your API Key
+访问 [API Key Management Page](https://apimart.ai/console/token) 获取您的 API Key
 
-Add to request header:
+添加到请求头:
 
 ```
 Authorization: Bearer YOUR_API_KEY
@@ -23,103 +22,103 @@ Authorization: Bearer YOUR_API_KEY
 ## Body
 
 <ParamField body="model" type="string" default="gemini-2.5-flash-image-preview" required>
-  Image generation model name
+  图像生成模型名称
 
-  Example: `"gemini-2.5-flash-image-preview"`
+  示例: `"gemini-2.5-flash-image-preview"`
 </ParamField>
 
 <ParamField body="prompt" type="string" required>
-  Text description for image generation
+  用于图像生成的文本描述
 
-  Maximum 1000 characters
+  最多1000个字符
 </ParamField>
 
 <ParamField body="size" type="string">
-  Image generation size
+  图像生成尺寸
 
-  Supported formats:
-    - Ratios: `1:1`, `2:3`, `3:2`, `3:4`, `4:3`, `4:5`, `5:4`, `9:16`, `16:9`, `21:9`
+  支持的格式:
+    - 长宽比: `1:1`, `2:3`, `3:2`, `3:4`, `4:3`, `4:5`, `5:4`, `9:16`, `16:9`, `21:9`
 </ParamField>
 
 <ParamField body="n" type="integer">
-  Number of images to generate
+  生成图像数量
 
-  Fixed at 1
+  固定为1
 
-  **⚠️ Note:** Must be a pure number (e.g. 1), do not add quotes, otherwise it will error
+  **⚠️ 注意:** 必须是纯数字(例如1)，不要加引号，否则会报错
 </ParamField>
 
 <ParamField body="resolution" type="string">
-  Output image resolution
+  输出图像分辨率
 
-  Supported values:
-    - `1K` - 1K resolution (default)
-    - `2K` - 2K resolution
-    - `4K` - 4K resolution
+  支持的值:
+    - `1K` - 1K 分辨率（默认）
+    - `2K` - 2K 分辨率
+    - `4K` - 4K 分辨率
 
-    **⚠️ Note:** Generating 4K images with base64 format takes longer processing time
+    **⚠️ 注意:** 生成64位格式的4K图像处理时间较长
 </ParamField>
 
 <ParamField body="image_urls" type="array">
-  List of reference image URLs for image-to-image or image editing
+  用于图像转图像或图像编辑的参考图像URL列表
 
-  💡 **Quick Fill (Try it area):**
-  1. Click "+ Add an item" to add an image URL
-  2. Enter the complete image URL address or base64 data
+  💡 **快速填写（试用区）:**
+  1. 点击 "+ Add an item" 添加图像URL
+  2. 输入完整的图像URL地址或base64数据
 
-  <Expandable title="Detailed field description">
+  <Expandable title="详细字段说明">
     <ParamField body="url"  type="string" required>
-      Image URL address
+      图像URL地址
 
-      Supports two formats:
+      支持两种格式:
 
-      **1. Complete image URL address**
+      **1. 完整的图像URL地址**
 
-      - Publicly accessible image URL (http:// or https://)
-      - Example: `https://example.com/image.jpg`
+      - 公共可访问的图像URL（http:// 或 https://）
+      - 示例: `https://example.com/image.jpg`
 
-      **2. Base64 encoded format**
+      **2. Base64编码格式**
 
-      - Must use complete Data URI format
-      - Format: `data:image/{format};base64,{base64data}`
-      - Supported image formats: jpeg, png, webp, etc.
-      - Example: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
-      - **⚠️ Note:** Must include the `data:image/jpeg;base64,` prefix
+      - 必须使用完整的Data URI格式
+      - 格式: `data:image/{format};base64,{base64data}`
+      - 支持的图像格式: jpeg, png, webp 等
+      - 示例: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+      - **⚠️ 注意:** 必须包含 `data:image/jpeg;base64,` 前缀
 
-      **Limitations:**
+      **限制:**
 
-      - Single image must not exceed 10MB
-      - Supported formats: .jpeg, .jpg, .png, .webp
+      - 单张图像不得超过10MB
+      - 支持的格式: .jpeg, .jpg, .png, .webp
     </ParamField>
   </Expandable>
 
-  **Limit:** Maximum 5 images
+  **限制:** 最多5张图像
 </ParamField>
 
 <ParamField body="mask_url" type="string">
-  Mask image URL
-  - Must be PNG format
-  - Size must match reference image
-  - Must not exceed 4MB
+  遮罩图像URL
+  - 必须为PNG格式
+  - 尺寸必须与参考图像一致
+  - 不得超过4MB
 </ParamField>
 
 ## Response
 
 <ResponseField name="code" type="integer">
-  Response status code
+  响应状态码
 </ResponseField>
 
 <ResponseField name="data" type="array">
-  Response data array
+  响应数据数组
 
-  <Expandable title="Properties">
+  <Expandable title="属性">
     <ResponseField name="status" type="string">
-      Task status
-      - submitted - Submitted
+      任务状态
+      - submitted - 已提交
     </ResponseField>
 
     <ResponseField name="task_id" type="string">
-      Unique task identifier
+      唯一任务标识符
     </ResponseField>
   </Expandable>
 </ResponseField>
@@ -132,7 +131,7 @@ Authorization: Bearer YOUR_API_KEY
     --header 'Content-Type: application/json' \
     --data '{
       "model": "gemini-2.5-flash-image-preview",
-      "prompt": "A bamboo forest path under moonlight",
+      "prompt": "月光下的竹林小径",
       "size": "1:1",
       "n": 1,
       "image_urls": [
@@ -148,7 +147,7 @@ Authorization: Bearer YOUR_API_KEY
 
   payload = {
       "model": "gemini-2.5-flash-image-preview",
-      "prompt": "A bamboo forest path under moonlight",
+      "prompt": "月光下的竹林小径",
       "size": "1:1",
       "n": 1,
       "image_urls": [
@@ -171,7 +170,7 @@ Authorization: Bearer YOUR_API_KEY
 
   const payload = {
     model: "gemini-2.5-flash-image-preview",
-    prompt: "A bamboo forest path under moonlight",
+    prompt: "月光下的竹林小径",
     size: "1:1",
     n: 1,
     image_urls: [
@@ -210,7 +209,7 @@ Authorization: Bearer YOUR_API_KEY
 
       payload := map[string]interface{}{
           "model":  "gemini-2.5-flash-image-preview",
-          "prompt": "A bamboo forest path under moonlight",
+          "prompt": "月光下的竹林小径",
           "size":   "1:1",
           "n":      1,
           "image_urls": []string{
@@ -249,7 +248,7 @@ Authorization: Bearer YOUR_API_KEY
           String payload = """
           {
             "model": "gemini-2.5-flash-image-preview",
-            "prompt": "A bamboo forest path under moonlight",
+            "prompt": "月光下的竹林小径",
             "size": "1:1",
             "n": 1,
             "image_urls": [
@@ -281,7 +280,7 @@ Authorization: Bearer YOUR_API_KEY
 
   $payload = [
       "model" => "gemini-2.5-flash-image-preview",
-      "prompt" => "A bamboo forest path under moonlight",
+      "prompt" => "月光下的竹林小径",
       "size" => "1:1",
       "n" => 1,
       "image_urls" => [
@@ -314,7 +313,7 @@ Authorization: Bearer YOUR_API_KEY
 
   payload = {
     model: "gemini-2.5-flash-image-preview",
-    prompt: "A bamboo forest path under moonlight",
+    prompt: "月光下的竹林小径",
     size: "1:1",
     n: 1,
     image_urls: [
@@ -341,7 +340,7 @@ Authorization: Bearer YOUR_API_KEY
 
   let payload: [String: Any] = [
       "model": "gemini-2.5-flash-image-preview",
-      "prompt": "A bamboo forest path under moonlight",
+      "prompt": "月光下的竹林小径",
       "size": "1:1",
       "n": 1,
       "image_urls": [
@@ -383,7 +382,7 @@ Authorization: Bearer YOUR_API_KEY
 
           var payload = @"{
               ""model"": ""gemini-2.5-flash-image-preview"",
-              ""prompt"": ""A bamboo forest path under moonlight"",
+              ""prompt"": ""月光下的竹林小径"",
               ""size"": ""1:1"",
               ""n"": 1,
               ""image_urls"": [
@@ -418,7 +417,7 @@ Authorization: Bearer YOUR_API_KEY
           const char *url = "https://api.apimart.ai/v1/images/generations";
           const char *payload = "{"
               "\"model\":\"gemini-2.5-flash-image-preview\","
-              "\"prompt\":\"A bamboo forest path under moonlight\","
+              "\"prompt\":\"月光下的竹林小径\","
               "\"size\":\"1:1\","
               "\"n\":1,"
               "\"image_urls\":[\"https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png\"]"
@@ -457,7 +456,7 @@ Authorization: Bearer YOUR_API_KEY
           
           NSDictionary *payload = @{
               @"model": @"gemini-2.5-flash-image-preview",
-              @"prompt": @"A bamboo forest path under moonlight",
+              @"prompt": @"月光下的竹林小径",
               @"size": @"1:1",
               @"n": @1,
               @"image_urls": @[
@@ -505,7 +504,7 @@ Authorization: Bearer YOUR_API_KEY
 
   let payload = {|{
     "model": "gemini-2.5-flash-image-preview",
-    "prompt": "A bamboo forest path under moonlight",
+    "prompt": "月光下的竹林小径",
     "size": "1:1",
     "n": 1,
     "image_urls": [
@@ -536,7 +535,7 @@ Authorization: Bearer YOUR_API_KEY
     
     final payload = {
       'model': 'gemini-2.5-flash-image-preview',
-      'prompt': 'A bamboo forest path under moonlight',
+      'prompt': '月光下的竹林小径',
       'size': '1:1',
       'n': 1,
       'image_urls': [
@@ -565,7 +564,7 @@ Authorization: Bearer YOUR_API_KEY
 
   payload <- list(
     model = "gemini-2.5-flash-image-preview",
-    prompt = "A bamboo forest path under moonlight",
+    prompt = "月光下的竹林小径",
     size = "1:1",
     n = 1,
     image_urls = list(
@@ -606,7 +605,7 @@ Authorization: Bearer YOUR_API_KEY
 {
   "error": {
     "code": 400,
-    "message": "Invalid request parameters",
+    "message": "请求参数无效",
     "type": "invalid_request_error"
   }
 }
@@ -616,7 +615,7 @@ Authorization: Bearer YOUR_API_KEY
 {
   "error": {
     "code": 401,
-    "message": "Authentication failed, please check your API key",
+    "message": "认证失败，请检查您的API密钥",
     "type": "authentication_error"
   }
 }
@@ -626,7 +625,7 @@ Authorization: Bearer YOUR_API_KEY
 {
   "error": {
     "code": 402,
-    "message": "Insufficient account balance, please recharge",
+    "message": "账户余额不足，请充值",
     "type": "payment_required"
   }
 }
@@ -636,7 +635,7 @@ Authorization: Bearer YOUR_API_KEY
 {
   "error": {
     "code": 403,
-    "message": "Access forbidden, you do not have permission to access this resource",
+    "message": "访问被禁止，您无权访问该资源",
     "type": "permission_error"
   }
 }
@@ -646,7 +645,7 @@ Authorization: Bearer YOUR_API_KEY
 {
   "error": {
     "code": 429,
-    "message": "Too many requests, please try again later",
+    "message": "请求过多，请稍后再试",
     "type": "rate_limit_error"
   }
 }
@@ -656,7 +655,7 @@ Authorization: Bearer YOUR_API_KEY
 {
   "error": {
     "code": 500,
-    "message": "Internal server error, please try again later",
+    "message": "服务器内部错误，请稍后再试",
     "type": "server_error"
   }
 }
@@ -666,7 +665,7 @@ Authorization: Bearer YOUR_API_KEY
 {
   "error": {
     "code": 502,
-    "message": "Gateway error, server temporarily unavailable",
+    "message": "网关错误，服务器暂时不可用",
     "type": "bad_gateway"
   }
 }

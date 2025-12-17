@@ -1,0 +1,588 @@
+---
+title: 'MiniMax-Hailuo-02 视频生成'
+description: '• 异步处理模式，返回任务 ID 以供后续查询<br/>• 支持文本转视频、图像转视频（第一帧/最后一帧）<br/>• 支持 6 秒和 10 秒时长，多种分辨率可选<br/>• 支持自动提示优化和水印控制 '
+api: 'POST https://api.apimart.ai/v1/videos/generations'
+---
+## Authorization
+
+<ParamField header="Authorization" type="string" required>
+  所有 API 请求都需要 Bearer Token 认证
+
+  获取 API 密钥：
+
+  访问 [API Key Management Page](https://apimart.ai/console/token) 获取您的 API 密钥
+
+  添加到请求头：
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Request Parameters
+
+<ParamField body="model" type="string" required>
+  视频生成模型名称
+
+  固定值：`MiniMax-Hailuo-02`
+</ParamField>
+
+<ParamField body="prompt" type="string" required>
+  视频内容描述
+
+  详细描述场景、动作、风格等，以获得更好的生成效果
+
+  示例：`"一只可爱的猫在草地上奔跑"`
+</ParamField>
+
+<ParamField body="duration" type="integer" default="5">
+  视频时长（秒）
+
+  选项：
+
+  * `5` - 5秒视频
+  * `10` - 10秒视频
+
+  默认值：`5`
+
+  <Warning>
+    **1080p 限制**：使用1080p分辨率时，仅支持5秒时长
+  </Warning>
+</ParamField>
+
+<ParamField body="metadata" type="object">
+  视频生成的高级配置选项
+
+  <Expandable title="metadata fields">
+    <ParamField body="metadata.resolution" type="string" default="768p">
+      视频分辨率
+
+      选项：
+
+      * `512p` - 标清
+      * `768p` - 高清
+      * `1080p` - 全高清（仅支持5秒时长）
+
+      默认值：`768p`
+    </ParamField>
+
+    <ParamField body="metadata.prompt_optimizer" type="boolean" default="true">
+      是否自动优化提示词
+
+      启用后，系统会自动优化你的提示词以获得更好生成效果
+
+      默认值：`true`
+    </ParamField>
+
+    <ParamField body="metadata.fast_pretreatment" type="boolean" default="false">
+      是否减少提示词优化时间
+
+      启用后可以加快处理速度，但可能会稍微影响优化质量
+
+      默认值：`false`
+    </ParamField>
+
+    <ParamField body="metadata.watermark" type="boolean" default="false">
+      是否添加水印
+
+      默认值：`false`
+    </ParamField>
+
+    <ParamField body="metadata.first_frame_image" type="string">
+      视频首帧图像
+
+      支持两种格式：
+
+      * **公开 URL**：`https://example.com/start.jpg`
+      * **Base64 编码**：`data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+
+      用于指定视频的起始画面
+    </ParamField>
+
+    <ParamField body="metadata.last_frame_image" type="string">
+      视频末帧图像
+
+      支持两种格式：
+
+      * **公开 URL**：`https://example.com/end.jpg`
+      * **Base64 编码**：`data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+
+      用于指定视频的结束画面
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+## Parameter Limitations
+
+| Limitation       | Description                                                          |
+| ---------------- | -------------------------------------------------------------------- |
+| Duration         | 仅支持5秒或10秒                                                     |
+| 1080p Resolution | 仅支持5秒的时长                                                    |
+| Image Format     | 支持公共URL或Base64编码（`data:image/jpeg;base64,...`）          |
+
+## Resolution and Duration Combinations
+
+| Resolution | Supported Duration | Notes             |
+| ---------- | ------------------ | ----------------- |
+| 512p       | 5s, 10s            | 全部支持          |
+| 768p       | 5s, 10s            | 全部支持          |
+| 1080p      | 5s                 | 不支持10秒        |
+
+## Response
+
+<ResponseField name="code" type="integer">
+  响应状态码，成功时为 200
+</ResponseField>
+
+<ResponseField name="data" type="array">
+  响应数据数组
+
+  <Expandable title="Array elements">
+    <ResponseField name="status" type="string">
+      任务状态，初始提交时为 `submitted`
+    </ResponseField>
+
+    <ResponseField name="task_id" type="string">
+      用于查询任务状态和结果的唯一任务标识符
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+  ```bash cURL
+  curl --request POST \
+    --url https://api.apimart.ai/v1/videos/generations \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "MiniMax-Hailuo-02",
+      "prompt": "一只可爱的猫咪在草地上奔跑",
+      "duration": 5,
+      "metadata": {
+        "resolution": "768p",
+        "prompt_optimizer": true,
+        "fast_pretreatment": false,
+        "watermark": false
+      }
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://api.apimart.ai/v1/videos/generations"
+
+  payload = {
+      "model": "MiniMax-Hailuo-02",
+      "prompt": "一只可爱的猫咪在草地上奔跑",
+      "duration": 5,
+      "metadata": {
+          "resolution": "768p",
+          "prompt_optimizer": True,
+          "fast_pretreatment": False,
+          "watermark": False
+      }
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://api.apimart.ai/v1/videos/generations";
+
+  const payload = {
+    model: "MiniMax-Hailuo-02",
+    prompt: "一只可爱的猫咪在草地上奔跑",
+    duration: 6,
+    metadata: {
+      resolution: "768p",
+      prompt_optimizer: true,
+      fast_pretreatment: false,
+      watermark: false
+    }
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://api.apimart.ai/v1/videos/generations"
+
+      payload := map[string]interface{}{
+          "model":    "MiniMax-Hailuo-02",
+          "prompt":   "一只可爱的猫咪在草地上奔跑",
+          "duration": 5,
+          "metadata": map[string]interface{}{
+              "resolution":        "768p",
+              "prompt_optimizer":  true,
+              "fast_pretreatment": false,
+              "watermark":         false,
+          },
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://api.apimart.ai/v1/videos/generations";
+
+          String payload = """
+          {
+            "model": "MiniMax-Hailuo-02",
+            "prompt": "一只可爱的猫咪在草地上奔跑",
+            "duration": 5,
+            "metadata": {
+              "resolution": "768p",
+              "prompt_optimizer": true,
+              "fast_pretreatment": false,
+              "watermark": false
+            }
+          }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://api.apimart.ai/v1/videos/generations";
+
+  $payload = [
+      "model" => "MiniMax-Hailuo-02",
+      "prompt" => "一只可爱的猫咪在草地上奔跑",
+      "duration" => 6,
+      "metadata" => [
+          "resolution" => "768p",
+          "prompt_optimizer" => true,
+          "fast_pretreatment" => false,
+          "watermark" => false
+      ]
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url = URI("https://api.apimart.ai/v1/videos/generations")
+
+  payload = {
+    model: "MiniMax-Hailuo-02",
+    prompt: "一只可爱的猫咪在草地上奔跑",
+    duration: 6,
+    metadata: {
+      resolution: "768p",
+      prompt_optimizer: true,
+      fast_pretreatment: false,
+      watermark: false
+    }
+  }
+
+  http = Net::HTTP.new(url.host, url.port)
+  http.use_ssl = true
+
+  request = Net::HTTP::Post.new(url)
+  request["Authorization"] = "Bearer <token>"
+  request["Content-Type"] = "application/json"
+  request.body = payload.to_json
+
+  response = http.request(request)
+  puts response.body
+  ```
+
+  ```swift Swift
+  import Foundation
+
+  let url = URL(string: "https://api.apimart.ai/v1/videos/generations")!
+
+  let payload: [String: Any] = [
+      "model": "MiniMax-Hailuo-02",
+      "prompt": "一只可爱的猫咪在草地上奔跑",
+      "duration": 5,
+      "metadata": [
+          "resolution": "768p",
+          "prompt_optimizer": true,
+          "fast_pretreatment": false,
+          "watermark": false
+      ]
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      if let error = error {
+          print("Error: \(error)")
+          return
+      }
+      
+      if let data = data, let responseString = String(data: data, encoding: .utf8) {
+          print(responseString)
+      }
+  }
+
+  task.resume()
+  ```
+
+  ```csharp C#
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url = "https://api.apimart.ai/v1/videos/generations";
+
+          var payload = @"{
+              ""model"": ""MiniMax-Hailuo-02"",
+              ""prompt"": ""一只可爱的猫咪在草地上奔跑"",
+              ""duration"": 6,
+              ""metadata"": {
+                  ""resolution"": ""768p"",
+                  ""prompt_optimizer"": true,
+                  ""fast_pretreatment"": false,
+                  ""watermark"": false
+              }
+          }";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+
+          var content = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          var result = await response.Content.ReadAsStringAsync();
+
+          Console.WriteLine(result);
+      }
+  }
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+  {
+    "code": 200,
+    "data": [
+      {
+        "status": "submitted",
+        "task_id": "task_01K8SGYNNNVBQTXNR4MM964S7K"
+      }
+    ]
+  }
+  ```
+
+  ```json 400
+  {
+    "error": {
+      "code": 400,
+      "message": "请求参数无效",
+      "type": "invalid_request_error"
+    }
+  }
+  ```
+
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "认证失败，请检查您的 API 密钥",
+      "type": "authentication_error"
+    }
+  }
+  ```
+
+  ```json 402
+  {
+    "error": {
+      "code": 402,
+      "message": "账户余额不足，请充值",
+      "type": "payment_required"
+    }
+  }
+  ```
+
+  ```json 429
+  {
+    "error": {
+      "code": 429,
+      "message": "请求过多，请稍后再试",
+      "type": "rate_limit_error"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "服务器内部错误，请稍后再试",
+      "type": "server_error"
+    }
+  }
+  ```
+</ResponseExample>
+
+## Use Cases
+
+### 案例 1：快速文本转视频生成
+
+```json 
+{
+  "model": "MiniMax-Hailuo-02",
+  "prompt": "一只可爱的猫在阳光明媚的草地上跑"
+}
+```
+
+### 案例 2：生成高清1080p视频
+
+```json 
+{
+  "model": "MiniMax-Hailuo-02",
+  "prompt": "城市夜景，霓虹灯闪烁，车流穿梭",
+  "duration": 5,
+  "metadata": {
+    "resolution": "1080p",
+    "prompt_optimizer": true,
+    "watermark": false
+  }
+}
+```
+
+### 案例 3：从首帧图片生成视频
+
+```json 
+{
+  "model": "MiniMax-Hailuo-02",
+  "prompt": "人缓缓转身微笑",
+  "duration": 5,
+  "metadata": {
+    "resolution": "768p",
+    "first_frame_image": "https://example.com/portrait.jpg"
+  }
+}
+```
+
+### 案例 4：首尾帧控制的过渡视频
+
+```json 
+{
+  "model": "MiniMax-Hailuo-02",
+  "prompt": "场景从白天逐渐过渡到夜晚，天空颜色变化",
+  "duration": 10,
+  "metadata": {
+    "resolution": "768p",
+    "first_frame_image": "https://example.com/day.jpg",
+    "last_frame_image": "https://example.com/night.jpg",
+    "prompt_optimizer": true
+  }
+}
+```
+
+### 案例 5：快速预处理模式
+
+```json 
+{
+  "model": "MiniMax-Hailuo-02",
+  "prompt": "日落时分海滩上的海浪拍打",
+  "duration": 5,
+  "metadata": {
+    "resolution": "768p",
+    "prompt_optimizer": true,
+    "fast_pretreatment": true
+  }
+}
+```
+
+<Note>
+  **查询任务结果**
+
+  视频生成是异步任务，提交后会返回一个 `task_id`。使用 [Get Task Status](/en/api-reference/tasks/status) 接口查询生成进度和结果。
+</Note>
