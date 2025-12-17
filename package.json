@@ -1,0 +1,17 @@
+{
+  "name": "apimart-docs",
+  "version": "1.0.0",
+  "description": "APIMart API Documentation - Multilingual Translation System",
+  "scripts": {
+    "translate": "tsx translate.ts",
+    "translate:force": "tsx translate.ts --force"
+  },
+  "dependencies": {
+    "openai": "^4.77.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}

@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "APIMart Documentation",
   "colors": {
     "primary": "#2563EB",
     "light": "#2563EB",
@@ -9,87 +9,359 @@
   },
   "favicon": "/favicon.svg",
   "navigation": {
-    "groups": [
+    "languages": [
       {
-        "group": "Overview",
-        "pages": [
-          "overview"
-        ]
-      },
-      {
-        "group": "Image Series",
-        "icon": "image",
-        "pages": [
+        "language": "en",
+        "groups": [
           {
-            "group": "Gemini-3-Pro-Image-preview (Nano banana2)",
-            "icon": "image",
+            "group": "Overview",
             "pages": [
-              "api-reference/images/gemini-3-pro/generation"
+              "en/overview"
             ]
           },
           {
-            "group": "Gemini-2.5-Flash-Image-preview (Nano banana)",
+            "group": "Image Series",
             "icon": "image",
             "pages": [
-              "api-reference/images/nano-banana/generation"
+              {
+                "group": "Gemini-3-Pro-Image-preview (Nano banana2)",
+                "icon": "image",
+                "pages": [
+                  "en/api-reference/images/gemini-3-pro/generation"
+                ]
+              },
+              {
+                "group": "Gemini-2.5-Flash-Image-preview (Nano banana)",
+                "icon": "image",
+                "pages": [
+                  "en/api-reference/images/nano-banana/generation"
+                ]
+              },
+              {
+                "group": "GPT-4o-image",
+                "icon": "image",
+                "pages": [
+                  "en/api-reference/images/gpt-4o/generation"
+                ]
+              },
+              {
+                "group": "Seedream-4.0",
+                "icon": "image",
+                "pages": [
+                  "en/api-reference/images/seedream-4/generation"
+                ]
+              },
+              {
+                "group": "Seedream-4.5",
+                "icon": "image",
+                "pages": [
+                  "en/api-reference/images/seedream-4.5/generation"
+                ]
+              }
             ]
           },
           {
-            "group": "GPT-4o-image",
-            "icon": "image",
+            "group": "Video Series",
+            "icon": "video",
             "pages": [
-              "api-reference/images/gpt-4o/generation"
-            ]
-          },
-          {
-            "group": "Seedream-4.0",
-            "icon": "image",
-            "pages": [
-              "api-reference/images/seedream-4/generation"
-            ]
-          },
-          {
-            "group": "Seedream-4.5",
-            "icon": "image",
-            "pages": [
-              "api-reference/images/seedream-4.5/generation"
+              {
+                "group": "doubao-seedance-1-0-pro",
+                "icon": "video",
+                "pages": [
+                  "en/api-reference/videos/doubao/generation"
+                ]
+              },
+              {
+                "group": "Sora2",
+                "icon": "video",
+                "pages": [
+                  "en/api-reference/videos/sora-2/generation",
+                  "en/api-reference/videos/sora-2/create-character",
+                  "en/api-reference/videos/sora-2/query-character",
+                  "en/api-reference/videos/sora-2/remix"
+                ]
+              },
+              {
+                "group": "VEO3",
+                "icon": "video",
+                "pages": [
+                  "en/api-reference/videos/veo3/generation"
+                ]
+              },
+              {
+                "group": "MiniMax-Hailuo-02",
+                "icon": "video",
+                "pages": [
+                  "en/api-reference/videos/minimax-hailuo/generation"
+                ]
+              }
             ]
           }
         ]
       },
       {
-        "group": "Video Series",
-        "icon": "video",
-        "pages": [
+        "language": "zh",
+        "groups": [
           {
-            "group": "doubao-seedance-1-0-pro",
-            "icon": "video",
+            "group": "概览",
             "pages": [
-              "api-reference/videos/doubao/generation"
+              "zh/overview"
             ]
           },
           {
-            "group": "Sora2",
-            "icon": "video",
+            "group": "图片生成系列",
+            "icon": "image",
             "pages": [
-              "api-reference/videos/sora-2/generation",
-              "api-reference/videos/sora-2/create-character",
-              "api-reference/videos/sora-2/query-character",
-              "api-reference/videos/sora-2/remix"
+              {
+                "group": "Gemini-3-Pro-Image-preview (Nano banana2)",
+                "icon": "image",
+                "pages": [
+                  "zh/api-reference/images/gemini-3-pro/generation"
+                ]
+              },
+              {
+                "group": "Gemini-2.5-Flash-Image-preview (Nano banana)",
+                "icon": "image",
+                "pages": [
+                  "zh/api-reference/images/nano-banana/generation"
+                ]
+              },
+              {
+                "group": "GPT-4o-image",
+                "icon": "image",
+                "pages": [
+                  "zh/api-reference/images/gpt-4o/generation"
+                ]
+              },
+              {
+                "group": "Seedream-4.0",
+                "icon": "image",
+                "pages": [
+                  "zh/api-reference/images/seedream-4/generation"
+                ]
+              },
+              {
+                "group": "Seedream-4.5",
+                "icon": "image",
+                "pages": [
+                  "zh/api-reference/images/seedream-4.5/generation"
+                ]
+              }
             ]
           },
           {
-            "group": "VEO3",
+            "group": "视频生成系列",
             "icon": "video",
             "pages": [
-              "api-reference/videos/veo3/generation"
+              {
+                "group": "doubao-seedance-1-0-pro",
+                "icon": "video",
+                "pages": [
+                  "zh/api-reference/videos/doubao/generation"
+                ]
+              },
+              {
+                "group": "Sora2",
+                "icon": "video",
+                "pages": [
+                  "zh/api-reference/videos/sora-2/generation",
+                  "zh/api-reference/videos/sora-2/create-character",
+                  "zh/api-reference/videos/sora-2/query-character",
+                  "zh/api-reference/videos/sora-2/remix"
+                ]
+              },
+              {
+                "group": "VEO3",
+                "icon": "video",
+                "pages": [
+                  "zh/api-reference/videos/veo3/generation"
+                ]
+              },
+              {
+                "group": "MiniMax-Hailuo-02",
+                "icon": "video",
+                "pages": [
+                  "zh/api-reference/videos/minimax-hailuo/generation"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "language": "ja",
+        "groups": [
+          {
+            "group": "概要",
+            "pages": [
+              "ja/overview"
             ]
           },
           {
-            "group": "MiniMax-Hailuo-02",
+            "group": "画像生成シリーズ",
+            "icon": "image",
+            "pages": [
+              {
+                "group": "Gemini-3-Pro-Image-preview (Nano banana2)",
+                "icon": "image",
+                "pages": [
+                  "ja/api-reference/images/gemini-3-pro/generation"
+                ]
+              },
+              {
+                "group": "Gemini-2.5-Flash-Image-preview (Nano banana)",
+                "icon": "image",
+                "pages": [
+                  "ja/api-reference/images/nano-banana/generation"
+                ]
+              },
+              {
+                "group": "GPT-4o-image",
+                "icon": "image",
+                "pages": [
+                  "ja/api-reference/images/gpt-4o/generation"
+                ]
+              },
+              {
+                "group": "Seedream-4.0",
+                "icon": "image",
+                "pages": [
+                  "ja/api-reference/images/seedream-4/generation"
+                ]
+              },
+              {
+                "group": "Seedream-4.5",
+                "icon": "image",
+                "pages": [
+                  "ja/api-reference/images/seedream-4.5/generation"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "動画生成シリーズ",
             "icon": "video",
             "pages": [
-              "api-reference/videos/minimax-hailuo/generation"
+              {
+                "group": "doubao-seedance-1-0-pro",
+                "icon": "video",
+                "pages": [
+                  "ja/api-reference/videos/doubao/generation"
+                ]
+              },
+              {
+                "group": "Sora2",
+                "icon": "video",
+                "pages": [
+                  "ja/api-reference/videos/sora-2/generation",
+                  "ja/api-reference/videos/sora-2/create-character",
+                  "ja/api-reference/videos/sora-2/query-character",
+                  "ja/api-reference/videos/sora-2/remix"
+                ]
+              },
+              {
+                "group": "VEO3",
+                "icon": "video",
+                "pages": [
+                  "ja/api-reference/videos/veo3/generation"
+                ]
+              },
+              {
+                "group": "MiniMax-Hailuo-02",
+                "icon": "video",
+                "pages": [
+                  "ja/api-reference/videos/minimax-hailuo/generation"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "language": "ko",
+        "groups": [
+          {
+            "group": "개요",
+            "pages": [
+              "ko/overview"
+            ]
+          },
+          {
+            "group": "이미지 생성 시리즈",
+            "icon": "image",
+            "pages": [
+              {
+                "group": "Gemini-3-Pro-Image-preview (Nano banana2)",
+                "icon": "image",
+                "pages": [
+                  "ko/api-reference/images/gemini-3-pro/generation"
+                ]
+              },
+              {
+                "group": "Gemini-2.5-Flash-Image-preview (Nano banana)",
+                "icon": "image",
+                "pages": [
+                  "ko/api-reference/images/nano-banana/generation"
+                ]
+              },
+              {
+                "group": "GPT-4o-image",
+                "icon": "image",
+                "pages": [
+                  "ko/api-reference/images/gpt-4o/generation"
+                ]
+              },
+              {
+                "group": "Seedream-4.0",
+                "icon": "image",
+                "pages": [
+                  "ko/api-reference/images/seedream-4/generation"
+                ]
+              },
+              {
+                "group": "Seedream-4.5",
+                "icon": "image",
+                "pages": [
+                  "ko/api-reference/images/seedream-4.5/generation"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "비디오 생성 시리즈",
+            "icon": "video",
+            "pages": [
+              {
+                "group": "doubao-seedance-1-0-pro",
+                "icon": "video",
+                "pages": [
+                  "ko/api-reference/videos/doubao/generation"
+                ]
+              },
+              {
+                "group": "Sora2",
+                "icon": "video",
+                "pages": [
+                  "ko/api-reference/videos/sora-2/generation",
+                  "ko/api-reference/videos/sora-2/create-character",
+                  "ko/api-reference/videos/sora-2/query-character",
+                  "ko/api-reference/videos/sora-2/remix"
+                ]
+              },
+              {
+                "group": "VEO3",
+                "icon": "video",
+                "pages": [
+                  "ko/api-reference/videos/veo3/generation"
+                ]
+              },
+              {
+                "group": "MiniMax-Hailuo-02",
+                "icon": "video",
+                "pages": [
+                  "ko/api-reference/videos/minimax-hailuo/generation"
+                ]
+              }
             ]
           }
         ]

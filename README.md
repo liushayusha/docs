@@ -1,43 +1,223 @@
-# Mintlify Starter Kit
+# APIMart API Documentation
 
-Use the starter kit to get your docs deployed and ready to customize.
+多语言 API 文档，支持英语、中文、日语和韩语。
 
-Click the green **Use this template** button at the top of this repo to copy the Mintlify starter kit. The starter kit contains examples with
+## 快速开始
 
-- Guide pages
-- Navigation
-- Customizations
-- API reference pages
-- Use of popular components
+### 1. 安装依赖
 
-**[Follow the full quickstart guide](https://starter.mintlify.com/quickstart)**
+```bash
+npm install
+```
 
-## Development
+### 2. 初始化多语言目录结构（首次使用）
 
-Install the [Mintlify CLI](https://www.npmjs.com/package/mint) to preview your documentation changes locally. To install, use the following command:
+将现有的 `.mdx` 文件移动到 `en/` 目录：
+
+```bash
+npm run setup-i18n
+```
+
+此命令会：
+- 创建 `en/` 目录
+- 将所有根目录下的 `.mdx` 文件移动到 `en/` 目录
+- 保持原有的目录结构
+
+### 3. 生成翻译
+
+```bash
+npm run translate
+```
+
+此命令会：
+- 扫描 `en/` 目录下的所有 `.mdx` 文件
+- 自动翻译成中文、日语、韩语
+- 在项目根目录创建 `zh/`、`ja/`、`ko/` 目录
+- 生成对应的翻译文件
+
+## 目录结构
 
 ```
+docs/
+├── en/                          # 英文文档
+│   ├── overview.mdx
+│   └── api-reference/
+│       ├── images/
+│       │   ├── gemini-3-pro/
+│       │   │   └── generation.mdx
+│       │   ├── nano-banana/
+│       │   ├── gpt-4o/
+│       │   ├── seedream-4/
+│       │   └── seedream-4.5/
+│       └── videos/
+│           ├── doubao/
+│           ├── sora-2/
+│           ├── veo3/
+│           └── minimax-hailuo/
+├── zh/                          # 中文文档（自动生成）
+│   └── ... (与 en/ 结构相同)
+├── ja/                          # 日语文档（自动生成）
+│   └── ... (与 en/ 结构相同)
+├── ko/                          # 韩语文档（自动生成）
+│   └── ... (与 en/ 结构相同)
+├── docs.json                    # Mintlify 配置文件
+├── translate.ts                 # 翻译脚本
+├── setup-i18n.ts               # 多语言初始化脚本
+└── package.json
+```
+
+## 可用命令
+
+| 命令 | 说明 |
+|------|------|
+| `npm run setup-i18n` | 初始化多语言目录结构，将文件移动到 en/ 目录 |
+| `npm run translate` | 翻译所有 MDX 文件（默认） |
+| `npm run translate:mdx` | 翻译 MDX 文档 |
+| `npm run translate:hash` | 基于 hash 的差异翻译（JSON 文件） |
+| `npm run translate:full` | 全量翻译（JSON 文件） |
+
+## 支持的语言
+
+- 🇬🇧 **en** - English
+- 🇨🇳 **zh** - 简体中文
+- 🇯🇵 **ja** - 日本語
+- 🇰🇷 **ko** - 한국어
+
+## 配置
+
+### 翻译 API 配置
+
+翻译脚本使用 OpenAI API，配置位于 `translate.ts` 第 63-64 行：
+
+```typescript
+const openai = new OpenAI({
+  baseURL: process.env.OPENAI_BASE_URL || "https://ismaque.org/v1",
+  apiKey: process.env.OPENAI_API_KEY || "your-api-key",
+});
+```
+
+你可以通过环境变量自定义：
+
+```bash
+export OPENAI_BASE_URL="https://api.openai.com/v1"
+export OPENAI_API_KEY="your-api-key"
+export TRANSLATE_MODEL="gpt-4-turbo"  # 默认: gpt-4.1-mini
+```
+
+### docs.json 配置
+
+多语言路由配置在 `docs.json` 中：
+
+```json
+{
+  "navigation": {
+    "languages": [
+      {
+        "language": "en",
+        "groups": [...]
+      },
+      {
+        "language": "zh",
+        "groups": [...]
+      },
+      {
+        "language": "ja",
+        "groups": [...]
+      },
+      {
+        "language": "ko",
+        "groups": [...]
+      }
+    ]
+  }
+}
+```
+
+## 工作流程
+
+### 添加新文档
+
+1. 在 `en/` 目录下创建或编辑 `.mdx` 文件
+2. 运行 `npm run translate` 生成其他语言版本
+3. 确保在 `docs.json` 的所有语言配置中添加相应路径
+
+### 更新现有文档
+
+1. 修改 `en/` 目录下的 `.mdx` 文件
+2. 运行 `npm run translate` 更新翻译
+3. 脚本会跳过已存在的文件，如需重新翻译，请先删除目标语言文件
+
+### 手动调整翻译
+
+自动翻译后，建议人工审核和调整：
+- 技术术语的准确性
+- 代码示例的正确性
+- 链接和引用的有效性
+
+## 开发
+
+### 本地预览
+
+安装 Mintlify CLI：
+
+```bash
 npm i -g mint
 ```
 
-Run the following command at the root of your documentation, where your `docs.json` is located:
+在文档根目录运行：
 
-```
+```bash
 mint dev
 ```
 
-View your local preview at `http://localhost:3000`.
+访问 `http://localhost:3000` 查看预览。
 
-## Publishing changes
+### 修改翻译逻辑
 
-Install our GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app) to propagate changes from your repo to your deployment. Changes are deployed to production automatically after pushing to the default branch.
+编辑 `translate.ts` 文件：
+- 修改翻译提示词：`translateSystemPrompt`
+- 调整并发配置：`CONCURRENT_BATCH_SIZE`、`BATCH_DELAY_MS`
+- 修改分片大小：`MAX_CHUNK_SIZE`
 
-## Need help?
+### 添加新语言
 
-### Troubleshooting
+1. 在 `translate.ts` 的 `allLocales` 数组中添加新语言
+2. 在 `docs.json` 的 `navigation.languages` 中添加对应配置
+3. 运行 `npm run translate` 生成翻译
 
-- If your dev environment isn't running: Run `mint update` to ensure you have the most recent version of the CLI.
-- If a page loads as a 404: Make sure you are running in a folder with a valid `docs.json`.
+## 注意事项
 
-### Resources
-- [Mintlify documentation](https://mintlify.com/docs)
+1. **首次使用**：必须先运行 `npm run setup-i18n` 初始化目录结构
+2. **文件位置**：所有英文文档必须放在 `en/` 目录下
+3. **翻译保护**：脚本会自动保留代码块、URL、组件名称等不需要翻译的内容
+4. **并发限制**：默认并发翻译 6 个文件，可在 `translate.ts` 中调整 `CONCURRENT_BATCH_SIZE`
+5. **API 配额**：注意 OpenAI API 的使用配额和费用
+
+## 故障排除
+
+### 翻译失败
+
+如果翻译失败，检查：
+1. API Key 是否正确
+2. 网络连接是否正常
+3. API 配额是否充足
+
+### 目录结构错误
+
+如果目录结构不正确：
+1. 确保已运行 `npm run setup-i18n`
+2. 检查 `en/` 目录是否存在
+3. 验证文件路径与 `docs.json` 配置一致
+
+## Publishing Changes
+
+通过 [Mintlify Dashboard](https://dashboard.mintlify.com/settings/organization/github-app) 安装 GitHub App，自动将仓库变更部署到生产环境。推送到默认分支后会自动部署。
+
+## Resources
+
+- [Mintlify Documentation](https://mintlify.com/docs)
+- [OpenAI API](https://platform.openai.com/docs)
+
+## License
+
+MIT

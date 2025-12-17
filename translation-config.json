@@ -1,0 +1,39 @@
+{
+  "doNotTranslate": {
+    "headers": [
+      "Authorization",
+      "Request Parameters",
+      "Response",
+      "RequestExample",
+      "ResponseExample",
+      "Use Cases"
+    ],
+    "terms": [
+      "APIMart",
+      "OpenAI",
+      "GPT-4o",
+      "GPT-5",
+      "Claude",
+      "Gemini",
+      "Sora2",
+      "VEO3",
+      "API",
+      "SDK",
+      "Bearer Token",
+      "webhook"
+    ],
+    "patterns": [
+      "## Authorization",
+      "## Response",
+      "## Request"
+    ]
+  },
+  "preserveFormatting": {
+    "codeBlocks": true,
+    "inlineCode": true,
+    "urls": true,
+    "componentTags": true,
+    "h2Headers": true,
+    "h3Headers": false
+  }
+}
