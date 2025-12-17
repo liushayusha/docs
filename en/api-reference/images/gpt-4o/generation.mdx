@@ -4,6 +4,111 @@ description: '• Asynchronous processing mode, returns task ID for subsequent q
 api: 'POST https://api.apimart.ai/v1/images/generations'
 ---
 
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  All API endpoints require Bearer Token authentication
+
+  Get your API Key:
+
+  Visit the [API Key Management Page](https://apimart.ai/console/token) to get your API Key
+
+  Add it to the request header:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" default="gpt-4o-image" required>
+  Image generation model name
+
+  Example: `"gpt-4o-image"`
+</ParamField>
+
+<ParamField body="prompt" type="string" required>
+  Text description for image generation
+
+  Maximum 1000 characters
+</ParamField>
+
+<ParamField body="size" type="string">
+  Image generation size
+
+  Supported formats:
+
+  * Ratios: `1:1`, `2:3`, `3:2`
+</ParamField>
+
+<ParamField body="n" type="integer">
+  Number of images to generate
+
+  Supports 1, 2, 4. Charges will be pre-deducted based on the number
+
+  Default: 1
+
+  **⚠️ Note:** Must enter a plain number (e.g., `1`), do not use quotes or it will cause an error
+</ParamField>
+
+<ParamField body="image_urls" type="array">
+  Reference image URL list for image-to-image or image editing
+
+  **💡 Quick fill (Try it area):**
+
+  1. Click "+ Add an item" to add an image URL
+  2. Enter the complete image URL address
+
+  <Expandable title="Field details">
+    <ParamField body="url" type="string" required>
+      Image URL address
+
+      Can be:
+
+      * Publicly accessible image URL (http\:// or https\://)
+      * Base64 encoded image data
+
+      **Limitations:**
+
+      * Single image up to 10MB
+      * Supported formats: .jpeg, .jpg, .png, .webp
+    </ParamField>
+  </Expandable>
+
+  **Limitation:** Maximum 5 images
+</ParamField>
+
+<ParamField body="mask_url" type="string">
+  Mask image URL
+
+  * Must be PNG format
+  * Size must match the reference image
+  * Maximum 4MB
+</ParamField>
+
+## Response
+
+<ResponseField name="code" type="integer">
+  Response status code
+</ResponseField>
+
+<ResponseField name="data" type="array">
+  Response data array
+
+  <Expandable title="Properties">
+    <ResponseField name="status" type="string">
+      Task status
+
+      * `submitted` - Submitted
+    </ResponseField>
+
+    <ResponseField name="task_id" type="string">
+      Unique task identifier
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
 <RequestExample>
   ```bash cURL theme={null}
   curl --request POST \
@@ -32,7 +137,9 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
       "size": "1:1",
       "n": 1,
       "image_urls": [
-          "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"    ]}
+          "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"
+      ]
+  }
 
   headers = {
       "Authorization": "Bearer <token>",
@@ -53,7 +160,9 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
     size: "1:1",
     n: 1,
     image_urls: [
-      "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"  ]};
+      "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"
+    ]
+  };
 
   const headers = {
     "Authorization": "Bearer <token>",
@@ -194,7 +303,9 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
     size: "1:1",
     n: 1,
     image_urls: [
-      "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"  ]}
+      "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"
+    ]
+  }
 
   http = Net::HTTP.new(url.host, url.port)
   http.use_ssl = true
@@ -219,7 +330,9 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
       "size": "1:1",
       "n": 1,
       "image_urls": [
-          "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"    ]]
+          "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"
+      ]
+  ]
 
   var request = URLRequest(url: url)
   request.httpMethod = "POST"
@@ -232,7 +345,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
           print("Error: \(error)")
           return
       }
-      
+
       if let data = data, let responseString = String(data: data, encoding: .utf8) {
           print(responseString)
       }
@@ -326,7 +439,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
           NSURL *url = [NSURL URLWithString:@"https://api.apimart.ai/v1/images/generations"];
-          
+
           NSDictionary *payload = @{
               @"model": @"gpt-4o-image",
               @"prompt": @"An ancient castle under the starry sky",
@@ -336,30 +449,30 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
                   @"https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"
               ]
           };
-          
+
           NSError *error;
           NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
                                                             options:0
                                                               error:&error];
-          
+
           NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
           [request setHTTPMethod:@"POST"];
           [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
           [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
           [request setHTTPBody:jsonData];
-          
-          NSURLSessionDataTask *task = [[NSURLSession sharedSession] 
+
+          NSURLSessionDataTask *task = [[NSURLSession sharedSession]
               dataTaskWithRequest:request
               completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
                   if (error) {
                       NSLog(@"Error: %@", error);
                       return;
                   }
-                  NSString *result = [[NSString alloc] initWithData:data 
+                  NSString *result = [[NSString alloc] initWithData:data
                                                           encoding:NSUTF8StringEncoding];
                   NSLog(@"%@", result);
               }];
-          
+
           [task resume];
           [[NSRunLoop mainRunLoop] run];
       }
@@ -391,7 +504,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
       |> fun h -> Header.add h "Content-Type" "application/json"
     in
     let body = Cohttp_lwt.Body.of_string payload in
-    
+
     let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
       body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
       print_endline body_str
@@ -405,15 +518,17 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   void main() async {
     final url = Uri.parse('https://api.apimart.ai/v1/images/generations');
-    
+
     final payload = {
       'model': 'gpt-4o-image',
       'prompt': 'An ancient castle under the starry sky',
       'size': '1:1',
       'n': 1,
       'image_urls': [
-        'https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png'    ]  };
-    
+        'https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png'
+      ]
+    };
+
     final response = await http.post(
       url,
       headers: {
@@ -422,7 +537,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
       },
       body: jsonEncode(payload),
     );
-    
+
     print(response.body);
   }
   ```
@@ -439,7 +554,9 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
     size = "1:1",
     n = 1,
     image_urls = list(
-      "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"  ))
+      "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"
+    )
+  )
 
   response <- POST(
     url,
@@ -538,108 +655,3 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   }
   ```
 </ResponseExample>
-
-## Authorizations
-
-<ParamField header="Authorization" type="string" required>
-  All API endpoints require Bearer Token authentication
-
-  Get your API Key:
-
-  Visit the [API Key Management Page](https://apimart.ai/console/token) to get your API Key
-
-  Add it to the request header:
-
-  ```
-  Authorization: Bearer YOUR_API_KEY
-  ```
-</ParamField>
-
-## Body
-
-<ParamField body="model" type="string" default="gpt-4o-image" required>
-  Image generation model name
-
-  Example: `"gpt-4o-image"`
-</ParamField>
-
-<ParamField body="prompt" type="string" required>
-  Text description for image generation
-
-  Maximum 1000 characters
-</ParamField>
-
-<ParamField body="size" type="string">
-  Image generation size
-
-  Supported formats:
-
-  * Ratios: `1:1`, `2:3`, `3:2`
-</ParamField>
-
-<ParamField body="n" type="integer">
-  Number of images to generate
-
-  Supports 1, 2, 4. Charges will be pre-deducted based on the number
-
-  Default: 1
-
-  **⚠️ Note:** Must enter a plain number (e.g., `1`), do not use quotes or it will cause an error
-</ParamField>
-
-<ParamField body="image_urls" type="array">
-  Reference image URL list for image-to-image or image editing
-
-  **💡 Quick fill (Try it area):**
-
-  1. Click "+ Add an item" to add an image URL
-  2. Enter the complete image URL address
-
-  <Expandable title="Field details">
-    <ParamField body="url" type="string" required>
-      Image URL address
-
-      Can be:
-
-      * Publicly accessible image URL (http\:// or https\://)
-      * Base64 encoded image data
-
-      **Limitations:**
-
-      * Single image up to 10MB
-      * Supported formats: .jpeg, .jpg, .png, .webp
-    </ParamField>
-  </Expandable>
-
-  **Limitation:** Maximum 5 images
-</ParamField>
-
-<ParamField body="mask_url" type="string">
-  Mask image URL
-
-  * Must be PNG format
-  * Size must match the reference image
-  * Maximum 4MB
-</ParamField>
-
-## Response
-
-<ResponseField name="code" type="integer">
-  Response status code
-</ResponseField>
-
-<ResponseField name="data" type="array">
-  Response data array
-
-  <Expandable title="Properties">
-    <ResponseField name="status" type="string">
-      Task status
-
-      * `submitted` - Submitted
-    </ResponseField>
-
-    <ResponseField name="task_id" type="string">
-      Unique task identifier
-    </ResponseField>
-  </Expandable>
-</ResponseField>
