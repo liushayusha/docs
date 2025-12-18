@@ -1,19 +1,19 @@
 ---
-title: 'Sora2 Create Character (Character Management)'
-description: '• Extract characters from videos for use in subsequent video generation<br/>• Asynchronous processing mode, returns task ID for subsequent queries<br/>• Video must contain sound and characters'
+title: 'Sora2 创建角色（角色管理）'
+description: '• 从视频中提取角色，用于后续视频生成<br/>• 异步处理模式，返回任务ID用于后续查询<br/>• 视频必须包含声音和角色 '
 api: 'POST https://api.apimart.ai/v1/videos/generations'
 ---
 
-## Authorization
+## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  All API endpoints require Bearer Token authentication
+  所有接口均需要使用Bearer Token进行认证
 
-  Get your API Key:
+  获取 API Key：
 
-  Visit the [API Key Management Page](https://apimart.ai/console/token) to get your API Key
+  访问 [API Key 管理页面](https://apimart.ai/console/token) 获取您的 API Key
 
-  Add it to the request header:
+  使用时在请求头中添加：
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -23,75 +23,75 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 ## Body
 
 <ParamField body="model" type="string" default="sora-2" required>
-  Video generation model name
+  视频生成模型名称
 
-  Supported models:
+  支持的模型：
 
-  * `sora-2` - Standard version
-  * `sora-2-pro` - Professional version
+  * `sora-2` - 标准版本
+  * `sora-2-pro` - 专业版本
 
-  Example: `"sora-2"` or `"sora-2-pro"`
+  示例：`"sora-2"` 或 `"sora-2-pro"`
 </ParamField>
 
 <ParamField body="timestamps" type="string" required>
-  Character appearance timestamp range
+  角色出现的时间戳范围
 
-  In seconds, format: `"start_second,end_second"`
+  单位为秒，格式为 `"起始秒,结束秒"`
 
-  **⚠️ Limitations:**
+  **⚠️ 限制：**
 
-  * Minimum time range difference: 1 second
-  * Maximum time range difference: 3 seconds
+  * 时间范围差值最小 1 秒
+  * 时间范围差值最大 3 秒
 
-  Example: `"1,3"` means the character appearing from second 1 to second 3 in the video
+  示例：`"1,3"` 表示视频中第 1 秒到第 3 秒出现的角色
 </ParamField>
 
 <ParamField body="url" type="string">
-  Video URL containing the character to create
+  包含需要创建角色的视频 URL
 
-  **⚠️ Requirements:**
+  **⚠️ 要求：**
 
-  * Video must contain sound
-  * Video must contain a character
+  * 视频必须包含声音
+  * 视频必须包含角色
 
-  **💡 Note:**
+  **💡 说明：**
 
-  * Either `url` or `from_task` must be provided (choose one)
+  * 参数 `url` 和 `from_task` 二选一，必须设置其中一个
 
-  Example: `"https://upload.apimart.ai/f/video/9998234807907072-ad4c2656-94a4-44d4-9eaa-5be2855a7798-video_task_01KBYT63R1TGZNT4EHAD495ZJ3.mp4"`
+  示例：`"https://upload.apimart.ai/f/video/9998234807907072-ad4c2656-94a4-44d4-9eaa-5be2855a7798-video_task_01KBYT63R1TGZNT4EHAD495ZJ3.mp4"`
 </ParamField>
 
 <ParamField body="from_task" type="string">
-  Previously generated video task ID
+  已生成的视频任务 ID
 
-  Create a character from an already generated video task
+  可以根据已经生成的任务 ID 来创建角色
 
-  **💡 Note:**
+  **💡 说明：**
 
-  * Either `url` or `from_task` must be provided (choose one)
-  * Use this parameter to extract characters directly from previously generated video tasks
+  * 参数 `url` 和 `from_task` 二选一，必须设置其中一个
+  * 使用此参数可以直接从之前生成的视频任务中提取角色
 
-  Example: `"task_01KBYT59JDHB4A3KDDR9N9JVWP"`
+  示例：`"task_01KBYT59JDHB4A3KDDR9N9JVWP"`
 </ParamField>
 
 ## Response
 
 <ResponseField name="code" type="integer">
-  Response status code, 200 for success
+  响应状态码，成功时为 200
 </ResponseField>
 
 <ResponseField name="data" type="array">
-  Response data array
+  返回数据数组
 
-  <Expandable title="Array Elements">
+  <Expandable title="数组元素">
     <ResponseField name="status" type="string">
-      Task status, `submitted` upon initial submission
+      任务状态，初始提交时为 `submitted`
     </ResponseField>
 
     <ResponseField name="task_id" type="string">
-      Unique task identifier for querying task status and results
+      任务唯一标识符，用于查询任务状态和结果
 
-      Once completed, you can use this character task ID to reference the character via the `character_url` parameter in video generation
+      创建完成后，可使用此角色任务 ID 在视频生成时通过 `character_url` 参数引用该角色
     </ResponseField>
   </Expandable>
 </ResponseField>
@@ -522,7 +522,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   {
     "error": {
       "code": 400,
-      "message": "Invalid request parameters",
+      "message": "请求参数无效",
       "type": "invalid_request_error"
     }
   }
@@ -532,7 +532,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   {
     "error": {
       "code": 401,
-      "message": "Invalid authentication credentials",
+      "message": "身份验证失败，请检查您的API密钥",
       "type": "authentication_error"
     }
   }
@@ -542,7 +542,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   {
     "error": {
       "code": 402,
-      "message": "Insufficient balance. Please top up your account",
+      "message": "账户余额不足，请充值后再试",
       "type": "payment_required"
     }
   }
@@ -552,7 +552,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   {
     "error": {
       "code": 403,
-      "message": "Access forbidden. You don't have permission to access this resource",
+      "message": "访问被禁止，您没有权限访问此资源",
       "type": "permission_error"
     }
   }
@@ -562,7 +562,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   {
     "error": {
       "code": 429,
-      "message": "Rate limit exceeded. Please try again later",
+      "message": "请求过于频繁，请稍后再试",
       "type": "rate_limit_error"
     }
   }
@@ -572,7 +572,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   {
     "error": {
       "code": 500,
-      "message": "Internal server error. Please try again later",
+      "message": "服务器内部错误，请稍后重试",
       "type": "server_error"
     }
   }
@@ -582,7 +582,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   {
     "error": {
       "code": 502,
-      "message": "Bad gateway. The server is temporarily unavailable",
+      "message": "网关错误，服务器暂时不可用",
       "type": "bad_gateway"
     }
   }

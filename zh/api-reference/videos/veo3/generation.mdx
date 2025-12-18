@@ -1,18 +1,19 @@
 ---
 title: 'VEO3 视频生成'
-description: '• 异步处理模式，返回任务 ID 以供后续查询<br/>• 支持多种生成模式，包括文本到视频和图片到视频<br/>• 生成的视频链接有效期为 24 小时，请及时保存'
+description: '• 异步处理模式，返回任务ID用于后续查询<br/>• 支持文本转视频、图生视频等多种生成模式<br/>• 生成的视频链接，有效期为24小时，请尽快保存'
 api: 'POST https://api.apimart.ai/v1/videos/generations'
 ---
+
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  所有 API 接口都需要 Bearer Token 认证
+  所有接口均需要使用Bearer Token进行认证
 
-  获取您的 API Key：
+  获取 API Key：
 
-  访问 [API Key 管理页面](https://apimart.ai/console/token) 以获取您的 API Key
+  访问 [API Key 管理页面](https://apimart.ai/console/token) 获取您的 API Key
 
-  将其添加到请求头：
+  使用时在请求头中添加：
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -26,10 +27,10 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
   可用模型：
 
-  * `veo3.1-fast` - 快速生成模型，适合快速预览和迭代
-  * `veo3.1-quality` - 高质量生成模型，适合最终制作
+  * `veo3.1-fast` - 快速生成模型，适用于快速预览和迭代
+  * `veo3.1-quality` - 高质量生成模型，适用于最终制作
 
-  示例：`"veo3.1-fast"`
+  Example: `"veo3.1-fast"`
 </ParamField>
 
 <ParamField body="prompt" type="string" required>
@@ -43,35 +44,45 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 </ParamField>
 
 <ParamField body="aspect_ratio" type="string">
-  视频宽高比
+  视频分辨率
 
-  支持格式：
+  支持的格式：
 
-  * `16:9`（横屏）
-  * `9:16`（竖屏）
+  * `16:9` (横屏)
+  * `9:16` (竖屏)
 </ParamField>
 
 <ParamField body="image_urls" type="array">
-  用于图像生成视频的参考图片 URL 数组
+  用于图生视频的参考图像 URL 数组
 
-  **💡 快速填充（试用区）：**
+  **💡 快速填写（Try it 区域）：**
 
-  1. 点击 "+ Add an item" 添加图片 URL
-  2. 输入完整的图片 URL 地址
+  1. 点击 "+ Add an item" 添加一个图像URL
+  2. 输入图像的完整 URL 地址或base64数据
 
-  <Expandable title="字段详情">
+  <Expandable title="详细字段说明">
     <ParamField body="url" type="string" required>
-      图片 URL 地址
+      图像URL地址
 
-      可为：
+      支持两种格式：
 
-      * 公开访问的图片 URL（http\:// 或 https\://）
-      * Base64 编码的图片数据
+      **1. 完整的图像URL地址**
+
+      * 公开可访问的图像URL（http\:// 或 https\://）
+      * 示例：`https://example.com/image.jpg`
+
+      **2. Base64 编码格式**
+
+      * **必须使用完整的 Data URI 格式**
+      * 格式：`data:image/{格式};base64,{base64数据}`
+      * 支持的图片格式：jpeg、png、webp 等
+      * 示例：`data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+      * ⚠️ 注意：必须包含 `data:image/jpeg;base64,` 前缀部分
 
       **限制：**
 
       * 最大文件大小：10MB
-      * 支持格式：.jpeg, .jpg, .png, .webp
+      * 支持格式：.jpeg、.jpg、.png、.webp
     </ParamField>
   </Expandable>
 </ParamField>
@@ -83,7 +94,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 </ResponseField>
 
 <ResponseField name="data" type="array">
-  响应数据数组
+  返回数据数组
 
   <Expandable title="属性">
     <ResponseField name="status" type="string">
@@ -93,7 +104,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
     </ResponseField>
 
     <ResponseField name="task_id" type="string">
-      唯一任务标识
+      任务唯一标识符
     </ResponseField>
   </Expandable>
 </ResponseField>
@@ -106,7 +117,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
     --header 'Content-Type: application/json' \
     --data '{
       "model": "veo3.1-fast",
-      "prompt": "Dolphins leaping in the azure ocean",
+      "prompt": "海豚在碧蓝海洋中跳跃",
       "duration": 8,
       "aspect_ratio": "16:9",
       "image_urls": ["https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png"]
@@ -120,7 +131,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
   payload = {
       "model": "veo3.1-fast",
-      "prompt": "Dolphins leaping in the azure ocean",
+      "prompt": "海豚在碧蓝海洋中跳跃",
       "duration": 8,
       "aspect_ratio": "16:9",
       "image_urls": ["https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png"]
@@ -141,7 +152,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
   const payload = {
     model: "veo3.1",
-    prompt: "Dolphins leaping in the azure ocean",
+    prompt: "海豚在碧蓝海洋中跳跃",
     duration: 8,
     aspect_ratio: "16:9",
     image_urls: ["https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png"]
@@ -178,8 +189,8 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
       payload := map[string]interface{}{
           "model":      "veo3.1",
-          "prompt":     "Dolphins leaping in the azure ocean",
-          "duration":   5,
+          "prompt":     "海豚在碧蓝海洋中跳跃",
+          "duration":   8,
           "aspect_ratio": "16:9",
           "image_urls":  ["https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png"],
       }
@@ -215,7 +226,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
           String payload = """
           {
             "model": "veo3.1-fast",
-            "prompt": "Dolphins leaping in the azure ocean",
+            "prompt": "海豚在碧蓝海洋中跳跃",
             "duration": 8,
             "aspect_ratio": "16:9",
             "image_urls": ["https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png"]
@@ -245,7 +256,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
   $payload = [
       "model" => "veo3.1",
-      "prompt" => "Dolphins leaping in the azure ocean",
+      "prompt" => "海豚在碧蓝海洋中跳跃",
       "duration" => 8,
       "aspect_ratio" => "16:9",
       "image_urls" => ["https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png"]
@@ -276,7 +287,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
   payload = {
     model: "veo3.1",
-    prompt: "Dolphins leaping in the azure ocean",
+    prompt: "海豚在碧蓝海洋中跳跃",
     duration: 8,
     aspect_ratio: "16:9",
     image_urls: ["https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png"]
@@ -301,7 +312,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
   let payload: [String: Any] = [
       "model": "veo3.1-fast",
-      "prompt": "Dolphins leaping in the azure ocean",
+      "prompt": "海豚在碧蓝海洋中跳跃",
       "duration": 8,
       "aspect_ratio": "16:9",
       "image_urls": ["https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png"]
@@ -341,10 +352,10 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
           var payload = @"{
               ""model"": ""veo3.1"",
-              ""prompt"": ""Dolphins leaping in the azure ocean"",
+              ""prompt"": ""海豚在碧蓝海洋中跳跃"",
               ""duration"": 8,
               ""aspect_ratio"": ""16:9"",
-              ""image_urls"": ""https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png""
+              ""image_url"": ""https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png""
           }";
 
           using var client = new HttpClient();
@@ -373,9 +384,9 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
       if(curl) {
           const char *url = "https://api.apimart.ai/v1/videos/generations";
           const char *payload = "{"
-              "\"model\":\"veo3.1\","
-              "\"prompt\":\"Dolphins leaping in the azure ocean\","
-              "\"duration\":10,"
+              "\"model\":\"veo3.1-fast\","
+              "\"prompt\":\"海豚在碧蓝海洋中跳跃\","
+              "\"duration\":8,"
               "\"aspect_ratio\":\"16:9\","
               "\"image_urls\":[\"https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png\"]"
           "}";
@@ -413,8 +424,8 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
           
           NSDictionary *payload = @{
               @"model": @"veo3.1",
-              @"prompt": @"Dolphins leaping in the azure ocean",
-              @"duration": @5,
+              @"prompt": @"海豚在碧蓝海洋中跳跃",
+              @"duration": @8,
               @"aspect_ratio": @"16:9",
               @"image_urls": @[@"https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png"]
           };
@@ -459,8 +470,8 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
   let payload = {|{
     "model": "veo3.1",
-    "prompt": "Dolphins leaping in the azure ocean",
-    "duration": 5,
+    "prompt": "海豚在碧蓝海洋中跳跃",
+    "duration": 8,
     "aspect_ratio": "16:9",
               "image_urls": ["https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png"]
   }|}
@@ -488,7 +499,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
     
     final payload = {
       'model': 'veo3.1',
-      'prompt': 'Dolphins leaping in the azure ocean',
+      'prompt': '海豚在碧蓝海洋中跳跃',
       'duration': 8,
       'aspect_ratio': '16:9',
       'image_urls': ['https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png']
@@ -515,7 +526,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
   payload <- list(
     model = "veo3.1",
-    prompt = "Dolphins leaping in the azure ocean",
+    prompt = "海豚在碧蓝海洋中跳跃",
     duration = 8,
     aspect_ratio = "16:9",
     image_urls = c("https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png")
@@ -562,7 +573,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   {
     "error": {
       "code": 401,
-      "message": "认证凭据无效",
+      "message": "身份验证失败，请检查您的API密钥",
       "type": "authentication_error"
     }
   }
@@ -572,7 +583,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   {
     "error": {
       "code": 402,
-      "message": "余额不足。请为您的账户充值",
+      "message": "账户余额不足，请充值后再试",
       "type": "payment_required"
     }
   }
@@ -582,7 +593,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   {
     "error": {
       "code": 403,
-      "message": "访问被拒绝。您没有权限访问该资源",
+      "message": "访问被禁止，您没有权限访问此资源",
       "type": "permission_error"
     }
   }
@@ -592,7 +603,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   {
     "error": {
       "code": 429,
-      "message": "超出速率限制。请稍后再试",
+      "message": "请求过于频繁，请稍后再试",
       "type": "rate_limit_error"
     }
   }
@@ -602,7 +613,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   {
     "error": {
       "code": 500,
-      "message": "服务器内部错误。请稍后再试",
+      "message": "服务器内部错误，请稍后重试",
       "type": "server_error"
     }
   }
@@ -612,7 +623,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   {
     "error": {
       "code": 502,
-      "message": "错误网关。服务器暂时不可用",
+      "message": "网关错误，服务器暂时不可用",
       "type": "bad_gateway"
     }
   }

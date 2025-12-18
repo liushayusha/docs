@@ -1,29 +1,29 @@
 ---
-title: 'Sora2 Query Character (Character Management)'
-description: '• Query the status and result of character creation tasks<br/>• Get detailed information about created characters<br/>• Returns character ID for use in subsequent video generation'
+title: 'Sora2 查询角色（角色管理）'
+description: '• 查询角色创建任务的状态和结果<br/>• 获取已创建角色的详细信息<br/>• 返回角色ID可用于后续视频生成'
 api: 'GET https://api.apimart.ai/v1/characters_tasks/{task_id}'
 ---
 
-## Path Parameters
+## 路径参数
 
 <ParamField path="task_id" type="string" required>
-  Character creation task ID
+  角色创建任务 ID
 
-  This is the task ID returned from the create character API
+  这是通过创建角色接口返回的任务 ID
 
-  Example: `"task_01KBZ0TZZ7C7M3WS1TJM0PH8J4"`
+  示例：`"task_01KBZ0TZZ7C7M3WS1TJM0PH8J4"`
 </ParamField>
 
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  All API endpoints require Bearer Token authentication
+  所有接口均需要使用Bearer Token进行认证
 
-  Get your API Key:
+  获取 API Key：
 
-  Visit the [API Key Management Page](https://apimart.ai/console/token) to get your API Key
+  访问 [API Key 管理页面](https://apimart.ai/console/token) 获取您的 API Key
 
-  Add it to the request header:
+  使用时在请求头中添加：
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -33,94 +33,94 @@ api: 'GET https://api.apimart.ai/v1/characters_tasks/{task_id}'
 ## Response
 
 <ResponseField name="code" type="integer">
-  Response status code, 200 for success
+  响应状态码，成功时为 200
 </ResponseField>
 
 <ResponseField name="data" type="object">
-  Response data object
+  返回数据对象
 
-  <Expandable title="Field Details">
+  <Expandable title="字段说明">
     <ResponseField name="id" type="string">
-      Unique task identifier
+      任务唯一标识符
 
-      Example: `"task_01KC0JZCMTMQ70D68XTM56Q5D0"`
+      示例：`"task_01KC0JZCMTMQ70D68XTM56Q5D0"`
     </ResponseField>
 
     <ResponseField name="status" type="string">
-      Task status
+      任务状态
 
-      Possible values:
+      可能的值：
 
-      * `pending` - Waiting for processing
-      * `processing` - In progress
-      * `completed` - Completed
-      * `failed` - Failed
+      * `pending` - 等待处理
+      * `processing` - 处理中
+      * `completed` - 已完成
+      * `failed` - 失败
 
-      Example: `"completed"`
+      示例：`"completed"`
     </ResponseField>
 
     <ResponseField name="progress" type="integer">
-      Task completion progress percentage (0-100)
+      任务完成进度百分比 (0-100)
 
-      Example: `100`
+      示例：`100`
     </ResponseField>
 
     <ResponseField name="created" type="integer">
-      Task creation timestamp (Unix timestamp)
+      任务创建时间戳（Unix 时间戳）
 
-      Example: `1765251461`
+      示例：`1765251461`
     </ResponseField>
 
     <ResponseField name="completed" type="integer">
-      Task completion timestamp (Unix timestamp)
+      任务完成时间戳（Unix 时间戳）
 
-      Example: `1765251507`
+      示例：`1765251507`
     </ResponseField>
 
     <ResponseField name="estimated_time" type="integer">
-      Estimated processing time (seconds)
+      预计处理时间（秒）
 
-      Example: `30`
+      示例：`30`
     </ResponseField>
 
     <ResponseField name="actual_time" type="integer">
-      Actual processing time (seconds)
+      实际处理时间（秒）
 
-      Example: `46`
+      示例：`46`
     </ResponseField>
 
     <ResponseField name="result" type="object">
-      Task result
+      任务结果
 
-      <Expandable title="result fields">
+      <Expandable title="result 字段">
         <ResponseField name="characters" type="array">
-          Characters array
+          角色数组
 
-          <Expandable title="Character object">
+          <Expandable title="角色对象">
             <ResponseField name="id" type="string">
-              Unique character identifier
+              角色唯一标识符
 
-              This ID can be used to reference the character via the `character_url` parameter in video generation
+              此 ID 可在视频生成时通过 `character_url` 参数引用该角色
 
-              Example: `"ch_6937998961208191a45ef08447a554df"`
+              示例：`"ch_6937998961208191a45ef08447a554df"`
             </ResponseField>
 
             <ResponseField name="display_name" type="string">
-              Character display name
+              角色显示名称
 
-              Example: `"Turbo Whiskers"`
+              示例：`"Turbo Whiskers"`
             </ResponseField>
 
             <ResponseField name="profile_picture_url" type="string">
-              Character profile picture URL
+              角色头像图片 URL
 
-              Example: `"https://upload.apimart.ai/f/image/...character_task_xxx.jpg"`
+              示例：`"https://upload.apimart.ai/f/image/...character_task_xxx.jpg"`
             </ResponseField>
 
             <ResponseField name="username" type="string">
-              Character username, can be referenced in prompt using `@username`
+              角色用户名，可在 prompt 中使用 `@username` 引用该角色
 
-              Example: `"duksvfkf.turbo_whis"`
+              示例：`"duksvfkf.turbo_whis"`
             </ResponseField>
           </Expandable>
         </ResponseField>
@@ -274,7 +274,7 @@ api: 'GET https://api.apimart.ai/v1/characters_tasks/{task_id}'
           print("Error: \(error)")
           return
       }
-      
+
       if let data = data, let responseString = String(data: data, encoding: .utf8) {
           print(responseString)
       }
@@ -350,23 +350,23 @@ api: 'GET https://api.apimart.ai/v1/characters_tasks/{task_id}'
           NSString *taskId = @"task_01KBZ0TZZ7C7M3WS1TJM0PH8J4";
           NSString *urlString = [NSString stringWithFormat:@"https://api.apimart.ai/v1/characters_tasks/%@", taskId];
           NSURL *url = [NSURL URLWithString:urlString];
-          
+
           NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
           [request setHTTPMethod:@"GET"];
           [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
-          
-          NSURLSessionDataTask *task = [[NSURLSession sharedSession] 
+
+          NSURLSessionDataTask *task = [[NSURLSession sharedSession]
               dataTaskWithRequest:request
               completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
                   if (error) {
                       NSLog(@"Error: %@", error);
                       return;
                   }
-                  NSString *result = [[NSString alloc] initWithData:data 
+                  NSString *result = [[NSString alloc] initWithData:data
                                                           encoding:NSUTF8StringEncoding];
                   NSLog(@"%@", result);
               }];
-          
+
           [task resume];
           [[NSRunLoop mainRunLoop] run];
       }
@@ -387,7 +387,7 @@ api: 'GET https://api.apimart.ai/v1/characters_tasks/{task_id}'
     let headers = Header.init ()
       |> fun h -> Header.add h "Authorization" "Bearer <token>"
     in
-    
+
     let response = Client.get ~headers (Uri.of_string url) >>= fun (resp, body) ->
       body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
       print_endline body_str
@@ -402,14 +402,14 @@ api: 'GET https://api.apimart.ai/v1/characters_tasks/{task_id}'
   void main() async {
     final taskId = 'task_01KBZ0TZZ7C7M3WS1TJM0PH8J4';
     final url = Uri.parse('https://api.apimart.ai/v1/characters_tasks/$taskId');
-    
+
     final response = await http.get(
       url,
       headers: {
         'Authorization': 'Bearer <token>',
       },
     );
-    
+
     print(response.body);
   }
   ```
@@ -462,7 +462,7 @@ api: 'GET https://api.apimart.ai/v1/characters_tasks/{task_id}'
   {
     "error": {
       "code": 400,
-      "message": "Invalid request parameters",
+      "message": "请求参数无效",
       "type": "invalid_request_error"
     }
   }
@@ -472,7 +472,7 @@ api: 'GET https://api.apimart.ai/v1/characters_tasks/{task_id}'
   {
     "error": {
       "code": 401,
-      "message": "Invalid authentication credentials",
+      "message": "身份验证失败，请检查您的API密钥",
       "type": "authentication_error"
     }
   }
@@ -482,7 +482,7 @@ api: 'GET https://api.apimart.ai/v1/characters_tasks/{task_id}'
   {
     "error": {
       "code": 404,
-      "message": "Task not found",
+      "message": "任务不存在",
       "type": "not_found_error"
     }
   }
@@ -492,7 +492,7 @@ api: 'GET https://api.apimart.ai/v1/characters_tasks/{task_id}'
   {
     "error": {
       "code": 429,
-      "message": "Rate limit exceeded. Please try again later",
+      "message": "请求过于频繁，请稍后再试",
       "type": "rate_limit_error"
     }
   }
@@ -502,7 +502,7 @@ api: 'GET https://api.apimart.ai/v1/characters_tasks/{task_id}'
   {
     "error": {
       "code": 500,
-      "message": "Internal server error. Please try again later",
+      "message": "服务器内部错误，请稍后重试",
       "type": "server_error"
     }
   }
