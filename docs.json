@@ -98,6 +98,95 @@
             ]
           }
         ]
+      },
+      {
+        "language": "en",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "en/overview"
+            ]
+          },
+          {
+            "group": "Image Series",
+            "icon": "image",
+            "pages": [
+              {
+                "group": "Gemini-3-Pro-Image-preview (Nano banana2)",
+                "icon": "image",
+                "pages": [
+                  "en/api-reference/images/gemini-3-pro/generation"
+                ]
+              },
+              {
+                "group": "Gemini-2.5-Flash-Image-preview (Nano banana)",
+                "icon": "image",
+                "pages": [
+                  "en/api-reference/images/nano-banana/generation"
+                ]
+              },
+              {
+                "group": "GPT-4o-image",
+                "icon": "image",
+                "pages": [
+                  "en/api-reference/images/gpt-4o/generation"
+                ]
+              },
+              {
+                "group": "Seedream-4.0",
+                "icon": "image",
+                "pages": [
+                  "en/api-reference/images/seedream-4/generation"
+                ]
+              },
+              {
+                "group": "Seedream-4.5",
+                "icon": "image",
+                "pages": [
+                  "en/api-reference/images/seedream-4.5/generation"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Video Series",
+            "icon": "video",
+            "pages": [
+              {
+                "group": "doubao-seedance-1-0-pro",
+                "icon": "video",
+                "pages": [
+                  "en/api-reference/videos/doubao/generation"
+                ]
+              },
+              {
+                "group": "Sora2",
+                "icon": "video",
+                "pages": [
+                  "en/api-reference/videos/sora2/generation",
+                  "en/api-reference/videos/sora2/create-character",
+                  "en/api-reference/videos/sora2/query-character",
+                  "en/api-reference/videos/sora2/remix"
+                ]
+              },
+              {
+                "group": "VEO3",
+                "icon": "video",
+                "pages": [
+                  "en/api-reference/videos/veo3/generation"
+                ]
+              },
+              {
+                "group": "MiniMax-Hailuo-02",
+                "icon": "video",
+                "pages": [
+                  "en/api-reference/videos/minimax-hailuo/generation"
+                ]
+              }
+            ]
+          }
+        ]
       }
     ]
   },

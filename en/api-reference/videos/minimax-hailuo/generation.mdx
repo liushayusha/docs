@@ -1,0 +1,588 @@
+---
+title: 'MiniMax-Hailuo-02 Video Generation'
+description: '• Asynchronous processing mode, returns task ID for subsequent queries<br/>• Supports text-to-video, image-to-video (first frame/last frame)<br/>• Supports 6-second and 10-second durations, multiple resolutions available<br/>• Supports prompt auto-optimization and watermark control'
+api: 'POST https://api.apimart.ai/v1/videos/generations'
+---
+## 认证
+
+<ParamField header="Authorization" type="string" required>
+  All endpoints require authentication with a Bearer Token
+
+  Obtain API Key:
+
+  Visit [API Key management page](https://apimart.ai/console/token) to get your API Key
+
+  Use by adding the following to your request header:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Request Parameters
+
+<ParamField body="model" type="string" required>
+  Video generation model name
+
+  Fixed value: `MiniMax-Hailuo-02`
+</ParamField>
+
+<ParamField body="prompt" type="string" required>
+  Video content description
+
+  It is recommended to describe scenes, actions, styles, etc. in detail to achieve better generation effects
+
+  Example: `"A cute cat running on the grass"`
+</ParamField>
+
+<ParamField body="duration" type="integer" default="5">
+  Video duration (seconds)
+
+  Optional values:
+
+  * `5` - 5 seconds video
+  * `10` - 10 seconds video
+
+  Default value: `5`
+
+  <Warning>
+    **1080p limitation**: When using 1080p resolution, only 5-second duration is supported
+  </Warning>
+</ParamField>
+
+<ParamField body="metadata" type="object">
+  Advanced configuration options for video generation
+
+  <Expandable title="metadata field description">
+    <ParamField body="metadata.resolution" type="string" default="768p">
+      Video resolution
+
+      Optional values:
+
+      * `512p` - Standard definition
+      * `768p` - High definition
+      * `1080p` - Full HD (only supports 6-second duration)
+
+      Default value: `768p`
+    </ParamField>
+
+    <ParamField body="metadata.prompt_optimizer" type="boolean" default="true">
+      Whether to automatically optimize the prompt
+
+      When enabled, the system will automatically optimize your prompt to achieve better generation effects
+
+      Default value: `true`
+    </ParamField>
+
+    <ParamField body="metadata.fast_pretreatment" type="boolean" default="false">
+      Whether to shorten prompt optimization time
+
+      When enabled, processing speed is increased but optimization effects may be slightly affected
+
+      Default value: `false`
+    </ParamField>
+
+    <ParamField body="metadata.watermark" type="boolean" default="false">
+      Whether to add watermark
+
+      Default value: `false`
+    </ParamField>
+
+    <ParamField body="metadata.first_frame_image" type="string">
+      Video starting frame image
+
+      Two formats are supported:
+
+      * **Public URL**: `https://example.com/start.jpg`
+      * **Base64 encoding**: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+
+      Used to specify the starting frame of the video
+    </ParamField>
+
+    <ParamField body="metadata.last_frame_image" type="string">
+      Video ending frame image
+
+      Two formats are supported:
+
+      * **Public URL**: `https://example.com/end.jpg`
+      * **Base64 encoding**: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+
+      Used to specify the ending frame of the video
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+## 参数限制
+
+| Limitation   | Description                                        |
+| --------- | -------------------------------------------------- |
+| Duration      | Only supports 5 or 10 seconds                      |
+| 1080p Resolution | Only supports 5 seconds duration                    |
+| Image Format  | Supports public URL or Base64 encoding (`data:image/jpeg;base64,...`) |
+
+## 分辨率与时长组合
+
+| Resolution | Supported Duration | Remarks     |
+| ----- | ------ | ------ |
+| 512p  | 5s, 10s | Fully supported   |
+| 768p  | 5s, 10s | Fully supported   |
+| 1080p | 5s     | 10s not supported |
+
+## Response
+
+<ResponseField name="code" type="integer">
+  Response status code, 200 when successful
+</ResponseField>
+
+<ResponseField name="data" type="array">
+  Returned data array
+
+  <Expandable title="Array Elements">
+    <ResponseField name="status" type="string">
+      Task status, "submitted" at initial submission
+    </ResponseField>
+
+    <ResponseField name="task_id" type="string">
+      Unique task identifier, used to query task status and results
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+  ```bash cURL
+  curl --request POST \
+    --url https://api.apimart.ai/v1/videos/generations \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "MiniMax-Hailuo-02",
+      "prompt": "A cute cat running on the grass",
+      "duration": 5,
+      "metadata": {
+        "resolution": "768p",
+        "prompt_optimizer": true,
+        "fast_pretreatment": false,
+        "watermark": false
+      }
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://api.apimart.ai/v1/videos/generations"
+
+  payload = {
+      "model": "MiniMax-Hailuo-02",
+      "prompt": "A cute cat running on the grass",
+      "duration": 5,
+      "metadata": {
+          "resolution": "768p",
+          "prompt_optimizer": True,
+          "fast_pretreatment": False,
+          "watermark": False
+      }
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://api.apimart.ai/v1/videos/generations";
+
+  const payload = {
+    model: "MiniMax-Hailuo-02",
+    prompt: "A cute cat running on the grass",
+    duration: 6,
+    metadata: {
+      resolution: "768p",
+      prompt_optimizer: true,
+      fast_pretreatment: false,
+      watermark: false
+    }
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://api.apimart.ai/v1/videos/generations"
+
+      payload := map[string]interface{}{
+          "model":    "MiniMax-Hailuo-02",
+          "prompt":   "A cute cat running on the grass",
+          "duration": 5,
+          "metadata": map[string]interface{}{
+              "resolution":        "768p",
+              "prompt_optimizer":  true,
+              "fast_pretreatment": false,
+              "watermark":         false,
+          },
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://api.apimart.ai/v1/videos/generations";
+
+          String payload = """
+          {
+            "model": "MiniMax-Hailuo-02",
+            "prompt": "A cute cat running on the grass",
+            "duration": 5,
+            "metadata": {
+              "resolution": "768p",
+              "prompt_optimizer": true,
+              "fast_pretreatment": false,
+              "watermark": false
+            }
+          }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://api.apimart.ai/v1/videos/generations";
+
+  $payload = [
+      "model" => "MiniMax-Hailuo-02",
+      "prompt" => "A cute cat running on the grass",
+      "duration" => 6,
+      "metadata" => [
+          "resolution" => "768p",
+          "prompt_optimizer" => true,
+          "fast_pretreatment" => false,
+          "watermark" => false
+      ]
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url = URI("https://api.apimart.ai/v1/videos/generations")
+
+  payload = {
+    model: "MiniMax-Hailuo-02",
+    prompt: "A cute cat running on the grass",
+    duration: 6,
+    metadata: {
+      resolution: "768p",
+      prompt_optimizer: true,
+      fast_pretreatment: false,
+      watermark: false
+    }
+  }
+
+  http = Net::HTTP.new(url.host, url.port)
+  http.use_ssl = true
+
+  request = Net::HTTP::Post.new(url)
+  request["Authorization"] = "Bearer <token>"
+  request["Content-Type"] = "application/json"
+  request.body = payload.to_json
+
+  response = http.request(request)
+  puts response.body
+  ```
+
+  ```swift Swift
+  import Foundation
+
+  let url = URL(string: "https://api.apimart.ai/v1/videos/generations")!
+
+  let payload: [String: Any] = [
+      "model": "MiniMax-Hailuo-02",
+      "prompt": "A cute cat running on the grass",
+      "duration": 5,
+      "metadata": [
+          "resolution": "768p",
+          "prompt_optimizer": true,
+          "fast_pretreatment": false,
+          "watermark": false
+      ]
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      if let error = error {
+          print("Error: \(error)")
+          return
+      }
+
+      if let data = data, let responseString = String(data: data, encoding: .utf8) {
+          print(responseString)
+      }
+  }
+
+  task.resume()
+  ```
+
+  ```csharp C#
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url = "https://api.apimart.ai/v1/videos/generations";
+
+          var payload = @"{
+              ""model"": ""MiniMax-Hailuo-02"",
+              ""prompt"": ""A cute cat running on the grass"",
+              ""duration"": 6,
+              ""metadata"": {
+                  ""resolution"": ""768p"",
+                  ""prompt_optimizer"": true,
+                  ""fast_pretreatment"": false,
+                  ""watermark"": false
+              }
+          }";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+
+          var content = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          var result = await response.Content.ReadAsStringAsync();
+
+          Console.WriteLine(result);
+      }
+  }
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+  {
+    "code": 200,
+    "data": [
+      {
+        "status": "submitted",
+        "task_id": "task_01K8SGYNNNVBQTXNR4MM964S7K"
+      }
+    ]
+  }
+  ```
+
+  ```json 400
+  {
+    "error": {
+      "code": 400,
+      "message": "Invalid request parameters",
+      "type": "invalid_request_error"
+    }
+  }
+  ```
+
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "Authentication failed, please check your API key",
+      "type": "authentication_error"
+    }
+  }
+  ```
+
+  ```json 402
+  {
+    "error": {
+      "code": 402,
+      "message": "Insufficient account balance, please recharge and try again",
+      "type": "payment_required"
+    }
+  }
+  ```
+
+  ```json 429
+  {
+    "error": {
+      "code": 429,
+      "message": "Too many requests, please try again later",
+      "type": "rate_limit_error"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "Internal server error, please try again later",
+      "type": "server_error"
+    }
+  }
+  ```
+</ResponseExample>
+
+## Use Cases
+
+### Scenario 1: Quickly Generate Text Videos
+
+```json
+{
+  "model": "MiniMax-Hailuo-02",
+  "prompt": "A cute cat running on the grass under bright sunshine"
+}
+```
+
+### Scenario 2: Generate High-Quality 1080p Videos
+
+```json
+{
+  "model": "MiniMax-Hailuo-02",
+  "prompt": "City night scene, neon lights flashing, traffic flowing",
+  "duration": 5,
+  "metadata": {
+    "resolution": "1080p",
+    "prompt_optimizer": true,
+    "watermark": false
+  }
+}
+```
+
+### Scenario 3: Generate Video Based on First Frame Image
+
+```json
+{
+  "model": "MiniMax-Hailuo-02",
+  "prompt": "A person slowly turns around, smiling",
+  "duration": 5,
+  "metadata": {
+    "resolution": "768p",
+    "first_frame_image": "https://example.com/portrait.jpg"
+  }
+}
+```
+
+### Scenario 4: Transition Video Controlled by First and Last Frames
+
+```json
+{
+  "model": "MiniMax-Hailuo-02",
+  "prompt": "The scene gradually transitions from day to night, sky gradient",
+  "duration": 10,
+  "metadata": {
+    "resolution": "768p",
+    "first_frame_image": "https://example.com/day.jpg",
+    "last_frame_image": "https://example.com/night.jpg",
+    "prompt_optimizer": true
+  }
+}
+```
+
+### Scenario 5: Fast Pretreatment Mode
+
+```json
+{
+  "model": "MiniMax-Hailuo-02",
+  "prompt": "Waves hitting the beach at sunset",
+  "duration": 5,
+  "metadata": {
+    "resolution": "768p",
+    "prompt_optimizer": true,
+    "fast_pretreatment": true
+  }
+}
+```
+
+<Note>
+  **Query Task Results**
+
+  Video generation is an asynchronous task. After submission, a `task_id` will be returned. Use the [Get Task Status](/cn/api-reference/tasks/status) API to check the progress and results.
+</Note>
