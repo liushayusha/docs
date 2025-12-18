@@ -1,0 +1,633 @@
+---
+title: 'VEO3 ビデオ生成'
+description: |
+    - 非同期処理モード、後続のクエリのためにタスクIDを返す
+    - テキストからビデオ、画像からビデオなど複数の生成モードに対応
+    - 生成されたビデオのリンクは有効期限が24時間ですので、早めに保存してください
+api: 'POST https://api.apimart.ai/v1/videos/generations'
+---
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  すべてのエンドポイントはBearer Token認証が必要です
+
+  APIキーの取得：
+
+  [APIキー管理ページ](https://apimart.ai/console/token) にアクセスしてAPIキーを取得してください
+
+  使用時はリクエストヘッダーに以下を追加します：
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" default="veo3.1-fast" required>
+  動画生成モデル名
+
+  使用可能なモデル：
+
+  * `veo3.1-fast` - 高速生成モデル、素早いプレビューと反復に適しています
+  * `veo3.1-quality` - 高品質生成モデル、最終制作に適しています
+
+  Example: `"veo3.1-fast"`
+</ParamField>
+
+<ParamField body="prompt" type="string" required>
+  動画生成のテキスト説明
+</ParamField>
+
+<ParamField body="duration" type="integer">
+  動画の長さ（秒）
+
+  固定値：`8`（VEO3 は8秒のみサポート）
+</ParamField>
+
+<ParamField body="aspect_ratio" type="string">
+  動画の解像度
+
+  サポートされるフォーマット：
+
+  * `16:9` (横向き)
+  * `9:16` (縦向き)
+</ParamField>
+
+<ParamField body="image_urls" type="array">
+  画像から動画を生成するための参照画像URLの配列
+
+  **💡 クイック入力（Try itエリア）：**
+
+  1. "+ Add an item"をクリックして画像URLを追加
+  2. 画像の完全なURLかbase64データを入力
+
+  <Expandable title="詳細なフィールド説明">
+    <ParamField body="url" type="string" required>
+      画像URLアドレス
+
+      2つの形式をサポート：
+
+      **1. 完全な画像URLアドレス**
+
+      * 公開アクセス可能な画像URL（http\:// または https\://）
+      * 例：`https://example.com/image.jpg`
+
+      **2. Base64エンコード形式**
+
+      * **完全なData URI形式である必要があります**
+      * フォーマット：`data:image/{形式};base64,{base64データ}`
+      * 対応画像形式：jpeg、png、webpなど
+      * 例：`data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+      * ⚠️ 注意：`data:image/jpeg;base64,`のプレフィックスが必須です
+
+      **制限：**
+
+      * 最大ファイルサイズ：10MB
+      * サポート形式：.jpeg、.jpg、.png、.webp
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+## Response
+
+<ResponseField name="code" type="integer">
+  レスポンスステータスコード
+</ResponseField>
+
+<ResponseField name="data" type="array">
+  返却データの配列
+
+  <Expandable title="Properties">
+    <ResponseField name="status" type="string">
+      タスクの状態
+
+      * `submitted` - 提出済み
+    </ResponseField>
+
+    <ResponseField name="task_id" type="string">
+      タスクの一意識別子
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+  ```bash cURL
+  curl --request POST \
+    --url https://api.apimart.ai/v1/videos/generations \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "veo3.1-fast",
+      "prompt": "イルカが青い海を跳ねる",
+      "duration": 8,
+      "aspect_ratio": "16:9",
+      "image_urls": ["https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png"]
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://api.apimart.ai/v1/videos/generations"
+
+  payload = {
+      "model": "veo3.1-fast",
+      "prompt": "イルカが青い海を跳ねる",
+      "duration": 8,
+      "aspect_ratio": "16:9",
+      "image_urls": ["https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png"]
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://api.apimart.ai/v1/videos/generations";
+
+  const payload = {
+    model: "veo3.1",
+    prompt: "イルカが青い海を跳ねる",
+    duration: 8,
+    aspect_ratio: "16:9",
+    image_urls: ["https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png"]
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://api.apimart.ai/v1/videos/generations"
+
+      payload := map[string]interface{}{
+          "model":      "veo3.1",
+          "prompt":     "イルカが青い海を跳ねる",
+          "duration":   8,
+          "aspect_ratio": "16:9",
+          "image_urls":  ["https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png"],
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://api.apimart.ai/v1/videos/generations";
+
+          String payload = """
+          {
+            "model": "veo3.1-fast",
+            "prompt": "イルカが青い海を跳ねる",
+            "duration": 8,
+            "aspect_ratio": "16:9",
+            "image_urls": ["https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png"]
+          }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://api.apimart.ai/v1/videos/generations";
+
+  $payload = [
+      "model" => "veo3.1",
+      "prompt" => "イルカが青い海を跳ねる",
+      "duration" => 8,
+      "aspect_ratio" => "16:9",
+      "image_urls" => ["https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png"]
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url = URI("https://api.apimart.ai/v1/videos/generations")
+
+  payload = {
+    model: "veo3.1",
+    prompt: "イルカが青い海を跳ねる",
+    duration: 8,
+    aspect_ratio: "16:9",
+    image_urls: ["https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png"]
+  }
+
+  http = Net::HTTP.new(url.host, url.port)
+  http.use_ssl = true
+
+  request = Net::HTTP::Post.new(url)
+  request["Authorization"] = "Bearer <token>"
+  request["Content-Type"] = "application/json"
+  request.body = payload.to_json
+
+  response = http.request(request)
+  puts response.body
+  ```
+
+  ```swift Swift
+  import Foundation
+
+  let url = URL(string: "https://api.apimart.ai/v1/videos/generations")!
+
+  let payload: [String: Any] = [
+      "model": "veo3.1-fast",
+      "prompt": "イルカが青い海を跳ねる",
+      "duration": 8,
+      "aspect_ratio": "16:9",
+      "image_urls": ["https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png"]
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      if let error = error {
+          print("Error: \(error)")
+          return
+      }
+      
+      if let data = data, let responseString = String(data: data, encoding: .utf8) {
+          print(responseString)
+      }
+  }
+
+  task.resume()
+  ```
+
+  ```csharp C#
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url = "https://api.apimart.ai/v1/videos/generations";
+
+          var payload = @"{
+              ""model"": ""veo3.1"",
+              ""prompt"": ""イルカが青い海を跳ねる"",
+              ""duration"": 8,
+              ""aspect_ratio"": ""16:9"",
+              ""image_url"": ""https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png""
+          }";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+
+          var content = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          var result = await response.Content.ReadAsStringAsync();
+
+          Console.WriteLine(result);
+      }
+  }
+  ```
+
+  ```c C
+  #include <stdio.h>
+  #include <curl/curl.h>
+
+  int main(void) {
+      CURL *curl;
+      CURLcode res;
+
+      curl_global_init(CURL_GLOBAL_DEFAULT);
+      curl = curl_easy_init();
+
+      if(curl) {
+          const char *url = "https://api.apimart.ai/v1/videos/generations";
+          const char *payload = "{"
+              "\"model\":\"veo3.1-fast\","
+              "\"prompt\":\"イルカが青い海を跳ねる\","
+              "\"duration\":8,"
+              "\"aspect_ratio\":\"16:9\","
+              "\"image_urls\":[\"https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png\"]"
+          "}";
+
+          struct curl_slist *headers = NULL;
+          headers = curl_slist_append(headers, "Authorization: Bearer <token>");
+          headers = curl_slist_append(headers, "Content-Type: application/json");
+
+          curl_easy_setopt(curl, CURLOPT_URL, url);
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
+          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+          res = curl_easy_perform(curl);
+
+          if(res != CURLE_OK) {
+              fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                      curl_easy_strerror(res));
+          }
+
+          curl_slist_free_all(headers);
+          curl_easy_cleanup(curl);
+      }
+
+      curl_global_cleanup();
+      return 0;
+  }
+  ```
+
+  ```objectivec Objective-C
+  #import <Foundation/Foundation.h>
+
+  int main(int argc, const char * argv[]) {
+      @autoreleasepool {
+          NSURL *url = [NSURL URLWithString:@"https://api.apimart.ai/v1/videos/generations"];
+          
+          NSDictionary *payload = @{
+              @"model": @"veo3.1",
+              @"prompt": @"イルカが青い海を跳ねる",
+              @"duration": @8,
+              @"aspect_ratio": @"16:9",
+              @"image_urls": @[@"https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png"]
+          };
+          
+          NSError *error;
+          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
+                                                            options:0
+                                                              error:&error];
+          
+          NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+          [request setHTTPMethod:@"POST"];
+          [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
+          [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+          [request setHTTPBody:jsonData];
+          
+          NSURLSessionDataTask *task = [[NSURLSession sharedSession] 
+              dataTaskWithRequest:request
+              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+                  if (error) {
+                      NSLog(@"Error: %@", error);
+                      return;
+                  }
+                  NSString *result = [[NSString alloc] initWithData:data 
+                                                          encoding:NSUTF8StringEncoding];
+                  NSLog(@"%@", result);
+              }];
+          
+          [task resume];
+          [[NSRunLoop mainRunLoop] run];
+      }
+      return 0;
+  }
+  ```
+
+  ```ocaml OCaml
+  (* Requires cohttp and yojson libraries *)
+  open Lwt
+  open Cohttp
+  open Cohttp_lwt_unix
+
+  let url = "https://api.apimart.ai/v1/videos/generations"
+
+  let payload = {|{
+    "model": "veo3.1",
+    "prompt": "イルカが青い海を跳ねる",
+    "duration": 8,
+    "aspect_ratio": "16:9",
+              "image_urls": ["https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png"]
+  }|}
+
+  let () =
+    let headers = Header.init ()
+      |> fun h -> Header.add h "Authorization" "Bearer <token>"
+      |> fun h -> Header.add h "Content-Type" "application/json"
+    in
+    let body = Cohttp_lwt.Body.of_string payload in
+    
+    let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
+      body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
+      print_endline body_str
+    in
+    Lwt_main.run response
+  ```
+
+  ```dart Dart
+  import 'dart:convert';
+  import 'package:http/http.dart' as http;
+
+  void main() async {
+    final url = Uri.parse('https://api.apimart.ai/v1/videos/generations');
+    
+    final payload = {
+      'model': 'veo3.1',
+      'prompt': 'イルカが青い海を跳ねる',
+      'duration': 8,
+      'aspect_ratio': '16:9',
+      'image_urls': ['https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png']
+    };
+    
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer <token>',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(payload),
+    );
+    
+    print(response.body);
+  }
+  ```
+
+  ```r R
+  library(httr)
+  library(jsonlite)
+
+  url <- "https://api.apimart.ai/v1/videos/generations"
+
+  payload <- list(
+    model = "veo3.1",
+    prompt = "イルカが青い海を跳ねる",
+    duration = 8,
+    aspect_ratio = "16:9",
+    image_urls = c("https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png")
+  )
+
+  response <- POST(
+    url,
+    add_headers(
+      Authorization = "Bearer <token>",
+      `Content-Type` = "application/json"
+    ),
+    body = toJSON(payload, auto_unbox = TRUE),
+    encode = "raw"
+  )
+
+  cat(content(response, "text"))
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+  {
+    "code": 200,
+    "data": [
+      {
+        "status": "submitted",
+        "task_id": "task_01K8SGYNNNVBQTXNR4MM964S7K"
+      }
+    ]
+  }
+  ```
+
+  ```json 400
+  {
+    "error": {
+      "code": 400,
+      "message": "リクエストパラメータが無効です",
+      "type": "invalid_request_error"
+    }
+  }
+  ```
+
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "認証に失敗しました。APIキーを確認してください",
+      "type": "authentication_error"
+    }
+  }
+  ```
+
+  ```json 402
+  {
+    "error": {
+      "code": 402,
+      "message": "アカウント残高が不足しています。チャージ後に再試行してください",
+      "type": "payment_required"
+    }
+  }
+  ```
+
+  ```json 403
+  {
+    "error": {
+      "code": 403,
+      "message": "アクセスが禁止されています。このリソースにアクセスする権限がありません",
+      "type": "permission_error"
+    }
+  }
+  ```
+
+  ```json 429
+  {
+    "error": {
+      "code": 429,
+      "message": "リクエストが多すぎます。しばらくしてから再試行してください",
+      "type": "rate_limit_error"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "サーバー内部エラーです。後でもう一度お試しください",
+      "type": "server_error"
+    }
+  }
+  ```
+
+  ```json 502
+  {
+    "error": {
+      "code": 502,
+      "message": "ゲートウェイエラーです。サーバーは一時的に利用できません",
+      "type": "bad_gateway"
+    }
+  }
+  ```
+</ResponseExample>

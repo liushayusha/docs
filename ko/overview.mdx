@@ -1,0 +1,102 @@
+---
+title: 'APIMart — OpenAI 호환 API 게이트웨이(GPT-5, Claude, Gemini)'
+description: 'GPT-5, Claude 및 Gemini에 적합한 OpenAI 호환 API. 다중 공급자 라우팅, 투명한 가격, 낮은 지연 시간. 엔터프라이즈급 SLA, SDK 지원, 사용량 기준 과금.'
+---
+GPT-5, Claude 및 Gemini를 지원하는 OpenAI 호환의 통합 엔드포인트입니다. 기본 URL을 `https://api.apimart.ai/v1`로 변경하기만 하면 몇 분 내에 OpenAI에서 마이그레이션할 수 있으며 코드를 다시 작성하지 않고 기존 SDK를 계속 사용할 수 있습니다. 다중 공급업체 라우팅으로 낮은 지연 시간과 높은 가용성을 보장합니다. 투명한 가격 책정, 기업 수준의 SLA 및 글로벌 CDN 가속을 제공합니다.
+
+## Quick Start
+
+<Card title="바로 시작하기" icon="rocket" horizontal href="/en/api-reference/images/gpt-4o/generation">
+  통합 API 엔드포인트를 통해 이미지와 비디오 생성을 시작하세요
+</Card>
+
+## API Endpoints
+
+APIMart는 다양한 AI 모델과 공급자를 지원하는 표준화된 이미지 및 비디오 생성 엔드포인트를 제공합니다.
+
+### Image Creation API
+
+GPT-4o Image, Gemini 2.5 Flash Image-preview 모델을 사용하여 이미지를 생성합니다. OpenAI 스타일 API로 매끄러운 통합을 구현합니다.
+
+<Card title="Image Creation API" icon="image" href="/api-reference/images/gpt-4o/generation">
+  텍스트로 이미지 생성
+</Card>
+
+### Video Creation API
+
+OpenAI Sora2, Google VEO3 모델을 사용하여 비디오를 생성합니다. 비동기 작업 관리를 지원하며 상태 추적 및 webhook 지원 기능이 포함되어 있습니다.
+
+<Card title="Video Creation API" icon="video" href="/api-reference/videos/veo3/generation">
+  webhook이 포함된 비동기 작업 관리
+</Card>
+
+## Platform Benefits
+
+### 투명한 가격 정책
+
+사용량 기반 요금제로 구독이 필요 없습니다. 모든 모델은 명확한 토큰당 가격을 제공하며, 공식 공급업체 가격보다 더 경제적이면서도 동일한 품질과 낮은 지연 시간을 유지합니다.
+
+* 모든 모델에 명확한 토큰당 가격 제공
+* 기업 고객을 위한 대량 할인
+* 숨겨진 비용 없음
+* 실제 사용한 만큼만 요금 부과
+
+### 다중 공급업체 라우팅 및 기업급 SLA
+
+내장된 다중 LLM 공급업체의 지능형 라우팅으로 높은 가용성과 낮은 지연 시간을 보장합니다. 특정 공급업체에 장애가 발생하면 자동으로 대체 공급업체로 요청이 전환되어 서비스 중단이 없습니다.
+
+### 99.9% 정상 가동 시간 SLA
+
+기업급 신뢰성 및 자동 장애 조치 기능을 제공합니다. 다중 공급업체 라우팅으로 요청이 항상 최저 지연 시간으로 처리됩니다.
+
+### 전 세계 CDN 가속
+
+전 세계 엣지 노드로 최저 지연 시간을 제공합니다. 최적화된 라우팅으로 응답 시간을 단축하여 전 세계 사용자 경험을 향상시킵니다.
+
+### 속도 제한 관리
+
+공급업체 간 속도 제한을 자동으로 처리합니다. 지능형 요청 분배로 스로틀링을 방지하여 원활한 운영을 보장합니다.
+
+### 실시간 상태
+
+엔드포인트의 상태와 성능을 모니터링합니다. 이미지 및 비디오 생성 비동기 작업 진행 상황을 추적하고 webhook으로 알림을 제공합니다. [상태 보기 →](/en/api-reference/tasks/status)
+
+## Supported Models
+
+통합 API 엔드포인트를 통해 선도적인 이미지 및 비디오 생성 AI 모델에 액세스할 수 있습니다.
+
+### Image Creation Models
+
+텍스트 프롬프트 기반 이미지 생성:
+
+* **GPT-4o Image**：OpenAI 이미지 생성 모델
+* **Gemini 2.5 Flash Image-preview**：Google 고효율 이미지 모델
+
+### Video Creation Models
+
+비동기 작업 추적 및 웹훅 콜백을 지원하는 비디오 생성:
+
+* **OpenAI Sora2**：OpenAI 비디오 생성 모델
+* **Google VEO3**：Google 비디오 생성 모델
+* **doubao-seedance-1-0-pro**：빠르고 고품질 비디오 생성
+* **MiniMax-Hailuo-02**：이미지에서 비디오로 변환을 지원하는 고효율 비디오 생성
+
+## FAQ
+
+<AccordionGroup>
+  <Accordion title="이미지 및 비디오 생성은 어떻게 작동합니까?">
+    이미지 생성은 동기식으로 즉시 결과를 반환합니다. 비디오 생성은 비동기로, 요청을 제출하면 task_id를 받고 상태 엔드포인트를 폴링하여 진행 상황을 확인하고 최종 비디오 URL을 획득합니다.
+  </Accordion>
+
+  <Accordion title="SLA에는 무엇이 포함되어 있습니까?">
+    당사의 엔터프라이즈 SLA에는 99.9% 가동 시간 보장, 글로벌 CDN 가속, 다중 공급업체 라우팅 및 자동 장애 조치, 실시간 상태 모니터링이 포함됩니다. 비동기 작업은 속도 제한 관리 및 웹훅을 지원합니다.
+  </Accordion>
+
+  <Accordion title="가격은 어떻게 계산됩니까?">
+    APIMart는 이미지 및 비디오 생성에 대해 투명한 요청별 과금 방식을 제공합니다. 구독이 필요 없으며, 엔터프라이즈 고객은 대량 할인 혜택을 받으며 숨겨진 비용이 없습니다. 성공적으로 생성된 콘텐츠에만 비용이 부과됩니다.
+  </Accordion>
+
+  <Accordion title="지연 시간과 성능은 어떻습니까?">
+    글로벌 CDN 가속과 스마트 다중 공급업체 라우팅으로 낮은 지연 시간을 보장합니다. 이미지 생성은 일반적으로 즉시 완료되며, 비디오 생성 시간은 모델에 따라 40~300초가 소요됩니다. 실시간 상태 모니터링을 통해 비동기 작업 진행 상황을 추적할 수 있습니다.
+  </Accordion>
+</AccordionGroup>

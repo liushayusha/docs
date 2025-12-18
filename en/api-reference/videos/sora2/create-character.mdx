@@ -1,6 +1,9 @@
 ---
 title: 'Sora2 Create Character (Character Management)'
-description: '• Extract characters from videos for subsequent video generation<br/>• Asynchronous processing mode, returns task ID for subsequent query<br/>• Video must contain sound and characters '
+description: |
+    - Extract characters from videos for subsequent video generation
+    - Asynchronous processing mode, returns task ID for later query
+    - Videos must contain sound and characters
 api: 'POST https://api.apimart.ai/v1/videos/generations'
 ---
 ## Authorizations
@@ -8,11 +11,11 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 <ParamField header="Authorization" type="string" required>
   All endpoints require authentication using a Bearer Token
 
-  Obtain API Key:
+  Get the API Key:
 
-  Visit the [API Key Management Page](https://apimart.ai/console/token) to get your API Key
+  Visit the [API Key management page](https://apimart.ai/console/token) to get your API Key
 
-  Add the following in the request header:
+  Add the following in the request headers:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -33,29 +36,29 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 </ParamField>
 
 <ParamField body="timestamps" type="string" required>
-  Timestamp range for character appearance
+  Timestamp range for the character appearance
 
-  Unit in seconds, format `"startSecond,endSecond"`
+  Unit is seconds, format is `"start_second,end_second"`
 
-  **⚠️ Limitation:**
+  **⚠️ Limitations:**
 
-  * Minimum time range difference 1 second
-  * Maximum time range difference 3 seconds
+  * Minimum time range difference is 1 second
+  * Maximum time range difference is 3 seconds
 
-  Example: `"1,3"` means the character appears from second 1 to second 3 in the video
+  Example: `"1,3"` means the character appears in the video from second 1 to second 3
 </ParamField>
 
 <ParamField body="url" type="string">
-  URL of the video containing the character to create
+  URL of the video containing the character to be created
 
-  **⚠️ Requirement:**
+  **⚠️ Requirements:**
 
-  * The video must include sound
-  * The video must include the character
+  * Video must contain audio
+  * Video must contain characters
 
   **💡 Note:**
 
-  * Exactly one of the parameters `url` or `from_task` must be set
+  * Either `url` or `from_task` must be set, one of them is required
 
   Example: `"https://upload.apimart.ai/f/video/9998234807907072-ad4c2656-94a4-44d4-9eaa-5be2855a7798-video_task_01KBYT63R1TGZNT4EHAD495ZJ3.mp4"`
 </ParamField>
@@ -67,8 +70,8 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
   **💡 Note:**
 
-  * Exactly one of the parameters `url` or `from_task` must be set
-  * This parameter allows extraction of characters directly from a previously generated video task
+  * Either `url` or `from_task` must be set, one of them is required
+  * Using this parameter allows extracting characters directly from a previously generated video task
 
   Example: `"task_01KBYT59JDHB4A3KDDR9N9JVWP"`
 </ParamField>
@@ -76,7 +79,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 ## Response
 
 <ResponseField name="code" type="integer">
-  Response status code, 200 when successful
+  Response status code, 200 on success
 </ResponseField>
 
 <ResponseField name="data" type="array">
@@ -84,13 +87,13 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
   <Expandable title="Array Elements">
     <ResponseField name="status" type="string">
-      Task status, initially submitted as `submitted`
+      Task status, initially `submitted` upon submission
     </ResponseField>
 
     <ResponseField name="task_id" type="string">
-      Unique identifier of the task, used to query task status and results
+      Unique identifier for the task, used to query task status and results
 
-      After creation is complete, you can use this character task ID to reference this character during video generation via the `character_url` parameter
+      Once created, this character task ID can be referenced via the `character_url` parameter when generating videos
     </ResponseField>
   </Expandable>
 </ResponseField>
@@ -541,7 +544,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   {
     "error": {
       "code": 402,
-      "message": "Insufficient account balance, please top up and try again",
+      "message": "Insufficient account balance, please recharge and try again",
       "type": "payment_required"
     }
   }

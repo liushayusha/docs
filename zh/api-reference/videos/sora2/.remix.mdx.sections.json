@@ -1,7 +1,27 @@
-{
-  "__frontmatter__": "3decfe80",
-  "section-0-路径参数": "6146bdd0",
-  "section-1-authorizations": "9514dfac",
-  "section-2-body": "2220d511",
-  "section-3-response": "8bff69cb"
-}
+[
+  {
+    "id": "__frontmatter__",
+    "hash": "904b4d69",
+    "index": 0
+  },
+  {
+    "id": "section-0-路径参数",
+    "hash": "6146bdd0",
+    "index": 1
+  },
+  {
+    "id": "section-1-authorizations",
+    "hash": "9514dfac",
+    "index": 2
+  },
+  {
+    "id": "section-2-body",
+    "hash": "2220d511",
+    "index": 3
+  },
+  {
+    "id": "section-3-response",
+    "hash": "8bff69cb",
+    "index": 4
+  }
+]

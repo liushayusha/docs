@@ -1,0 +1,718 @@
+---
+title: 'Sora2 ビデオ生成'
+description: |
+    - 非同期処理モードで、後続のクエリに使用するタスクIDを返します
+    - テキストからビデオ、画像からビデオなど多様な生成モードをサポートします
+    - 生成されたビデオのリンクは24時間有効です。できるだけ早く保存してください
+api: 'POST https://api.apimart.ai/v1/videos/generations'
+---
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  すべてのエンドポイントはBearer Tokenによる認証が必要です
+
+  APIキーの取得方法：
+
+  [APIキー管理ページ](https://apimart.ai/console/token)にアクセスしてAPIキーを取得してください
+
+  使用時はリクエストヘッダーに以下を追加します：
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" default="sora-2" required>
+  動画生成モデル名
+
+  対応モデル：
+
+  * `sora-2` - 標準版
+  * `sora-2-pro` - プロ版、より長い動画に対応
+
+  例：`"sora-2"` または `"sora-2-pro"`
+</ParamField>
+
+<ParamField body="prompt" type="string" required>
+  動画生成のテキスト説明
+
+  **💡 @キャラクター参照機能：**
+
+  prompt内で `@username` 形式を使い、作成済みのキャラクターを呼び出し、生成される動画にそのキャラクターを登場させることができます。
+
+  * キャラクターの `username` は[キャラクター照会API](/en/api-reference/videos/sora2/query-character)で取得可能
+  * 複数キャラクターの同時参照に対応
+
+  例：`"猫と犬が一緒に車を運転する @duksvfkf.cruisingki @zdqwahgj.baronbarki"`
+</ParamField>
+
+<ParamField body="duration" type="integer">
+  動画の長さ（秒）
+
+  * `sora-2`：10秒または15秒対応
+  * `sora-2-pro`：15秒（HD）または25秒対応
+
+  例：`10`
+</ParamField>
+
+<ParamField body="aspect_ratio" type="string">
+  動画の解像度
+
+  対応フォーマット：
+
+  * `16:9`（横向き）
+  * `9:16`（縦向き）
+</ParamField>
+
+<ParamField body="image_urls" type="array">
+  画像から動画生成するための参照画像URL配列
+
+  **💡 クイック入力（Try itエリア）：**
+
+  1. "+ Add an item" をクリックして画像URLを追加
+  2. 画像の完全なURLまたはbase64データを入力
+
+  <Expandable title="詳細なフィールド説明">
+    <ParamField body="url" type="string" required>
+      画像URLアドレス
+
+      2つの形式をサポート：
+
+      **1. 完全な画像のURLアドレス**
+
+      * 公開アクセス可能な画像URL（http\:// または https\://）
+      * 例：`https://example.com/image.jpg`
+
+      **2. Base64エンコード形式**
+
+      * **完全なData URI形式である必要があります**
+      * 形式：`data:image/{フォーマット};base64,{base64データ}`
+      * 対応画像フォーマット：jpeg、png、webpなど
+      * 例：`data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+      * ⚠️ 注意：`data:image/jpeg;base64,`のプレフィックスが必須
+
+      **制限：**
+
+      * 最大ファイルサイズ：10MB
+      * 対応フォーマット：.jpeg、.jpg、.png、.webp
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="watermark" type="boolean" default="false">
+  生成する動画にウォーターマークを追加するか
+
+  * `false`：ウォーターマークなし
+  * `true`：Sora公式ウォーターマークを動画に追加
+
+  デフォルト値：`false`
+</ParamField>
+
+<ParamField body="thumbnail" type="boolean">
+  動画のサムネイルを生成するか
+
+  * `true`：動画のサムネイルを生成し、プレビューや表示に便利
+
+  サムネイル生成が不要な場合は、このパラメータを省略可能
+</ParamField>
+
+<ParamField body="private" type="boolean" default="false">
+  プライバシーモードを有効にするか
+
+  * `true`：動画は公開されず、かつremix（二次編集）不可
+  * `false`：動画を公開し、remix操作も可能
+
+  デフォルト値：`false`
+</ParamField>
+
+<ParamField body="style" type="string">
+  動画のスタイル
+
+  対応値：
+
+  * `thanksgiving` - 感謝祭スタイル
+  * `comic` - 漫画スタイル
+  * `news` - ニューススタイル
+  * `selfie` - セルフィースタイル
+  * `nostalgic` - ノスタルジックスタイル
+  * `anime` - アニメスタイル
+
+  例：`"anime"`
+</ParamField>
+
+<ParamField body="storyboard" type="boolean">
+  ストーリーボードを使い、より細かい生成制御を行うか
+
+  * `true`：ストーリーボード機能を有効化
+  * `false`：ストーリーボードを使用しない
+
+  例：`true`
+</ParamField>
+
+<ParamField body="character_url" type="string">
+  参照動画中のキャラクターのURL
+
+  生成する動画に参照動画のキャラクターを再利用
+
+  例：`"https://filesystem.site/cdn/20251030/javYrU4etHVFDqg8by7mViTWHlMOZy.mp4"`
+
+  **⚠️ 注意：** このパラメータ使用時、生成動画の長さは1秒短くなります
+</ParamField>
+
+<ParamField body="character_timestamps" type="string">
+  キャラクターの出現タイムスタンプ
+
+  参照動画内のキャラクター出現時間範囲を指定、2秒の時間帯のみ対応
+
+  形式：`"開始秒,終了秒"`
+
+  例：`"1,3"` は参照動画の1秒から3秒のキャラクターを示します
+
+  **⚠️ 注意：** このパラメータ使用時、生成動画の長さは1秒短くなります
+</ParamField>
+
+## Response
+
+<ResponseField name="code" type="integer">
+  レスポンスステータスコード。成功した場合は200
+</ResponseField>
+
+<ResponseField name="data" type="array">
+  戻りデータの配列
+
+  <Expandable title="配列の要素">
+    <ResponseField name="status" type="string">
+      タスクのステータス。初回の送信時は `submitted`
+    </ResponseField>
+
+    <ResponseField name="task_id" type="string">
+      タスクの一意識別子。タスクのステータスと結果を取得するために使用
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+  ```bash cURL
+  curl --request POST \
+    --url https://api.apimart.ai/v1/videos/generations \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "sora-2",
+      "prompt": "滝が流れ落ちて虹を形成する",
+      "duration": 10,
+      "aspect_ratio": "16:9",
+      "private": false,
+      "image_urls": ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://api.apimart.ai/v1/videos/generations"
+
+  payload = {
+      "model": "sora-2",
+      "prompt": "滝が流れ落ちて虹を形成する",
+      "duration": 10,
+      "aspect_ratio": "16:9",
+      "private": False,
+      "image_urls": ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://api.apimart.ai/v1/videos/generations";
+
+  const payload = {
+    model: "sora-2",
+    prompt: "滝が流れ落ちて虹を形成する",
+    duration: 15,
+    aspect_ratio: "16:9",
+    private: false,
+    image_urls: ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://api.apimart.ai/v1/videos/generations"
+
+      payload := map[string]interface{}{
+          "model":      "sora-2",
+          "prompt":     "滝が流れ落ちて虹を形成する",
+          "duration":   15,
+          "aspect_ratio": "16:9",
+          "image_urls":  ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"],
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://api.apimart.ai/v1/videos/generations";
+
+          String payload = """
+          {
+            "model": "sora-2",
+            "prompt": "滝が流れ落ちて虹を形成する",
+            "duration": 10,
+            "aspect_ratio": "16:9",
+            "image_urls": ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
+          }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://api.apimart.ai/v1/videos/generations";
+
+  $payload = [
+      "model" => "sora-2",
+      "prompt" => "滝が流れ落ちて虹を形成する",
+      "duration" => 15,
+      "aspect_ratio" => "16:9",
+      "image_urls" => ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url = URI("https://api.apimart.ai/v1/videos/generations")
+
+  payload = {
+    model: "sora-2",
+    prompt: "滝が流れ落ちて虹を形成する",
+    duration: 15,
+    aspect_ratio: "16:9",
+    image_urls: ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
+  }
+
+  http = Net::HTTP.new(url.host, url.port)
+  http.use_ssl = true
+
+  request = Net::HTTP::Post.new(url)
+  request["Authorization"] = "Bearer <token>"
+  request["Content-Type"] = "application/json"
+  request.body = payload.to_json
+
+  response = http.request(request)
+  puts response.body
+  ```
+
+  ```swift Swift
+  import Foundation
+
+  let url = URL(string: "https://api.apimart.ai/v1/videos/generations")!
+
+  let payload: [String: Any] = [
+      "model": "sora-2",
+      "prompt": "滝が流れ落ちて虹を形成する",
+      "duration": 10,
+      "aspect_ratio": "16:9",
+      "image_urls": ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      if let error = error {
+          print("Error: \(error)")
+          return
+      }
+      
+      if let data = data, let responseString = String(data: data, encoding: .utf8) {
+          print(responseString)
+      }
+  }
+
+  task.resume()
+  ```
+
+  ```csharp C#
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url = "https://api.apimart.ai/v1/videos/generations";
+
+          var payload = @"{
+              ""model"": ""sora-2"",
+              ""prompt"": ""滝が流れ落ちて虹を形成する"",
+              ""duration"": 15,
+              ""aspect_ratio"": ""16:9"",
+              ""image_urls"": [""https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png""]
+          }";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+
+          var content = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          var result = await response.Content.ReadAsStringAsync();
+
+          Console.WriteLine(result);
+      }
+  }
+  ```
+
+  ```c C
+  #include <stdio.h>
+  #include <curl/curl.h>
+
+  int main(void) {
+      CURL *curl;
+      CURLcode res;
+
+      curl_global_init(CURL_GLOBAL_DEFAULT);
+      curl = curl_easy_init();
+
+      if(curl) {
+          const char *url = "https://api.apimart.ai/v1/videos/generations";
+          const char *payload = "{"
+              "\"model\":\"sora-2\","
+              "\"prompt\":\"滝が流れ落ちて虹を形成する\","
+              "\"duration\":15,"
+              "\"aspect_ratio\":\"16:9\","
+              "\"image_urls\":[\"https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png\"]"
+          "}";
+
+          struct curl_slist *headers = NULL;
+          headers = curl_slist_append(headers, "Authorization: Bearer <token>");
+          headers = curl_slist_append(headers, "Content-Type: application/json");
+
+          curl_easy_setopt(curl, CURLOPT_URL, url);
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
+          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+          res = curl_easy_perform(curl);
+
+          if(res != CURLE_OK) {
+              fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                      curl_easy_strerror(res));
+          }
+
+          curl_slist_free_all(headers);
+          curl_easy_cleanup(curl);
+      }
+
+      curl_global_cleanup();
+      return 0;
+  }
+  ```
+
+  ```objectivec Objective-C
+  #import <Foundation/Foundation.h>
+
+  int main(int argc, const char * argv[]) {
+      @autoreleasepool {
+          NSURL *url = [NSURL URLWithString:@"https://api.apimart.ai/v1/videos/generations"];
+          
+          NSDictionary *payload = @{
+              @"model": @"sora-2",
+              @"prompt": @"滝が流れ落ちて虹を形成する",
+              @"duration": @15,
+              @"aspect_ratio": @"16:9",
+              @"image_urls": @[@"https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
+          };
+          
+          NSError *error;
+          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
+                                                            options:0
+                                                              error:&error];
+          
+          NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+          [request setHTTPMethod:@"POST"];
+          [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
+          [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+          [request setHTTPBody:jsonData];
+          
+          NSURLSessionDataTask *task = [[NSURLSession sharedSession] 
+              dataTaskWithRequest:request
+              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+                  if (error) {
+                      NSLog(@"Error: %@", error);
+                      return;
+                  }
+                  NSString *result = [[NSString alloc] initWithData:data 
+                                                          encoding:NSUTF8StringEncoding];
+                  NSLog(@"%@", result);
+              }];
+          
+          [task resume];
+          [[NSRunLoop mainRunLoop] run];
+      }
+      return 0;
+  }
+  ```
+
+  ```ocaml OCaml
+  (* Requires cohttp and yojson libraries *)
+  open Lwt
+  open Cohttp
+  open Cohttp_lwt_unix
+
+  let url = "https://api.apimart.ai/v1/videos/generations"
+
+  let payload = {|{
+    "model": "sora-2",
+    "prompt": "滝が流れ落ちて虹を形成する",
+    "duration": 10,
+          "aspect_ratio": "16:9",
+            "image_urls": ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
+  }|}
+
+  let () =
+    let headers = Header.init ()
+      |> fun h -> Header.add h "Authorization" "Bearer <token>"
+      |> fun h -> Header.add h "Content-Type" "application/json"
+    in
+    let body = Cohttp_lwt.Body.of_string payload in
+    
+    let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
+      body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
+      print_endline body_str
+    in
+    Lwt_main.run response
+  ```
+
+  ```dart Dart
+  import 'dart:convert';
+  import 'package:http/http.dart' as http;
+
+  void main() async {
+    final url = Uri.parse('https://api.apimart.ai/v1/videos/generations');
+    
+    final payload = {
+      'model': 'sora-2',
+      'prompt': '滝が流れ落ちて虹を形成する',
+      'duration': 15,
+      'aspect_ratio': '16:9',
+      'image_urls': ['https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png']
+    };
+    
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer <token>',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(payload),
+    );
+    
+    print(response.body);
+  }
+  ```
+
+  ```r R
+  library(httr)
+  library(jsonlite)
+
+  url <- "https://api.apimart.ai/v1/videos/generations"
+
+  payload <- list(
+    model = "sora-2",
+    prompt = "滝が流れ落ちて虹を形成する",
+    duration = 15,
+    aspect_ratio = "16:9",
+    image_urls = c("https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png")
+  )
+
+  response <- POST(
+    url,
+    add_headers(
+      Authorization = "Bearer <token>",
+      `Content-Type` = "application/json"
+    ),
+    body = toJSON(payload, auto_unbox = TRUE),
+    encode = "raw"
+  )
+
+  cat(content(response, "text"))
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+  {
+    "code": 200,
+    "data": [
+      {
+        "status": "submitted",
+        "task_id": "task_01K8SGYNNNVBQTXNR4MM964S7K"
+      }
+    ]
+  }
+  ```
+
+  ```json 400
+  {
+    "error": {
+      "code": 400,
+      "message": "リクエストパラメータが無効です",
+      "type": "invalid_request_error"
+    }
+  }
+  ```
+
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "認証に失敗しました。APIキーを確認してください",
+      "type": "authentication_error"
+    }
+  }
+  ```
+
+  ```json 402
+  {
+    "error": {
+      "code": 402,
+      "message": "アカウント残高が不足しています。チャージ後に再試行してください",
+      "type": "payment_required"
+    }
+  }
+  ```
+
+  ```json 403
+  {
+    "error": {
+      "code": 403,
+      "message": "アクセスが拒否されました。このリソースにアクセスする権限がありません",
+      "type": "permission_error"
+    }
+  }
+  ```
+
+  ```json 429
+  {
+    "error": {
+      "code": 429,
+      "message": "リクエストが多すぎます。しばらくしてから再試行してください",
+      "type": "rate_limit_error"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "サーバー内部エラー。しばらくしてから再試行してください",
+      "type": "server_error"
+    }
+  }
+  ```
+
+  ```json 502
+  {
+    "error": {
+      "code": 502,
+      "message": "ゲートウェイエラー。サーバーは一時的に利用できません",
+      "type": "bad_gateway"
+    }
+  }
+  ```
+</ResponseExample>

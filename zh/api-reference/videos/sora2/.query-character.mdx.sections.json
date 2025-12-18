@@ -1,6 +1,22 @@
-{
-  "__frontmatter__": "4c8b4f38",
-  "section-0-路径参数": "67f49bd0",
-  "section-1-authorizations": "deed641c",
-  "section-2-response": "913fc89c"
-}
+[
+  {
+    "id": "__frontmatter__",
+    "hash": "acd7a5e0",
+    "index": 0
+  },
+  {
+    "id": "section-0-路径参数",
+    "hash": "67f49bd0",
+    "index": 1
+  },
+  {
+    "id": "section-1-authorizations",
+    "hash": "deed641c",
+    "index": 2
+  },
+  {
+    "id": "section-2-response",
+    "hash": "913fc89c",
+    "index": 3
+  }
+]

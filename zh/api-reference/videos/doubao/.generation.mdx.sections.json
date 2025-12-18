@@ -1,8 +1,32 @@
-{
-  "__frontmatter__": "c3df635d",
-  "section-0-认证": "aa7d1f13",
-  "section-1-请求参数": "725921a2",
-  "section-2-分辨率与宽高比组合": "7f437eee",
-  "section-3-响应": "4fc9ac42",
-  "section-4-使用场景": "c3bf5e61"
-}
+[
+  {
+    "id": "__frontmatter__",
+    "hash": "fb2bdf05",
+    "index": 0
+  },
+  {
+    "id": "section-0-认证",
+    "hash": "aa7d1f13",
+    "index": 1
+  },
+  {
+    "id": "section-1-请求参数",
+    "hash": "725921a2",
+    "index": 2
+  },
+  {
+    "id": "section-2-分辨率与宽高比组合",
+    "hash": "7f437eee",
+    "index": 3
+  },
+  {
+    "id": "section-3-响应",
+    "hash": "4fc9ac42",
+    "index": 4
+  },
+  {
+    "id": "section-4-使用场景",
+    "hash": "c3bf5e61",
+    "index": 5
+  }
+]

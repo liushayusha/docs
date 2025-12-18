@@ -1,14 +1,17 @@
 ---
-title: 'Sora2 Query Role (Role Management)'
-description: '• Query the status and result of role creation tasks<br/>• Obtain detailed information of created roles<br/>• Return role ID for subsequent video generation'
+title: 'Sora2 Query Character (Character Management)'
+description: |
+    - Query the status and result of character creation tasks
+    - Get detailed information of created characters
+    - Return character ID for subsequent video generation
 api: 'GET https://api.apimart.ai/v1/characters_tasks/{task_id}'
 ---
-## 路径参数
+## Path Parameters
 
 <ParamField path="task_id" type="string" required>
-  Role creation task ID
+  Role Creation Task ID
 
-  This is the task ID returned through the role creation interface
+  This is the task ID returned by the Create Role API
 
   Example: `"task_01KBZ0TZZ7C7M3WS1TJM0PH8J4"`
 </ParamField>
@@ -16,13 +19,13 @@ api: 'GET https://api.apimart.ai/v1/characters_tasks/{task_id}'
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  All endpoints require authentication using a Bearer Token
+  All endpoints require authentication using a Bearer Token.
 
-  Obtaining API Key:
+  Get the API Key:
 
-  Visit the [API Key Management Page](https://apimart.ai/console/token) to get your API Key
+  Visit the [API Key Management Page](https://apimart.ai/console/token) to obtain your API Key.
 
-  Add the following in the request header when using:
+  Add the following to the request header when using:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -40,7 +43,7 @@ api: 'GET https://api.apimart.ai/v1/characters_tasks/{task_id}'
 
   <Expandable title="Field Description">
     <ResponseField name="id" type="string">
-      Unique identifier of the task
+      Unique task identifier
 
       Example: `"task_01KC0JZCMTMQ70D68XTM56Q5D0"`
     </ResponseField>
@@ -93,13 +96,13 @@ api: 'GET https://api.apimart.ai/v1/characters_tasks/{task_id}'
 
       <Expandable title="result field">
         <ResponseField name="characters" type="array">
-          Array of characters
+          Characters array
 
           <Expandable title="Character object">
             <ResponseField name="id" type="string">
-              Unique identifier of the character
+              Unique character identifier
 
-              This ID can be referenced via the `character_url` parameter during video generation
+              This ID can be referenced in video generation via the `character_url` parameter
 
               Example: `"ch_6937998961208191a45ef08447a554df"`
             </ResponseField>
@@ -111,13 +114,13 @@ api: 'GET https://api.apimart.ai/v1/characters_tasks/{task_id}'
             </ResponseField>
 
             <ResponseField name="profile_picture_url" type="string">
-              Character avatar image URL
+              Character profile picture URL
 
               Example: `"https://upload.apimart.ai/f/image/...character_task_xxx.jpg"`
             </ResponseField>
 
             <ResponseField name="username" type="string">
-              Character username, can be referenced in prompt using `@username`
+              Character username, can be referenced in prompt with `@username`
 
               Example: `"duksvfkf.turbo_whis"`
             </ResponseField>

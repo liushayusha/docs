@@ -1,18 +1,22 @@
 ---
 title: 'MiniMax-Hailuo-02 Video Generation'
-description: '• Asynchronous processing mode, returns task ID for subsequent queries<br/>• Supports text-to-video, image-to-video (first frame/last frame)<br/>• Supports 6-second and 10-second durations, multiple resolutions available<br/>• Supports prompt auto-optimization and watermark control'
+description: |
+    - Asynchronous processing mode, returns a task ID for subsequent queries
+    - Supports text-to-video and image-to-video (first frame/last frame)
+    - Supports 6-second and 10-second durations, with multiple resolutions available
+    - Supports prompt auto-optimization and watermark control
 api: 'POST https://api.apimart.ai/v1/videos/generations'
 ---
-## 认证
+## Authorization
 
 <ParamField header="Authorization" type="string" required>
-  All endpoints require authentication with a Bearer Token
+  All endpoints require authentication using a Bearer Token
 
-  Obtain API Key:
+  Get the API Key:
 
-  Visit [API Key management page](https://apimart.ai/console/token) to get your API Key
+  Visit the [API Key Management Page](https://apimart.ai/console/token) to obtain your API Key
 
-  Use by adding the following to your request header:
+  Add the following in the request headers when using:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -30,7 +34,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 <ParamField body="prompt" type="string" required>
   Video content description
 
-  It is recommended to describe scenes, actions, styles, etc. in detail to achieve better generation effects
+  It is recommended to describe the scene, actions, style, etc. in detail for better generation results
 
   Example: `"A cute cat running on the grass"`
 </ParamField>
@@ -40,13 +44,13 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
   Optional values:
 
-  * `5` - 5 seconds video
-  * `10` - 10 seconds video
+  * `5` - 5-second video
+  * `10` - 10-second video
 
   Default value: `5`
 
   <Warning>
-    **1080p limitation**: When using 1080p resolution, only 5-second duration is supported
+    **1080p Limitation**: When using 1080p resolution, only 5 seconds duration is supported
   </Warning>
 </ParamField>
 
@@ -59,9 +63,9 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
       Optional values:
 
-      * `512p` - Standard definition
-      * `768p` - High definition
-      * `1080p` - Full HD (only supports 6-second duration)
+      * `512p` - Standard Definition
+      * `768p` - High Definition
+      * `1080p` - Full HD (only supports 6 seconds duration)
 
       Default value: `768p`
     </ParamField>
@@ -69,21 +73,21 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
     <ParamField body="metadata.prompt_optimizer" type="boolean" default="true">
       Whether to automatically optimize the prompt
 
-      When enabled, the system will automatically optimize your prompt to achieve better generation effects
+      When enabled, the system will automatically optimize your prompt for better generation results
 
       Default value: `true`
     </ParamField>
 
     <ParamField body="metadata.fast_pretreatment" type="boolean" default="false">
-      Whether to shorten prompt optimization time
+      Whether to shorten the prompt optimization time
 
-      When enabled, processing speed is increased but optimization effects may be slightly affected
+      Enabling this can speed up processing but may slightly affect optimization quality
 
       Default value: `false`
     </ParamField>
 
     <ParamField body="metadata.watermark" type="boolean" default="false">
-      Whether to add watermark
+      Whether to add a watermark
 
       Default value: `false`
     </ParamField>
@@ -91,10 +95,10 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
     <ParamField body="metadata.first_frame_image" type="string">
       Video starting frame image
 
-      Two formats are supported:
+      Supports two formats:
 
       * **Public URL**: `https://example.com/start.jpg`
-      * **Base64 encoding**: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+      * **Base64 encoded**: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
 
       Used to specify the starting frame of the video
     </ParamField>
@@ -102,36 +106,36 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
     <ParamField body="metadata.last_frame_image" type="string">
       Video ending frame image
 
-      Two formats are supported:
+      Supports two formats:
 
       * **Public URL**: `https://example.com/end.jpg`
-      * **Base64 encoding**: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+      * **Base64 encoded**: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
 
       Used to specify the ending frame of the video
     </ParamField>
   </Expandable>
 </ParamField>
 
-## 参数限制
+## Limitations
 
-| Limitation   | Description                                        |
+| Limit       | Description                                         |
 | --------- | -------------------------------------------------- |
-| Duration      | Only supports 5 or 10 seconds                      |
-| 1080p Resolution | Only supports 5 seconds duration                    |
-| Image Format  | Supports public URL or Base64 encoding (`data:image/jpeg;base64,...`) |
+| Duration        | Only supports 5 or 10 seconds                       |
+| 1080p Resolution | Only supports 5-second duration                      |
+| Image Format      | Supports public URL or Base64 encoding (`data:image/jpeg;base64,...`) |
 
-## 分辨率与时长组合
+## Resolution and Duration Combinations
 
-| Resolution | Supported Duration | Remarks     |
+| Resolution | Supported Duration | Notes       |
 | ----- | ------ | ------ |
-| 512p  | 5s, 10s | Fully supported   |
-| 768p  | 5s, 10s | Fully supported   |
-| 1080p | 5s     | 10s not supported |
+| 512p  | 5 seconds, 10 seconds | Fully supported |
+| 768p  | 5 seconds, 10 seconds | Fully supported |
+| 1080p | 5 seconds           | 10 seconds not supported |
 
 ## Response
 
 <ResponseField name="code" type="integer">
-  Response status code, 200 when successful
+  Response status code, 200 on success
 </ResponseField>
 
 <ResponseField name="data" type="array">
@@ -139,7 +143,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
   <Expandable title="Array Elements">
     <ResponseField name="status" type="string">
-      Task status, "submitted" at initial submission
+      Task status, `submitted` when initially submitted
     </ResponseField>
 
     <ResponseField name="task_id" type="string">
@@ -493,7 +497,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   {
     "error": {
       "code": 429,
-      "message": "Too many requests, please try again later",
+      "message": "Requests are too frequent, please try again later",
       "type": "rate_limit_error"
     }
   }
@@ -541,7 +545,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 ```json
 {
   "model": "MiniMax-Hailuo-02",
-  "prompt": "A person slowly turns around, smiling",
+  "prompt": "Person slowly turns around with a smile",
   "duration": 5,
   "metadata": {
     "resolution": "768p",
@@ -555,7 +559,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 ```json
 {
   "model": "MiniMax-Hailuo-02",
-  "prompt": "The scene gradually transitions from day to night, sky gradient",
+  "prompt": "Scene gradually shifts from daytime to night, sky gradient",
   "duration": 10,
   "metadata": {
     "resolution": "768p",
@@ -584,5 +588,5 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 <Note>
   **Query Task Results**
 
-  Video generation is an asynchronous task. After submission, a `task_id` will be returned. Use the [Get Task Status](/cn/api-reference/tasks/status) API to check the progress and results.
+  Video generation is an asynchronous task. After submission, a `task_id` will be returned. Use the [Get Task Status](/en/api-reference/tasks/status) endpoint to check generation progress and results.
 </Note>

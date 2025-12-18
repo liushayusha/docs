@@ -1,6 +1,9 @@
 ---
 title: 'VEO3 Video Generation'
-description: '• Asynchronous processing mode, returns task ID for subsequent queries<br/>• Supports multiple generation modes including text-to-video and image-to-video<br/>• The generated video link is valid for 24 hours, please save it as soon as possible'
+description: |
+    - Asynchronous processing mode, returns a task ID for subsequent queries
+    - Supports multiple generation modes such as text-to-video and image-to-video
+    - Generated video links are valid for 24 hours, please save them promptly
 api: 'POST https://api.apimart.ai/v1/videos/generations'
 ---
 ## Authorizations
@@ -8,11 +11,11 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 <ParamField header="Authorization" type="string" required>
   All endpoints require authentication using a Bearer Token
 
-  Obtain API Key:
+  Obtain the API Key:
 
-  Visit [API Key management page](https://apimart.ai/console/token) to get your API Key
+  Visit the [API Key Management Page](https://apimart.ai/console/token) to get your API Key
 
-  Add to request header when using:
+  Add the following to the request header when using:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -26,7 +29,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
   Available models:
 
-  * `veo3.1-fast` - Fast generation model, suitable for quick preview and iteration
+  * `veo3.1-fast` - Fast generation model, suitable for quick previews and iterations
   * `veo3.1-quality` - High-quality generation model, suitable for final production
 
   Example: `"veo3.1-fast"`
@@ -52,18 +55,18 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 </ParamField>
 
 <ParamField body="image_urls" type="array">
-  Array of reference image URLs for image-to-video generation
+  Array of reference image URLs for image-to-video
 
-  **💡 Quick fill (Try it section):**
+  **💡 Quick fill (Try it area):**
 
   1. Click "+ Add an item" to add an image URL
-  2. Enter the full URL address of the image or base64 data
+  2. Enter the full URL or base64 data of the image
 
-  <Expandable title="Detailed Field Description">
+  <Expandable title="Detailed field description">
     <ParamField body="url" type="string" required>
       Image URL address
 
-      Two supported formats:
+      Supports two formats:
 
       **1. Full image URL address**
 
@@ -73,10 +76,10 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
       **2. Base64 encoding format**
 
       * **Must use the full Data URI format**
-      * Format: `data:image/{format};base64,{base64 data}`
+      * Format: `data:image/{format};base64,{base64_data}`
       * Supported image formats: jpeg, png, webp, etc.
       * Example: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
-      * ⚠️ Note: Must include the `data:image/jpeg;base64,` prefix part
+      * ⚠️ Note: The prefix `data:image/jpeg;base64,` must be included
 
       **Limitations:**
 
@@ -116,7 +119,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
     --header 'Content-Type: application/json' \
     --data '{
       "model": "veo3.1-fast",
-      "prompt": "Dolphins jumping in the blue ocean",
+      "prompt": "Dolphins jumping in the azure ocean",
       "duration": 8,
       "aspect_ratio": "16:9",
       "image_urls": ["https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png"]
@@ -130,7 +133,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
   payload = {
       "model": "veo3.1-fast",
-      "prompt": "Dolphins jumping in the blue ocean",
+      "prompt": "Dolphins jumping in the azure ocean",
       "duration": 8,
       "aspect_ratio": "16:9",
       "image_urls": ["https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png"]
@@ -151,7 +154,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
   const payload = {
     model: "veo3.1",
-    prompt: "Dolphins jumping in the blue ocean",
+    prompt: "Dolphins jumping in the azure ocean",
     duration: 8,
     aspect_ratio: "16:9",
     image_urls: ["https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png"]
@@ -188,7 +191,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
       payload := map[string]interface{}{
           "model":      "veo3.1",
-          "prompt":     "Dolphins jumping in the blue ocean",
+          "prompt":     "Dolphins jumping in the azure ocean",
           "duration":   8,
           "aspect_ratio": "16:9",
           "image_urls":  ["https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png"],
@@ -225,7 +228,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
           String payload = """
           {
             "model": "veo3.1-fast",
-            "prompt": "Dolphins jumping in the blue ocean",
+            "prompt": "Dolphins jumping in the azure ocean",
             "duration": 8,
             "aspect_ratio": "16:9",
             "image_urls": ["https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png"]
@@ -255,7 +258,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
   $payload = [
       "model" => "veo3.1",
-      "prompt" => "Dolphins jumping in the blue ocean",
+      "prompt" => "Dolphins jumping in the azure ocean",
       "duration" => 8,
       "aspect_ratio" => "16:9",
       "image_urls" => ["https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png"]
@@ -286,7 +289,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
   payload = {
     model: "veo3.1",
-    prompt: "Dolphins jumping in the blue ocean",
+    prompt: "Dolphins jumping in the azure ocean",
     duration: 8,
     aspect_ratio: "16:9",
     image_urls: ["https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png"]
@@ -311,7 +314,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
   let payload: [String: Any] = [
       "model": "veo3.1-fast",
-      "prompt": "Dolphins jumping in the blue ocean",
+      "prompt": "Dolphins jumping in the azure ocean",
       "duration": 8,
       "aspect_ratio": "16:9",
       "image_urls": ["https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png"]
@@ -351,7 +354,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
           var payload = @"{
               ""model"": ""veo3.1"",
-              ""prompt"": ""Dolphins jumping in the blue ocean"",
+              ""prompt"": ""Dolphins jumping in the azure ocean"",
               ""duration"": 8,
               ""aspect_ratio"": ""16:9"",
               ""image_url"": ""https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png""
@@ -384,7 +387,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
           const char *url = "https://api.apimart.ai/v1/videos/generations";
           const char *payload = "{"
               "\"model\":\"veo3.1-fast\","
-              "\"prompt\":\"Dolphins jumping in the blue ocean\","
+              "\"prompt\":\"Dolphins jumping in the azure ocean\","
               "\"duration\":8,"
               "\"aspect_ratio\":\"16:9\","
               "\"image_urls\":[\"https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png\"]"
@@ -423,7 +426,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
           
           NSDictionary *payload = @{
               @"model": @"veo3.1",
-              @"prompt": @"Dolphins jumping in the blue ocean",
+              @"prompt": @"Dolphins jumping in the azure ocean",
               @"duration": @8,
               @"aspect_ratio": @"16:9",
               @"image_urls": @[@"https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png"]
@@ -469,7 +472,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
   let payload = {|{
     "model": "veo3.1",
-    "prompt": "Dolphins jumping in the blue ocean",
+    "prompt": "Dolphins jumping in the azure ocean",
     "duration": 8,
     "aspect_ratio": "16:9",
               "image_urls": ["https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png"]
@@ -498,7 +501,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
     
     final payload = {
       'model': 'veo3.1',
-      'prompt': 'Dolphins jumping in the blue ocean',
+      'prompt': 'Dolphins jumping in the azure ocean',
       'duration': 8,
       'aspect_ratio': '16:9',
       'image_urls': ['https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png']
@@ -525,7 +528,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
   payload <- list(
     model = "veo3.1",
-    prompt = "Dolphins jumping in the blue ocean",
+    prompt = "Dolphins jumping in the azure ocean",
     duration = 8,
     aspect_ratio = "16:9",
     image_urls = c("https://cdn.apimart.ai/doc/9998238783208208-9972597b-255d-4e7e-9649-e6ee38a837aa-image_task_01K88B53MTK41PP5KGDTG2PA5P_0.png")
@@ -582,7 +585,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   {
     "error": {
       "code": 402,
-      "message": "Insufficient account balance, please top up and try again",
+      "message": "Insufficient account balance, please recharge and try again",
       "type": "payment_required"
     }
   }
@@ -622,7 +625,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   {
     "error": {
       "code": 502,
-      "message": "Bad gateway, the server is temporarily unavailable",
+      "message": "Gateway error, server temporarily unavailable",
       "type": "bad_gateway"
     }
   }

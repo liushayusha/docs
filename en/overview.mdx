@@ -1,22 +1,22 @@
 ---
-title: 'APIMart — Compatible OpenAI API Gateway (GPT-5, Claude, Gemini)'
-description: 'Compatible OpenAI API for GPT-5, Claude, and Gemini. Multi-vendor routing, transparent pricing, low latency. Enterprise-grade SLA, SDK support, pay-as-you-go.'
+title: 'APIMart — OpenAI Compatible API Gateway (GPT-5, Claude, Gemini)'
+description: 'OpenAI compatible API for GPT-5, Claude, and Gemini. Multi-vendor routing, transparent pricing, low latency. Enterprise-grade SLA, SDK support, pay-as-you-go.'
 ---
-A unified endpoint compatible with OpenAI, supporting GPT-5, Claude, and Gemini. Simply change the base URL to `https://api.apimart.ai/v1` to migrate from OpenAI in minutes—no code rewrite needed, continue using existing SDKs. Multi-vendor routing ensures low latency and high availability. Transparent pricing, enterprise-grade SLA, and global CDN acceleration.
+A unified endpoint compatible with OpenAI, supporting GPT-5, Claude, and Gemini. Simply change the base URL to `https://api.apimart.ai/v1` to migrate from OpenAI within minutes—no code rewriting required, continue using existing SDKs. Multi-vendor routing ensures low latency and high availability. Transparent pricing, enterprise-level SLA, and global CDN acceleration.
 
 ## Quick Start
 
 <Card title="Get Started Now" icon="rocket" horizontal href="/en/api-reference/images/gpt-4o/generation">
-  Start generating images and videos through our unified API interface
+  Start generating images and videos through our unified API endpoint
 </Card>
 
 ## API Endpoints
 
-APIMart provides standardized image and video generation endpoints, supporting multiple AI models and vendors.
+APIMart offers standardized image and video generation endpoints supporting multiple AI models and providers.
 
 ### Image Creation API
 
-Use GPT-4o Image, Gemini 2.5 Flash Image-preview models for image creation. Employs OpenAI-style API for seamless integration.
+Use GPT-4o Image, Gemini 2.5 Flash Image-preview models for image creation. Implements OpenAI-style API for seamless integration.
 
 <Card title="Image Creation API" icon="image" href="/api-reference/images/gpt-4o/generation">
   Text-to-image generation
@@ -24,7 +24,7 @@ Use GPT-4o Image, Gemini 2.5 Flash Image-preview models for image creation. Empl
 
 ### Video Creation API
 
-Uses OpenAI Sora2, Google VEO3 models for video creation. Supports asynchronous task management with status tracking and webhook support.
+Use OpenAI Sora2, Google VEO3 models for video creation. Supports asynchronous task management with status tracking and webhook support.
 
 <Card title="Video Creation API" icon="video" href="/api-reference/videos/veo3/generation">
   Asynchronous task management with webhook
@@ -34,32 +34,32 @@ Uses OpenAI Sora2, Google VEO3 models for video creation. Supports asynchronous 
 
 ### Transparent Pricing
 
-Pay-as-you-go, no subscription required. All models have clear per-token prices, more affordable than official vendor prices, while maintaining the same quality and low latency.
+Pay-as-you-go, no subscription required. All models have clear per-token pricing, more affordable than official provider prices, while maintaining the same quality and low latency.
 
-* All models have clear per-token prices
+* All models have clear per-token pricing
 * Enterprise users enjoy bulk discounts
 * No hidden fees
 * Pay only for actual usage
 
-### Multi-Vendor Routing and Enterprise-Grade SLA
+### Multi-Provider Routing and Enterprise-Grade SLA
 
-Built-in intelligent routing for multiple LLM vendors, ensuring high availability and low latency. When a vendor fails, requests automatically switch to backup vendors with no service interruption.
+Built-in intelligent routing across multiple LLM providers ensures high availability and low latency. Automatically switches requests to backup providers during a provider failure with no service interruption.
 
 ### 99.9% Uptime SLA
 
-Enterprise-grade reliability with automatic failover. Multi-vendor routing ensures requests are always processed with minimum latency.
+Enterprise-grade reliability with automatic failover. Multi-provider routing ensures requests are always processed with minimal latency.
 
 ### Global CDN Acceleration
 
-Global edge nodes provide the lowest latency. Optimized routing reduces response times and enhances global user experience.
+Global edge nodes provide the lowest latency. Optimized routing reduces response times and enhances the experience for global users.
 
 ### Rate Limit Management
 
-Automatically handle rate limits across vendors. Intelligent request distribution prevents throttling, ensuring smooth operation.
+Automatically handles rate limits among providers. Intelligent request allocation prevents throttling to ensure smooth operation.
 
 ### Real-time Status
 
-Monitor endpoint health and performance. Track asynchronous tasks for image and video generation and receive notifications via webhook. [View Status →](/en/api-reference/tasks/status)
+Monitors endpoint health and performance. Tracks the progress of asynchronous image and video generation tasks and notifies via webhook. [View Status →](/en/api-reference/tasks/status)
 
 ## Supported Models
 
@@ -67,36 +67,36 @@ Access leading image and video generation AI models through a unified API endpoi
 
 ### Image Creation Models
 
-Text-prompt based image generation:
+Text prompt-based image generation:
 
 * **GPT-4o Image**: OpenAI image generation model
 * **Gemini 2.5 Flash Image-preview**: Google efficient image model
 
 ### Video Creation Models
 
-Video generation with support for asynchronous task tracking and webhook callbacks:
+Video generation supporting asynchronous task tracking and webhook callbacks:
 
 * **OpenAI Sora2**: OpenAI video generation model
 * **Google VEO3**: Google video generation model
-* **doubao-seedance-1-0-pro**: fast high-quality video generation
-* **MiniMax-Hailuo-02**: efficient video generation supporting image-to-video
+* **doubao-seedance-1-0-pro**: Fast high-quality video generation
+* **MiniMax-Hailuo-02**: Efficient video generation supporting image-to-video
 
 ## FAQ
 
 <AccordionGroup>
-  <Accordion title="How does image and video generation work?">
-    Image generation is synchronous and can return results immediately. Video generation is asynchronous — after you submit a request, you will receive a task_id, then poll the status endpoint to check progress and obtain the final video URL.
+  <Accordion title="How do image and video generation work?">
+    Image generation is synchronous and returns results immediately. Video generation is asynchronous — after you submit a request, you receive a task_id, then poll the status endpoint to check progress and get the final video URL.
   </Accordion>
 
   <Accordion title="What does the SLA include?">
-    Our enterprise SLA includes a 99.9% uptime guarantee, global CDN acceleration, multi-vendor routing and automatic failover, and real-time status monitoring. Asynchronous tasks support rate limiting and webhooks.
+    Our enterprise SLA includes a 99.9% uptime guarantee, global CDN acceleration, multi-vendor routing with automatic failover, and real-time status monitoring. Asynchronous tasks support rate limit management and webhooks.
   </Accordion>
 
   <Accordion title="How is pricing calculated?">
-    APIMart offers transparent pay-per-request billing, applicable for image and video generation. Pay-as-you-go with no subscription required, enterprise users receive bulk discounts, and there are no hidden fees. Charges apply only for successfully generated content.
+    APIMart offers transparent pay-per-request billing for image and video generation. Pay as you go, no subscriptions required, with volume discounts for enterprise users and no hidden fees. Charges apply only to successfully generated content.
   </Accordion>
 
   <Accordion title="What about latency and performance?">
-    Low latency is ensured through global CDN acceleration and intelligent multi-vendor routing. Image generation is typically instantaneous, while video generation time depends on the model (40-300 seconds). Real-time status monitoring lets you track asynchronous task progress.
+    Low latency is ensured through global CDN acceleration and intelligent multi-vendor routing. Image generation is generally instantaneous, while video generation time depends on the model (40–300 seconds). Real-time status monitoring lets you track asynchronous task progress.
   </Accordion>
 </AccordionGroup>

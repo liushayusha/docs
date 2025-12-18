@@ -1,6 +1,9 @@
 ---
 title: 'Sora2 Video Generation'
-description: '• Asynchronous processing mode, returns task ID for subsequent queries<br/>• Supports multiple generation modes such as text-to-video and image-to-video<br/>• The generated video link is valid for 24 hours, please save it as soon as possible '
+description: |
+    - Asynchronous processing mode, returns task ID for subsequent queries
+    - Supports multiple generation modes including text-to-video and image-to-video
+    - Generated video links are valid for 24 hours, please save them promptly
 api: 'POST https://api.apimart.ai/v1/videos/generations'
 ---
 ## Authorizations
@@ -8,9 +11,9 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 <ParamField header="Authorization" type="string" required>
   All endpoints require authentication using a Bearer Token
 
-  Obtain API Key:
+  Get the API Key:
 
-  Visit the [API Key Management Page](https://apimart.ai/console/token) to get your API Key
+  Visit the [API Key Management Page](https://apimart.ai/console/token) to obtain your API Key
 
   Add the following to the request header when using:
 
@@ -37,12 +40,12 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
   **💡 @Role Mention Feature:**
 
-  You can use the `@username` format in the prompt to mention created characters, making them appear in the generated video.
+  You can mention created characters in the prompt using the `@username` format to have the character appear in the generated video.
 
-  * The character's `username` can be obtained via the [Query Character API](/cn/api-reference/videos/sora2/query-character)
-  * Supports mentioning multiple characters simultaneously
+  * The character's `username` can be obtained via the [Query Character Endpoint](/en/api-reference/videos/sora2/query-character)
+  * Multiple characters can be mentioned simultaneously
 
-  Example: `"A kitten and puppy driving a car together @duksvfkf.cruisingki @zdqwahgj.baronbarki"`
+  Example: `"A kitten and a puppy driving a car together @duksvfkf.cruisingki @zdqwahgj.baronbarki"`
 </ParamField>
 
 <ParamField body="duration" type="integer">
@@ -79,49 +82,49 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
       **1. Full image URL**
 
-      * Publicly accessible image URLs (http\:// or https\://)
+      * Publicly accessible image URL (http:// or https://)
       * Example: `https://example.com/image.jpg`
 
       **2. Base64 encoded format**
 
       * **Must use the full Data URI format**
-      * Format: `data:image/{format};base64,{base64 data}`
+      * Format: `data:image/{format};base64,{base64data}`
       * Supported image formats: jpeg, png, webp, etc.
       * Example: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
-      * ⚠️ Note: Must include the `data:image/jpeg;base64,` prefix
+      * ⚠️ Note: Must include the prefix `data:image/jpeg;base64,`
 
       **Limitations:**
 
-      * Max file size: 10MB
+      * Maximum file size: 10MB
       * Supported formats: .jpeg, .jpg, .png, .webp
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="watermark" type="boolean" default="false">
-  Whether to add watermark in the generated video
+  Whether to add a watermark in the generated video
 
-  * `false`: Do not add watermark
-  * `true`: Add official Sora watermark in the video
+  * `false`: no watermark added
+  * `true`: adds the official Sora watermark in the video
 
-  Default: `false`
+  Default Value: `false`
 </ParamField>
 
 <ParamField body="thumbnail" type="boolean">
-  Whether to generate video thumbnail
+  Whether to generate a video thumbnail
 
-  * `true`: Generate video thumbnail for preview and display
+  * `true`: generates a video thumbnail for preview and display
 
-  If no thumbnail is needed, this parameter can be omitted
+  Can be omitted if no thumbnail generation is needed
 </ParamField>
 
 <ParamField body="private" type="boolean" default="false">
   Whether to enable privacy mode
 
-  * `true`: Video will not be published and remix (secondary editing) is not allowed
-  * `false`: Video can be published and remix is allowed
+  * `true`: the video will not be published and remix (re-edit) operations will be disabled
+  * `false`: the video can be published and remixed
 
-  Default: `false`
+  Default Value: `false`
 </ParamField>
 
 <ParamField body="style" type="string">
@@ -133,59 +136,59 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   * `comic` - Comic style
   * `news` - News style
   * `selfie` - Selfie style
-  * `nostalgic` - Nostalgic style
+  * `nostalgic` - Vintage style
   * `anime` - Anime style
 
   Example: `"anime"`
 </ParamField>
 
 <ParamField body="storyboard" type="boolean">
-  Whether to use storyboard for more detailed video generation control
+  Whether to use storyboard for more detailed control over video generation details
 
-  * `true`: Enable storyboard feature
-  * `false`: Do not use storyboard
+  * `true`: enable storyboard feature
+  * `false`: do not use storyboard
 
   Example: `true`
 </ParamField>
 
 <ParamField body="character_url" type="string">
-  Reference video character URL
+  Character URL from reference video
 
   Used to reuse characters from the reference video in the generated video
 
   Example: `"https://filesystem.site/cdn/20251030/javYrU4etHVFDqg8by7mViTWHlMOZy.mp4"`
 
-  **⚠️ Note:** When using this parameter, the generated video duration will be reduced by 1 second
+  **⚠️ Note:** Using this parameter will reduce the generated video duration by 1 second
 </ParamField>
 
 <ParamField body="character_timestamps" type="string">
   Character appearance timestamps
 
-  Specifies the time range when character appears in the reference video, only supports 2-second duration segments
+  Specify the time range in the reference video when the character appears; only supports 2-second intervals
 
   Format: `"start_second,end_second"`
 
-  Example: `"1,3"` means the character appears from second 1 to second 3 in the reference video
+  Example: `"1,3"` indicates the character appears from second 1 to second 3 in the reference video
 
-  **⚠️ Note:** When using this parameter, the generated video duration will be reduced by 1 second
+  **⚠️ Note:** Using this parameter will reduce the generated video duration by 1 second
 </ParamField>
 
 ## Response
 
 <ResponseField name="code" type="integer">
-  Response status code, 200 for success
+  Response status code, 200 indicates success
 </ResponseField>
 
 <ResponseField name="data" type="array">
   Returned data array
 
-  <Expandable title="Array elements">
+  <Expandable title="Array Elements">
     <ResponseField name="status" type="string">
-      Task status, initially `submitted` when first submitted
+      Task status, initially `submitted` upon submission
     </ResponseField>
 
     <ResponseField name="task_id" type="string">
-      Unique identifier for the task, used to query task status and results
+      Unique identifier for the task, used to query the task status and results
     </ResponseField>
   </Expandable>
 </ResponseField>
@@ -198,7 +201,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
     --header 'Content-Type: application/json' \
     --data '{
       "model": "sora-2",
-      "prompt": "A waterfall cascading down forming a rainbow",
+      "prompt": "A waterfall cascading forming a rainbow",
       "duration": 10,
       "aspect_ratio": "16:9",
       "private": false,
@@ -213,7 +216,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
   payload = {
       "model": "sora-2",
-      "prompt": "A waterfall cascading down forming a rainbow",
+      "prompt": "A waterfall cascading forming a rainbow",
       "duration": 10,
       "aspect_ratio": "16:9",
       "private": False,
@@ -235,7 +238,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
   const payload = {
     model: "sora-2",
-    prompt: "A waterfall cascading down forming a rainbow",
+    prompt: "A waterfall cascading forming a rainbow",
     duration: 15,
     aspect_ratio: "16:9",
     private: false,
@@ -273,7 +276,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
       payload := map[string]interface{}{
           "model":      "sora-2",
-          "prompt":     "A waterfall cascading down forming a rainbow",
+          "prompt":     "A waterfall cascading forming a rainbow",
           "duration":   15,
           "aspect_ratio": "16:9",
           "image_urls":  ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"],
@@ -310,7 +313,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
           String payload = """
           {
             "model": "sora-2",
-            "prompt": "A waterfall cascading down forming a rainbow",
+            "prompt": "A waterfall cascading forming a rainbow",
             "duration": 10,
             "aspect_ratio": "16:9",
             "image_urls": ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
@@ -340,7 +343,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
   $payload = [
       "model" => "sora-2",
-      "prompt" => "A waterfall cascading down forming a rainbow",
+      "prompt" => "A waterfall cascading forming a rainbow",
       "duration" => 15,
       "aspect_ratio" => "16:9",
       "image_urls" => ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
@@ -371,7 +374,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
   payload = {
     model: "sora-2",
-    prompt: "A waterfall cascading down forming a rainbow",
+    prompt: "A waterfall cascading forming a rainbow",
     duration: 15,
     aspect_ratio: "16:9",
     image_urls: ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
@@ -396,7 +399,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
   let payload: [String: Any] = [
       "model": "sora-2",
-      "prompt": "A waterfall cascading down forming a rainbow",
+      "prompt": "A waterfall cascading forming a rainbow",
       "duration": 10,
       "aspect_ratio": "16:9",
       "image_urls": ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
@@ -436,7 +439,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
           var payload = @"{
               ""model"": ""sora-2"",
-              ""prompt"": ""A waterfall cascading down forming a rainbow"",
+              ""prompt"": ""A waterfall cascading forming a rainbow"",
               ""duration"": 15,
               ""aspect_ratio"": ""16:9"",
               ""image_urls"": [""https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png""]
@@ -469,7 +472,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
           const char *url = "https://api.apimart.ai/v1/videos/generations";
           const char *payload = "{"
               "\"model\":\"sora-2\","
-              "\"prompt\":\"A waterfall cascading down forming a rainbow\","
+              "\"prompt\":\"A waterfall cascading forming a rainbow\","
               "\"duration\":15,"
               "\"aspect_ratio\":\"16:9\","
               "\"image_urls\":[\"https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png\"]"
@@ -508,7 +511,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
           
           NSDictionary *payload = @{
               @"model": @"sora-2",
-              @"prompt": @"A waterfall cascading down forming a rainbow",
+              @"prompt": @"A waterfall cascading forming a rainbow",
               @"duration": @15,
               @"aspect_ratio": @"16:9",
               @"image_urls": @[@"https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
@@ -554,7 +557,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
   let payload = {|{
     "model": "sora-2",
-    "prompt": "A waterfall cascading down forming a rainbow",
+    "prompt": "A waterfall cascading forming a rainbow",
     "duration": 10,
           "aspect_ratio": "16:9",
             "image_urls": ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
@@ -583,7 +586,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
     
     final payload = {
       'model': 'sora-2',
-      'prompt': 'A waterfall cascading down forming a rainbow',
+      'prompt': 'A waterfall cascading forming a rainbow',
       'duration': 15,
       'aspect_ratio': '16:9',
       'image_urls': ['https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png']
@@ -610,7 +613,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
   payload <- list(
     model = "sora-2",
-    prompt = "A waterfall cascading down forming a rainbow",
+    prompt = "A waterfall cascading forming a rainbow",
     duration = 15,
     aspect_ratio = "16:9",
     image_urls = c("https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png")
@@ -667,7 +670,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   {
     "error": {
       "code": 402,
-      "message": "Insufficient account balance, please recharge and try again",
+      "message": "Insufficient account balance, please top up and try again",
       "type": "payment_required"
     }
   }

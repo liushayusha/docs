@@ -1,18 +1,21 @@
 ---
 title: 'Gemini-3-Pro-Image-preview (Nano banana2) Image Generation'
-description: '• Asynchronous processing mode, returns task ID for subsequent query<br/>• High-quality image generation, professional-grade image creation<br/>• Generated image links are valid for 24 hours, please save them as soon as possible'
+description: |
+    - Asynchronous processing mode, returns a task ID for subsequent queries
+    - High-quality image generation, professional-grade image creation
+    - Generated image links are valid for 24 hours, please save them promptly
 api: 'POST https://api.apimart.ai/v1/images/generations'
 ---
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  All endpoints require authentication using a Bearer Token
+  All endpoints require authentication using a Bearer Token.
 
-  Obtaining an API Key:
+  Get the API Key:
 
-  Visit the [API Key Management Page](https://apimart.ai/console/token) to get your API Key
+  Visit the [API Key management page](https://apimart.ai/console/token) to get your API Key.
 
-  Add the following in the request header when using:
+  Add to the request headers:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -44,7 +47,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   Fixed at 1
 
-  **⚠️ Notice:** Must input a pure number (e.g., `1`), do not add quotes, otherwise an error will occur
+  **⚠️ Note:** Must enter a plain number (e.g. `1`), do not use quotes, otherwise an error will occur
 </ParamField>
 
 <ParamField body="resolution" type="string">
@@ -56,39 +59,39 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   * `2K` - 2K resolution
   * `4K` - 4K resolution
 
-  **⚠️ Notice:** Generating 4K images in base64 format will take longer processing time
+  **⚠️ Note:** Processing time will be longer when generating 4K images in base64 format
 </ParamField>
 
 <ParamField body="image_urls" type="array">
   List of reference image URLs, used for image-to-image generation or image editing
 
-  **💡 Quick fill (Try it area):**
+  **💡 Quick Fill (Try it section):**
 
   1. Click "+ Add an item" to add an image URL
-  2. Enter the full image URL or base64 data
+  2. Enter the full URL or base64 data of the image
 
-  <Expandable title="Detailed field description">
+  <Expandable title="Detailed Field Description">
     <ParamField body="url" type="string" required>
       Image URL address
 
       Supports two formats:
 
-      **1. Full image URL address**
+      **1. Complete image URL address**
 
       * Publicly accessible image URL (http\:// or https\://)
       * Example: `https://example.com/image.jpg`
 
-      **2. Base64 encoding format**
+      **2. Base64 encoded format**
 
       * **Must use the complete Data URI format**
       * Format: `data:image/{format};base64,{base64 data}`
       * Supported image formats: jpeg, png, webp, etc.
       * Example: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
-      * ⚠️ Notice: Must include the prefix `data:image/jpeg;base64,`
+      * ⚠️ Note: The prefix `data:image/jpeg;base64,` must be included
 
       **Limitations:**
 
-      * Single image not exceeding 10MB
+      * Single image size must not exceed 10MB
       * Supported formats: .jpeg, .jpg, .png, .webp
     </ParamField>
   </Expandable>
@@ -99,9 +102,9 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 <ParamField body="mask_url" type="string">
   Mask image URL
 
-  * Must be in PNG format
-  * Size needs to match the reference image
-  * Not exceeding 4MB
+  * Must be PNG format
+  * Size must match the reference image
+  * Not exceed 4MB
 </ParamField>
 
 ## Response
@@ -134,7 +137,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
     --header 'Content-Type: application/json' \
     --data '{
       "model": "gemini-3-pro-image-preview",
-      "prompt": "A bamboo path under moonlight",
+      "prompt": "A bamboo forest path under the moonlight",
       "size": "1:1",
       "n": 1,
       "resolution": "1K"
@@ -148,7 +151,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   payload = {
       "model": "gemini-3-pro-image-preview",
-      "prompt": "A bamboo path under moonlight",
+      "prompt": "A bamboo forest path under the moonlight",
       "size": "1:1",
       "n": 1,
       "resolution": "1K"
@@ -169,7 +172,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   const payload = {
     model: "gemini-3-pro-image-preview",
-    prompt: "A bamboo path under moonlight",
+    prompt: "A bamboo forest path under the moonlight",
     size: "1:1",
     n: 1,
     resolution: "2K"
@@ -206,7 +209,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
       payload := map[string]interface{}{
           "model":      "gemini-3-pro-image-preview",
-          "prompt":     "A bamboo path under moonlight",
+          "prompt":     "A bamboo forest path under the moonlight",
           "size":       "1:1",
           "n":          1,
           "resolution": "1K",
@@ -243,7 +246,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
           String payload = """
           {
             "model": "gemini-3-pro-image-preview",
-            "prompt": "A bamboo path under moonlight",
+            "prompt": "A bamboo forest path under the moonlight",
             "size": "1:1",
             "n": 1,
             "resolution": "1K"
@@ -273,7 +276,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   $payload = [
       "model" => "gemini-3-pro-image-preview",
-      "prompt" => "A bamboo path under moonlight",
+      "prompt" => "A bamboo forest path under the moonlight",
       "size" => "1:1",
       "n" => 1,
       "resolution" => "2K"
@@ -304,7 +307,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   payload = {
     model: "gemini-3-pro-image-preview",
-    prompt: "A bamboo path under moonlight",
+    prompt: "A bamboo forest path under the moonlight",
     size: "1:1",
     n: 1,
     resolution: "2K"
@@ -329,7 +332,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   let payload: [String: Any] = [
       "model": "gemini-3-pro-image-preview",
-      "prompt": "A bamboo path under moonlight",
+      "prompt": "A bamboo forest path under the moonlight",
       "size": "1:1",
       "n": 1,
       "resolution": "1K"
@@ -369,7 +372,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
           var payload = @"{
               ""model"": ""gemini-3-pro-image-preview"",
-              ""prompt"": ""A bamboo path under moonlight"",
+              ""prompt"": ""A bamboo forest path under the moonlight"",
               ""size"": ""1:1"",
               ""n"": 1,
               ""resolution"": ""2K""
@@ -402,7 +405,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
           const char *url = "https://api.apimart.ai/v1/images/generations";
           const char *payload = "{"
               "\"model\":\"gemini-3-pro-image-preview\","
-              "\"prompt\":\"A bamboo path under moonlight\","
+              "\"prompt\":\"A bamboo forest path under the moonlight\","
               "\"size\":\"1:1\","
               "\"n\":1,"
               "\"resolution\":\"2K\""
@@ -441,7 +444,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
           NSDictionary *payload = @{
               @"model": @"gemini-3-pro-image-preview",
-              @"prompt": @"A bamboo path under moonlight",
+              @"prompt": @"A bamboo forest path under the moonlight",
               @"size": @"1:1",
               @"n": @1,
               @"resolution": @"2K"
@@ -487,7 +490,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   let payload = {|{
     "model": "gemini-3-pro-image-preview",
-    "prompt": "A bamboo path under moonlight",
+    "prompt": "A bamboo forest path under the moonlight",
     "size": "1:1",
     "n": 1,
     "resolution": "1K"
@@ -516,7 +519,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
     final payload = {
       'model': 'gemini-3-pro-image-preview',
-      'prompt': 'A bamboo path under moonlight',
+      'prompt': 'A bamboo forest path under the moonlight',
       'size': '1:1',
       'n': 1,
       'resolution': '1K'
@@ -543,7 +546,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   payload <- list(
     model = "gemini-3-pro-image-preview",
-    prompt = "A bamboo path under moonlight",
+    prompt = "A bamboo forest path under the moonlight",
     size = "1:1",
     n = 1,
     resolution = "1K"

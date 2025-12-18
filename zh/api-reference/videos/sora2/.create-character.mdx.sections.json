@@ -1,6 +1,22 @@
-{
-  "__frontmatter__": "4d6d31b4",
-  "section-0-authorizations": "deed641c",
-  "section-1-body": "6d198710",
-  "section-2-response": "3b427e75"
-}
+[
+  {
+    "id": "__frontmatter__",
+    "hash": "f59a1578",
+    "index": 0
+  },
+  {
+    "id": "section-0-authorizations",
+    "hash": "deed641c",
+    "index": 1
+  },
+  {
+    "id": "section-1-body",
+    "hash": "6d198710",
+    "index": 2
+  },
+  {
+    "id": "section-2-response",
+    "hash": "3b427e75",
+    "index": 3
+  }
+]

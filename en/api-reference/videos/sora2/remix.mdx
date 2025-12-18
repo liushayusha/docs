@@ -1,14 +1,17 @@
 ---
 title: 'Sora2 Video Editing'
-description: '• Secondary editing based on the generated video<br/>• Asynchronous processing mode, returns a task ID for subsequent queries<br/>• The generated video link is valid for 24 hours, please save it promptly '
+description: |
+    - Secondary editing based on the generated video
+    - Asynchronous processing mode, returns task ID for subsequent queries
+    - The generated video link is valid for 24 hours, please save it promptly
 api: 'POST https://api.apimart.ai/v1/{video_id}/remix'
 ---
-## 路径参数
+## Path Parameters
 
 <ParamField path="video_id" type="string" required>
   Original video task ID
 
-  This is the task ID previously returned by the video generation interface
+  This is the task ID previously returned by the video generation endpoint
 </ParamField>
 
 ## Authorizations
@@ -16,9 +19,9 @@ api: 'POST https://api.apimart.ai/v1/{video_id}/remix'
 <ParamField header="Authorization" type="string" required>
   All API endpoints require Bearer Token authentication
 
-  Obtain your API Key:
+  Get your API Key:
 
-  Visit the [API Key Management Page](https://apimart.ai/console/token) to get your API Key
+  Visit the [API Key management page](https://apimart.ai/console/token) to obtain your API Key
 
   Add it to the request header:
 
@@ -30,7 +33,7 @@ api: 'POST https://api.apimart.ai/v1/{video_id}/remix'
 ## Body
 
 <ParamField body="model" type="string" default="sora-2" required>
-  Video editing model name
+  Name of the video editing model
 
   Supported models:
 
@@ -41,7 +44,7 @@ api: 'POST https://api.apimart.ai/v1/{video_id}/remix'
 </ParamField>
 
 <ParamField body="prompt" type="string" required>
-  Edit instruction description
+  Description of the editing instruction
 </ParamField>
 
 <ParamField body="duration" type="integer">
@@ -76,7 +79,7 @@ api: 'POST https://api.apimart.ai/v1/{video_id}/remix'
 </ResponseField>
 
 <ResponseField name="model" type="string">
-  Name of the model actually used
+  Name of the actual model used
 </ResponseField>
 
 <ResponseField name="object" type="string">
@@ -92,14 +95,14 @@ api: 'POST https://api.apimart.ai/v1/{video_id}/remix'
 
   Possible values:
 
-  * `pending` - Pending processing
+  * `pending` - Pending
   * `processing` - Processing
   * `completed` - Completed
   * `failed` - Failed
 </ResponseField>
 
 <ResponseField name="task_info" type="object">
-  Task detailed information
+  Task details
 
   <Expandable title="Properties">
     <ResponseField name="can_cancel" type="boolean">
@@ -134,7 +137,7 @@ api: 'POST https://api.apimart.ai/v1/{video_id}/remix'
     --header 'Content-Type: application/json' \
     --data '{
       "model": "sora-2",
-      "prompt": "Add one more puppy",
+      "prompt": "Add another puppy",
       "duration": 15,
       "aspect_ratio": "16:9"
     }'
@@ -147,7 +150,7 @@ api: 'POST https://api.apimart.ai/v1/{video_id}/remix'
 
   payload = {
       "model": "sora-2",
-      "prompt": "Add one more puppy",
+      "prompt": "Add another puppy",
       "duration": 15,
       "aspect_ratio": "16:9"
   }
@@ -167,7 +170,7 @@ api: 'POST https://api.apimart.ai/v1/{video_id}/remix'
 
   const payload = {
     model: "sora-2",
-    prompt: "Add one more puppy",
+    prompt: "Add another puppy",
     duration: 15,
     aspect_ratio: "16:9"
   };
@@ -203,7 +206,7 @@ api: 'POST https://api.apimart.ai/v1/{video_id}/remix'
 
       payload := map[string]interface{}{
           "model":        "sora-2",
-          "prompt":       "Add one more puppy",
+          "prompt":       "Add another puppy",
           "duration":     15,
           "aspect_ratio": "16:9",
       }
@@ -239,7 +242,7 @@ api: 'POST https://api.apimart.ai/v1/{video_id}/remix'
           String payload = """
           {
             "model": "sora-2",
-            "prompt": "Add one more puppy",
+            "prompt": "Add another puppy",
             "duration": 15,
             "aspect_ratio": "16:9"
           }
@@ -268,7 +271,7 @@ api: 'POST https://api.apimart.ai/v1/{video_id}/remix'
 
   $payload = [
       "model" => "sora-2",
-      "prompt" => "Add one more puppy",
+      "prompt" => "Add another puppy",
       "duration" => 15,
       "aspect_ratio" => "16:9"
   ];
@@ -298,7 +301,7 @@ api: 'POST https://api.apimart.ai/v1/{video_id}/remix'
 
   payload = {
     model: "sora-2",
-    prompt: "Add one more puppy",
+    prompt: "Add another puppy",
     duration: 15,
     aspect_ratio: "16:9"
   }
@@ -322,7 +325,7 @@ api: 'POST https://api.apimart.ai/v1/{video_id}/remix'
 
   let payload: [String: Any] = [
       "model": "sora-2",
-      "prompt": "Add one more puppy",
+      "prompt": "Add another puppy",
       "duration": 15,
       "aspect_ratio": "16:9"
   ]
@@ -361,7 +364,7 @@ api: 'POST https://api.apimart.ai/v1/{video_id}/remix'
 
           var payload = @"{
               ""model"": ""sora-2"",
-              ""prompt"": ""Add one more puppy"",
+              ""prompt"": ""Add another puppy"",
               ""duration"": 15,
               ""aspect_ratio"": ""16:9""
           }";
@@ -393,7 +396,7 @@ api: 'POST https://api.apimart.ai/v1/{video_id}/remix'
           const char *url = "https://api.apimart.ai/v1/videos/{video_id}/remix";
           const char *payload = "{"
               "\"model\":\"sora-2\","
-              "\"prompt\":\"Add one more puppy\","
+              "\"prompt\":\"Add another puppy\","
               "\"duration\":15,"
               "\"aspect_ratio\":\"16:9\""
           "}";
@@ -431,7 +434,7 @@ api: 'POST https://api.apimart.ai/v1/{video_id}/remix'
           
           NSDictionary *payload = @{
               @"model": @"sora-2",
-              @"prompt": @"Add one more puppy",
+              @"prompt": @"Add another puppy",
               @"duration": @15,
               @"aspect_ratio": @"16:9"
           };
@@ -476,7 +479,7 @@ api: 'POST https://api.apimart.ai/v1/{video_id}/remix'
 
   let payload = {|{
     "model": "sora-2",
-    "prompt": "Add one more puppy",
+    "prompt": "Add another puppy",
     "duration": 15,
     "aspect_ratio": "16:9"
   }|}
@@ -504,7 +507,7 @@ api: 'POST https://api.apimart.ai/v1/{video_id}/remix'
     
     final payload = {
       'model': 'sora-2',
-      'prompt': 'Add one more puppy',
+      'prompt': 'Add another puppy',
       'duration': 15,
       'aspect_ratio': '16:9'
     };
@@ -530,7 +533,7 @@ api: 'POST https://api.apimart.ai/v1/{video_id}/remix'
 
   payload <- list(
     model = "sora-2",
-    prompt = "Add one more puppy",
+    prompt = "Add another puppy",
     duration = 15,
     aspect_ratio = "16:9"
   )

@@ -56,8 +56,8 @@ const SOURCE_LOCALE = { code: "zh", label: "Chinese" };
 // 定义目标语言（从中文翻译到这些语言）
 const allLocales = [
   { code: "en", label: "English" },
-  // { code: "ja", label: "Japanese" },  // 暂时注释，测试翻译
-  // { code: "ko", label: "Korean" },     // 暂时注释，测试翻译
+  { code: "ja", label: "Japanese" },
+  { code: "ko", label: "Korean" },
 ];
 
 // 并发配置
@@ -99,48 +99,157 @@ function generateTranslateSystemPrompt(): string {
     headersSection = `\n\nExamples of headers NOT to translate:\n${examples}`;
   }
 
-  return `You are a professional translator.
-Your task is to translate the string values within JSON objects.
+  return `You are a professional technical translator specializing in MDX (Markdown + JSX) documentation.
+Your task is to translate the string values within JSON objects while preserving all technical formatting.
 
-Rules:
-1. Translate accurately, conveying the original meaning.
-2. **Maintain the original JSON structure.** Do not translate keys, only string values.
-3. **TRANSLATE all user-facing text**, including:
-   - Text content in component attribute values (e.g., title="Properties" → title="属性")
-   - Descriptions, explanations, and documentation text
-   - Section titles and headings (unless specified in do-not-translate list)
-   - Any text that users will read in the UI or documentation
-4. Preserve proper nouns, brand names, and specific technical terms.
-5. **Keep original Markdown formatting EXACTLY**, including:
-   - Bold: **text** → **翻译** (NO space between ** and text)
-   - Italic: *text* → *翻译*
-   - Links: [text](url) → [翻译](url)
-   - Lists, code formatting, etc.
-   - ⚠️ CRITICAL: **text** must become **翻译**, NOT ** 翻译** (no space after opening **)
-   - **Punctuation: Keep English colons (:) as-is, do NOT convert to Chinese colon (：)**
-   - Example: "Limitation: text" → "限制: 文本" (keep the English colon :)
-6. **Ensure all quotes within JSON string values are properly escaped.**
-7. **Do NOT translate:**
-   - Code blocks (content between \`\`\` markers)
-   - Inline code (content between \` markers)
-   - URLs and file paths
-   - Component names (e.g., <Card>, <ParamField>, <Expandable>)
-   - Component attribute names (e.g., "title", "type", "required" - the key names themselves)
-   - Technical terms in code contexts (variable names, function names)
-   - API endpoints and method names${preserveH2 ? "\n   - **Markdown headers starting with ## (keep them in original language)**" : ""}
-   - Lines that contain only technical terms or API names${termsSection}
+=== TERMINOLOGY GLOSSARY (CRITICAL) ===
+Use these EXACT translations for common terms to ensure consistency:
 
-8. **Important distinction:**
-   - ❌ DO NOT translate: <Expandable title="Properties"> (the component name and attribute name)
-   - ✅ DO translate: The attribute VALUE "Properties" → <Expandable title="属性">
-   - ❌ DO NOT translate: <ParamField body="model" type="string"> (attribute names like "body", "type")
-   - ✅ DO translate: Text content inside components
+**API Documentation Terms:**
+- 属性 → Properties (NOT Attributes)
+- 参数 → Parameters
+- 请求 → Request
+- 响应 → Response
+- 限制 → Limitations (for section headers or general constraints)
+- 限制 → Limit (for specific numeric limits like "rate limit")
+- 示例 → Example / Examples
+- 描述 → Description
+- 必填 → Required
+- 可选 → Optional
+- 类型 → Type
+- 默认值 → Default / Default Value
+- 返回值 → Return Value / Returns
+- 错误 → Error
+- 状态 → Status
+- 端点 → Endpoint
+- 请求体 → Request Body
+- 响应体 → Response Body
+- 头部 → Header / Headers
+- 查询参数 → Query Parameters
+- 路径参数 → Path Parameters
 
-9. **Preserve all MDX/JSX component syntax exactly as-is.**${headersSection}
+**Common Phrases:**
+- 生成 → Generate
+- 创建 → Create
+- 获取 → Get / Retrieve
+- 更新 → Update
+- 删除 → Delete
+- 查询 → Query
+- 提交 → Submit
+- 处理 → Process
+- 成功 → Success
+- 失败 → Failed / Failure
+- 完成 → Completed
+- 进行中 → In Progress / Processing
 
-Output Format:
-Provide ONLY the resulting JSON object where the original string values have been replaced by their translations.
-Do not include any explanations, comments, code block markers, or any other text.`;
+=== TRANSLATION RULES ===
+
+1. **Translate accurately** while conveying the original meaning and tone.
+   - **Use the terminology glossary above for consistency**
+   - **Grammar adaptation:**
+     * English: Apply proper pluralization ("5个文件" → "5 files", NOT "5 file")
+     * English: Add articles (a, an, the) where natural ("获取密钥" → "Get the API key")
+     * English: Use appropriate verb tenses (Chinese lacks tense markers)
+     * English: Add spaces between numbers and units ("5秒" → "5 seconds")
+     * CJK: No spaces between numbers and units ("5秒" → "5秒")
+
+2. **JSON Structure (CRITICAL):**
+   - Maintain original structure. Do not translate keys, only string values.
+   - Keep all JSON keys in English (e.g., "description", "title", "prompt")
+
+3. **TRANSLATE all user-facing text:**
+   - **Markdown Content:** Paragraphs, headers (#), lists, blockquotes
+   - **Component Text Content:** Text between tags
+     * \`<Note>这是一个提示</Note>\` → \`<Note>This is a tip</Note>\`
+   - **Component Attributes (String Display ONLY):**
+     * \`title="..."\`, \`description="..."\`, \`label="..."\`, \`placeholder="..."\`
+     * Example: \`<Card title="核心功能">\` → \`<Card title="Core Features">\`
+   - **Table Content:** Headers and cell content (keep structure)
+   - **Code Blocks - Selective Translation (IMPORTANT):**
+     * ✅ TRANSLATE user-facing string values (Context Aware):
+       - \`"prompt": "瀑布..."\` → \`"prompt": "Waterfall..."\` (Human-readable content)
+       - \`"error": "找不到文件"\` → \`"error": "File not found"\`
+     * ✅ TRANSLATE explanatory comments:
+       - \`// 发送请求\` → \`// Send request\`
+       - \`# 变量定义\` → \`# Variable definition\`
+     * ❌ DO NOT translate JSON Keys:
+       - \`"description": "文本"\` → Keep \`"description"\`, translate only the value to \`"Text"\`
+     * ❌ DO NOT translate code syntax/structure:
+       - Variable names, Function calls, Keywords (if, for, class)
+     * ❌ DO NOT translate technical identifiers/Enums:
+       - \`"model": "sora-2"\`, \`status="pending"\`, \`/api/v1/generate\`
+     * ❌ DO NOT translate commented-out code:
+       - \`// console.log(response)\` → Keep as-is
+
+4. **DO NOT translate - Technical & Logic:**
+   - **Component Names:** \`<Card>\`, \`<Step>\`, \`<Note>\`, \`<ParamField>\` (NEVER translate tag names)
+   - **Functional Attributes:** \`href\`, \`icon\`, \`type\`, \`name\`, \`id\`, \`className\`, \`key\`, \`src\`
+     * \`<Card icon="rocket">\` → Keep "rocket" (identifier)
+   - **JSX Expressions:** Content inside \`{}\`
+     * \`value={isOpen}\` → Keep exactly as-is
+     * \`options={['A', 'B']}\` → Keep exactly as-is
+   - **Placeholder/Template Variables (CRITICAL):**
+     * \`{username}\`, \`{id}\`, \`{{variable}}\` (curly braces)
+     * \`\${name}\`, \`$USER\`, \`$API_KEY\` (dollar signs)
+     * \`%s\`, \`%d\`, \`%f\` (printf-style)
+     * \`<username>\`, \`<email>\` (angle brackets)
+     * \`YOUR_API_KEY\`, \`<token>\` (all-caps/angle bracket placeholders)
+   - **Technical Terms (Common Patterns):**
+     * Brand names: Sora2, GPT-4o, Gemini, VEO3, MiniMax, Seedream
+     * Data types: string, integer, boolean, array, object, null
+     * Status values: "submitted", "pending", "completed", "failed", "success"
+     * HTTP methods: GET, POST, PUT, DELETE, PATCH
+     * URLs, file extensions, MIME types, timestamps, environment variables${preserveH2 ? "\n   - **Markdown headers:** Keep ## headers in original language" : ""}${termsSection}
+
+5. **Markdown Format (CRITICAL):**
+   - **Bold/Italic:** \`**粗体**\` → \`**Bold**\`
+   - **Links:** \`[显示文本](URL)\` → \`[Translated Text](URL)\`
+     * **NO SPACE between brackets:** \`[Text](url)\` is correct. \`[Text] (url)\` is WRONG.
+     * Update internal links: \`/zh/...\` → \`/en/...\`
+   - **Images:** \`![Alt文本](path)\` → \`![Translated Alt](path)\`
+   - **Inline code:** \` \\\`code\\\` \` → Keep as-is (do NOT translate)
+   - **Code blocks:** \` \\\`\\\`\\\`json \` → Keep language identifier lowercase
+   - **Admonitions/Callouts:**
+     * \`:::tip 提示\` → \`:::tip Note\` (Translate custom title if present)
+
+6. **Punctuation Conversion:**
+   - Convert Chinese full-width punctuation to Target Language standard
+   - **English:** \`，\`→\`,\` | \`。\`→\`.\` | \`：\`→\`:\` | \`（）\`→\`()\`
+   - **CJK:** Keep full-width if appropriate (。、「」 for Japanese)
+
+7. **Numbers and Units:**
+   - Keep numbers (5, 10.5) as-is
+   - **English:** "5分钟" → "5 minutes" (add space)
+   - **Japanese/Korean:** "5分钟" → "5分" (no space or follow conventions)
+   - **Chinese measure words (量词):** Remove in English
+     * "5个文件" → "5 files"
+     * "3张图片" → "3 images"
+
+8. **Format Preservation (NEVER MODIFY):**
+   - Line breaks (\\n): keep exact count
+   - Indentation/whitespace: preserve exactly
+   - Quote style: " vs ' must stay the same
+   - **Smart Quotes (CRITICAL):** NEVER use \`"\` or \`"\` (curly quotes). Use ONLY \`"\` or \`'\` (straight quotes).
+   - Code block language: \`\`\`json, \`\`\`bash, \`\`\`python (keep lowercase)
+   - Tag spacing: <Tag> NOT < Tag > or <Tag >
+   - **JSX Props Spacing:** \`<Card title="Text">\` NOT \`<Card title = "Text">\`
+   - Table structure: | Header | → | 标题 | (same | count and spacing)
+   - Table separators: |---|---| → |---|---| (never change)
+   - Empty lines: preserve all blank lines
+
+9. **Special Elements:**
+   - **Emoji:** Keep exactly as-is (🎉, 💡, ⚠️, ✅, ❌)
+   - **HTML Comments:** \`<!-- 注释 -->\` → \`<!-- Comment -->\`
+   - **Line Breaks:** Preserve empty lines and structural indentation
+
+10. **JSON Escaping:**
+    - Properly escape quotes in string values
+    - Preserve existing escape sequences: \\n, \\t, \\", \\\\${headersSection}
+
+=== OUTPUT FORMAT ===
+Return ONLY the JSON object with translated values.
+NO explanations, NO comments, NO markdown code blocks, NO extra text.`;
+
 }
 
 const translateSystemPrompt = generateTranslateSystemPrompt();
@@ -196,9 +305,16 @@ interface MdxSection {
   hash: string;      // 段落内容的 hash
 }
 
-// 段落级 Hash 映射
+// 段落级 Hash 映射（旧格式，兼容性保留）
 interface SectionHashMap {
   [sectionId: string]: string;  // sectionId -> hash
+}
+
+// 段落历史记录（新格式）
+interface SectionHistory {
+  id: string;      // 段落ID
+  hash: string;    // 中文内容hash
+  index: number;   // 历史位置
 }
 
 // 将 MDX 内容按段落分割
@@ -345,6 +461,67 @@ function detectSectionChanges(
   return { added, modified, deleted, unchanged };
 }
 
+// V3.0 智能diff算法：基于hash指纹匹配
+interface SectionMapping {
+  sourceIndex: number;          // 当前中文段落的位置
+  targetIndex: number | null;   // 对应的英文段落位置（null表示需要翻译）
+  action: 'keep' | 'translate'; // keep=复用英文, translate=重新翻译
+  reason?: string;              // 调试信息
+}
+
+function smartDiffSectionsV3(
+  currentSections: MdxSection[],     // 当前中文段落
+  historySections: SectionHistory[], // 历史中文段落记录
+  targetSections: MdxSection[]       // 当前英文段落
+): SectionMapping[] {
+  const mappings: SectionMapping[] = [];
+
+  // 构建历史hash -> 位置的映射（快速查找）
+  const historyHashToIndex = new Map<string, number>();
+  for (const item of historySections) {
+    historyHashToIndex.set(item.hash, item.index);
+  }
+
+  // 为每个当前中文段落找到对应的英文翻译
+  for (let currentIndex = 0; currentIndex < currentSections.length; currentIndex++) {
+    const currentSection = currentSections[currentIndex];
+
+    // 检查这个中文段落是否在历史中存在（通过hash匹配）
+    const historicIndex = historyHashToIndex.get(currentSection.hash);
+
+    if (historicIndex !== undefined) {
+      // 这个中文段落未变，尝试复用英文翻译
+      if (historicIndex < targetSections.length) {
+        // 英文文件中对应位置存在段落，复用
+        mappings.push({
+          sourceIndex: currentIndex,
+          targetIndex: historicIndex,
+          action: 'keep',
+          reason: `复用历史位置 ${historicIndex} 的英文翻译`
+        });
+      } else {
+        // 英文文件段落数不够（可能是首次翻译某些语言），需要翻译
+        mappings.push({
+          sourceIndex: currentIndex,
+          targetIndex: null,
+          action: 'translate',
+          reason: '英文文件缺失该段落'
+        });
+      }
+    } else {
+      // 这个中文段落是新增或修改的，需要翻译
+      mappings.push({
+        sourceIndex: currentIndex,
+        targetIndex: null,
+        action: 'translate',
+        reason: '新增或修改的段落'
+      });
+    }
+  }
+
+  return mappings;
+}
+
 // 生成 MDX 文件
 function generateMdxFile(frontmatter: string, content: string): string {
   if (frontmatter) {
@@ -438,31 +615,62 @@ async function translateText(sourceLang: string, targetLang: string, textObj: an
   return translateSingleChunk(sourceLang, targetLang, textObj);
 }
 
-// 读取段落级 Hash 映射
-function loadSectionHashMap(hashFilePath: string): SectionHashMap {
+// 读取段落历史（支持新旧格式）
+function loadSectionHistory(hashFilePath: string): SectionHistory[] {
   if (!existsSync(hashFilePath)) {
-    return {};
+    return [];
   }
 
   try {
     const content = readFileSync(hashFilePath, "utf-8");
-    return JSON.parse(content);
+    const data = JSON.parse(content);
+
+    // 新格式：数组
+    if (Array.isArray(data)) {
+      return data;
+    }
+
+    // 旧格式：对象，转换为新格式
+    const history: SectionHistory[] = [];
+    let index = 0;
+    for (const [id, hash] of Object.entries(data)) {
+      history.push({ id, hash: hash as string, index });
+      index++;
+    }
+    return history;
   } catch {
-    return {};
+    return [];
   }
 }
 
-// 保存段落级 Hash 映射
-function saveSectionHashMap(hashFilePath: string, hashMap: SectionHashMap) {
+// 保存段落历史
+function saveSectionHistory(hashFilePath: string, sections: MdxSection[]) {
   try {
     const hashDir = dirname(hashFilePath);
     if (!existsSync(hashDir)) {
       mkdirSync(hashDir, { recursive: true });
     }
-    writeFileSync(hashFilePath, JSON.stringify(hashMap, null, 2), "utf-8");
+
+    const history: SectionHistory[] = sections.map((section, index) => ({
+      id: section.id,
+      hash: section.hash,
+      index
+    }));
+
+    writeFileSync(hashFilePath, JSON.stringify(history, null, 2), "utf-8");
   } catch (error) {
     console.warn(`  ⚠️  保存段落 hash 失败: ${error}`);
   }
+}
+
+// 兼容性：读取旧格式的 Hash 映射
+function loadSectionHashMap(hashFilePath: string): SectionHashMap {
+  const history = loadSectionHistory(hashFilePath);
+  const hashMap: SectionHashMap = {};
+  for (const item of history) {
+    hashMap[item.id] = item.hash;
+  }
+  return hashMap;
 }
 
 // 检查 MDX 文件是否有段落变更
@@ -531,10 +739,11 @@ async function translateMdxFiles(
       const sourceMdxContent = parseMdxFile(filePath);
       const sourceSections = splitMdxIntoSections(sourceMdxContent);
 
-      // 2. 读取段落 hash 映射
-      const storedHashMap = loadSectionHashMap(hashPath);
+      // 2. 读取历史段落记录（V3.0 新格式）
+      const historySections = loadSectionHistory(hashPath);
 
-      // 3. 检测变更
+      // 3. 检测变更（用于显示统计信息）
+      const storedHashMap = loadSectionHashMap(hashPath);
       const changes = detectSectionChanges(sourceSections, storedHashMap);
       const hasChanges =
         changes.added.length > 0 ||
@@ -573,14 +782,12 @@ async function translateMdxFiles(
             }
 
             // 读取目标语言文件（如果存在）
-            let existingTargetSections: Map<string, MdxSection> = new Map();
+            let existingTargetSections: MdxSection[] = [];
+
             if (existsSync(targetPath) && !forceUpdate) {
               try {
                 const targetMdxContent = parseMdxFile(targetPath);
-                const targetSections = splitMdxIntoSections(targetMdxContent);
-                for (const section of targetSections) {
-                  existingTargetSections.set(section.id, section);
-                }
+                existingTargetSections = splitMdxIntoSections(targetMdxContent);
               } catch (error) {
                 console.warn(`  ⚠️  无法读取现有翻译: ${error}`);
               }
@@ -589,31 +796,53 @@ async function translateMdxFiles(
             // 构建最终的段落列表
             const finalSections: MdxSection[] = [];
 
-            for (const sourceSection of sourceSections) {
-              const needsTranslation =
-                forceUpdate ||
-                changes.added.includes(sourceSection.id) ||
-                changes.modified.includes(sourceSection.id);
+            if (existingTargetSections.length > 0 && !forceUpdate && historySections.length > 0) {
+              // V3.0 增量翻译模式：基于hash指纹智能匹配
+              let keepCount = 0;
+              let translateCount = 0;
 
-              if (needsTranslation) {
-                // 翻译这个段落
-                const sectionObj = { [sourceSection.id]: sourceSection.content };
-                const translatedObj = await translateText(
-                  SOURCE_LOCALE.label,
-                  locale.label,
-                  sectionObj
-                );
-                const translatedContent = translatedObj[sourceSection.id];
+              // 使用V3.0智能diff算法
+              const mappings = smartDiffSectionsV3(
+                sourceSections,
+                historySections,
+                existingTargetSections
+              );
 
-                finalSections.push({
-                  ...sourceSection,
-                  content: translatedContent,
-                });
-              } else if (existingTargetSections.has(sourceSection.id)) {
-                // 复用现有翻译
-                finalSections.push(existingTargetSections.get(sourceSection.id)!);
-              } else {
-                // 如果既不需要翻译又没有现有翻译，翻译它
+              for (const mapping of mappings) {
+                const sourceSection = sourceSections[mapping.sourceIndex];
+
+                if (mapping.action === 'keep' && mapping.targetIndex !== null) {
+                  // 复用历史位置的英文翻译
+                  finalSections.push({
+                    ...sourceSection,
+                    content: existingTargetSections[mapping.targetIndex].content,
+                  });
+                  keepCount++;
+                } else {
+                  // 需要翻译（新增或修改）
+                  const sectionObj = { [sourceSection.id]: sourceSection.content };
+                  const translatedObj = await translateText(
+                    SOURCE_LOCALE.label,
+                    locale.label,
+                    sectionObj
+                  );
+                  const translatedContent = translatedObj[sourceSection.id];
+
+                  finalSections.push({
+                    ...sourceSection,
+                    content: translatedContent,
+                  });
+                  translateCount++;
+                }
+              }
+
+              console.log(
+                `  ✅ ${locale.code}/${relativePath}: ` +
+                `复用 ${keepCount} | 翻译 ${translateCount}`
+              );
+            } else {
+              // 全量翻译模式：目标文件不存在、强制更新、或无历史记录
+              for (const sourceSection of sourceSections) {
                 const sectionObj = { [sourceSection.id]: sourceSection.content };
                 const translatedObj = await translateText(
                   SOURCE_LOCALE.label,
@@ -627,6 +856,10 @@ async function translateMdxFiles(
                   content: translatedContent,
                 });
               }
+
+              console.log(
+                `  ✅ ${locale.code}/${relativePath}: 全量翻译 ${sourceSections.length} 个段落`
+              );
             }
 
             // 从段落重建完整的 MDX 文件
@@ -635,13 +868,6 @@ async function translateMdxFiles(
             // 保存文件
             writeFileSync(targetPath, translatedMdxContent.fullText, "utf-8");
 
-            const changedCount = forceUpdate
-              ? sourceSections.length
-              : changes.added.length + changes.modified.length;
-
-            console.log(
-              `  ✅ ${locale.code}/${relativePath}: 翻译 ${changedCount} 个段落`
-            );
             return { success: true, skipped: false };
           } catch (error) {
             console.error(`  ❌ ${locale.code}/${relativePath}: ${error}`);
@@ -669,9 +895,8 @@ async function translateMdxFiles(
         }
       }
 
-      // 翻译成功后，保存段落 hash 映射
-      const newHashMap = generateSectionHashMap(sourceSections);
-      saveSectionHashMap(hashPath, newHashMap);
+      // 翻译成功后，保存段落历史记录（V3.0 新格式）
+      saveSectionHistory(hashPath, sourceSections);
     } catch (error) {
       console.error(`  ❌ 处理文件失败: ${error}`);
       errorCount += targetLanguages.length;

@@ -1,0 +1,536 @@
+---
+title: 'doubao-seedance-1-0-pro ビデオ生成'
+description: |
+    - 非同期処理モードでタスクIDを返し、後続のクエリに使用可能
+    - テキストからビデオ、画像からビデオ（最初のフレーム/最後のフレーム/参照画像）に対応
+    - 高速版（40〜90秒）と高品質版（90〜300秒）を選択可能
+    - 横画面、縦画面、正方形の複数のアスペクト比に対応
+api: 'POST https://api.apimart.ai/v1/videos/generations'
+---
+## 認証
+
+<ParamField header="Authorization" type="string" required>
+  すべてのエンドポイントは Bearer Token による認証が必要です
+
+  API Key の取得：
+
+  [API Key 管理ページ](https://apimart.ai/console/token) にアクセスして API Key を取得してください
+
+  使用時はリクエストヘッダーに以下を追加してください：
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## リクエストパラメーター
+
+<ParamField body="model" type="string" required>
+  動画生成モデル名
+
+  対応モデル：
+
+  * `doubao-seedance-1-0-pro-fast` - 高速版、生成速度が速い（40〜90秒）、プレビューや反復に適している
+  * `doubao-seedance-1-0-pro-quality` - 高品質版、生成時間は長め（90〜300秒）、画質が優れている
+</ParamField>
+
+<ParamField body="prompt" type="string" required>
+  動画内容の説明
+
+  シーン、動作、スタイルなどを詳細に説明することを推奨し、より良い生成効果を得るため
+
+  例：`"海辺の夕日、金色の光が海面に降り注ぎ、波が砂浜に優しく打ち寄せる"`
+</ParamField>
+
+<ParamField body="duration" type="integer" default="5">
+  動画の長さ（秒）
+
+  対応範囲：`2`〜`12`秒
+
+  デフォルト値：`5`
+</ParamField>
+
+<ParamField body="aspect_ratio" type="string" default="16:9">
+  動画のアスペクト比
+
+  選択可能な値：
+
+  * `16:9` - 横向き
+  * `9:16` - 縦向き
+  * `1:1` - 正方形
+  * `4:3` - 伝統的な比率
+  * `3:4` - 縦向きの伝統的な比率
+  * `21:9` - 超ワイドスクリーン
+
+  デフォルト値：`16:9`
+</ParamField>
+
+<ParamField body="resolution" type="string" default="720p">
+  動画の解像度
+
+  選択可能な値：
+
+  * `480p` - 標準画質
+  * `720p` - 高画質
+  * `1080p` - フルHD
+
+  デフォルト値：`720p`
+
+  <Warning>
+    **1080p の制限**：参照画像（`image_with_roles` 内の `role: reference`）のシーン使用時には、1080p 解像度はサポートされません
+  </Warning>
+</ParamField>
+
+## 解像度とアスペクト比の組み合わせ
+
+| 解像度   | 対応可能なアスペクト比                          | 備考       |
+| ----- | ------------------------------- | -------- |
+| 480p  | 16:9, 4:3, 1:1, 3:4, 9:16, 21:9 | 全て対応     |
+| 720p  | 16:9, 4:3, 1:1, 3:4, 9:16, 21:9 | 全て対応     |
+| 1080p | 16:9, 4:3, 1:1, 3:4, 9:16, 21:9 | 参考画像シーンは非対応 |
+
+<ParamField body="image_urls" type="array">
+  ファーストフレーム画像のURL配列、画像から動画を生成
+
+  動画の開始画面を指定するために使用
+
+  例：`["https://example.com/cat.png"]`
+
+  <Warning>
+    `image_urls` と `image_with_roles` は同時に使用できません
+  </Warning>
+</ParamField>
+
+<ParamField body="image_with_roles" type="array">
+  役割付き画像配列、より詳細な制御が可能
+
+  <Expandable title="フィールド説明">
+    <ParamField body="url" type="string" required>
+      画像のURLアドレス
+    </ParamField>
+
+    <ParamField body="role" type="string" required>
+      画像の役割
+
+      選択可能な値：
+
+      * `first_frame` - ファーストフレーム画像、動画の開始画面として使用
+      * `last_frame` - ラストフレーム画像、動画の終了画面として使用
+      * `reference` - 参考画像、動画のスタイルガイドとして使用
+    </ParamField>
+  </Expandable>
+
+  例：
+
+  ```json 
+  [
+    {"url": "https://example.com/start.png", "role": "first_frame"},
+    {"url": "https://example.com/end.png", "role": "last_frame"}
+  ]
+  ```
+
+  <Warning>
+    `image_urls` と `image_with_roles` は同時に使用できません
+  </Warning>
+</ParamField>
+
+## Response
+
+<ResponseField name="code" type="integer">
+  レスポンスステータスコード、成功時は 200
+</ResponseField>
+
+<ResponseField name="data" type="array">
+  戻り値データの配列
+
+  <Expandable title="配列の要素">
+    <ResponseField name="status" type="string">
+      タスクの状態、初回の送信時は `submitted`
+    </ResponseField>
+
+    <ResponseField name="task_id" type="string">
+      タスクの一意識別子。タスクの状態や結果を照会するために使用
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+  ```bash cURL
+  curl --request POST \
+    --url https://api.apimart.ai/v1/videos/generations \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "doubao-seedance-1-0-pro-fast",
+      "prompt": "日差しの下で遊んでいるかわいい子猫、ふわふわの毛、明るい目",
+      "duration": 5,
+      "aspect_ratio": "16:9",
+      "resolution": "720p"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://api.apimart.ai/v1/videos/generations"
+
+  payload = {
+      "model": "doubao-seedance-1-0-pro-fast",
+      "prompt": "日差しの下で遊んでいるかわいい子猫、ふわふわの毛、明るい目",
+      "duration": 5,
+      "aspect_ratio": "16:9",
+      "resolution": "720p"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://api.apimart.ai/v1/videos/generations";
+
+  const payload = {
+    model: "doubao-seedance-1-0-pro-fast",
+    prompt: "日差しの下で遊んでいるかわいい子猫、ふわふわの毛、明るい目",
+    duration: 5,
+    aspect_ratio: "16:9",
+    resolution: "720p"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://api.apimart.ai/v1/videos/generations"
+
+      payload := map[string]interface{}{
+          "model":        "doubao-seedance-1-0-pro-fast",
+          "prompt":       "日差しの下で遊んでいるかわいい子猫、ふわふわの毛、明るい目",
+          "duration":     5,
+          "aspect_ratio": "16:9",
+          "resolution":   "720p",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://api.apimart.ai/v1/videos/generations";
+
+          String payload = """
+          {
+            "model": "doubao-seedance-1-0-pro-fast",
+            "prompt": "日差しの下で遊んでいるかわいい子猫、ふわふわの毛、明るい目",
+            "duration": 5,
+            "aspect_ratio": "16:9",
+            "resolution": "720p"
+          }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://api.apimart.ai/v1/videos/generations";
+
+  $payload = [
+      "model" => "doubao-seedance-1-0-pro-fast",
+      "prompt" => "日差しの下で遊んでいるかわいい子猫、ふわふわの毛、明るい目",
+      "duration" => 5,
+      "aspect_ratio" => "16:9",
+      "resolution" => "720p"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url = URI("https://api.apimart.ai/v1/videos/generations")
+
+  payload = {
+    model: "doubao-seedance-1-0-pro-fast",
+    prompt: "日差しの下で遊んでいるかわいい子猫、ふわふわの毛、明るい目",
+    duration: 5,
+    aspect_ratio: "16:9",
+    resolution: "720p"
+  }
+
+  http = Net::HTTP.new(url.host, url.port)
+  http.use_ssl = true
+
+  request = Net::HTTP::Post.new(url)
+  request["Authorization"] = "Bearer <token>"
+  request["Content-Type"] = "application/json"
+  request.body = payload.to_json
+
+  response = http.request(request)
+  puts response.body
+  ```
+
+  ```swift Swift
+  import Foundation
+
+  let url = URL(string: "https://api.apimart.ai/v1/videos/generations")!
+
+  let payload: [String: Any] = [
+      "model": "doubao-seedance-1-0-pro-fast",
+      "prompt": "日差しの下で遊んでいるかわいい子猫、ふわふわの毛、明るい目",
+      "duration": 5,
+      "aspect_ratio": "16:9",
+      "resolution": "720p"
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      if let error = error {
+          print("Error: \(error)")
+          return
+      }
+
+      if let data = data, let responseString = String(data: data, encoding: .utf8) {
+          print(responseString)
+      }
+  }
+
+  task.resume()
+  ```
+
+  ```csharp C#
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url = "https://api.apimart.ai/v1/videos/generations";
+
+          var payload = @"{
+              ""model"": ""doubao-seedance-1-0-pro-fast"",
+              ""prompt"": ""日差しの下で遊んでいるかわいい子猫、ふわふわの毛、明るい目"",
+              ""duration"": 5,
+              ""aspect_ratio"": ""16:9"",
+              ""resolution"": ""720p""
+          }";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+
+          var content = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          var result = await response.Content.ReadAsStringAsync();
+
+          Console.WriteLine(result);
+      }
+  }
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+  {
+    "code": 200,
+    "data": [
+      {
+        "status": "submitted",
+        "task_id": "task_01K8SGYNNNVBQTXNR4MM964S7K"
+      }
+    ]
+  }
+  ```
+
+  ```json 400
+  {
+    "error": {
+      "code": 400,
+      "message": "リクエストパラメータが無効です",
+      "type": "invalid_request_error"
+    }
+  }
+  ```
+
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "認証に失敗しました。APIキーを確認してください",
+      "type": "authentication_error"
+    }
+  }
+  ```
+
+  ```json 402
+  {
+    "error": {
+      "code": 402,
+      "message": "アカウント残高が不足しています。チャージ後に再試行してください",
+      "type": "payment_required"
+    }
+  }
+  ```
+
+  ```json 429
+  {
+    "error": {
+      "code": 429,
+      "message": "リクエストが多すぎます。しばらくしてから再試行してください",
+      "type": "rate_limit_error"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "サーバー内部エラーです。後ほど再試行してください",
+      "type": "server_error"
+    }
+  }
+  ```
+</ResponseExample>
+
+## 使用シーン
+
+### シーン 1：横画面プレビュー動画の高速生成
+
+```json
+{
+  "model": "doubao-seedance-1-0-pro-fast",
+  "prompt": "海辺の夕日、金色の陽光が海面に降り注ぎ、波が砂浜に優しく打ち寄せる"
+}
+```
+
+### シーン 2：高品質縦画面ショート動画の生成
+
+```json
+{
+  "model": "doubao-seedance-1-0-pro-quality",
+  "prompt": "桜の木の下で回る女の子、花びらが風に舞い落ちる",
+  "duration": 5,
+  "aspect_ratio": "9:16",
+  "resolution": "1080p"
+}
+```
+
+### シーン 3：商品画像を基にした動的展示動画の生成
+
+```json
+{
+  "model": "doubao-seedance-1-0-pro-fast",
+  "prompt": "商品がゆっくり回転しながら展示され、背景は純白色で光が柔らかい",
+  "image_urls": ["https://example.com/product.png"],
+  "duration": 5,
+  "aspect_ratio": "1:1"
+}
+```
+
+### シーン 4：動的トランジション効果の制作（最初と最後のフレーム）
+
+```json
+{
+  "model": "doubao-seedance-1-0-pro-quality",
+  "prompt": "画面が昼から夜へ徐々に移り変わり、街の灯りが次第に灯る",
+  "image_with_roles": [
+    {"url": "https://example.com/day.png", "role": "first_frame"},
+    {"url": "https://example.com/night.png", "role": "last_frame"}
+  ],
+  "duration": 5
+}
+```
+
+<Note>
+  **タスク結果の確認**
+
+  動画生成は非同期タスクとして行われ、送信後に `task_id` が返されます。[タスク状態の取得](/cn/api-reference/tasks/status) エンドポイントを使用して生成の進行状況と結果を確認してください。
+</Note>

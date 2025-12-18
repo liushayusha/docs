@@ -1,18 +1,21 @@
 ---
 title: 'Seedream-4.0 Image Generation'
-description: '• Asynchronous processing mode, returns task ID for subsequent query<br/>• Supports multiple generation modes including text-to-image, image-to-image, image editing, etc.<br/>• Generated image links are valid for 24 hours, please save them as soon as possible '
+description: |
+    - Asynchronous processing mode, returns a task ID for subsequent queries
+    - Supports multiple generation modes including text-to-image, image-to-image, and image editing
+    - Generated image links are valid for 24 hours, please save them promptly
 api: 'POST https://api.apimart.ai/v1/images/generations'
 ---
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  All endpoints require authentication using a Bearer Token
+  All endpoints require authentication with a Bearer Token.
 
-  Obtaining an API Key:
+  Get API Key:
 
-  Visit the [API Key Management Page](https://apimart.ai/console/token) to get your API Key
+  Visit [API Key Management Page](https://apimart.ai/console/token) to get your API Key.
 
-  Add the following to the request header when using:
+  Add the following to request headers:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -34,7 +37,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 </ParamField>
 
 <ParamField body="size" type="string" default="1:1">
-  Aspect ratio for image generation
+  Aspect ratio of the generated image
 
   Supported aspect ratios:
 
@@ -60,13 +63,13 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   **Resolution reference sizes:**
 
-  | Resolution | 1:1 Size   | 16:9 Size  |
+  | Resolution | 1:1 Size    | 16:9 Size   |
   | --- | --------- | --------- |
   | 1K  | 1024x1024 | 1280x720  |
   | 2K  | 2048x2048 | 2560x1440 |
   | 4K  | 4096x4096 | 5404x3040 |
 
-  <Expandable title="Complete Pixel Mapping Table">
+  <Expandable title="Full Pixel Mapping Table">
     **1K Resolution**
 
     | Ratio | Pixels     |
@@ -120,44 +123,44 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   **Note:**
 
-  * The actual number of images generated depends not only on this parameter but also on the number of input reference images. Number of input reference images + final generated images ≤ 15
-  * **You must enter a pure number (e.g., `1`), do not add quotes, or it will cause an error**
+  * The actual number of images generated is affected both by this parameter and by the number of input reference images. The sum of input reference images + final generated images ≤ 15
+  * **Must input a pure number (e.g., `1`), do not add quotes, or it will cause an error**
 
-  Prepayment will be deducted based on the number of images generated
+  The charge will be deducted based on the quantity generated
 </ParamField>
 
 <ParamField body="image_urls" type="array">
-  List of URLs for reference images, used for image-to-image or image editing
+  List of reference image URLs for image-to-image generation or image editing
 
   Supports two formats:
 
-  **1. Full image URL address**
+  **1. Full image URL**
 
-  * Publicly accessible image URLs (http\:// or https\://)
+  * Publicly accessible image URLs (http:// or https://)
   * Example: `https://example.com/image.jpg`
 
   **2. Base64 encoding format**
 
-  * **Must use the complete Data URI format**
-  * Format: `data:image/{format};base64,{base64 data}`
+  * **Must use full Data URI format**
+  * Format: `data:image/{format};base64,{base64data}`
   * Supported image formats: jpeg, png
   * Example: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
   * ⚠️ Note: Must include the prefix `data:image/jpeg;base64,`
 
-  **Limitations:**
+  **Limits:**
 
-  * Up to 10 images
+  * Maximum 10 images
   * Image formats: jpeg, png
-  * Aspect ratio (width/height) range: \[1/3, 3]
-  * Width and height length (px) > 14
-  * Single image size: no larger than 10MB
+  * Aspect ratio (width/height) range: [1/3, 3]
+  * Width or height (px) > 14
+  * Single image size: no more than 10MB
   * Total pixels: no more than 6000×6000 px
 </ParamField>
 
 <ParamField body="optimize_prompt_options" type="string" default="standard">
   Prompt optimization mode
 
-  * `standard`: Standard mode, higher content quality, longer processing time
+  * `standard`: Standard mode, higher quality of generated content, longer processing time
   * `fast`: Fast mode, shorter processing time, average quality
 
   Default: `standard`
@@ -166,25 +169,25 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 <ParamField body="sequential_image_generation" type="string" default="disabled">
   Sequential image generation mode (exclusive feature of Doubao)
 
-  Controls whether multiple images are generated:
+  Controls whether to generate multiple images:
 
-  * `disabled`: Disable sequential mode, even if multiple reference images exist, only 1 image is generated (default)
-  * `auto`: Enable sequential mode, multiple images can be generated
+  * `disabled`: Disable sequential mode, generate only 1 image even if there are multiple reference images (default)
+  * `auto`: Enable sequential mode to generate multiple images
 
-  **Instructions:**
+  **Usage instructions:**
 
   * ✅ Must provide `image_urls` - at least 1 reference image required
   * ✅ Set `n: 3` or use `sequential_image_generation: "auto"` + `max_images: 3`
-  * ✅ This will generate 3 different images based on reference images
+  * ✅ This will generate 3 different images based on the reference images
   * ⚠️ When `n > 1`, it will automatically set to `auto`
 
   **Limitations:**
 
-  * Pure text-to-image (without `image_urls`) cannot generate multiple images, this is a Doubao API limitation
+  * Pure text-to-image (no `image_urls`) cannot generate multiple images, this is a limitation of the Doubao API
 </ParamField>
 
 <ParamField body="sequential_image_generation_options" type="object">
-  Options for sequential image generation
+  Sequential image generation options
 
   Available when `sequential_image_generation` is set to `auto`
 
@@ -203,7 +206,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 </ParamField>
 
 <ParamField body="watermark" type="boolean" default="false">
-  Whether to add a watermark to the generated image
+  Whether to add a watermark on the generated images
 
   * `true`: Add watermark
   * `false`: Do not add watermark (default)
@@ -239,7 +242,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
     --header 'Content-Type: application/json' \
     --data '{
       "model": "doubao-seedance-4-0",
-      "prompt": "Cute panda playing in a bamboo forest",
+      "prompt": "Cute panda playing in the bamboo forest",
       "size": "1:1",
       "resolution": "2K",
       "n": 1,
@@ -256,7 +259,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   payload = {
       "model": "doubao-seedance-4-0",
-      "prompt": "Cute panda playing in a bamboo forest",
+      "prompt": "Cute panda playing in the bamboo forest",
       "size": "1:1",
       "resolution": "2K",
       "n": 1,
@@ -280,7 +283,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   const payload = {
     model: "doubao-seedance-4-0",
-    prompt: "Cute panda playing in a bamboo forest",
+    prompt: "Cute panda playing in the bamboo forest",
     size: "1:1",
     resolution: "2K",
     n: 1,
@@ -320,7 +323,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
       payload := map[string]interface{}{
           "model":      "doubao-seedance-4-0",
-          "prompt":     "Cute panda playing in a bamboo forest",
+          "prompt":     "Cute panda playing in the bamboo forest",
           "size":       "1:1",
           "resolution": "2K",
           "n":          1,
@@ -360,7 +363,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
           String payload = """
           {
             "model": "doubao-seedance-4-0",
-            "prompt": "Cute panda playing in a bamboo forest",
+            "prompt": "Cute panda playing in the bamboo forest",
             "size": "1:1",
             "resolution": "2K",
             "n": 1,
@@ -393,7 +396,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   $payload = [
       "model" => "doubao-seedance-4-0",
-      "prompt" => "Cute panda playing in a bamboo forest",
+      "prompt" => "Cute panda playing in the bamboo forest",
       "size" => "1:1",
       "resolution" => "2K",
       "n" => 1,
@@ -427,7 +430,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   payload = {
     model: "doubao-seedance-4-0",
-    prompt: "Cute panda playing in a bamboo forest",
+    prompt: "Cute panda playing in the bamboo forest",
     size: "1:1",
     resolution: "2K",
     n: 1,
@@ -455,7 +458,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   let payload: [String: Any] = [
       "model": "doubao-seedance-4-0",
-      "prompt": "Cute panda playing in a bamboo forest",
+      "prompt": "Cute panda playing in the bamboo forest",
       "size": "1:1",
       "resolution": "2K",
       "n": 1,
@@ -498,7 +501,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
           var payload = @"{
               ""model"": ""doubao-seedance-4-0"",
-              ""prompt"": ""Cute panda playing in a bamboo forest"",
+              ""prompt"": ""Cute panda playing in the bamboo forest"",
               ""size"": ""1:1"",
               ""resolution"": ""2K"",
               ""n"": 1,
@@ -534,7 +537,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
           const char *url = "https://api.apimart.ai/v1/images/generations";
           const char *payload = "{"
               "\"model\":\"doubao-seedance-4-0\","
-              "\"prompt\":\"Cute panda playing in a bamboo forest\","
+              "\"prompt\":\"Cute panda playing in the bamboo forest\","
               "\"size\":\"1:1\","
               "\"resolution\":\"2K\","
               "\"n\":1,"
@@ -574,7 +577,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
           
           NSDictionary *payload = @{
               @"model": @"doubao-seedance-4-0",
-              @"prompt": @"Cute panda playing in a bamboo forest",
+              @"prompt": @"Cute panda playing in the bamboo forest",
               @"size": @"1:1",
               @"resolution": @"2K",
               @"n": @1,
@@ -623,7 +626,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   let payload = {|{
     "model": "doubao-seedance-4-0",
-    "prompt": "Cute panda playing in a bamboo forest",
+    "prompt": "Cute panda playing in the bamboo forest",
     "size": "1:1",
     "resolution": "2K",
     "n": 1,
@@ -655,7 +658,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
     
     final payload = {
       'model': 'doubao-seedance-4-0',
-      'prompt': 'Cute panda playing in a bamboo forest',
+      'prompt': 'Cute panda playing in the bamboo forest',
       'size': '1:1',
       'resolution': '2K',
       'n': 1,
@@ -685,7 +688,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   payload <- list(
     model = "doubao-seedance-4-0",
-    prompt = "Cute panda playing in a bamboo forest",
+    prompt = "Cute panda playing in the bamboo forest",
     size = "1:1",
     resolution = "2K",
     n = 1,
@@ -745,7 +748,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   {
     "error": {
       "code": 402,
-      "message": "Insufficient account balance, please top up and try again",
+      "message": "Insufficient account balance, please recharge and try again",
       "type": "payment_required"
     }
   }

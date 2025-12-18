@@ -1,18 +1,21 @@
 ---
 title: 'GPT-4o-image Image Generation'
-description: '• Asynchronous processing mode, returns a task ID for subsequent queries<br/>• Supports multiple generation modes such as text-to-image, image-to-image, and image editing.<br/>• Generated image links are valid for 24 hours, please save them promptly '
+description: |
+    - Asynchronous processing mode, returns a task ID for subsequent queries
+    - Supports multiple generation modes including text-to-image, image-to-image, and image editing.
+    - Generated image links are valid for 24 hours, please save them promptly
 api: 'POST https://api.apimart.ai/v1/images/generations'
 ---
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  All endpoints require authentication using a Bearer Token
+  All endpoints require authentication using a Bearer Token.
 
-  Obtain API Key:
+  Get the API Key:
 
-  Visit the [API Key Management Page](https://apimart.ai/console/token) to get your API Key
+  Visit the [API Key Management Page](https://apimart.ai/console/token) to obtain your API Key.
 
-  Add the following to the request header when using:
+  Add the following to the request header:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -22,7 +25,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 ## Body
 
 <ParamField body="model" type="string" default="gpt-4o-image" required>
-  Name of the image generation model
+  Image generation model name
 
   Example: `"gpt-4o-image"`
 </ParamField>
@@ -30,11 +33,11 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 <ParamField body="prompt" type="string" required>
   Text description for image generation
 
-  Maximum 1000 characters
+  Up to 1000 characters
 </ParamField>
 
 <ParamField body="size" type="string">
-  Size of the generated image
+  Image generation size
 
   Supported formats:
 
@@ -42,22 +45,22 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 </ParamField>
 
 <ParamField body="n" type="integer">
-  Number of images to generate
+  Number of generated images
 
-  Supports 1, 2, 4; pre-charging applies based on the number generated
+  Supports 1, 2, 4, with pre-charging based on the number generated
 
-  Default value: 1
+  Default: 1
 
-  **⚠️ Note:** Must input a pure number (e.g. `1`), do not add quotes, or an error will occur
+  **⚠️ Note:** Must input a pure number (e.g., `1`), do not add quotes or an error will occur
 </ParamField>
 
 <ParamField body="image_urls" type="array">
   List of reference image URLs, used for image-to-image or image editing
 
-  **💡 Quick fill (Try it area):**
+  **💡 Quick fill (Try it section):**
 
   1. Click "+ Add an item" to add an image URL
-  2. Input the full URL address of the image or base64 data
+  2. Enter the full URL or base64 data of the image
 
   <Expandable title="Detailed field description">
     <ParamField body="url" type="string" required>
@@ -65,9 +68,9 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
       Supports two formats:
 
-      **1. Full image URL address**
+      **1. Full image URL**
 
-      * Publicly accessible image URLs (http\:// or https\://)
+      * Publicly accessible image URL (http\:// or https\://)
       * Example: `https://example.com/image.jpg`
 
       **2. Base64 encoded format**
@@ -76,11 +79,11 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
       * Format: `data:image/{format};base64,{base64 data}`
       * Supported image formats: jpeg, png, webp, etc.
       * Example: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
-      * ⚠️ Note: Must include the prefix `data:image/jpeg;base64,`
+      * ⚠️ Note: Must include the `data:image/jpeg;base64,` prefix
 
       **Limitations:**
 
-      * Single image size no more than 10MB
+      * Single image not exceeding 10MB
       * Supported formats: .jpeg, .jpg, .png, .webp
     </ParamField>
   </Expandable>
@@ -91,9 +94,9 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 <ParamField body="mask_url" type="string">
   URL of the mask image
 
-  * Must be PNG format
+  * Must be in PNG format
   * Size must match the reference image
-  * No larger than 4MB
+  * Not exceeding 4MB
 </ParamField>
 
 ## Response
@@ -126,7 +129,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
     --header 'Content-Type: application/json' \
     --data '{
       "model": "gpt-4o-image",
-      "prompt": "An ancient castle under a starry sky",
+      "prompt": "An ancient castle under the starry sky",
       "size": "1:1",
       "n": 1,
       "image_urls": [
@@ -142,7 +145,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   payload = {
       "model": "gpt-4o-image",
-      "prompt": "An ancient castle under a starry sky",
+      "prompt": "An ancient castle under the starry sky",
       "size": "1:1",
       "n": 1,
       "image_urls": [
@@ -163,7 +166,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   const payload = {
     model: "gpt-4o-image",
-    prompt: "An ancient castle under a starry sky",
+    prompt: "An ancient castle under the starry sky",
     size: "1:1",
     n: 1,
     image_urls: [
@@ -200,7 +203,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
       payload := map[string]interface{}{
           "model":  "gpt-4o-image",
-          "prompt": "An ancient castle under a starry sky",
+          "prompt": "An ancient castle under the starry sky",
           "size":   "1:1",
           "n":      1,
           "image_urls": []string{
@@ -238,7 +241,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
           String payload = """
           {
             "model": "gpt-4o-image",
-            "prompt": "An ancient castle under a starry sky",
+            "prompt": "An ancient castle under the starry sky",
             "size": "1:1",
             "n": 1,
             "image_urls": [
@@ -269,7 +272,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   $payload = [
       "model" => "gpt-4o-image",
-      "prompt" => "An ancient castle under a starry sky",
+      "prompt" => "An ancient castle under the starry sky",
       "size" => "1:1",
       "n" => 1,
       "image_urls" => [
@@ -300,7 +303,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   payload = {
     model: "gpt-4o-image",
-    prompt: "An ancient castle under a starry sky",
+    prompt: "An ancient castle under the starry sky",
     size: "1:1",
     n: 1,
     image_urls: [
@@ -325,7 +328,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   let payload: [String: Any] = [
       "model": "gpt-4o-image",
-      "prompt": "An ancient castle under a starry sky",
+      "prompt": "An ancient castle under the starry sky",
       "size": "1:1",
       "n": 1,
       "image_urls": [
@@ -365,7 +368,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
           var payload = @"{
               ""model"": ""gpt-4o-image"",
-              ""prompt"": ""An ancient castle under a starry sky"",
+              ""prompt"": ""An ancient castle under the starry sky"",
               ""size"": ""1:1"",
               ""n"": 1,
               ""image_urls"": [
@@ -400,7 +403,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
           const char *url = "https://api.apimart.ai/v1/images/generations";
           const char *payload = "{"
               "\"model\":\"gpt-4o-image\","
-              "\"prompt\":\"An ancient castle under a starry sky\","
+              "\"prompt\":\"An ancient castle under the starry sky\","
               "\"size\":\"1:1\","
               "\"n\":1,"
               "\"image_urls\":[\"https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png\"]"
@@ -439,7 +442,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
           
           NSDictionary *payload = @{
               @"model": @"gpt-4o-image",
-              @"prompt": @"An ancient castle under a starry sky",
+              @"prompt": @"An ancient castle under the starry sky",
               @"size": @"1:1",
               @"n": @1,
               @"image_urls": @[
@@ -487,7 +490,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   let payload = {|{
     "model": "gpt-4o-image",
-    "prompt": "An ancient castle under a starry sky",
+    "prompt": "An ancient castle under the starry sky",
     "size": "1:1",
     "n": 1,
     "image_urls": [
@@ -516,7 +519,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
     
     final payload = {
       'model': 'gpt-4o-image',
-      'prompt': 'An ancient castle under a starry sky',
+      'prompt': 'An ancient castle under the starry sky',
       'size': '1:1',
       'n': 1,
       'image_urls': [
@@ -543,7 +546,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   payload <- list(
     model = "gpt-4o-image",
-    prompt = "An ancient castle under a starry sky",
+    prompt = "An ancient castle under the starry sky",
     size = "1:1",
     n = 1,
     image_urls = list(
