@@ -4,6 +4,14 @@ description: '• 基于已生成的视频进行二次编辑<br/>• 异步处�
 api: 'POST https://api.apimart.ai/v1/{video_id}/remix'
 ---
 
+## 路径参数
+
+<ParamField path="video_id" type="string" required>
+  原视频任务 ID
+
+  这是之前通过视频生成接口返回的任务ID
+</ParamField>
+
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
