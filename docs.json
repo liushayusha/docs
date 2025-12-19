@@ -373,12 +373,12 @@
     {
         "label": "",
         "icon": "x-twitter",
-        "href": "https://x.com/your-x-handle"
+        "href": "https://x.com/APIMart_"
       },
       {
         "label": "Discord",
         "icon": "discord",
-        "href": "https://discord.gg/your-discord-link"
+        "href": "https://discord.com/invite/V8zqssyZ5c"
       },
       {
         "label": "WeChat",
@@ -389,7 +389,7 @@
     "primary": {
       "type": "button",
       "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
+      "href": "https://apimart.ai"
     }
   },
   "contextual": {
