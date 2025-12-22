@@ -30,7 +30,7 @@ APIMart は、画像と動画の生成サービスを提供する統合 AI コ�
 
 ```bash
 curl --request POST \
-  --url http://pxz-api.xinsulv.com/api/openapi/submit \
+  --url https://pxz-api.xinsulv.com/api/openapi/submit \
   --header 'Authorization: Bearer YOUR_API_KEY' \
   --header 'Content-Type: application/json' \
   --data '{
@@ -48,7 +48,7 @@ curl --request POST \
 
 ```bash
 curl --request POST \
-  --url http://pxz-api.xinsulv.com/api/openapi/query \
+  --url https://pxz-api.xinsulv.com/api/openapi/query \
   --header 'Authorization: Bearer YOUR_API_KEY' \
   --header 'Content-Type: application/json' \
   --data-raw '{
@@ -184,7 +184,7 @@ Authorization: Bearer YOUR_API_KEY
     タスク送信時に返された `task_id` を使用してタスクステータス照会 API を使用します:
 
     ```bash
-    POST http://pxz-api.xinsulv.com/api/openapi/query
+    POST https://pxz-api.xinsulv.com/api/openapi/query
     ```
 
     詳細は [タスクステータス照会ドキュメント](/ja/api-reference/tasks/status) をご覧ください。

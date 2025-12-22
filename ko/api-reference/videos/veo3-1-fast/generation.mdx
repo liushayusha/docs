@@ -5,7 +5,7 @@ description: |
     - 텍스트에서 영상 변환, 이미지에서 영상 생성 등 지원
     - 속도 최적화된 빠른 버전
     - 첫 프레임 및 마지막 프레임 참고 이미지 지원
-api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
+api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 ---
 ## Authorizations
 
@@ -99,7 +99,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 <RequestExample>
   ```bash cURL
   curl --request POST \
-    --url http://pxz-api.xinsulv.com/api/openapi/submit \
+    --url https://pxz-api.xinsulv.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
@@ -116,7 +116,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   ```python Python
   import requests
 
-  url = "http://pxz-api.xinsulv.com/api/openapi/submit"
+  url = "https://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload = {
       "model": "veo3_1_fast",
@@ -139,7 +139,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   ```
 
   ```javascript JavaScript
-  const url = "http://pxz-api.xinsulv.com/api/openapi/submit";
+  const url = "https://pxz-api.xinsulv.com/api/openapi/submit";
 
   const payload = {
     model: "veo3_1_fast",
@@ -178,7 +178,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   )
 
   func main() {
-      url := "http://pxz-api.xinsulv.com/api/openapi/submit"
+      url := "https://pxz-api.xinsulv.com/api/openapi/submit"
 
       payload := map[string]interface{}{
           "model": "veo3_1_fast",
@@ -218,7 +218,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   public class Main {
       public static void main(String[] args) {
           try {
-              URL url = new URL("http://pxz-api.xinsulv.com/api/openapi/submit");
+              URL url = new URL("https://pxz-api.xinsulv.com/api/openapi/submit");
               HttpURLConnection conn = (HttpURLConnection) url.openConnection();
               conn.setRequestMethod("POST");
               conn.setRequestProperty("Authorization", "Bearer <token>");
@@ -250,7 +250,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 
   ```php PHP
   <?php
-  $url = "http://pxz-api.xinsulv.com/api/openapi/submit";
+  $url = "https://pxz-api.xinsulv.com/api/openapi/submit";
 
   $payload = array(
       "model" => "veo3_1_fast",
@@ -283,7 +283,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   require 'json'
   require 'uri'
 
-  url = URI.parse("http://pxz-api.xinsulv.com/api/openapi/submit")
+  url = URI.parse("https://pxz-api.xinsulv.com/api/openapi/submit")
 
   payload = {
     model: "veo3_1_fast",
@@ -308,7 +308,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "http://pxz-api.xinsulv.com/api/openapi/submit")!
+  let url = URL(string: "https://pxz-api.xinsulv.com/api/openapi/submit")!
   var request = URLRequest(url: url)
   request.httpMethod = "POST"
   request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
@@ -344,7 +344,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   {
       static async Task Main(string[] args)
       {
-          var url = "http://pxz-api.xinsulv.com/api/openapi/submit";
+          var url = "https://pxz-api.xinsulv.com/api/openapi/submit";
           var payload = "{\"model\":\"veo3_1_fast\",\"params\":{\"prompt\":\"산속의 안개가 천천히 흐른다\",\"image_url\":\"https://example.com/start.jpg\",\"end_image_url\":\"https://example.com/end.jpg\",\"aspect_ratio\":\"16:9\"}}";
 
           using (var client = new HttpClient())
@@ -370,7 +370,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 
       curl = curl_easy_init();
       if(curl) {
-          curl_easy_setopt(curl, CURLOPT_URL, "http://pxz-api.xinsulv.com/api/openapi/submit");
+          curl_easy_setopt(curl, CURLOPT_URL, "https://pxz-api.xinsulv.com/api/openapi/submit");
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
@@ -394,7 +394,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
-          NSURL *url = [NSURL URLWithString:@"http://pxz-api.xinsulv.com/api/openapi/submit"];
+          NSURL *url = [NSURL URLWithString:@"https://pxz-api.xinsulv.com/api/openapi/submit"];
           NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
           [request setHTTPMethod:@"POST"];
           [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
@@ -432,7 +432,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   open Cohttp
   open Cohttp_lwt_unix
 
-  let url = "http://pxz-api.xinsulv.com/api/openapi/submit"
+  let url = "https://pxz-api.xinsulv.com/api/openapi/submit"
 
   let payload = {|{"model":"veo3_1_fast","params":{"prompt":"산속의 안개가 천천히 흐른다","image_url":"https://example.com/start.jpg","end_image_url":"https://example.com/end.jpg","aspect_ratio":"16:9"}}|}
 
@@ -454,7 +454,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   import 'package:http/http.dart' as http;
 
   void main() async {
-    var url = Uri.parse('http://pxz-api.xinsulv.com/api/openapi/submit');
+    var url = Uri.parse('https://pxz-api.xinsulv.com/api/openapi/submit');
 
     var payload = {
       'model': 'veo3_1_fast',
@@ -483,7 +483,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   library(httr)
   library(jsonlite)
 
-  url <- "http://pxz-api.xinsulv.com/api/openapi/submit"
+  url <- "https://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload <- list(
     model = "veo3_1_fast",

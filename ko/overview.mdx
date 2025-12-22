@@ -30,7 +30,7 @@ APIMart는 이미지 및 비디오 생성 서비스를 제공하는 통합 AI �
 
 ```bash
 curl --request POST \
-  --url http://pxz-api.xinsulv.com/api/openapi/submit \
+  --url https://pxz-api.xinsulv.com/api/openapi/submit \
   --header 'Authorization: Bearer YOUR_API_KEY' \
   --header 'Content-Type: application/json' \
   --data '{
@@ -48,7 +48,7 @@ curl --request POST \
 
 ```bash
 curl --request POST \
-  --url http://pxz-api.xinsulv.com/api/openapi/query \
+  --url https://pxz-api.xinsulv.com/api/openapi/query \
   --header 'Authorization: Bearer YOUR_API_KEY' \
   --header 'Content-Type: application/json' \
   --data-raw '{
@@ -184,7 +184,7 @@ Authorization: Bearer YOUR_API_KEY
     작업 제출 시 반환된 `task_id`를 사용하여 작업 상태 조회 API를 사용합니다:
 
     ```bash
-    POST http://pxz-api.xinsulv.com/api/openapi/query
+    POST https://pxz-api.xinsulv.com/api/openapi/query
     ```
 
     자세한 내용은 [작업 상태 조회 문서](/ko/api-reference/tasks/status)를 참조하세요.

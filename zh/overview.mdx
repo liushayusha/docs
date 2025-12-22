@@ -30,7 +30,7 @@ APIMart 是一个统一的 AI 内容生成 API 平台，提供图像和视频生
 
 ```bash
 curl --request POST \
-  --url http://pxz-api.xinsulv.com/api/openapi/submit \
+  --url https://pxz-api.xinsulv.com/api/openapi/submit \
   --header 'Authorization: Bearer YOUR_API_KEY' \
   --header 'Content-Type: application/json' \
   --data '{
@@ -48,7 +48,7 @@ curl --request POST \
 
 ```bash
 curl --request POST \
-  --url http://pxz-api.xinsulv.com/api/openapi/query \
+  --url https://pxz-api.xinsulv.com/api/openapi/query \
   --header 'Authorization: Bearer YOUR_API_KEY' \
   --header 'Content-Type: application/json' \
   --data-raw '{
@@ -184,7 +184,7 @@ Authorization: Bearer YOUR_API_KEY
     使用任务状态查询 API，传入提交任务时返回的 `task_id`：
 
     ```bash
-    POST http://pxz-api.xinsulv.com/api/openapi/query
+    POST https://pxz-api.xinsulv.com/api/openapi/query
     ```
 
     查看 [任务状态查询文档](/zh/api-reference/tasks/status) 了解详情。

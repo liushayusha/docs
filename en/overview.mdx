@@ -30,7 +30,7 @@ All image and video generation uses asynchronous processing. After submitting a 
 
 ```bash
 curl --request POST \
-  --url http://pxz-api.xinsulv.com/api/openapi/submit \
+  --url https://pxz-api.xinsulv.com/api/openapi/submit \
   --header 'Authorization: Bearer YOUR_API_KEY' \
   --header 'Content-Type: application/json' \
   --data '{
@@ -48,7 +48,7 @@ Use the returned `task_id` to query task progress and results:
 
 ```bash
 curl --request POST \
-  --url http://pxz-api.xinsulv.com/api/openapi/query \
+  --url https://pxz-api.xinsulv.com/api/openapi/query \
   --header 'Authorization: Bearer YOUR_API_KEY' \
   --header 'Content-Type: application/json' \
   --data-raw '{
@@ -184,7 +184,7 @@ Visit the [API Key Management Page](https://apimart.ai/console/token) to get you
     Use the task status query API with the `task_id` returned when submitting the task:
 
     ```bash
-    POST http://pxz-api.xinsulv.com/api/openapi/query
+    POST https://pxz-api.xinsulv.com/api/openapi/query
     ```
 
     See the [Task Status Query Documentation](/en/api-reference/tasks/status) for details.

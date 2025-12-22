@@ -4,7 +4,7 @@ description: |
     - 비동기 처리 모드, 작업 ID를 반환하여 후속 조회 지원
     - 텍스트-투-비디오, 이미지-투-비디오 등의 생성 모드 지원
     - 전문가 버전, 더 높은 해상도 지원
-api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
+api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 ---
 ## Authorizations
 
@@ -109,7 +109,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 <RequestExample>
   ```bash cURL
   curl --request POST \
-    --url http://pxz-api.xinsulv.com/api/openapi/submit \
+    --url https://pxz-api.xinsulv.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
@@ -126,7 +126,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   ```python Python
   import requests
 
-  url = "http://pxz-api.xinsulv.com/api/openapi/submit"
+  url = "https://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload = {
       "model": "sora2_pro",
@@ -149,7 +149,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   ```
 
   ```javascript JavaScript
-  const url = "http://pxz-api.xinsulv.com/api/openapi/submit";
+  const url = "https://pxz-api.xinsulv.com/api/openapi/submit";
 
   const payload = {
     model: "sora2_pro",
@@ -188,7 +188,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   )
 
   func main() {
-      url := "http://pxz-api.xinsulv.com/api/openapi/submit"
+      url := "https://pxz-api.xinsulv.com/api/openapi/submit"
 
       payload := map[string]interface{}{
           "model": "sora2_pro",
@@ -228,7 +228,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   public class Main {
       public static void main(String[] args) {
           try {
-              URL url = new URL("http://pxz-api.xinsulv.com/api/openapi/submit");
+              URL url = new URL("https://pxz-api.xinsulv.com/api/openapi/submit");
               HttpURLConnection conn = (HttpURLConnection) url.openConnection();
               conn.setRequestMethod("POST");
               conn.setRequestProperty("Authorization", "Bearer <token>");
@@ -260,7 +260,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 
   ```php PHP
   <?php
-  $url = "http://pxz-api.xinsulv.com/api/openapi/submit";
+  $url = "https://pxz-api.xinsulv.com/api/openapi/submit";
 
   $payload = array(
       "model" => "sora2_pro",
@@ -293,7 +293,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   require 'json'
   require 'uri'
 
-  url = URI.parse("http://pxz-api.xinsulv.com/api/openapi/submit")
+  url = URI.parse("https://pxz-api.xinsulv.com/api/openapi/submit")
 
   payload = {
     model: "sora2_pro",
@@ -318,7 +318,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "http://pxz-api.xinsulv.com/api/openapi/submit")!
+  let url = URL(string: "https://pxz-api.xinsulv.com/api/openapi/submit")!
   var request = URLRequest(url: url)
   request.httpMethod = "POST"
   request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
@@ -354,7 +354,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   {
       static async Task Main(string[] args)
       {
-          var url = "http://pxz-api.xinsulv.com/api/openapi/submit";
+          var url = "https://pxz-api.xinsulv.com/api/openapi/submit";
           var payload = "{\"model\":\"sora2_pro\",\"params\":{\"prompt\":\"한 마리 고양이가 정원에서 산책하는 장면\",\"aspect_ratio\":\"16:9\",\"video_length\":\"15\",\"resolution\":\"high\"}}";
 
           using (var client = new HttpClient())
@@ -380,7 +380,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 
       curl = curl_easy_init();
       if(curl) {
-          curl_easy_setopt(curl, CURLOPT_URL, "http://pxz-api.xinsulv.com/api/openapi/submit");
+          curl_easy_setopt(curl, CURLOPT_URL, "https://pxz-api.xinsulv.com/api/openapi/submit");
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
@@ -404,7 +404,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
-          NSURL *url = [NSURL URLWithString:@"http://pxz-api.xinsulv.com/api/openapi/submit"];
+          NSURL *url = [NSURL URLWithString:@"https://pxz-api.xinsulv.com/api/openapi/submit"];
           NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
           [request setHTTPMethod:@"POST"];
           [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
@@ -442,7 +442,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   open Cohttp
   open Cohttp_lwt_unix
 
-  let url = "http://pxz-api.xinsulv.com/api/openapi/submit"
+  let url = "https://pxz-api.xinsulv.com/api/openapi/submit"
 
   let payload = {|{"model":"sora2_pro","params":{"prompt":"한 마리 고양이가 정원에서 산책하는 장면","aspect_ratio":"16:9","video_length":"15","resolution":"high"}}|}
 
@@ -464,7 +464,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   import 'package:http/http.dart' as http;
 
   void main() async {
-    var url = Uri.parse('http://pxz-api.xinsulv.com/api/openapi/submit');
+    var url = Uri.parse('https://pxz-api.xinsulv.com/api/openapi/submit');
 
     var payload = {
       'model': 'sora2_pro',
@@ -493,7 +493,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   library(httr)
   library(jsonlite)
 
-  url <- "http://pxz-api.xinsulv.com/api/openapi/submit"
+  url <- "https://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload <- list(
     model = "sora2_pro",

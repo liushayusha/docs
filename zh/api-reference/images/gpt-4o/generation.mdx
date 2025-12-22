@@ -3,7 +3,7 @@ title: 'GPT-4o 图片生成'
 description: |
     - 异步处理模式，返回任务ID用于后续查询
     - 支持文本转图片、图生图等生成模式
-api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
+api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 ---
 
 ## Authorizations
@@ -92,7 +92,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 <RequestExample>
   ```bash cURL
   curl --request POST \
-    --url http://pxz-api.xinsulv.com/api/openapi/submit \
+    --url https://pxz-api.xinsulv.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
@@ -107,7 +107,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   ```python Python
   import requests
 
-  url = "http://pxz-api.xinsulv.com/api/openapi/submit"
+  url = "https://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload = {
       "model": "gpt_4o",
@@ -128,7 +128,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   ```
 
   ```javascript JavaScript
-  const url = "http://pxz-api.xinsulv.com/api/openapi/submit";
+  const url = "https://pxz-api.xinsulv.com/api/openapi/submit";
 
   const payload = {
     model: "gpt_4o",
@@ -165,7 +165,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   )
 
   func main() {
-      url := "http://pxz-api.xinsulv.com/api/openapi/submit"
+      url := "https://pxz-api.xinsulv.com/api/openapi/submit"
 
       payload := map[string]interface{}{
           "model": "gpt_4o",
@@ -201,7 +201,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 
   public class Main {
       public static void main(String[] args) throws Exception {
-          String url = "http://pxz-api.xinsulv.com/api/openapi/submit";
+          String url = "https://pxz-api.xinsulv.com/api/openapi/submit";
 
           String payload = """
           {
@@ -232,7 +232,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   ```php PHP
   <?php
 
-  $url = "http://pxz-api.xinsulv.com/api/openapi/submit";
+  $url = "https://pxz-api.xinsulv.com/api/openapi/submit";
 
   $payload = [
       "model" => "gpt_4o",
@@ -263,7 +263,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   require 'json'
   require 'uri'
 
-  url = URI("http://pxz-api.xinsulv.com/api/openapi/submit")
+  url = URI("https://pxz-api.xinsulv.com/api/openapi/submit")
 
   payload = {
     model: "gpt_4o",
@@ -287,7 +287,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "http://pxz-api.xinsulv.com/api/openapi/submit")!
+  let url = URL(string: "https://pxz-api.xinsulv.com/api/openapi/submit")!
 
   let payload: [String: Any] = [
       "model": "gpt_4o",
@@ -327,7 +327,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   {
       static async Task Main(string[] args)
       {
-          var url = "http://pxz-api.xinsulv.com/api/openapi/submit";
+          var url = "https://pxz-api.xinsulv.com/api/openapi/submit";
 
           var payload = @"{
               ""model"": ""gpt_4o"",
@@ -361,7 +361,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
       curl = curl_easy_init();
 
       if(curl) {
-          const char *url = "http://pxz-api.xinsulv.com/api/openapi/submit";
+          const char *url = "https://pxz-api.xinsulv.com/api/openapi/submit";
           const char *payload = "{"
               "\"model\":\"gpt_4o\","
               "\"params\":{"
@@ -399,7 +399,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
-          NSURL *url = [NSURL URLWithString:@"http://pxz-api.xinsulv.com/api/openapi/submit"];
+          NSURL *url = [NSURL URLWithString:@"https://pxz-api.xinsulv.com/api/openapi/submit"];
 
           NSDictionary *payload = @{
               @"model": @"gpt_4o",
@@ -445,7 +445,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   open Cohttp
   open Cohttp_lwt_unix
 
-  let url = "http://pxz-api.xinsulv.com/api/openapi/submit"
+  let url = "https://pxz-api.xinsulv.com/api/openapi/submit"
 
   let payload = {|{
     "model": "gpt_4o",
@@ -474,7 +474,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   import 'package:http/http.dart' as http;
 
   void main() async {
-    final url = Uri.parse('http://pxz-api.xinsulv.com/api/openapi/submit');
+    final url = Uri.parse('https://pxz-api.xinsulv.com/api/openapi/submit');
 
     final payload = {
       'model': 'gpt_4o',
@@ -501,7 +501,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   library(httr)
   library(jsonlite)
 
-  url <- "http://pxz-api.xinsulv.com/api/openapi/submit"
+  url <- "https://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload <- list(
     model = "gpt_4o",

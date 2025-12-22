@@ -4,7 +4,7 @@ description: |
     - Query the execution status and results of asynchronous tasks
     - Real-time status updates and progress tracking
     - Get generation results when tasks are completed
-api: 'POST http://pxz-api.xinsulv.com/api/openapi/query'
+api: 'POST https://pxz-api.xinsulv.com/api/openapi/query'
 ---
 
 ## Authorizations
@@ -85,7 +85,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/query'
 <RequestExample>
   ```bash cURL
   curl --request POST \
-    --url 'http://pxz-api.xinsulv.com/api/openapi/query' \
+    --url 'https://pxz-api.xinsulv.com/api/openapi/query' \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data-raw '{
@@ -96,7 +96,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/query'
   ```python Python
   import requests
 
-  url = "http://pxz-api.xinsulv.com/api/openapi/query"
+  url = "https://pxz-api.xinsulv.com/api/openapi/query"
 
   headers = {
       "Authorization": "Bearer <token>",
@@ -113,7 +113,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/query'
   ```
 
   ```javascript JavaScript
-  const url = "http://pxz-api.xinsulv.com/api/openapi/query";
+  const url = "https://pxz-api.xinsulv.com/api/openapi/query";
 
   const headers = {
     "Authorization": "Bearer <token>",
@@ -146,7 +146,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/query'
   )
 
   func main() {
-      url := "http://pxz-api.xinsulv.com/api/openapi/query"
+      url := "https://pxz-api.xinsulv.com/api/openapi/query"
 
       payload := map[string]interface{}{
           "task_id": "order_lwU2d-VkUq9-tlCCmrdYu",
@@ -180,7 +180,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/query'
   public class Main {
       public static void main(String[] args) {
           try {
-              URL url = new URL("http://pxz-api.xinsulv.com/api/openapi/query");
+              URL url = new URL("https://pxz-api.xinsulv.com/api/openapi/query");
               HttpURLConnection conn = (HttpURLConnection) url.openConnection();
               conn.setRequestMethod("POST");
               conn.setRequestProperty("Authorization", "Bearer <token>");
@@ -213,7 +213,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/query'
   ```php PHP
   <?php
 
-  $url = "http://pxz-api.xinsulv.com/api/openapi/query";
+  $url = "https://pxz-api.xinsulv.com/api/openapi/query";
 
   $payload = array(
       "task_id" => "order_lwU2d-VkUq9-tlCCmrdYu"
@@ -240,7 +240,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/query'
   require 'json'
   require 'uri'
 
-  url = URI.parse("http://pxz-api.xinsulv.com/api/openapi/query")
+  url = URI.parse("https://pxz-api.xinsulv.com/api/openapi/query")
 
   payload = {
     task_id: "order_lwU2d-VkUq9-tlCCmrdYu"
@@ -259,7 +259,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/query'
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "http://pxz-api.xinsulv.com/api/openapi/query")!
+  let url = URL(string: "https://pxz-api.xinsulv.com/api/openapi/query")!
   var request = URLRequest(url: url)
   request.httpMethod = "POST"
   request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
@@ -295,7 +295,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/query'
   {
       static async Task Main(string[] args)
       {
-          var url = "http://pxz-api.xinsulv.com/api/openapi/query";
+          var url = "https://pxz-api.xinsulv.com/api/openapi/query";
           var payload = "{\"task_id\":\"order_lwU2d-VkUq9-tlCCmrdYu\"}";
 
           using var client = new HttpClient();
@@ -321,7 +321,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/query'
       curl = curl_easy_init();
 
       if(curl) {
-          const char *url = "http://pxz-api.xinsulv.com/api/openapi/query";
+          const char *url = "https://pxz-api.xinsulv.com/api/openapi/query";
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
@@ -354,7 +354,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/query'
 
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
-          NSURL *url = [NSURL URLWithString:@"http://pxz-api.xinsulv.com/api/openapi/query"];
+          NSURL *url = [NSURL URLWithString:@"https://pxz-api.xinsulv.com/api/openapi/query"];
 
           NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
           [request setHTTPMethod:@"POST"];
@@ -393,7 +393,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/query'
   open Cohttp
   open Cohttp_lwt_unix
 
-  let url = "http://pxz-api.xinsulv.com/api/openapi/query"
+  let url = "https://pxz-api.xinsulv.com/api/openapi/query"
 
   let payload = {|{"task_id":"order_lwU2d-VkUq9-tlCCmrdYu"}|}
 
@@ -416,7 +416,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/query'
   import 'package:http/http.dart' as http;
 
   void main() async {
-    final url = Uri.parse('http://pxz-api.xinsulv.com/api/openapi/query');
+    final url = Uri.parse('https://pxz-api.xinsulv.com/api/openapi/query');
 
     final payload = {
       'task_id': 'order_lwU2d-VkUq9-tlCCmrdYu'
@@ -439,7 +439,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/query'
   library(httr)
   library(jsonlite)
 
-  url <- "http://pxz-api.xinsulv.com/api/openapi/query"
+  url <- "https://pxz-api.xinsulv.com/api/openapi/query"
 
   payload <- list(
     task_id = "order_lwU2d-VkUq9-tlCCmrdYu"
