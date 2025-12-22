@@ -1,10 +1,9 @@
 ---
 title: 'Sora2 비디오 생성'
 description: |
-    - 비동기 처리 모드, 작업 ID를 반환하여 후속 조회에 사용
-    - 텍스트를 비디오로, 이미지 생성 비디오 등 다양한 생성 모드 지원
-    - 생성된 비디오 링크는 24시간 동안 유효하니, 빠르게 저장하세요
-api: 'POST https://api.apimart.ai/v1/videos/generations'
+    - 비동기 처리 모드, 후속 조회를 위한 작업 ID 반환
+    - 텍스트-비디오, 이미지-비디오 등 생성 모드 지원
+api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 ---
 ## Authorizations
 
@@ -24,203 +23,107 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
 ## Body
 
-<ParamField body="model" type="string" default="sora-2" required>
-  비디오 생성 모델 이름
+<ParamField body="model" type="string" required>
+  모델 이름
 
-  지원하는 모델:
-
-  * `sora-2` - 표준 버전
-  * `sora-2-pro` - 전문가 버전, 더 긴 길이 지원
-
-  예시: `"sora-2"` 또는 `"sora-2-pro"`
+  고정 값: `"sora2"`
 </ParamField>
 
-<ParamField body="prompt" type="string" required>
-  비디오 생성을 위한 텍스트 설명
+<ParamField body="params" type="object" required>
+  모델 매개변수 객체
 
-  **💡 @캐릭터 언급 기능:**
+  <Expandable title="params 객체 속성">
+    <ParamField body="prompt" type="string" required>
+      비디오 생성용 텍스트 설명
 
-  prompt 내에서 `@username` 형식으로 생성된 캐릭터를 언급하여 해당 캐릭터가 비디오에 등장하도록 할 수 있습니다.
+      제한 없음
+    </ParamField>
 
-  * 캐릭터의 `username`은 [캐릭터 조회 API](/en/api-reference/videos/sora2/query-character)에서 얻을 수 있습니다
-  * 여러 캐릭터를 동시에 언급할 수 있습니다
+    <ParamField body="image_url" type="string">
+      비디오 생성(첫 프레임)에 사용되는 참조 이미지 URL
 
-  예시: `"고양이와 강아지가 차를 타고 가는 장면 @duksvfkf.cruisingki @zdqwahgj.baronbarki"`
-</ParamField>
+      * 단일 이미지만 지원
+      * 공개적으로 접근 가능한 URL 지원
+    </ParamField>
 
-<ParamField body="duration" type="integer">
-  비디오 길이(초)
+    <ParamField body="aspect_ratio" type="string" default="16:9">
+      비디오 가로세로 비율
 
-  * `sora-2`: 10초 또는 15초 지원
-  * `sora-2-pro`: 15초(고화질) 또는 25초 지원
+      지원되는 비율:
 
-  예시: `10`
-</ParamField>
+      * `16:9` - 가로(기본값)
+      * `9:16` - 세로
+    </ParamField>
 
-<ParamField body="aspect_ratio" type="string">
-  비디오 해상도
+    <ParamField body="video_length" type="string" default="10">
+      비디오 길이(초)
 
-  지원 포맷:
+      지원되는 길이:
 
-  * `16:9` (가로 화면)
-  * `9:16` (세로 화면)
-</ParamField>
-
-<ParamField body="image_urls" type="array">
-  영상 생성에 참고할 이미지 URL 배열
-
-  **💡 빠른 입력(체험 구역):**
-
-  1. "+ Add an item"을 클릭하여 이미지 URL 추가
-  2. 이미지 전체 URL 또는 base64 데이터를 입력
-
-  <Expandable title="상세 필드 설명">
-    <ParamField body="url" type="string" required>
-      이미지 URL 주소
-
-      두 가지 형식을 지원합니다:
-
-      **1. 완전한 이미지 URL 주소**
-
-      * 공개 접근 가능한 이미지 URL(http\:// 또는 https\://)
-      * 예시: `https://example.com/image.jpg`
-
-      **2. Base64 인코딩 형식**
-
-      * **완전한 Data URI 형식을 반드시 사용해야 합니다**
-      * 형식: `data:image/{포맷};base64,{base64 데이터}`
-      * 지원 이미지 포맷: jpeg, png, webp 등
-      * 예시: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
-      * ⚠️ 주의: `data:image/jpeg;base64,` 접두어를 반드시 포함해야 합니다
-
-      **제한:**
-
-      * 최대 파일 크기: 10MB
-      * 지원 포맷: .jpeg, .jpg, .png, .webp
+      * `10` - 10초(기본값)
+      * `15` - 15초
     </ParamField>
   </Expandable>
 </ParamField>
 
-<ParamField body="watermark" type="boolean" default="false">
-  생성된 비디오에 워터마크를 추가할지 여부
+<ParamField body="callback_url" type="string">
+  작업 완료 후 콜백 알림 주소
 
-  * `false`: 워터마크 미추가
-  * `true`: Sora 공식 워터마크를 비디오에 추가
-
-  기본값: `false`
+  작업 완료 시 시스템이 해당 주소로 POST 요청을 보내 결과를 알립니다
 </ParamField>
 
-<ParamField body="thumbnail" type="boolean">
-  비디오 썸네일 생성 여부
+<ParamField body="metadata" type="object">
+  커스텀 메타데이터
 
-  * `true`: 비디오 썸네일 생성, 미리보기 및 표시 용이
-
-  썸네일이 필요하지 않으면 이 매개변수를 생략할 수 있습니다
-</ParamField>
-
-<ParamField body="private" type="boolean" default="false">
-  프라이버시 모드 활성화 여부
-
-  * `true`: 비디오가 공개되지 않으며, 리믹스(재편집) 불가
-  * `false`: 비디오를 공개하고 리믹스 가능
-
-  기본값: `false`
-</ParamField>
-
-<ParamField body="style" type="string">
-  비디오 스타일
-
-  지원하는 값:
-
-  * `thanksgiving` - 추수감사절 스타일
-  * `comic` - 만화 스타일
-  * `news` - 뉴스 스타일
-  * `selfie` - 셀피 스타일
-  * `nostalgic` - 복고풍 스타일
-  * `anime` - 애니메이션 스타일
-
-  예시: `"anime"`
-</ParamField>
-
-<ParamField body="storyboard" type="boolean">
-  스토리보드를 사용하여 더 세밀한 비디오 생성 제어를 할지 여부
-
-  * `true`: 스토리보드 기능 활성화
-  * `false`: 스토리보드 미사용
-
-  예시: `true`
-</ParamField>
-
-<ParamField body="character_url" type="string">
-  참고할 비디오 내 캐릭터 URL
-
-  생성되는 비디오에서 참고 비디오 내 캐릭터를 재사용하기 위함
-
-  예시: `"https://filesystem.site/cdn/20251030/javYrU4etHVFDqg8by7mViTWHlMOZy.mp4"`
-
-  **⚠️ 주의:** 이 매개변수를 사용할 경우 생성 비디오 길이가 1초 줄어듭니다
-</ParamField>
-
-<ParamField body="character_timestamps" type="string">
-  캐릭터가 등장하는 타임스탬프
-
-  참고 비디오 내 캐릭터 등장 구간을 지정하며, 2초 길이 구간만 지원
-
-  형식: `"시작초,종료초"`
-
-  예시: `"1,3"`는 참고 비디오의 1초부터 3초까지 캐릭터를 의미
-
-  **⚠️ 주의:** 이 매개변수를 사용할 경우 생성 비디오 길이가 1초 줄어듭니다
+  조회 시 원본 그대로 반환되며, 비즈니스 식별에 사용될 수 있습니다
 </ParamField>
 
 ## Response
 
-<ResponseField name="code" type="integer">
-  응답 상태 코드, 성공 시 200
+<ResponseField name="task_id" type="string">
+  작업 ID로, 결과를 조회할 때 사용됩니다
 </ResponseField>
 
-<ResponseField name="data" type="array">
-  반환 데이터 배열
+<ResponseField name="status" type="string">
+  초기 상태로, 고정값 `"pending"`입니다
+</ResponseField>
 
-  <Expandable title="배열 요소">
-    <ResponseField name="status" type="string">
-      작업 상태, 초기 제출 시 `submitted`
-    </ResponseField>
+<ResponseField name="estimated_credits" type="number">
+  예상 소모 크레딧
+</ResponseField>
 
-    <ResponseField name="task_id" type="string">
-      작업의 고유 식별자, 작업 상태 및 결과 조회용
-    </ResponseField>
-  </Expandable>
+<ResponseField name="created_at" type="string">
+  생성 시간 (ISO 형식)
 </ResponseField>
 
 <RequestExample>
   ```bash cURL
   curl --request POST \
-    --url https://api.apimart.ai/v1/videos/generations \
+    --url http://pxz-api.xinsulv.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
-      "model": "sora-2",
-      "prompt": "폭포가 흘러내려 무지개를 형성함",
-      "duration": 10,
-      "aspect_ratio": "16:9",
-      "private": false,
-      "image_urls": ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
+      "model": "sora2",
+      "params": {
+        "prompt": "정원이에서 산책하는 고양이 한 마리",
+        "aspect_ratio": "16:9",
+        "video_length": "10"
+      }
     }'
   ```
 
   ```python Python
   import requests
 
-  url = "https://api.apimart.ai/v1/videos/generations"
+  url = "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload = {
-      "model": "sora-2",
-      "prompt": "폭포가 흘러내려 무지개를 형성함",
-      "duration": 10,
-      "aspect_ratio": "16:9",
-      "private": False,
-      "image_urls": ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
+      "model": "sora2",
+      "params": {
+          "prompt": "정원이에서 산책하는 고양이 한 마리",
+          "aspect_ratio": "16:9",
+          "video_length": "10"
+      }
   }
 
   headers = {
@@ -234,15 +137,15 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   ```
 
   ```javascript JavaScript
-  const url = "https://api.apimart.ai/v1/videos/generations";
+  const url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
   const payload = {
-    model: "sora-2",
-    prompt: "폭포가 흘러내려 무지개를 형성함",
-    duration: 15,
-    aspect_ratio: "16:9",
-    private: false,
-    image_urls: ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
+    model: "sora2",
+    params: {
+      prompt: "정원이에서 산책하는 고양이 한 마리",
+      aspect_ratio: "16:9",
+      video_length: "10"
+    }
   };
 
   const headers = {
@@ -272,14 +175,15 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   )
 
   func main() {
-      url := "https://api.apimart.ai/v1/videos/generations"
+      url := "http://pxz-api.xinsulv.com/api/openapi/submit"
 
       payload := map[string]interface{}{
-          "model":      "sora-2",
-          "prompt":     "폭포가 흘러내려 무지개를 형성함",
-          "duration":   15,
-          "aspect_ratio": "16:9",
-          "image_urls":  ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"],
+          "model": "sora2",
+          "params": map[string]interface{}{
+              "prompt":       "정원이에서 산책하는 고양이 한 마리",
+              "aspect_ratio": "16:9",
+              "video_length": "10",
+          },
       }
 
       jsonData, _ := json.Marshal(payload)
@@ -301,62 +205,66 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   ```
 
   ```java Java
-  import java.net.http.HttpClient;
-  import java.net.http.HttpRequest;
-  import java.net.http.HttpResponse;
-  import java.net.URI;
+  import java.io.BufferedReader;
+  import java.io.InputStreamReader;
+  import java.io.OutputStream;
+  import java.net.HttpURLConnection;
+  import java.net.URL;
 
   public class Main {
-      public static void main(String[] args) throws Exception {
-          String url = "https://api.apimart.ai/v1/videos/generations";
+      public static void main(String[] args) {
+          try {
+              URL url = new URL("http://pxz-api.xinsulv.com/api/openapi/submit");
+              HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+              conn.setRequestMethod("POST");
+              conn.setRequestProperty("Authorization", "Bearer <token>");
+              conn.setRequestProperty("Content-Type", "application/json");
+              conn.setDoOutput(true);
 
-          String payload = """
-          {
-            "model": "sora-2",
-            "prompt": "폭포가 흘러내려 무지개를 형성함",
-            "duration": 10,
-            "aspect_ratio": "16:9",
-            "image_urls": ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
+              String jsonPayload = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"정원이에서 산책하는 고양이 한 마리\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"}}";
+
+              OutputStream os = conn.getOutputStream();
+              os.write(jsonPayload.getBytes());
+              os.flush();
+              os.close();
+
+              BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+              String line;
+              StringBuilder response = new StringBuilder();
+              while ((line = br.readLine()) != null) {
+                  response.append(line);
+              }
+              br.close();
+
+              System.out.println(response.toString());
+          } catch (Exception e) {
+              e.printStackTrace();
           }
-          """;
-
-          HttpClient client = HttpClient.newHttpClient();
-          HttpRequest request = HttpRequest.newBuilder()
-              .uri(URI.create(url))
-              .header("Authorization", "Bearer <token>")
-              .header("Content-Type", "application/json")
-              .POST(HttpRequest.BodyPublishers.ofString(payload))
-              .build();
-
-          HttpResponse<String> response = client.send(request,
-              HttpResponse.BodyHandlers.ofString());
-
-          System.out.println(response.body());
       }
   }
   ```
 
   ```php PHP
   <?php
+  $url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
-  $url = "https://api.apimart.ai/v1/videos/generations";
-
-  $payload = [
-      "model" => "sora-2",
-      "prompt" => "폭포가 흘러내려 무지개를 형성함",
-      "duration" => 15,
-      "aspect_ratio" => "16:9",
-      "image_urls" => ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
-  ];
+  $payload = array(
+      "model" => "sora2",
+      "params" => array(
+          "prompt" => "정원이에서 산책하는 고양이 한 마리",
+          "aspect_ratio" => "16:9",
+          "video_length" => "10"
+      )
+  );
 
   $ch = curl_init($url);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
   curl_setopt($ch, CURLOPT_POST, true);
-  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+  curl_setopt($ch, CURLOPT_HTTPHEADER, array(
       "Authorization: Bearer <token>",
       "Content-Type: application/json"
-  ]);
+  ));
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
 
   $response = curl_exec($ch);
   curl_close($ch);
@@ -370,20 +278,19 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   require 'json'
   require 'uri'
 
-  url = URI("https://api.apimart.ai/v1/videos/generations")
+  url = URI.parse("http://pxz-api.xinsulv.com/api/openapi/submit")
 
   payload = {
-    model: "sora-2",
-    prompt: "폭포가 흘러내려 무지개를 형성함",
-    duration: 15,
-    aspect_ratio: "16:9",
-    image_urls: ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
+    model: "sora2",
+    params: {
+      prompt: "정원이에서 산책하는 고양이 한 마리",
+      aspect_ratio: "16:9",
+      video_length: "10"
+    }
   }
 
   http = Net::HTTP.new(url.host, url.port)
-  http.use_ssl = true
-
-  request = Net::HTTP::Post.new(url)
+  request = Net::HTTP::Post.new(url.path)
   request["Authorization"] = "Bearer <token>"
   request["Content-Type"] = "application/json"
   request.body = payload.to_json
@@ -395,33 +302,28 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "https://api.apimart.ai/v1/videos/generations")!
-
-  let payload: [String: Any] = [
-      "model": "sora-2",
-      "prompt": "폭포가 흘러내려 무지개를 형성함",
-      "duration": 10,
-      "aspect_ratio": "16:9",
-      "image_urls": ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
-  ]
-
+  let url = URL(string: "http://pxz-api.xinsulv.com/api/openapi/submit")!
   var request = URLRequest(url: url)
   request.httpMethod = "POST"
   request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
   request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+  let payload: [String: Any] = [
+      "model": "sora2",
+      "params": [
+          "prompt": "정원이에서 산책하는 고양이 한 마리",
+          "aspect_ratio": "16:9",
+          "video_length": "10"
+      ]
+  ]
+
   request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
 
   let task = URLSession.shared.dataTask(with: request) { data, response, error in
-      if let error = error {
-          print("Error: \(error)")
-          return
-      }
-      
-      if let data = data, let responseString = String(data: data, encoding: .utf8) {
-          print(responseString)
+      if let data = data {
+          print(String(data: data, encoding: .utf8) ?? "")
       }
   }
-
   task.resume()
   ```
 
@@ -435,24 +337,17 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   {
       static async Task Main(string[] args)
       {
-          var url = "https://api.apimart.ai/v1/videos/generations";
+          var url = "http://pxz-api.xinsulv.com/api/openapi/submit";
+          var payload = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"정원이에서 산책하는 고양이 한 마리\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"}}";
 
-          var payload = @"{
-              ""model"": ""sora-2"",
-              ""prompt"": ""폭포가 흘러내려 무지개를 형성함"",
-              ""duration"": 15,
-              ""aspect_ratio"": ""16:9"",
-              ""image_urls"": [""https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png""]
-          }";
-
-          using var client = new HttpClient();
-          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
-
-          var content = new StringContent(payload, Encoding.UTF8, "application/json");
-          var response = await client.PostAsync(url, content);
-          var result = await response.Content.ReadAsStringAsync();
-
-          Console.WriteLine(result);
+          using (var client = new HttpClient())
+          {
+              client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+              var content = new StringContent(payload, Encoding.UTF8, "application/json");
+              var response = await client.PostAsync(url, content);
+              var result = await response.Content.ReadAsStringAsync();
+              Console.WriteLine(result);
+          }
       }
   }
   ```
@@ -461,43 +356,28 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   #include <stdio.h>
   #include <curl/curl.h>
 
-  int main(void) {
+  int main(void)
+  {
       CURL *curl;
       CURLcode res;
 
-      curl_global_init(CURL_GLOBAL_DEFAULT);
       curl = curl_easy_init();
-
       if(curl) {
-          const char *url = "https://api.apimart.ai/v1/videos/generations";
-          const char *payload = "{"
-              "\"model\":\"sora-2\","
-              "\"prompt\":\"폭포가 흘러내려 무지개를 형성함\","
-              "\"duration\":15,"
-              "\"aspect_ratio\":\"16:9\","
-              "\"image_urls\":[\"https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png\"]"
-          "}";
+          curl_easy_setopt(curl, CURLOPT_URL, "http://pxz-api.xinsulv.com/api/openapi/submit");
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
           headers = curl_slist_append(headers, "Content-Type: application/json");
-
-          curl_easy_setopt(curl, CURLOPT_URL, url);
-          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
           curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-          res = curl_easy_perform(curl);
+          const char *data = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"정원이에서 산책하는 고양이 한 마리\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"}}";
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
 
-          if(res != CURLE_OK) {
-              fprintf(stderr, "curl_easy_perform() failed: %s\n",
-                      curl_easy_strerror(res));
-          }
+          res = curl_easy_perform(curl);
 
           curl_slist_free_all(headers);
           curl_easy_cleanup(curl);
       }
-
-      curl_global_cleanup();
       return 0;
   }
   ```
@@ -507,72 +387,56 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
-          NSURL *url = [NSURL URLWithString:@"https://api.apimart.ai/v1/videos/generations"];
-          
-          NSDictionary *payload = @{
-              @"model": @"sora-2",
-              @"prompt": @"폭포가 흘러내려 무지개를 형성함",
-              @"duration": @15,
-              @"aspect_ratio": @"16:9",
-              @"image_urls": @[@"https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
-          };
-          
-          NSError *error;
-          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
-                                                            options:0
-                                                              error:&error];
-          
+          NSURL *url = [NSURL URLWithString:@"http://pxz-api.xinsulv.com/api/openapi/submit"];
           NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
           [request setHTTPMethod:@"POST"];
           [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
           [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+
+          NSDictionary *payload = @{
+              @"model": @"sora2",
+              @"params": @{
+                  @"prompt": @"정원이에서 산책하는 고양이 한 마리",
+                  @"aspect_ratio": @"16:9",
+                  @"video_length": @"10"
+              }
+          };
+
+          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload options:0 error:nil];
           [request setHTTPBody:jsonData];
-          
-          NSURLSessionDataTask *task = [[NSURLSession sharedSession] 
-              dataTaskWithRequest:request
-              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-                  if (error) {
-                      NSLog(@"Error: %@", error);
-                      return;
-                  }
-                  NSString *result = [[NSString alloc] initWithData:data 
-                                                          encoding:NSUTF8StringEncoding];
+
+          NSURLSession *session = [NSURLSession sharedSession];
+          NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+              if (data) {
+                  NSString *result = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
                   NSLog(@"%@", result);
-              }];
-          
+              }
+          }];
           [task resume];
-          [[NSRunLoop mainRunLoop] run];
+          [[NSRunLoop currentRunLoop] run];
       }
       return 0;
   }
   ```
 
   ```ocaml OCaml
-  (* Requires cohttp and yojson libraries *)
   open Lwt
   open Cohttp
   open Cohttp_lwt_unix
 
-  let url = "https://api.apimart.ai/v1/videos/generations"
+  let url = "http://pxz-api.xinsulv.com/api/openapi/submit"
 
-  let payload = {|{
-    "model": "sora-2",
-    "prompt": "폭포가 흘러내려 무지개를 형성함",
-    "duration": 10,
-          "aspect_ratio": "16:9",
-            "image_urls": ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
-  }|}
+  let payload = {|{"model":"sora2","params":{"prompt":"정원이에서 산책하는 고양이 한 마리","aspect_ratio":"16:9","video_length":"10"}}|}
 
   let () =
     let headers = Header.init ()
       |> fun h -> Header.add h "Authorization" "Bearer <token>"
-      |> fun h -> Header.add h "Content-Type" "application/json"
-    in
+      |> fun h -> Header.add h "Content-Type" "application/json" in
     let body = Cohttp_lwt.Body.of_string payload in
-    
+
     let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
-      body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
-      print_endline body_str
+      body |> Cohttp_lwt.Body.to_string >|= fun body ->
+      print_endline body
     in
     Lwt_main.run response
   ```
@@ -582,17 +446,18 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   import 'package:http/http.dart' as http;
 
   void main() async {
-    final url = Uri.parse('https://api.apimart.ai/v1/videos/generations');
-    
-    final payload = {
-      'model': 'sora-2',
-      'prompt': '폭포가 흘러내려 무지개를 형성함',
-      'duration': 15,
-      'aspect_ratio': '16:9',
-      'image_urls': ['https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png']
+    var url = Uri.parse('http://pxz-api.xinsulv.com/api/openapi/submit');
+
+    var payload = {
+      'model': 'sora2',
+      'params': {
+        'prompt': '정원이에서 산책하는 고양이 한 마리',
+        'aspect_ratio': '16:9',
+        'video_length': '10'
+      }
     };
-    
-    final response = await http.post(
+
+    var response = await http.post(
       url,
       headers: {
         'Authorization': 'Bearer <token>',
@@ -600,7 +465,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
       },
       body: jsonEncode(payload),
     );
-    
+
     print(response.body);
   }
   ```
@@ -609,14 +474,15 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   library(httr)
   library(jsonlite)
 
-  url <- "https://api.apimart.ai/v1/videos/generations"
+  url <- "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload <- list(
-    model = "sora-2",
-    prompt = "폭포가 흘러내려 무지개를 형성함",
-    duration = 15,
-    aspect_ratio = "16:9",
-    image_urls = c("https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png")
+    model = "sora2",
+    params = list(
+      prompt = "정원이에서 산책하는 고양이 한 마리",
+      aspect_ratio = "16:9",
+      video_length = "10"
+    )
   )
 
   response <- POST(
@@ -626,7 +492,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
       `Content-Type` = "application/json"
     ),
     body = toJSON(payload, auto_unbox = TRUE),
-    encode = "raw"
+    encode = "json"
   )
 
   cat(content(response, "text"))
@@ -635,63 +501,38 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
 <ResponseExample>
   ```json 200
-  {
-    "code": 200,
-    "data": [
-      {
-        "status": "submitted",
-        "task_id": "task_01K8SGYNNNVBQTXNR4MM964S7K"
-      }
-    ]
-  }
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
+        "status": "pending",
+        "estimated_credits": 100,
+        "created_at": "2025-12-22T06:03:28.242Z"
+    }
+}
   ```
 
   ```json 400
-  {
-    "error": {
-      "code": 400,
-      "message": "잘못된 요청 파라미터",
-      "type": "invalid_request_error"
+    {
+        "statusCode": 400,
+        "message": "요청 파라미터가 유효하지 않습니다",
+        "ok": false
     }
-  }
   ```
-
   ```json 401
   {
     "error": {
       "code": 401,
-      "message": "인증 실패, API 키를 확인하세요",
-      "type": "authentication_error"
+      "message": "인증에 실패했습니다. API 키를 확인해 주세요"
     }
   }
   ```
-
-  ```json 402
+```json 433
   {
     "error": {
-      "code": 402,
-      "message": "계좌 잔액 부족, 충전 후 재시도하세요",
-      "type": "payment_required"
-    }
-  }
-  ```
-
-  ```json 403
-  {
-    "error": {
-      "code": 403,
-      "message": "접근 금지, 이 리소스에 대한 권한이 없습니다",
-      "type": "permission_error"
-    }
-  }
-  ```
-
-  ```json 429
-  {
-    "error": {
-      "code": 429,
-      "message": "요청이 너무 많습니다, 나중에 다시 시도하세요",
-      "type": "rate_limit_error"
+      "code": 433,
+      "message": "계정 잔액이 부족합니다. 충전 후 다시 시도해 주세요"
     }
   }
   ```
@@ -700,18 +541,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   {
     "error": {
       "code": 500,
-      "message": "서버 내부 오류, 나중에 다시 시도해주세요",
-      "type": "server_error"
-    }
-  }
-  ```
-
-  ```json 502
-  {
-    "error": {
-      "code": 502,
-      "message": "게이트웨이 오류, 서버가 일시적으로 사용 불가",
-      "type": "bad_gateway"
+      "message": "서버 내부 오류입니다. 잠시 후 다시 시도해 주세요"
     }
   }
   ```

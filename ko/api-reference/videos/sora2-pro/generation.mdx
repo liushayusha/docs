@@ -1,8 +1,9 @@
 ---
-title: 'Seedream V4.5 이미지 생성'
+title: 'Sora2 Pro 비디오 생성'
 description: |
-    - 비동기 처리 모드, 후속 조회를 위한 작업 ID 반환
-    - 더 높은 품질의 이미지 생성
+    - 비동기 처리 모드, 작업 ID를 반환하여 후속 조회 지원
+    - 텍스트-투-비디오, 이미지-투-비디오 등의 생성 모드 지원
+    - 전문가 버전, 더 높은 해상도 지원
 api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 ---
 ## Authorizations
@@ -10,11 +11,11 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 <ParamField header="Authorization" type="string" required>
   모든 엔드포인트는 Bearer Token 인증이 필요합니다.
 
-  API 키 받기:
+  API Key 얻기:
 
-  [API Key 관리 페이지](https://apimart.ai/console/token)에서 API 키를 받으세요.
+  [API Key 관리 페이지](https://apimart.ai/console/token)에서 API Key를 가져오세요.
 
-  요청 헤더에 다음을 추가하세요:
+  요청 헤더에 다음과 같이 추가하여 사용하세요:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -26,7 +27,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 <ParamField body="model" type="string" required>
   모델 이름
 
-  고정값: `"seedream_v4_5"`
+  고정 값: `"sora2_pro"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
@@ -34,42 +35,43 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 
   <Expandable title="params 객체 속성">
     <ParamField body="prompt" type="string" required>
-      이미지 생성을 위한 텍스트 설명
+      비디오 생성 텍스트 설명
 
       제한 없음
     </ParamField>
 
-    <ParamField body="image_url" type="array">
-      참고 이미지 URL 목록, 이미지 생성에 사용
+    <ParamField body="image_url" type="string">
+      참조 이미지 URL, 비디오 생성(첫 프레임)용
 
-      * 최대 9장 이미지
+      * 단일 이미지만 지원
       * 공개 접근 가능한 URL 지원
     </ParamField>
 
-    <ParamField body="aspect_ratio" type="string" default="1:1">
-      이미지 생성의 가로 세로 비율
+    <ParamField body="aspect_ratio" type="string" default="16:9">
+      비디오 가로 세로 비율
 
-      지원하는 가로 세로 비율:
+      지원 가로 세로 비율:
 
-      * `1:1` - 정사각형 (기본값)
-      * `3:2` - 가로 3:2
-      * `2:3` - 세로 2:3
-      * `4:3` - 가로 4:3
-      * `3:4` - 세로 3:4
-      * `5:4` - 가로 5:4
-      * `4:5` - 세로 4:5
-      * `16:9` - 가로 와이드스크린
-      * `9:16` - 세로 와이드스크린
-      * `21:9` - 울트라 와이드스크린
+      * `16:9` - 가로(기본값)
+      * `9:16` - 세로
     </ParamField>
 
-    <ParamField body="resolution" type="string" default="basic">
-      이미지 해상도
+    <ParamField body="video_length" type="string" default="10">
+      비디오 길이(초)
+
+      지원 길이:
+
+      * `10` - 10초(기본값)
+      * `15` - 15초
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="standard">
+      비디오 해상도
 
       지원 해상도:
 
-      * `basic` - 기본 해상도 (기본값)
-      * `high` - 고해상도
+      * `standard` - 표준 해상도(기본값)
+      * `high` - 고화질 해상도
     </ParamField>
   </Expandable>
 </ParamField>
@@ -77,23 +79,23 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 <ParamField body="callback_url" type="string">
   작업 완료 후 콜백 알림 주소
 
-  작업 완료 시 시스템이 이 주소로 POST 요청을 보내 결과를 알림
+  작업이 완료되면 시스템이 이 주소로 POST 요청을 보내 결과를 알립니다
 </ParamField>
 
 <ParamField body="metadata" type="object">
-  사용자 정의 메타데이터
+  커스텀 메타데이터
 
-  조회 결과에 그대로 반환되며, 비즈니스 식별에 사용 가능
+  쿼리 결과 시 그대로 반환되며 비즈니스 식별에 사용할 수 있습니다
 </ParamField>
 
 ## Response
 
 <ResponseField name="task_id" type="string">
-  작업 ID로 결과 조회에 사용됩니다
+  작업 ID, 결과 조회에 사용
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  초기 상태로 고정값 `"pending"`
+  초기 상태, 고정값 `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
@@ -111,10 +113,11 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
-      "model": "seedream_v4_5",
+      "model": "sora2_pro",
       "params": {
-        "prompt": "꿈같은 숲속 밤경치",
+        "prompt": "한 마리 고양이가 정원에서 산책하는 장면",
         "aspect_ratio": "16:9",
+        "video_length": "15",
         "resolution": "high"
       }
     }'
@@ -126,10 +129,11 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   url = "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload = {
-      "model": "seedream_v4_5",
+      "model": "sora2_pro",
       "params": {
-          "prompt": "꿈같은 숲속 밤경치",
+          "prompt": "한 마리 고양이가 정원에서 산책하는 장면",
           "aspect_ratio": "16:9",
+          "video_length": "15",
           "resolution": "high"
       }
   }
@@ -148,10 +152,11 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   const url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
   const payload = {
-    model: "seedream_v4_5",
+    model: "sora2_pro",
     params: {
-      prompt: "꿈같은 숲속 밤경치",
+      prompt: "한 마리 고양이가 정원에서 산책하는 장면",
       aspect_ratio: "16:9",
+      video_length: "15",
       resolution: "high"
     }
   };
@@ -186,10 +191,11 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
       url := "http://pxz-api.xinsulv.com/api/openapi/submit"
 
       payload := map[string]interface{}{
-          "model": "seedream_v4_5",
+          "model": "sora2_pro",
           "params": map[string]interface{}{
-              "prompt":       "꿈같은 숲속 밤경치",
+              "prompt":       "한 마리 고양이가 정원에서 산책하는 장면",
               "aspect_ratio": "16:9",
+              "video_length": "15",
               "resolution":   "high",
           },
       }
@@ -213,64 +219,67 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   ```
 
   ```java Java
-  import java.net.http.HttpClient;
-  import java.net.http.HttpRequest;
-  import java.net.http.HttpResponse;
-  import java.net.URI;
+  import java.io.BufferedReader;
+  import java.io.InputStreamReader;
+  import java.io.OutputStream;
+  import java.net.HttpURLConnection;
+  import java.net.URL;
 
   public class Main {
-      public static void main(String[] args) throws Exception {
-          String url = "http://pxz-api.xinsulv.com/api/openapi/submit";
+      public static void main(String[] args) {
+          try {
+              URL url = new URL("http://pxz-api.xinsulv.com/api/openapi/submit");
+              HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+              conn.setRequestMethod("POST");
+              conn.setRequestProperty("Authorization", "Bearer <token>");
+              conn.setRequestProperty("Content-Type", "application/json");
+              conn.setDoOutput(true);
 
-          String payload = """
-          {
-            "model": "seedream_v4_5",
-            "params": {
-              "prompt": "꿈같은 숲속 밤경치",
-              "aspect_ratio": "16:9",
-              "resolution": "high"
-            }
+              String jsonPayload = "{\"model\":\"sora2_pro\",\"params\":{\"prompt\":\"한 마리 고양이가 정원에서 산책하는 장면\",\"aspect_ratio\":\"16:9\",\"video_length\":\"15\",\"resolution\":\"high\"}}";
+
+              OutputStream os = conn.getOutputStream();
+              os.write(jsonPayload.getBytes());
+              os.flush();
+              os.close();
+
+              BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+              String line;
+              StringBuilder response = new StringBuilder();
+              while ((line = br.readLine()) != null) {
+                  response.append(line);
+              }
+              br.close();
+
+              System.out.println(response.toString());
+          } catch (Exception e) {
+              e.printStackTrace();
           }
-          """;
-
-          HttpClient client = HttpClient.newHttpClient();
-          HttpRequest request = HttpRequest.newBuilder()
-              .uri(URI.create(url))
-              .header("Authorization", "Bearer <token>")
-              .header("Content-Type", "application/json")
-              .POST(HttpRequest.BodyPublishers.ofString(payload))
-              .build();
-
-          HttpResponse<String> response = client.send(request,
-              HttpResponse.BodyHandlers.ofString());
-
-          System.out.println(response.body());
       }
   }
   ```
 
   ```php PHP
   <?php
-
   $url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
-  $payload = [
-      "model" => "seedream_v4_5",
-      "params" => [
-          "prompt" => "꿈같은 숲속 밤경치",
+  $payload = array(
+      "model" => "sora2_pro",
+      "params" => array(
+          "prompt" => "한 마리 고양이가 정원에서 산책하는 장면",
           "aspect_ratio" => "16:9",
+          "video_length" => "15",
           "resolution" => "high"
-      ]
-  ];
+      )
+  );
 
   $ch = curl_init($url);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
   curl_setopt($ch, CURLOPT_POST, true);
-  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+  curl_setopt($ch, CURLOPT_HTTPHEADER, array(
       "Authorization: Bearer <token>",
       "Content-Type: application/json"
-  ]);
+  ));
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
 
   $response = curl_exec($ch);
   curl_close($ch);
@@ -284,20 +293,20 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   require 'json'
   require 'uri'
 
-  url = URI("http://pxz-api.xinsulv.com/api/openapi/submit")
+  url = URI.parse("http://pxz-api.xinsulv.com/api/openapi/submit")
 
   payload = {
-    model: "seedream_v4_5",
+    model: "sora2_pro",
     params: {
-      prompt: "꿈같은 숲속 밤경치",
+      prompt: "한 마리 고양이가 정원에서 산책하는 장면",
       aspect_ratio: "16:9",
+      video_length: "15",
       resolution: "high"
     }
   }
 
   http = Net::HTTP.new(url.host, url.port)
-
-  request = Net::HTTP::Post.new(url)
+  request = Net::HTTP::Post.new(url.path)
   request["Authorization"] = "Bearer <token>"
   request["Content-Type"] = "application/json"
   request.body = payload.to_json
@@ -310,33 +319,28 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   import Foundation
 
   let url = URL(string: "http://pxz-api.xinsulv.com/api/openapi/submit")!
-
-  let payload: [String: Any] = [
-      "model": "seedream_v4_5",
-      "params": [
-          "prompt": "꿈같은 숲속 밤경치",
-          "aspect_ratio": "16:9",
-          "resolution": "high"
-      ]
-  ]
-
   var request = URLRequest(url: url)
   request.httpMethod = "POST"
   request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
   request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+  let payload: [String: Any] = [
+      "model": "sora2_pro",
+      "params": [
+          "prompt": "한 마리 고양이가 정원에서 산책하는 장면",
+          "aspect_ratio": "16:9",
+          "video_length": "15",
+          "resolution": "high"
+      ]
+  ]
+
   request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
 
   let task = URLSession.shared.dataTask(with: request) { data, response, error in
-      if let error = error {
-          print("Error: \(error)")
-          return
-      }
-
-      if let data = data, let responseString = String(data: data, encoding: .utf8) {
-          print(responseString)
+      if let data = data {
+          print(String(data: data, encoding: .utf8) ?? "")
       }
   }
-
   task.resume()
   ```
 
@@ -351,24 +355,16 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
       static async Task Main(string[] args)
       {
           var url = "http://pxz-api.xinsulv.com/api/openapi/submit";
+          var payload = "{\"model\":\"sora2_pro\",\"params\":{\"prompt\":\"한 마리 고양이가 정원에서 산책하는 장면\",\"aspect_ratio\":\"16:9\",\"video_length\":\"15\",\"resolution\":\"high\"}}";
 
-          var payload = @"{
-              ""model"": ""seedream_v4_5"",
-              ""params"": {
-                  ""prompt"": ""꿈같은 숲속 밤경치"",
-                  ""aspect_ratio"": ""16:9"",
-                  ""resolution"": ""high""
-              }
-          }";
-
-          using var client = new HttpClient();
-          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
-
-          var content = new StringContent(payload, Encoding.UTF8, "application/json");
-          var response = await client.PostAsync(url, content);
-          var result = await response.Content.ReadAsStringAsync();
-
-          Console.WriteLine(result);
+          using (var client = new HttpClient())
+          {
+              client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+              var content = new StringContent(payload, Encoding.UTF8, "application/json");
+              var response = await client.PostAsync(url, content);
+              var result = await response.Content.ReadAsStringAsync();
+              Console.WriteLine(result);
+          }
       }
   }
   ```
@@ -377,44 +373,28 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   #include <stdio.h>
   #include <curl/curl.h>
 
-  int main(void) {
+  int main(void)
+  {
       CURL *curl;
       CURLcode res;
 
-      curl_global_init(CURL_GLOBAL_DEFAULT);
       curl = curl_easy_init();
-
       if(curl) {
-          const char *url = "http://pxz-api.xinsulv.com/api/openapi/submit";
-          const char *payload = "{"
-              "\"model\":\"seedream_v4_5\","
-              "\"params\":{"
-                  "\"prompt\":\"꿈같은 숲속 밤경치\","
-                  "\"aspect_ratio\":\"16:9\","
-                  "\"resolution\":\"high\""
-              "}"
-          "}";
+          curl_easy_setopt(curl, CURLOPT_URL, "http://pxz-api.xinsulv.com/api/openapi/submit");
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
           headers = curl_slist_append(headers, "Content-Type: application/json");
-
-          curl_easy_setopt(curl, CURLOPT_URL, url);
-          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
           curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-          res = curl_easy_perform(curl);
+          const char *data = "{\"model\":\"sora2_pro\",\"params\":{\"prompt\":\"한 마리 고양이가 정원에서 산책하는 장면\",\"aspect_ratio\":\"16:9\",\"video_length\":\"15\",\"resolution\":\"high\"}}";
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
 
-          if(res != CURLE_OK) {
-              fprintf(stderr, "curl_easy_perform() failed: %s\n",
-                      curl_easy_strerror(res));
-          }
+          res = curl_easy_perform(curl);
 
           curl_slist_free_all(headers);
           curl_easy_cleanup(curl);
       }
-
-      curl_global_cleanup();
       return 0;
   }
   ```
@@ -425,73 +405,56 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
           NSURL *url = [NSURL URLWithString:@"http://pxz-api.xinsulv.com/api/openapi/submit"];
-
-          NSDictionary *payload = @{
-              @"model": @"seedream_v4_5",
-              @"params": @{
-                  @"prompt": @"꿈같은 숲속 밤경치",
-                  @"aspect_ratio": @"16:9",
-                  @"resolution": @"high"
-              }
-          };
-
-          NSError *error;
-          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
-                                                            options:0
-                                                              error:&error];
-
           NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
           [request setHTTPMethod:@"POST"];
           [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
           [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+
+          NSDictionary *payload = @{
+              @"model": @"sora2_pro",
+              @"params": @{
+                  @"prompt": @"한 마리 고양이가 정원에서 산책하는 장면",
+                  @"aspect_ratio": @"16:9",
+                  @"video_length": @"15",
+                  @"resolution": @"high"
+              }
+          };
+
+          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload options:0 error:nil];
           [request setHTTPBody:jsonData];
 
-          NSURLSessionDataTask *task = [[NSURLSession sharedSession]
-              dataTaskWithRequest:request
-              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-                  if (error) {
-                      NSLog(@"Error: %@", error);
-                      return;
-                  }
-                  NSString *result = [[NSString alloc] initWithData:data
-                                                          encoding:NSUTF8StringEncoding];
+          NSURLSession *session = [NSURLSession sharedSession];
+          NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+              if (data) {
+                  NSString *result = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
                   NSLog(@"%@", result);
-              }];
-
+              }
+          }];
           [task resume];
-          [[NSRunLoop mainRunLoop] run];
+          [[NSRunLoop currentRunLoop] run];
       }
       return 0;
   }
   ```
 
   ```ocaml OCaml
-  (* Requires cohttp and yojson libraries *)
   open Lwt
   open Cohttp
   open Cohttp_lwt_unix
 
   let url = "http://pxz-api.xinsulv.com/api/openapi/submit"
 
-  let payload = {|{
-    "model": "seedream_v4_5",
-    "params": {
-      "prompt": "꿈같은 숲속 밤경치",
-      "aspect_ratio": "16:9",
-      "resolution": "high"
-    }
-  }|}
+  let payload = {|{"model":"sora2_pro","params":{"prompt":"한 마리 고양이가 정원에서 산책하는 장면","aspect_ratio":"16:9","video_length":"15","resolution":"high"}}|}
 
   let () =
     let headers = Header.init ()
       |> fun h -> Header.add h "Authorization" "Bearer <token>"
-      |> fun h -> Header.add h "Content-Type" "application/json"
-    in
+      |> fun h -> Header.add h "Content-Type" "application/json" in
     let body = Cohttp_lwt.Body.of_string payload in
 
     let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
-      body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
-      print_endline body_str
+      body |> Cohttp_lwt.Body.to_string >|= fun body ->
+      print_endline body
     in
     Lwt_main.run response
   ```
@@ -501,22 +464,23 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   import 'package:http/http.dart' as http;
 
   void main() async {
-    final url = Uri.parse('http://pxz-api.xinsulv.com/api/openapi/submit');
+    var url = Uri.parse('http://pxz-api.xinsulv.com/api/openapi/submit');
 
-    final payload = {
-      'model': 'seedream_v4_5',
+    var payload = {
+      'model': 'sora2_pro',
       'params': {
-        'prompt': '꿈같은 숲속 밤경치',
+        'prompt': '한 마리 고양이가 정원에서 산책하는 장면',
         'aspect_ratio': '16:9',
+        'video_length': '15',
         'resolution': 'high'
       }
     };
 
-    final response = await http.post(
+    var response = await http.post(
       url,
       headers: {
         'Authorization': 'Bearer <token>',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       body: jsonEncode(payload),
     );
@@ -532,10 +496,11 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   url <- "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload <- list(
-    model = "seedream_v4_5",
+    model = "sora2_pro",
     params = list(
-      prompt = "꿈같은 숲속 밤경치",
+      prompt = "한 마리 고양이가 정원에서 산책하는 장면",
       aspect_ratio = "16:9",
+      video_length = "15",
       resolution = "high"
     )
   )
@@ -547,7 +512,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
       `Content-Type` = "application/json"
     ),
     body = toJSON(payload, auto_unbox = TRUE),
-    encode = "raw"
+    encode = "json"
   )
 
   cat(content(response, "text"))
@@ -587,7 +552,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   {
     "error": {
       "code": 433,
-      "message": "계정 잔액이 부족합니다. 충전 후 다시 시도하세요"
+      "message": "계정 잔액 부족, 충전 후 다시 시도하세요"
     }
   }
   ```
@@ -596,7 +561,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   {
     "error": {
       "code": 500,
-      "message": "서버 내부 오류가 발생했습니다. 나중에 다시 시도해주세요"
+      "message": "서버 내부 오류, 나중에 다시 시도하세요"
     }
   }
   ```

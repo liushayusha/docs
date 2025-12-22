@@ -1,0 +1,512 @@
+---
+title: '获取任务状态'
+description: |
+    - 查询异步任务的执行状态和结果
+    - 实时状态更新和进度跟踪
+    - 任务完成时获取生成结果
+api: 'POST http://pxz-api.xinsulv.com/api/openapi/query'
+---
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  所有接口均需要使用Bearer Token进行认证
+
+  获取 API Key：
+
+  访问 [API Key 管理页面](https://apimart.ai/console/token) 获取您的 API Key
+
+  使用时在请求头中添加：
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="task_id" type="string" required>
+  生成API返回的任务ID
+</ParamField>
+
+## Response
+
+<ResponseField name="task_id" type="string">
+  任务ID
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  任务状态：
+
+  * `pending` - 排队等待处理
+  * `processing` - 处理中
+  * `completed` - 成功完成
+  * `failed` - 失败
+</ResponseField>
+
+<ResponseField name="input" type="object">
+  任务输入（可选，仅在某些情况下返回）
+
+  包含提交任务时的完整参数信息
+</ResponseField>
+
+<ResponseField name="output" type="array">
+  任务输出（任务完成后返回）
+
+  包含生成结果的数组，每个元素包含 `url` 字段指向生成的资源
+</ResponseField>
+
+<ResponseField name="error" type="object">
+  错误信息（任务失败时返回）
+
+  <Expandable title="属性">
+    <ResponseField name="code" type="string">
+      错误代码
+    </ResponseField>
+
+    <ResponseField name="message" type="string">
+      错误消息
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="credits_used" type="number">
+  消耗的积分
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  创建时间（ISO 8601 格式）
+</ResponseField>
+
+<ResponseField name="completed_at" type="string">
+  完成时间（任务完成后返回，ISO 8601 格式）
+</ResponseField>
+
+<RequestExample>
+  ```bash cURL
+  curl --request POST \
+    --url 'http://pxz-api.xinsulv.com/api/openapi/query' \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data-raw '{
+      "task_id": "order_lwU2d-VkUq9-tlCCmrdYu"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "http://pxz-api.xinsulv.com/api/openapi/query"
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  payload = {
+      "task_id": "order_lwU2d-VkUq9-tlCCmrdYu"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "http://pxz-api.xinsulv.com/api/openapi/query";
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  const payload = {
+    task_id: "order_lwU2d-VkUq9-tlCCmrdYu"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "http://pxz-api.xinsulv.com/api/openapi/query"
+
+      payload := map[string]interface{}{
+          "task_id": "order_lwU2d-VkUq9-tlCCmrdYu",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.io.BufferedReader;
+  import java.io.InputStreamReader;
+  import java.io.OutputStream;
+  import java.net.HttpURLConnection;
+  import java.net.URL;
+
+  public class Main {
+      public static void main(String[] args) {
+          try {
+              URL url = new URL("http://pxz-api.xinsulv.com/api/openapi/query");
+              HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+              conn.setRequestMethod("POST");
+              conn.setRequestProperty("Authorization", "Bearer <token>");
+              conn.setRequestProperty("Content-Type", "application/json");
+              conn.setDoOutput(true);
+
+              String jsonPayload = "{\"task_id\":\"order_lwU2d-VkUq9-tlCCmrdYu\"}";
+
+              OutputStream os = conn.getOutputStream();
+              os.write(jsonPayload.getBytes());
+              os.flush();
+              os.close();
+
+              BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+              String line;
+              StringBuilder response = new StringBuilder();
+              while ((line = br.readLine()) != null) {
+                  response.append(line);
+              }
+              br.close();
+
+              System.out.println(response.toString());
+          } catch (Exception e) {
+              e.printStackTrace();
+          }
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "http://pxz-api.xinsulv.com/api/openapi/query";
+
+  $payload = array(
+      "task_id" => "order_lwU2d-VkUq9-tlCCmrdYu"
+  );
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ));
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url = URI.parse("http://pxz-api.xinsulv.com/api/openapi/query")
+
+  payload = {
+    task_id: "order_lwU2d-VkUq9-tlCCmrdYu"
+  }
+
+  http = Net::HTTP.new(url.host, url.port)
+  request = Net::HTTP::Post.new(url.path)
+  request["Authorization"] = "Bearer <token>"
+  request["Content-Type"] = "application/json"
+  request.body = payload.to_json
+
+  response = http.request(request)
+  puts response.body
+  ```
+
+  ```swift Swift
+  import Foundation
+
+  let url = URL(string: "http://pxz-api.xinsulv.com/api/openapi/query")!
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+  let payload: [String: Any] = [
+      "task_id": "order_lwU2d-VkUq9-tlCCmrdYu"
+  ]
+
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      if let error = error {
+          print("Error: \(error)")
+          return
+      }
+
+      if let data = data, let responseString = String(data: data, encoding: .utf8) {
+          print(responseString)
+      }
+  }
+
+  task.resume()
+  ```
+
+  ```csharp C#
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url = "http://pxz-api.xinsulv.com/api/openapi/query";
+          var payload = "{\"task_id\":\"order_lwU2d-VkUq9-tlCCmrdYu\"}";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+          var content = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          var result = await response.Content.ReadAsStringAsync();
+
+          Console.WriteLine(result);
+      }
+  }
+  ```
+
+  ```c C
+  #include <stdio.h>
+  #include <curl/curl.h>
+
+  int main(void) {
+      CURL *curl;
+      CURLcode res;
+
+      curl_global_init(CURL_GLOBAL_DEFAULT);
+      curl = curl_easy_init();
+
+      if(curl) {
+          const char *url = "http://pxz-api.xinsulv.com/api/openapi/query";
+
+          struct curl_slist *headers = NULL;
+          headers = curl_slist_append(headers, "Authorization: Bearer <token>");
+          headers = curl_slist_append(headers, "Content-Type: application/json");
+
+          const char *data = "{\"task_id\":\"order_lwU2d-VkUq9-tlCCmrdYu\"}";
+
+          curl_easy_setopt(curl, CURLOPT_URL, url);
+          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
+
+          res = curl_easy_perform(curl);
+
+          if(res != CURLE_OK) {
+              fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                      curl_easy_strerror(res));
+          }
+
+          curl_slist_free_all(headers);
+          curl_easy_cleanup(curl);
+      }
+
+      curl_global_cleanup();
+      return 0;
+  }
+  ```
+
+  ```objectivec Objective-C
+  #import <Foundation/Foundation.h>
+
+  int main(int argc, const char * argv[]) {
+      @autoreleasepool {
+          NSURL *url = [NSURL URLWithString:@"http://pxz-api.xinsulv.com/api/openapi/query"];
+
+          NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+          [request setHTTPMethod:@"POST"];
+          [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
+          [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+
+          NSDictionary *payload = @{
+              @"task_id": @"order_lwU2d-VkUq9-tlCCmrdYu"
+          };
+
+          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload options:0 error:nil];
+          [request setHTTPBody:jsonData];
+
+          NSURLSessionDataTask *task = [[NSURLSession sharedSession]
+              dataTaskWithRequest:request
+              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+                  if (error) {
+                      NSLog(@"Error: %@", error);
+                      return;
+                  }
+                  NSString *result = [[NSString alloc] initWithData:data
+                                                          encoding:NSUTF8StringEncoding];
+                  NSLog(@"%@", result);
+              }];
+
+          [task resume];
+          [[NSRunLoop mainRunLoop] run];
+      }
+      return 0;
+  }
+  ```
+
+  ```ocaml OCaml
+  (* Requires cohttp and yojson libraries *)
+  open Lwt
+  open Cohttp
+  open Cohttp_lwt_unix
+
+  let url = "http://pxz-api.xinsulv.com/api/openapi/query"
+
+  let payload = {|{"task_id":"order_lwU2d-VkUq9-tlCCmrdYu"}|}
+
+  let () =
+    let headers = Header.init ()
+      |> fun h -> Header.add h "Authorization" "Bearer <token>"
+      |> fun h -> Header.add h "Content-Type" "application/json"
+    in
+    let body = Cohttp_lwt.Body.of_string payload in
+
+    let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
+      body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
+      print_endline body_str
+    in
+    Lwt_main.run response
+  ```
+
+  ```dart Dart
+  import 'dart:convert';
+  import 'package:http/http.dart' as http;
+
+  void main() async {
+    final url = Uri.parse('http://pxz-api.xinsulv.com/api/openapi/query');
+
+    final payload = {
+      'task_id': 'order_lwU2d-VkUq9-tlCCmrdYu'
+    };
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer <token>',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(payload),
+    );
+
+    print(response.body);
+  }
+  ```
+
+  ```r R
+  library(httr)
+  library(jsonlite)
+
+  url <- "http://pxz-api.xinsulv.com/api/openapi/query"
+
+  payload <- list(
+    task_id = "order_lwU2d-VkUq9-tlCCmrdYu"
+  )
+
+  response <- POST(
+    url,
+    add_headers(
+      Authorization = "Bearer <token>",
+      `Content-Type` = "application/json"
+    ),
+    body = toJSON(payload, auto_unbox = TRUE),
+    encode = "json"
+  )
+
+  cat(content(response, "text"))
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "task_id": "order_lwU2d-VkUq9-tlCCmrdYu",
+        "status": "completed",
+        "created_at": "2025-12-18T10:12:11.000Z",
+        "completed_at": "2025-12-18T10:13:41.000Z",
+        "input": {
+            "model": "nano_banana",
+            "params": {
+                "format": "jpeg",
+                "prompt": "dog",
+                "image_url": "https://s1.pxz.ai/upload/nano_banana/20251217/lAI2Anos92Un0NLgGyDwl.png,https://s1.pxz.ai/upload/nano_banana/20251217/p9DkzlcwX2pleV-kf5XK4.png,https://s1.pxz.ai/upload/nano_banana/20251217/UMM7vnF_JPqmvqt8bO2Uo.jpeg",
+                "show_public": true,
+                "aspect_ratio": "16:9"
+            },
+            "showPublic": 0,
+            "attachments": [
+                "https://s1.pxz.ai/upload/nano_banana/20251217/lAI2Anos92Un0NLgGyDwl.png,https://s1.pxz.ai/upload/nano_banana/20251217/p9DkzlcwX2pleV-kf5XK4.png,https://s1.pxz.ai/upload/nano_banana/20251217/UMM7vnF_JPqmvqt8bO2Uo.jpeg"
+            ]
+        },
+        "credits_used": 100,
+        "output": [
+            {
+                "url": "https://s1.pxz.ai/upload/image-generator/20251218/hYtdX7AInk4HgErJCgD-w-item-0.jpeg"
+            }
+        ]
+    }
+}
+  ```
+
+  ```json 400
+  {
+    "statusCode": 400,
+    "message": "Missing required field: task_id",
+    "ok": false
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "服务器内部错误，请稍后重试"
+    }
+  }
+  ```
+</ResponseExample>

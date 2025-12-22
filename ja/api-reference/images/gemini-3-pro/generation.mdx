@@ -1,10 +1,9 @@
 ---
-title: 'Gemini-3-Pro-Image-preview (Nano banana2) 画像生成'
+title: 'Nano Banana Pro 画像生成'
 description: |
-    - 非同期処理モード、後続の照会用にタスクIDを返す
-    - 高品質な画像生成、プロフェッショナルレベルの画像作成
-    - 生成された画像リンクは有効期限が24時間です。できるだけ早く保存してください
-api: 'POST https://api.apimart.ai/v1/images/generations'
+    - 非同期処理モード、後続のクエリ用にタスクIDを返す
+    - 高品質画像生成、プロフェッショナルレベルの画像作成
+api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 ---
 ## Authorizations
 
@@ -24,137 +23,128 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
 ## Body
 
-<ParamField body="model" type="string" default="gemini-3-pro-image-preview" required>
-  画像生成モデルの名称
+<ParamField body="model" type="string" required>
+  モデル名
 
-  Example: `"gemini-3-pro-image-preview"`
+  固定値：`"nano_banana_pro"`
 </ParamField>
 
-<ParamField body="prompt" type="string" required>
-  画像生成のテキスト説明
-</ParamField>
+<ParamField body="params" type="object" required>
+  モデルパラメータオブジェクト
 
-<ParamField body="size" type="string">
-  画像生成のサイズ
+  <Expandable title="params オブジェクトのプロパティ">
+    <ParamField body="prompt" type="string" required>
+      画像生成のためのテキスト説明
 
-  対応フォーマット：
+      制限なし
+    </ParamField>
 
-  * アスペクト比：`1:1`、`2:3`、`3:2`、`3:4`、`4:3`、`4:5`、`5:4`、`9:16`、`16:9`、`21:9`
-</ParamField>
+    <ParamField body="image_url" type="array">
+      画像から画像への変換のための参照画像のURLリスト
 
-<ParamField body="n" type="integer">
-  生成する画像の枚数
+      * 最大8枚の画像
+      * 公開アクセス可能なURLをサポート
+    </ParamField>
 
-  固定値：1
+    <ParamField body="aspect_ratio" type="string" default="1:1">
+      画像生成のアスペクト比
 
-  **⚠️ 注意：** 純粋な数字（例：`1`）を入力してください。引用符を付けるとエラーになります
-</ParamField>
+      サポートされているアスペクト比：
 
-<ParamField body="resolution" type="string">
-  出力画像の解像度
+      * `auto` - 自動
+      * `1:1` - 正方形（デフォルト）
+      * `3:2` - 横長 3:2
+      * `2:3` - 縦長 2:3
+      * `4:3` - 横長 4:3
+      * `3:4` - 縦長 3:4
+      * `5:4` - 横長 5:4
+      * `4:5` - 縦長 4:5
+      * `16:9` - 横長ワイドスクリーン
+      * `9:16` - 縦長スクリーン
+      * `21:9` - 超ワイドスクリーン
+    </ParamField>
 
-  対応値：
+    <ParamField body="resolution" type="string" default="1K">
+      画像解像度
 
-  * `1K` - 1K 解像度（デフォルト）
-  * `2K` - 2K 解像度
-  * `4K` - 4K 解像度
+      サポートされている解像度：
 
-  **⚠️ 注意：** base64形式で4K画像を生成する場合、処理時間が長くなります
-</ParamField>
+      * `1K` - 基本解像度（デフォルト）
+      * `2K` - 標準解像度
+      * `4K` - 高精細解像度
+    </ParamField>
 
-<ParamField body="image_urls" type="array">
-  参考画像のURLリスト。画像から画像生成や画像編集に使用
+    <ParamField body="format" type="string" default="png">
+      画像出力フォーマット
 
-  **💡 クイック入力（Try it エリア）：**
+      サポートされているフォーマット：
 
-  1. "+ Add an item" をクリックして画像URLを追加
-  2. 画像の完全なURLアドレスかbase64データを入力
-
-  <Expandable title="詳細なフィールド説明">
-    <ParamField body="url" type="string" required>
-      画像URLアドレス
-
-      2種類のフォーマットに対応：
-
-      **1. 完全な画像URLアドレス**
-
-      * 公開アクセス可能な画像URL（http\:// または https\://）
-      * 例: `https://example.com/image.jpg`
-
-      **2. Base64 エンコード形式**
-
-      * **完全なData URI形式である必要があります**
-      * フォーマット：`data:image/{フォーマット};base64,{base64データ}`
-      * 対応画像フォーマット：jpeg、png、webp など
-      * 例: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
-      * ⚠️ 注意：`data:image/jpeg;base64,`のプレフィックス部分を必ず含めてください
-
-      **制限：**
-
-      * 1枚あたり最大10MB
-      * 対応フォーマット：.jpeg、.jpg、.png、.webp
+      * `png` - PNGフォーマット（デフォルト）
+      * `jpg` - JPEGフォーマット
     </ParamField>
   </Expandable>
-
-  **制限：** 最大5枚の画像
 </ParamField>
 
-<ParamField body="mask_url" type="string">
-  マスク画像のURL
+<ParamField body="callback_url" type="string">
+  タスク完了後のコールバック通知先URL
 
-  * PNG形式である必要があります
-  * 参考画像とサイズが同じである必要があります
-  * 4MB以下
+  タスク完了後、システムはこのURLにPOSTリクエストで結果を通知します
+</ParamField>
+
+<ParamField body="metadata" type="object">
+  カスタムメタデータ
+
+  クエリ結果時にそのまま返され、ビジネス識別に使用できます
 </ParamField>
 
 ## Response
 
-<ResponseField name="code" type="integer">
-  レスポンスステータスコード
+<ResponseField name="task_id" type="string">
+  タスクID、結果の照会に使用されます
 </ResponseField>
 
-<ResponseField name="data" type="array">
-  返却データ配列
+<ResponseField name="status" type="string">
+  初期状態、固定で `"pending"`
+</ResponseField>
 
-  <Expandable title="Properties">
-    <ResponseField name="status" type="string">
-      タスクの状態
+<ResponseField name="estimated_credits" type="number">
+  推定クレジット消費量
+</ResponseField>
 
-      * `submitted` - 提出済み
-    </ResponseField>
-
-    <ResponseField name="task_id" type="string">
-      タスクのユニーク識別子
-    </ResponseField>
-  </Expandable>
+<ResponseField name="created_at" type="string">
+  作成日時（ISOフォーマット）
 </ResponseField>
 
 <RequestExample>
   ```bash cURL
   curl --request POST \
-    --url https://api.apimart.ai/v1/images/generations \
+    --url http://pxz-api.xinsulv.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
-      "model": "gemini-3-pro-image-preview",
-      "prompt": "月光の下の竹林小道",
-      "size": "1:1",
-      "n": 1,
-      "resolution": "1K"
+      "model": "nano_banana_pro",
+      "params": {
+        "prompt": "プロフェッショナルクラスの都市夜景",
+        "aspect_ratio": "16:9",
+        "resolution": "2K",
+        "format": "png"
+      }
     }'
   ```
 
   ```python Python
   import requests
 
-  url = "https://api.apimart.ai/v1/images/generations"
+  url = "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload = {
-      "model": "gemini-3-pro-image-preview",
-      "prompt": "月光の下の竹林小道",
-      "size": "1:1",
-      "n": 1,
-      "resolution": "1K"
+      "model": "nano_banana_pro",
+      "params": {
+          "prompt": "プロフェッショナルクラスの都市夜景",
+          "aspect_ratio": "16:9",
+          "resolution": "2K",
+          "format": "png"
+      }
   }
 
   headers = {
@@ -168,14 +158,16 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   ```
 
   ```javascript JavaScript
-  const url = "https://api.apimart.ai/v1/images/generations";
+  const url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
   const payload = {
-    model: "gemini-3-pro-image-preview",
-    prompt: "月光の下の竹林小道",
-    size: "1:1",
-    n: 1,
-    resolution: "2K"
+    model: "nano_banana_pro",
+    params: {
+      prompt: "プロフェッショナルクラスの都市夜景",
+      aspect_ratio: "16:9",
+      resolution: "2K",
+      format: "png"
+    }
   };
 
   const headers = {
@@ -205,14 +197,16 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   )
 
   func main() {
-      url := "https://api.apimart.ai/v1/images/generations"
+      url := "http://pxz-api.xinsulv.com/api/openapi/submit"
 
       payload := map[string]interface{}{
-          "model":      "gemini-3-pro-image-preview",
-          "prompt":     "月光の下の竹林小道",
-          "size":       "1:1",
-          "n":          1,
-          "resolution": "1K",
+          "model": "nano_banana_pro",
+          "params": map[string]interface{}{
+              "prompt":       "プロフェッショナルクラスの都市夜景",
+              "aspect_ratio": "16:9",
+              "resolution":   "2K",
+              "format":       "png",
+          },
       }
 
       jsonData, _ := json.Marshal(payload)
@@ -241,15 +235,17 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   public class Main {
       public static void main(String[] args) throws Exception {
-          String url = "https://api.apimart.ai/v1/images/generations";
+          String url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
           String payload = """
           {
-            "model": "gemini-3-pro-image-preview",
-            "prompt": "月光の下の竹林小道",
-            "size": "1:1",
-            "n": 1,
-            "resolution": "1K"
+            "model": "nano_banana_pro",
+            "params": {
+              "prompt": "プロフェッショナルクラスの都市夜景",
+              "aspect_ratio": "16:9",
+              "resolution": "2K",
+              "format": "png"
+            }
           }
           """;
 
@@ -272,14 +268,16 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   ```php PHP
   <?php
 
-  $url = "https://api.apimart.ai/v1/images/generations";
+  $url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
   $payload = [
-      "model" => "gemini-3-pro-image-preview",
-      "prompt" => "月光の下の竹林小道",
-      "size" => "1:1",
-      "n" => 1,
-      "resolution" => "2K"
+      "model" => "nano_banana_pro",
+      "params" => [
+          "prompt" => "プロフェッショナルクラスの都市夜景",
+          "aspect_ratio" => "16:9",
+          "resolution" => "2K",
+          "format" => "png"
+      ]
   ];
 
   $ch = curl_init($url);
@@ -303,18 +301,19 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   require 'json'
   require 'uri'
 
-  url = URI("https://api.apimart.ai/v1/images/generations")
+  url = URI("http://pxz-api.xinsulv.com/api/openapi/submit")
 
   payload = {
-    model: "gemini-3-pro-image-preview",
-    prompt: "月光の下の竹林小道",
-    size: "1:1",
-    n: 1,
-    resolution: "2K"
+    model: "nano_banana_pro",
+    params: {
+      prompt: "プロフェッショナルクラスの都市夜景",
+      aspect_ratio: "16:9",
+      resolution: "2K",
+      format: "png"
+    }
   }
 
   http = Net::HTTP.new(url.host, url.port)
-  http.use_ssl = true
 
   request = Net::HTTP::Post.new(url)
   request["Authorization"] = "Bearer <token>"
@@ -328,14 +327,16 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "https://api.apimart.ai/v1/images/generations")!
+  let url = URL(string: "http://pxz-api.xinsulv.com/api/openapi/submit")!
 
   let payload: [String: Any] = [
-      "model": "gemini-3-pro-image-preview",
-      "prompt": "月光の下の竹林小道",
-      "size": "1:1",
-      "n": 1,
-      "resolution": "1K"
+      "model": "nano_banana_pro",
+      "params": [
+          "prompt": "プロフェッショナルクラスの都市夜景",
+          "aspect_ratio": "16:9",
+          "resolution": "2K",
+          "format": "png"
+      ]
   ]
 
   var request = URLRequest(url: url)
@@ -368,14 +369,16 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   {
       static async Task Main(string[] args)
       {
-          var url = "https://api.apimart.ai/v1/images/generations";
+          var url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
           var payload = @"{
-              ""model"": ""gemini-3-pro-image-preview"",
-              ""prompt"": ""月光の下の竹林小道"",
-              ""size"": ""1:1"",
-              ""n"": 1,
-              ""resolution"": ""2K""
+              ""model"": ""nano_banana_pro"",
+              ""params"": {
+                  ""prompt"": ""プロフェッショナルクラスの都市夜景"",
+                  ""aspect_ratio"": ""16:9"",
+                  ""resolution"": ""2K"",
+                  ""format"": ""png""
+              }
           }";
 
           using var client = new HttpClient();
@@ -402,13 +405,15 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
       curl = curl_easy_init();
 
       if(curl) {
-          const char *url = "https://api.apimart.ai/v1/images/generations";
+          const char *url = "http://pxz-api.xinsulv.com/api/openapi/submit";
           const char *payload = "{"
-              "\"model\":\"gemini-3-pro-image-preview\","
-              "\"prompt\":\"月光の下の竹林小道\","
-              "\"size\":\"1:1\","
-              "\"n\":1,"
-              "\"resolution\":\"2K\""
+              "\"model\":\"nano_banana_pro\","
+              "\"params\":{"
+                  "\"prompt\":\"プロフェッショナルクラスの都市夜景\","
+                  "\"aspect_ratio\":\"16:9\","
+                  "\"resolution\":\"2K\","
+                  "\"format\":\"png\""
+              "}"
           "}";
 
           struct curl_slist *headers = NULL;
@@ -440,14 +445,16 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
-          NSURL *url = [NSURL URLWithString:@"https://api.apimart.ai/v1/images/generations"];
+          NSURL *url = [NSURL URLWithString:@"http://pxz-api.xinsulv.com/api/openapi/submit"];
 
           NSDictionary *payload = @{
-              @"model": @"gemini-3-pro-image-preview",
-              @"prompt": @"月光の下の竹林小道",
-              @"size": @"1:1",
-              @"n": @1,
-              @"resolution": @"2K"
+              @"model": @"nano_banana_pro",
+              @"params": @{
+                  @"prompt": @"プロフェッショナルクラスの都市夜景",
+                  @"aspect_ratio": @"16:9",
+                  @"resolution": @"2K",
+                  @"format": @"png"
+              }
           };
 
           NSError *error;
@@ -486,14 +493,16 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   open Cohttp
   open Cohttp_lwt_unix
 
-  let url = "https://api.apimart.ai/v1/images/generations"
+  let url = "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   let payload = {|{
-    "model": "gemini-3-pro-image-preview",
-    "prompt": "月光の下の竹林小道",
-    "size": "1:1",
-    "n": 1,
-    "resolution": "1K"
+    "model": "nano_banana_pro",
+    "params": {
+      "prompt": "プロフェッショナルクラスの都市夜景",
+      "aspect_ratio": "16:9",
+      "resolution": "2K",
+      "format": "png"
+    }
   }|}
 
   let () =
@@ -515,14 +524,16 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   import 'package:http/http.dart' as http;
 
   void main() async {
-    final url = Uri.parse('https://api.apimart.ai/v1/images/generations');
+    final url = Uri.parse('http://pxz-api.xinsulv.com/api/openapi/submit');
 
     final payload = {
-      'model': 'gemini-3-pro-image-preview',
-      'prompt': '月光の下の竹林小道',
-      'size': '1:1',
-      'n': 1,
-      'resolution': '1K'
+      'model': 'nano_banana_pro',
+      'params': {
+        'prompt': 'プロフェッショナルクラスの都市夜景',
+        'aspect_ratio': '16:9',
+        'resolution': '2K',
+        'format': 'png'
+      }
     };
 
     final response = await http.post(
@@ -530,7 +541,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
       headers: {
         'Authorization': 'Bearer <token>',
         'Content-Type': 'application/json'
-    },
+      },
       body: jsonEncode(payload),
     );
 
@@ -542,14 +553,16 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   library(httr)
   library(jsonlite)
 
-  url <- "https://api.apimart.ai/v1/images/generations"
+  url <- "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload <- list(
-    model = "gemini-3-pro-image-preview",
-    prompt = "月光の下の竹林小道",
-    size = "1:1",
-    n = 1,
-    resolution = "1K"
+    model = "nano_banana_pro",
+    params = list(
+      prompt = "プロフェッショナルクラスの都市夜景",
+      aspect_ratio = "16:9",
+      resolution = "2K",
+      format = "png"
+    )
   )
 
   response <- POST(
@@ -568,63 +581,38 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
 <ResponseExample>
   ```json 200
-  {
-    "code": 200,
-    "data": [
-      {
-        "status": "submitted",
-        "task_id": "task_01K8SGYNNNVBQTXNR4MM964S7K"
-      }
-    ]
-  }
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
+        "status": "pending",
+        "estimated_credits": 100,
+        "created_at": "2025-12-22T06:03:28.242Z"
+    }
+}
   ```
 
   ```json 400
-  {
-    "error": {
-      "code": 400,
-      "message": "リクエストパラメータが無効です",
-      "type": "invalid_request_error"
+    {
+        "statusCode": 400,
+        "message": "リクエストパラメータが無効です",
+        "ok": false
     }
-  }
   ```
-
   ```json 401
   {
     "error": {
       "code": 401,
-      "message": "認証に失敗しました。APIキーを確認してください",
-      "type": "authentication_error"
+      "message": "認証失敗です。APIキーを確認してください",
     }
   }
   ```
-
-  ```json 402
+```json 433
   {
     "error": {
-      "code": 402,
-      "message": "アカウント残高不足です。チャージの上、再度お試しください",
-      "type": "payment_required"
-    }
-  }
-  ```
-
-  ```json 403
-  {
-    "error": {
-      "code": 403,
-      "message": "アクセスが禁止されています。このリソースへの権限がありません",
-      "type": "permission_error"
-    }
-  }
-  ```
-
-  ```json 429
-  {
-    "error": {
-      "code": 429,
-      "message": "リクエストが多すぎます。時間をおいて再度お試しください",
-      "type": "rate_limit_error"
+      "code": 433,
+      "message": "アカウント残高不足です。チャージ後に再試行してください",
     }
   }
   ```
@@ -633,18 +621,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   {
     "error": {
       "code": 500,
-      "message": "サーバー内部エラーです。時間をおいて再試行してください",
-      "type": "server_error"
-    }
-  }
-  ```
-
-  ```json 502
-  {
-    "error": {
-      "code": 502,
-      "message": "ゲートウェイエラー。サーバーが一時的に利用できません",
-      "type": "bad_gateway"
+      "message": "サーバ内部エラーです。しばらくしてから再試行してください"
     }
   }
   ```

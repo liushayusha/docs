@@ -1,10 +1,9 @@
 ---
-title: 'Seedream-4.0 이미지 생성'
+title: 'Seedream V4 이미지 생성'
 description: |
     - 비동기 처리 모드, 후속 조회를 위한 작업 ID 반환
-    - 텍스트->이미지, 이미지->이미지, 이미지 편집 등 다양한 생성 모드 지원
-    - 생성된 이미지 링크는 24시간 유효하니, 빠르게 저장하세요
-api: 'POST https://api.apimart.ai/v1/images/generations'
+    - 텍스트에서 이미지, 이미지에서 이미지 등 다양한 생성 모드 지원
+api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 ---
 ## Authorizations
 
@@ -24,248 +23,123 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
 ## Body
 
-<ParamField body="model" type="string" default="doubao-seedance-4-0" required>
-  이미지 생성 모델 이름
+<ParamField body="model" type="string" required>
+  모델 이름
 
-  Example: `"doubao-seedance-4-0"`
+  고정 값: `"seedream_v4"`
 </ParamField>
 
-<ParamField body="prompt" type="string" required>
-  이미지 생성을 위한 텍스트 설명
+<ParamField body="params" type="object" required>
+  모델 매개변수 객체
 
-  최대 1000자
-</ParamField>
+  <Expandable title="params 객체 속성">
+    <ParamField body="prompt" type="string" required>
+      이미지 생성을 위한 텍스트 설명
 
-<ParamField body="size" type="string" default="1:1">
-  이미지 생성 가로세로 비율
+      제한 없음
+    </ParamField>
 
-  지원하는 가로세로 비율:
+    <ParamField body="image_url" type="array">
+      이미지 생성에 참조할 이미지 URL 목록
 
-  * `1:1` - 정사각형 (기본값)
-  * `4:3` - 가로 4:3
-  * `3:4` - 세로 3:4
-  * `16:9` - 가로 와이드스크린
-  * `9:16` - 세로 세로스크린
-  * `3:2` - 가로 3:2
-  * `2:3` - 세로 2:3
-  * `21:9` - 초광폭
-  * `9:21` - 초세로스크린
-</ParamField>
+      * 최대 9장
+      * 공개적으로 접근 가능한 URL 지원
+    </ParamField>
 
-<ParamField body="resolution" type="string" default="2K">
-  이미지 해상도
+    <ParamField body="aspect_ratio" type="string" default="1:1">
+      이미지 생성의 가로세로 비율
 
-  지원하는 해상도:
+      지원하는 가로세로 비율:
 
-  * `1K` - 기본 해상도
-  * `2K` - 표준 해상도 (기본값)
-  * `4K` - 고해상도
+      * `1:1` - 정사각형 (기본값)
+      * `16:9` - 가로형 와이드스크린
+      * `9:16` - 세로형 와이드스크린
+      * `4:3` - 가로형 4:3
+      * `3:4` - 세로형 3:4
+    </ParamField>
 
-  **해상도 참고 크기:**
+    <ParamField body="resolution" type="string" default="1K">
+      이미지 해상도
 
-  | 해상도 | 1:1 크기    | 16:9 크기   |
-  | --- | --------- | --------- |
-  | 1K  | 1024x1024 | 1280x720  |
-  | 2K  | 2048x2048 | 2560x1440 |
-  | 4K  | 4096x4096 | 5404x3040 |
+      지원되는 해상도:
 
-  <Expandable title="전체 픽셀 매핑 표">
-    **1K 해상도**
+      * `1K` - 기본 해상도 (기본값)
+      * `2K` - 표준 해상도
+      * `4K` - 고해상도
+    </ParamField>
 
-    | 비율   | 픽셀        |
-    | ---- | --------- |
-    | 1:1  | 1024x1024 |
-    | 4:3  | 1152x864  |
-    | 3:4  | 864x1152  |
-    | 16:9 | 1280x720  |
-    | 9:16 | 720x1280  |
-    | 3:2  | 1248x832  |
-    | 2:3  | 832x1248  |
-    | 21:9 | 1512x648  |
-    | 9:21 | 648x1512  |
+    <ParamField body="output_n" type="string" default="1">
+      생성할 이미지 수
 
-    **2K 해상도**
+      지원 값:
 
-    | 비율   | 픽셀        |
-    | ---- | --------- |
-    | 1:1  | 2048x2048 |
-    | 4:3  | 2304x1728 |
-    | 3:4  | 1728x2304 |
-    | 16:9 | 2560x1440 |
-    | 9:16 | 1440x2560 |
-    | 3:2  | 2496x1664 |
-    | 2:3  | 1664x2496 |
-    | 21:9 | 3024x1296 |
-    | 9:21 | 1296x3024 |
-
-    **4K 해상도**
-
-    | 비율   | 픽셀        |
-    | ---- | --------- |
-    | 1:1  | 4096x4096 |
-    | 4:3  | 4694x3520 |
-    | 3:4  | 3520x4694 |
-    | 16:9 | 5404x3040 |
-    | 9:16 | 3040x5404 |
-    | 3:2  | 4992x3328 |
-    | 2:3  | 3328x4992 |
-    | 21:9 | 6198x2656 |
-    | 9:21 | 2656x6198 |
+      * `1` - 1장 생성 (기본값)
+      * `2` - 2장 생성
+      * `4` - 4장 생성
+    </ParamField>
   </Expandable>
 </ParamField>
 
-<ParamField body="n" type="integer">
-  생성할 이미지 수량
+<ParamField body="callback_url" type="string">
+  작업 완료 후 콜백 알림 주소
 
-  값 범위: 1-15 (최소 1장, 최대 15장)
-
-  기본값: 1
-
-  **주의:**
-
-  * 실제 생성 가능한 이미지 수량은 이 매개변수 외에도 입력한 참고 이미지 수량에 영향을 받습니다. 참고 이미지 수 + 최종 생성 이미지 수 ≤ 15장
-  * **숫자만 입력해야 합니다(예: `1`), 따옴표 포함 시 오류 발생**
-
-  생성 수량에 따라 선결제 차감됨
+  작업 완료 시 시스템이 이 주소로 POST 요청을 보내 결과를 알립니다
 </ParamField>
 
-<ParamField body="image_urls" type="array">
-  참고 이미지 URL 목록, 이미지 생성 또는 편집에 사용
+<ParamField body="metadata" type="object">
+  사용자 정의 메타데이터
 
-  두 가지 형식 지원:
-
-  **1. 완전한 이미지 URL 주소**
-
-  * 공개적으로 접근 가능한 이미지 URL (http\:// 또는 https\://)
-  * 예시: `https://example.com/image.jpg`
-
-  **2. Base64 인코딩 형식**
-
-  * **전체 Data URI 형식을 반드시 사용해야 합니다**
-  * 형식: `data:image/{형식};base64,{base64 데이터}`
-  * 지원 이미지 형식: jpeg, png
-  * 예시: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
-  * ⚠️ 주의: `data:image/jpeg;base64,` 접두어 포함 필수
-
-  **제한:**
-
-  * 최대 10장 이미지
-  * 이미지 형식: jpeg, png
-  * 가로세로 비율(가로/세로) 범위:\[1/3, 3]
-  * 가로세로 길이(px) > 14
-  * 단일 이미지 크기: 10MB 이하
-  * 총 픽셀: 6000×6000 px 이하
-</ParamField>
-
-<ParamField body="optimize_prompt_options" type="string" default="standard">
-  프롬프트 최적화 모드
-
-  * `standard`: 표준 모드, 생성 콘텐츠 품질이 더 높고 처리 시간 길음
-  * `fast`: 빠른 모드, 생성 처리 시간이 더 짧지만 품질은 보통
-
-  기본값: `standard`
-</ParamField>
-
-<ParamField body="sequential_image_generation" type="string" default="disabled">
-  시리즈 이미지 생성 모드 (Doubao 전용 기능)
-
-  여러 장 이미지 생성을 제어하는 기능:
-
-  * `disabled`: 시리즈 모드 비활성화, 참고 이미지가 여러 장이어도 1장만 생성 (기본값)
-  * `auto`: 시리즈 모드 활성화, 여러 장 이미지 생성 가능
-
-  **사용 안내:**
-
-  * ✅ `image_urls` 필수 – 최소 1장의 참고 이미지 필요
-  * ✅ `n: 3` 설정 또는 `sequential_image_generation: "auto"` 와 `max_images: 3` 사용
-  * ✅ 이렇게 하면 참고 이미지를 기반으로 3장의 서로 다른 이미지 생성
-  * ⚠️ `n > 1` 일 경우 자동으로 `auto` 로 설정됨
-
-  **제한:**
-
-  * 참고 이미지가 없는 순수 텍스트 이미지 생성은 다중 이미지 생성 불가, 이는 Doubao API 제한 사항
-</ParamField>
-
-<ParamField body="sequential_image_generation_options" type="object">
-  시리즈 이미지 생성 옵션
-
-  `sequential_image_generation` 이 `auto` 로 설정된 경우 사용 가능
-
-  **Properties:**
-
-  * `max_images` (integer): 생성할 이미지 수량 지정, 값 범위: 1-15
-
-  **예시:**
-
-  ```json 
-  "sequential_image_generation": "auto",
-  "sequential_image_generation_options": {
-    "max_images": 3
-  }
-  ```
-</ParamField>
-
-<ParamField body="watermark" type="boolean" default="false">
-  생성된 이미지에 워터마크 추가 여부
-
-  * `true`: 워터마크 추가
-  * `false`: 워터마크 미추가 (기본값)
+  쿼리 결과에 원본 그대로 반환되며, 비즈니스 식별에 사용됩니다
 </ParamField>
 
 ## Response
 
-<ResponseField name="code" type="integer">
-  응답 상태 코드
+<ResponseField name="task_id" type="string">
+  작업 ID, 결과 쿼리에 사용
 </ResponseField>
 
-<ResponseField name="data" type="array">
-  반환된 데이터 배열
+<ResponseField name="status" type="string">
+  초기 상태, 고정값 `"pending"`
+</ResponseField>
 
-  <Expandable title="Properties">
-    <ResponseField name="status" type="string">
-      작업 상태
+<ResponseField name="estimated_credits" type="number">
+  예상 소모 크레딧
+</ResponseField>
 
-      * `submitted` - 제출됨
-    </ResponseField>
-
-    <ResponseField name="task_id" type="string">
-      작업 고유 식별자
-    </ResponseField>
-  </Expandable>
+<ResponseField name="created_at" type="string">
+  생성 시간 (ISO 형식)
 </ResponseField>
 
 <RequestExample>
   ```bash cURL
   curl --request POST \
-    --url https://api.apimart.ai/v1/images/generations \
+    --url http://pxz-api.xinsulv.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
-      "model": "doubao-seedance-4-0",
-      "prompt": "귀여운 판다가 대나무 숲에서 놀고 있음",
-      "size": "1:1",
-      "resolution": "2K",
-      "n": 1,
-      "image_urls": [
-        "https://cdn.apimart.ai/doc/1761215838466614297_9852.png"
-      ]
+      "model": "seedream_v4",
+      "params": {
+        "prompt": "바닷가의 아름다운 일몰",
+        "aspect_ratio": "16:9",
+        "resolution": "2K",
+        "output_n": "2"
+      }
     }'
   ```
 
   ```python Python
   import requests
 
-  url = "https://api.apimart.ai/v1/images/generations"
+  url = "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload = {
-      "model": "doubao-seedance-4-0",
-      "prompt": "귀여운 판다가 대나무 숲에서 놀고 있음",
-      "size": "1:1",
-      "resolution": "2K",
-      "n": 1,
-      "image_urls": [
-          "https://cdn.apimart.ai/doc/1761215838466614297_9852.png"
-      ]
+      "model": "seedream_v4",
+      "params": {
+          "prompt": "바닷가의 아름다운 일몰",
+          "aspect_ratio": "16:9",
+          "resolution": "2K",
+          "output_n": "2"
+      }
   }
 
   headers = {
@@ -279,17 +153,16 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   ```
 
   ```javascript JavaScript
-  const url = "https://api.apimart.ai/v1/images/generations";
+  const url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
   const payload = {
-    model: "doubao-seedance-4-0",
-    prompt: "귀여운 판다가 대나무 숲에서 놀고 있음",
-    size: "1:1",
-    resolution: "2K",
-    n: 1,
-    image_urls: [
-      "https://cdn.apimart.ai/doc/1761215838466614297_9852.png"
-    ]
+    model: "seedream_v4",
+    params: {
+      prompt: "바닷가의 아름다운 일몰",
+      aspect_ratio: "16:9",
+      resolution: "2K",
+      output_n: "2"
+    }
   };
 
   const headers = {
@@ -319,16 +192,15 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   )
 
   func main() {
-      url := "https://api.apimart.ai/v1/images/generations"
+      url := "http://pxz-api.xinsulv.com/api/openapi/submit"
 
       payload := map[string]interface{}{
-          "model":      "doubao-seedance-4-0",
-          "prompt":     "귀여운 판다가 대나무 숲에서 놀고 있음",
-          "size":       "1:1",
-          "resolution": "2K",
-          "n":          1,
-          "image_urls": []string{
-              "https://cdn.apimart.ai/doc/1761215838466614297_9852.png",
+          "model": "seedream_v4",
+          "params": map[string]interface{}{
+              "prompt":       "바닷가의 아름다운 일몰",
+              "aspect_ratio": "16:9",
+              "resolution":   "2K",
+              "output_n":     "2",
           },
       }
 
@@ -358,18 +230,17 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   public class Main {
       public static void main(String[] args) throws Exception {
-          String url = "https://api.apimart.ai/v1/images/generations";
+          String url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
           String payload = """
           {
-            "model": "doubao-seedance-4-0",
-            "prompt": "귀여운 판다가 대나무 숲에서 놀고 있음",
-            "size": "1:1",
-            "resolution": "2K",
-            "n": 1,
-            "image_urls": [
-              "https://cdn.apimart.ai/doc/1761215838466614297_9852.png"
-            ]
+            "model": "seedream_v4",
+            "params": {
+              "prompt": "바닷가의 아름다운 일몰",
+              "aspect_ratio": "16:9",
+              "resolution": "2K",
+              "output_n": "2"
+            }
           }
           """;
 
@@ -392,16 +263,15 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   ```php PHP
   <?php
 
-  $url = "https://api.apimart.ai/v1/images/generations";
+  $url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
   $payload = [
-      "model" => "doubao-seedance-4-0",
-      "prompt" => "귀여운 판다가 대나무 숲에서 놀고 있음",
-      "size" => "1:1",
-      "resolution" => "2K",
-      "n" => 1,
-      "image_urls" => [
-          "https://cdn.apimart.ai/doc/1761215838466614297_9852.png"
+      "model" => "seedream_v4",
+      "params" => [
+          "prompt" => "바닷가의 아름다운 일몰",
+          "aspect_ratio" => "16:9",
+          "resolution" => "2K",
+          "output_n" => "2"
       ]
   ];
 
@@ -426,21 +296,19 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   require 'json'
   require 'uri'
 
-  url = URI("https://api.apimart.ai/v1/images/generations")
+  url = URI("http://pxz-api.xinsulv.com/api/openapi/submit")
 
   payload = {
-    model: "doubao-seedance-4-0",
-    prompt: "귀여운 판다가 대나무 숲에서 놀고 있음",
-    size: "1:1",
-    resolution: "2K",
-    n: 1,
-    image_urls: [
-      "https://cdn.apimart.ai/doc/1761215838466614297_9852.png"
-    ]
+    model: "seedream_v4",
+    params: {
+      prompt: "바닷가의 아름다운 일몰",
+      aspect_ratio: "16:9",
+      resolution: "2K",
+      output_n: "2"
+    }
   }
 
   http = Net::HTTP.new(url.host, url.port)
-  http.use_ssl = true
 
   request = Net::HTTP::Post.new(url)
   request["Authorization"] = "Bearer <token>"
@@ -454,16 +322,15 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "https://api.apimart.ai/v1/images/generations")!
+  let url = URL(string: "http://pxz-api.xinsulv.com/api/openapi/submit")!
 
   let payload: [String: Any] = [
-      "model": "doubao-seedance-4-0",
-      "prompt": "귀여운 판다가 대나무 숲에서 놀고 있음",
-      "size": "1:1",
-      "resolution": "2K",
-      "n": 1,
-      "image_urls": [
-          "https://cdn.apimart.ai/doc/1761215838466614297_9852.png"
+      "model": "seedream_v4",
+      "params": [
+          "prompt": "바닷가의 아름다운 일몰",
+          "aspect_ratio": "16:9",
+          "resolution": "2K",
+          "output_n": "2"
       ]
   ]
 
@@ -478,7 +345,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
           print("Error: \(error)")
           return
       }
-      
+
       if let data = data, let responseString = String(data: data, encoding: .utf8) {
           print(responseString)
       }
@@ -497,17 +364,16 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   {
       static async Task Main(string[] args)
       {
-          var url = "https://api.apimart.ai/v1/images/generations";
+          var url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
           var payload = @"{
-              ""model"": ""doubao-seedance-4-0"",
-              ""prompt"": ""귀여운 판다가 대나무 숲에서 놀고 있음"",
-              ""size"": ""1:1"",
-              ""resolution"": ""2K"",
-              ""n"": 1,
-              ""image_urls"": [
-                  ""https://cdn.apimart.ai/doc/1761215838466614297_9852.png""
-              ]
+              ""model"": ""seedream_v4"",
+              ""params"": {
+                  ""prompt"": ""바닷가의 아름다운 일몰"",
+                  ""aspect_ratio"": ""16:9"",
+                  ""resolution"": ""2K"",
+                  ""output_n"": ""2""
+              }
           }";
 
           using var client = new HttpClient();
@@ -534,14 +400,15 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
       curl = curl_easy_init();
 
       if(curl) {
-          const char *url = "https://api.apimart.ai/v1/images/generations";
+          const char *url = "http://pxz-api.xinsulv.com/api/openapi/submit";
           const char *payload = "{"
-              "\"model\":\"doubao-seedance-4-0\","
-              "\"prompt\":\"귀여운 판다가 대나무 숲에서 놀고 있음\","
-              "\"size\":\"1:1\","
-              "\"resolution\":\"2K\","
-              "\"n\":1,"
-              "\"image_urls\":[\"https://cdn.apimart.ai/doc/1761215838466614297_9852.png\"]"
+              "\"model\":\"seedream_v4\","
+              "\"params\":{"
+                  "\"prompt\":\"바닷가의 아름다운 일몰\","
+                  "\"aspect_ratio\":\"16:9\","
+                  "\"resolution\":\"2K\","
+                  "\"output_n\":\"2\""
+              "}"
           "}";
 
           struct curl_slist *headers = NULL;
@@ -573,42 +440,41 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
-          NSURL *url = [NSURL URLWithString:@"https://api.apimart.ai/v1/images/generations"];
-          
+          NSURL *url = [NSURL URLWithString:@"http://pxz-api.xinsulv.com/api/openapi/submit"];
+
           NSDictionary *payload = @{
-              @"model": @"doubao-seedance-4-0",
-              @"prompt": @"귀여운 판다가 대나무 숲에서 놀고 있음",
-              @"size": @"1:1",
-              @"resolution": @"2K",
-              @"n": @1,
-              @"image_urls": @[
-                  @"https://cdn.apimart.ai/doc/1761215838466614297_9852.png"
-              ]
+              @"model": @"seedream_v4",
+              @"params": @{
+                  @"prompt": @"바닷가의 아름다운 일몰",
+                  @"aspect_ratio": @"16:9",
+                  @"resolution": @"2K",
+                  @"output_n": @"2"
+              }
           };
-          
+
           NSError *error;
           NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
                                                             options:0
                                                               error:&error];
-          
+
           NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
           [request setHTTPMethod:@"POST"];
           [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
           [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
           [request setHTTPBody:jsonData];
-          
-          NSURLSessionDataTask *task = [[NSURLSession sharedSession] 
+
+          NSURLSessionDataTask *task = [[NSURLSession sharedSession]
               dataTaskWithRequest:request
               completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
                   if (error) {
                       NSLog(@"Error: %@", error);
                       return;
                   }
-                  NSString *result = [[NSString alloc] initWithData:data 
+                  NSString *result = [[NSString alloc] initWithData:data
                                                           encoding:NSUTF8StringEncoding];
                   NSLog(@"%@", result);
               }];
-          
+
           [task resume];
           [[NSRunLoop mainRunLoop] run];
       }
@@ -622,17 +488,16 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   open Cohttp
   open Cohttp_lwt_unix
 
-  let url = "https://api.apimart.ai/v1/images/generations"
+  let url = "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   let payload = {|{
-    "model": "doubao-seedance-4-0",
-    "prompt": "귀여운 판다가 대나무 숲에서 놀고 있음",
-    "size": "1:1",
-    "resolution": "2K",
-    "n": 1,
-    "image_urls": [
-      "https://cdn.apimart.ai/doc/1761215838466614297_9852.png"
-    ]
+    "model": "seedream_v4",
+    "params": {
+      "prompt": "바닷가의 아름다운 일몰",
+      "aspect_ratio": "16:9",
+      "resolution": "2K",
+      "output_n": "2"
+    }
   }|}
 
   let () =
@@ -641,7 +506,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
       |> fun h -> Header.add h "Content-Type" "application/json"
     in
     let body = Cohttp_lwt.Body.of_string payload in
-    
+
     let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
       body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
       print_endline body_str
@@ -654,28 +519,27 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   import 'package:http/http.dart' as http;
 
   void main() async {
-    final url = Uri.parse('https://api.apimart.ai/v1/images/generations');
-    
+    final url = Uri.parse('http://pxz-api.xinsulv.com/api/openapi/submit');
+
     final payload = {
-      'model': 'doubao-seedance-4-0',
-      'prompt': '귀여운 판다가 대나무 숲에서 놀고 있음',
-      'size': '1:1',
-      'resolution': '2K',
-      'n': 1,
-      'image_urls': [
-        'https://cdn.apimart.ai/doc/1761215838466614297_9852.png'
-      ]
+      'model': 'seedream_v4',
+      'params': {
+        'prompt': '바닷가의 아름다운 일몰',
+        'aspect_ratio': '16:9',
+        'resolution': '2K',
+        'output_n': '2'
+      }
     };
-    
+
     final response = await http.post(
       url,
       headers: {
         'Authorization': 'Bearer <token>',
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
       body: jsonEncode(payload),
     );
-    
+
     print(response.body);
   }
   ```
@@ -684,16 +548,15 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   library(httr)
   library(jsonlite)
 
-  url <- "https://api.apimart.ai/v1/images/generations"
+  url <- "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload <- list(
-    model = "doubao-seedance-4-0",
-    prompt = "귀여운 판다가 대나무 숲에서 놀고 있음",
-    size = "1:1",
-    resolution = "2K",
-    n = 1,
-    image_urls = list(
-      "https://cdn.apimart.ai/doc/1761215838466614297_9852.png"
+    model = "seedream_v4",
+    params = list(
+      prompt = "바닷가의 아름다운 일몰",
+      aspect_ratio = "16:9",
+      resolution = "2K",
+      output_n = "2"
     )
   )
 
@@ -713,63 +576,38 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
 <ResponseExample>
   ```json 200
-  {
-    "code": 200,
-    "data": [
-      {
-        "status": "submitted",
-        "task_id": "task_01K8SGYNNNVBQTXNR4MM964S7K"
-      }
-    ]
-  }
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
+        "status": "pending",
+        "estimated_credits": 100,
+        "created_at": "2025-12-22T06:03:28.242Z"
+    }
+}
   ```
 
   ```json 400
-  {
-    "error": {
-      "code": 400,
-      "message": "요청 파라미터가 유효하지 않습니다",
-      "type": "invalid_request_error"
+    {
+        "statusCode": 400,
+        "message": "요청 파라미터가 유효하지 않습니다",
+        "ok": false
     }
-  }
   ```
-
   ```json 401
   {
     "error": {
       "code": 401,
-      "message": "인증 실패, API 키를 확인하세요",
-      "type": "authentication_error"
+      "message": "인증 실패입니다. API 키를 확인하세요"
     }
   }
   ```
-
-  ```json 402
+```json 433
   {
     "error": {
-      "code": 402,
-      "message": "계정 잔액이 부족합니다, 충전 후 다시 시도하세요",
-      "type": "payment_required"
-    }
-  }
-  ```
-
-  ```json 403
-  {
-    "error": {
-      "code": 403,
-      "message": "접근이 거부되었습니다, 해당 리소스에 대한 권한이 없습니다",
-      "type": "permission_error"
-    }
-  }
-  ```
-
-  ```json 429
-  {
-    "error": {
-      "code": 429,
-      "message": "요청이 너무 많습니다, 잠시 후 다시 시도하세요",
-      "type": "rate_limit_error"
+      "code": 433,
+      "message": "계정 잔액이 부족합니다. 충전 후 다시 시도해주세요"
     }
   }
   ```
@@ -778,18 +616,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   {
     "error": {
       "code": 500,
-      "message": "서버 내부 오류, 잠시 후 다시 시도하세요",
-      "type": "server_error"
-    }
-  }
-  ```
-
-  ```json 502
-  {
-    "error": {
-      "code": 502,
-      "message": "게이트웨이 오류, 서버를 사용할 수 없습니다",
-      "type": "bad_gateway"
+      "message": "서버 내부 오류입니다. 잠시 후 다시 시도해주세요"
     }
   }
   ```

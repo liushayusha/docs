@@ -1,10 +1,9 @@
 ---
-title: 'Gemini-2.5-Flash-Image-preview (Nano banana) Image Generation'
+title: 'Nano Banana Image Generation'
 description: |
-    - Asynchronous processing mode, returns task ID for subsequent queries
+    - Asynchronous processing mode, returns a task ID for subsequent queries
     - Fast generation speed, optimized for rapid image creation
-    - Generated image links are valid for 24 hours, please save them promptly
-api: 'POST https://api.apimart.ai/v1/images/generations'
+api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 ---
 ## Authorizations
 
@@ -24,131 +23,116 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
 ## Body
 
-<ParamField body="model" type="string" default="gemini-2.5-flash-image-preview" required>
-  Name of the image generation model
+<ParamField body="model" type="string" required>
+  Model name
 
-  Example: `"gemini-2.5-flash-image-preview"`
+  Fixed value: `"nano_banana"`
 </ParamField>
 
-<ParamField body="prompt" type="string" required>
-  Text description for image generation
+<ParamField body="params" type="object" required>
+  Model parameters object
 
-  Maximum 1000 characters
-</ParamField>
+  <Expandable title="params object properties">
+    <ParamField body="prompt" type="string" required>
+      Text description for image generation
 
-<ParamField body="size" type="string">
-  Size of the generated image
+      No limits
+    </ParamField>
 
-  Supported formats:
+    <ParamField body="image_url" type="array">
+      List of reference image URLs for image-to-image generation
 
-  * Aspect ratios: `1:1`, `2:3`, `3:2`, `3:4`, `4:3`, `4:5`, `5:4`, `9:16`, `16:9`, `21:9`
-</ParamField>
+      * Up to 9 images
+      * Supports publicly accessible URLs
+    </ParamField>
 
-<ParamField body="n" type="integer">
-  Number of images to generate
+    <ParamField body="aspect_ratio" type="string" default="auto">
+      Aspect ratio for image generation
 
-  Fixed at 1
+      Supported ratios:
 
-  **⚠️ Note:** Must input a pure number (e.g., `1`), do not add quotes, otherwise it will cause an error
-</ParamField>
+      * `auto` - Automatic (default)
+      * `1:1` - Square
+      * `3:2` - Landscape 3:2
+      * `2:3` - Portrait 2:3
+      * `4:3` - Landscape 4:3
+      * `3:4` - Portrait 3:4
+      * `5:4` - Landscape 5:4
+      * `4:5` - Portrait 4:5
+      * `16:9` - Widescreen landscape
+      * `9:16` - Portrait vertical screen
+      * `21:9` - Ultra-wide screen
+    </ParamField>
 
-<ParamField body="image_urls" type="array">
-  List of reference image URLs for image-to-image generation or image editing
+    <ParamField body="format" type="string" default="png">
+      Image output format
 
-  **💡 Quick fill (Try it section):**
+      Supported formats:
 
-  1. Click "+ Add an item" to add an image URL
-  2. Enter the full URL of the image or base64 data
-
-  <Expandable title="Detailed field description">
-    <ParamField body="url" type="string" required>
-      Image URL address
-
-      Supports two formats:
-
-      **1. Full image URL address**
-
-      * Publicly accessible image URL (http\:// or https\://)
-      * Example: `https://example.com/image.jpg`
-
-      **2. Base64 encoded format**
-
-      * **Must use the complete Data URI format**
-      * Format: `data:image/{format};base64,{base64 data}`
-      * Supported image formats: jpeg, png, webp, etc.
-      * Example: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
-      * ⚠️ Note: Must include the `data:image/jpeg;base64,` prefix
-
-      **Limit:**
-
-      * Single image no larger than 10MB
-      * Supported formats: .jpeg, .jpg, .png, .webp
+      * `png` - PNG format (default)
+      * `jpeg` - JPEG format
     </ParamField>
   </Expandable>
-
-  **Limit:** Up to 5 images
 </ParamField>
 
-<ParamField body="mask_url" type="string">
-  URL of the mask image
+<ParamField body="callback_url" type="string">
+  Callback notification URL after task completion
 
-  * Must be PNG format
-  * Size must match the reference image
-  * No larger than 4MB
+  After the task is completed, the system sends a POST request to this URL to notify the result
+</ParamField>
+
+<ParamField body="metadata" type="object">
+  Custom metadata
+
+  Returned as-is when querying results, can be used for business identification
 </ParamField>
 
 ## Response
 
-<ResponseField name="code" type="integer">
-  Response status code
+<ResponseField name="task_id" type="string">
+  Task ID, used to query the result
 </ResponseField>
 
-<ResponseField name="data" type="array">
-  Returned data array
+<ResponseField name="status" type="string">
+  Initial status, fixed as `"pending"`
+</ResponseField>
 
-  <Expandable title="Properties">
-    <ResponseField name="status" type="string">
-      Task status
+<ResponseField name="estimated_credits" type="number">
+  Estimated consumed credits
+</ResponseField>
 
-      * `submitted` - Submitted
-    </ResponseField>
-
-    <ResponseField name="task_id" type="string">
-      Unique task identifier
-    </ResponseField>
-  </Expandable>
+<ResponseField name="created_at" type="string">
+  Creation time (ISO format)
 </ResponseField>
 
 <RequestExample>
   ```bash cURL
   curl --request POST \
-    --url https://api.apimart.ai/v1/images/generations \
+    --url http://pxz-api.xinsulv.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
-      "model": "gemini-2.5-flash-image-preview",
-      "prompt": "A bamboo path under moonlight",
-      "size": "1:1",
-      "n": 1,
-      "image_urls": [
-        "https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png"
-      ]
+      "model": "nano_banana",
+      "params": {
+        "prompt": "A bamboo path under the moonlight",
+        "aspect_ratio": "16:9",
+        "format": "png"
+      }
     }'
   ```
 
   ```python Python
   import requests
 
-  url = "https://api.apimart.ai/v1/images/generations"
+  url = "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload = {
-      "model": "gemini-2.5-flash-image-preview",
-      "prompt": "A bamboo path under moonlight",
-      "size": "1:1",
-      "n": 1,
-      "image_urls": [
-          "https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png"
-      ]
+      "model": "nano_banana",
+      "params": {
+          "prompt": "A bamboo path under the moonlight",
+          "aspect_ratio": "16:9",
+          "format": "png"
+      }
   }
 
   headers = {
@@ -162,16 +146,15 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   ```
 
   ```javascript JavaScript
-  const url = "https://api.apimart.ai/v1/images/generations";
+  const url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
   const payload = {
-    model: "gemini-2.5-flash-image-preview",
-    prompt: "A bamboo path under moonlight",
-    size: "1:1",
-    n: 1,
-    image_urls: [
-      "https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png"
-    ]
+    model: "nano_banana",
+    params: {
+      prompt: "A bamboo path under the moonlight",
+      aspect_ratio: "16:9",
+      format: "png"
+    }
   };
 
   const headers = {
@@ -201,15 +184,14 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   )
 
   func main() {
-      url := "https://api.apimart.ai/v1/images/generations"
+      url := "http://pxz-api.xinsulv.com/api/openapi/submit"
 
       payload := map[string]interface{}{
-          "model":  "gemini-2.5-flash-image-preview",
-          "prompt": "A bamboo path under moonlight",
-          "size":   "1:1",
-          "n":      1,
-          "image_urls": []string{
-              "https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png",
+          "model": "nano_banana",
+          "params": map[string]interface{}{
+              "prompt":       "A bamboo path under the moonlight",
+              "aspect_ratio": "16:9",
+              "format":       "png",
           },
       }
 
@@ -239,17 +221,16 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   public class Main {
       public static void main(String[] args) throws Exception {
-          String url = "https://api.apimart.ai/v1/images/generations";
+          String url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
           String payload = """
           {
-            "model": "gemini-2.5-flash-image-preview",
-            "prompt": "A bamboo path under moonlight",
-            "size": "1:1",
-            "n": 1,
-            "image_urls": [
-              "https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png"
-            ]
+            "model": "nano_banana",
+            "params": {
+              "prompt": "A bamboo path under the moonlight",
+              "aspect_ratio": "16:9",
+              "format": "png"
+            }
           }
           """;
 
@@ -272,15 +253,14 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   ```php PHP
   <?php
 
-  $url = "https://api.apimart.ai/v1/images/generations";
+  $url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
   $payload = [
-      "model" => "gemini-2.5-flash-image-preview",
-      "prompt" => "A bamboo path under moonlight",
-      "size" => "1:1",
-      "n" => 1,
-      "image_urls" => [
-          "https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png"
+      "model" => "nano_banana",
+      "params" => [
+          "prompt" => "A bamboo path under the moonlight",
+          "aspect_ratio" => "16:9",
+          "format" => "png"
       ]
   ];
 
@@ -305,20 +285,18 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   require 'json'
   require 'uri'
 
-  url = URI("https://api.apimart.ai/v1/images/generations")
+  url = URI("http://pxz-api.xinsulv.com/api/openapi/submit")
 
   payload = {
-    model: "gemini-2.5-flash-image-preview",
-    prompt: "A bamboo path under moonlight",
-    size: "1:1",
-    n: 1,
-    image_urls: [
-      "https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png"
-    ]
+    model: "nano_banana",
+    params: {
+      prompt: "A bamboo path under the moonlight",
+      aspect_ratio: "16:9",
+      format: "png"
+    }
   }
 
   http = Net::HTTP.new(url.host, url.port)
-  http.use_ssl = true
 
   request = Net::HTTP::Post.new(url)
   request["Authorization"] = "Bearer <token>"
@@ -332,15 +310,14 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "https://api.apimart.ai/v1/images/generations")!
+  let url = URL(string: "http://pxz-api.xinsulv.com/api/openapi/submit")!
 
   let payload: [String: Any] = [
-      "model": "gemini-2.5-flash-image-preview",
-      "prompt": "A bamboo path under moonlight",
-      "size": "1:1",
-      "n": 1,
-      "image_urls": [
-          "https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png"
+      "model": "nano_banana",
+      "params": [
+          "prompt": "A bamboo path under the moonlight",
+          "aspect_ratio": "16:9",
+          "format": "png"
       ]
   ]
 
@@ -374,16 +351,15 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   {
       static async Task Main(string[] args)
       {
-          var url = "https://api.apimart.ai/v1/images/generations";
+          var url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
           var payload = @"{
-              ""model"": ""gemini-2.5-flash-image-preview"",
-              ""prompt"": ""A bamboo path under moonlight"",
-              ""size"": ""1:1"",
-              ""n"": 1,
-              ""image_urls"": [
-                  ""https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png""
-              ]
+              ""model"": ""nano_banana"",
+              ""params"": {
+                  ""prompt"": ""A bamboo path under the moonlight"",
+                  ""aspect_ratio"": ""16:9"",
+                  ""format"": ""png""
+              }
           }";
 
           using var client = new HttpClient();
@@ -410,13 +386,14 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
       curl = curl_easy_init();
 
       if(curl) {
-          const char *url = "https://api.apimart.ai/v1/images/generations";
+          const char *url = "http://pxz-api.xinsulv.com/api/openapi/submit";
           const char *payload = "{"
-              "\"model\":\"gemini-2.5-flash-image-preview\","
-              "\"prompt\":\"A bamboo path under moonlight\","
-              "\"size\":\"1:1\","
-              "\"n\":1,"
-              "\"image_urls\":[\"https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png\"]"
+              "\"model\":\"nano_banana\","
+              "\"params\":{"
+                  "\"prompt\":\"A bamboo path under the moonlight\","
+                  "\"aspect_ratio\":\"16:9\","
+                  "\"format\":\"png\""
+              "}"
           "}";
 
           struct curl_slist *headers = NULL;
@@ -448,16 +425,15 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
-          NSURL *url = [NSURL URLWithString:@"https://api.apimart.ai/v1/images/generations"];
+          NSURL *url = [NSURL URLWithString:@"http://pxz-api.xinsulv.com/api/openapi/submit"];
 
           NSDictionary *payload = @{
-              @"model": @"gemini-2.5-flash-image-preview",
-              @"prompt": @"A bamboo path under moonlight",
-              @"size": @"1:1",
-              @"n": @1,
-              @"image_urls": @[
-                  @"https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png"
-              ]
+              @"model": @"nano_banana",
+              @"params": @{
+                  @"prompt": @"A bamboo path under the moonlight",
+                  @"aspect_ratio": @"16:9",
+                  @"format": @"png"
+              }
           };
 
           NSError *error;
@@ -496,16 +472,15 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   open Cohttp
   open Cohttp_lwt_unix
 
-  let url = "https://api.apimart.ai/v1/images/generations"
+  let url = "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   let payload = {|{
-    "model": "gemini-2.5-flash-image-preview",
-    "prompt": "A bamboo path under moonlight",
-    "size": "1:1",
-    "n": 1,
-    "image_urls": [
-      "https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png"
-    ]
+    "model": "nano_banana",
+    "params": {
+      "prompt": "A bamboo path under the moonlight",
+      "aspect_ratio": "16:9",
+      "format": "png"
+    }
   }|}
 
   let () =
@@ -527,16 +502,15 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   import 'package:http/http.dart' as http;
 
   void main() async {
-    final url = Uri.parse('https://api.apimart.ai/v1/images/generations');
+    final url = Uri.parse('http://pxz-api.xinsulv.com/api/openapi/submit');
 
     final payload = {
-      'model': 'gemini-2.5-flash-image-preview',
-      'prompt': 'A bamboo path under moonlight',
-      'size': '1:1',
-      'n': 1,
-      'image_urls': [
-        'https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png'
-      ]
+      'model': 'nano_banana',
+      'params': {
+        'prompt': 'A bamboo path under the moonlight',
+        'aspect_ratio': '16:9',
+        'format': 'png'
+      }
     };
 
     final response = await http.post(
@@ -544,7 +518,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
       headers: {
         'Authorization': 'Bearer <token>',
         'Content-Type': 'application/json'
-    },
+      },
       body: jsonEncode(payload),
     );
 
@@ -556,15 +530,14 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   library(httr)
   library(jsonlite)
 
-  url <- "https://api.apimart.ai/v1/images/generations"
+  url <- "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload <- list(
-    model = "gemini-2.5-flash-image-preview",
-    prompt = "A bamboo path under moonlight",
-    size = "1:1",
-    n = 1,
-    image_urls = list(
-      "https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png"
+    model = "nano_banana",
+    params = list(
+      prompt = "A bamboo path under the moonlight",
+      aspect_ratio = "16:9",
+      format = "png"
     )
   )
 
@@ -584,63 +557,38 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
 <ResponseExample>
   ```json 200
-  {
-    "code": 200,
-    "data": [
-      {
-        "status": "submitted",
-        "task_id": "task_01K8SGYNNNVBQTXNR4MM964S7K"
-      }
-    ]
-  }
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
+        "status": "pending",
+        "estimated_credits": 100,
+        "created_at": "2025-12-22T06:03:28.242Z"
+    }
+}
   ```
 
   ```json 400
-  {
-    "error": {
-      "code": 400,
-      "message": "Invalid request parameters",
-      "type": "invalid_request_error"
+    {
+        "statusCode": 400,
+        "message": "Invalid request parameters",
+        "ok": false
     }
-  }
   ```
-
   ```json 401
   {
     "error": {
       "code": 401,
-      "message": "Authentication failed, please check your API key",
-      "type": "authentication_error"
+      "message": "Authentication failed, please check your API key"
     }
   }
   ```
-
-  ```json 402
+```json 433
   {
     "error": {
-      "code": 402,
-      "message": "Insufficient account balance, please recharge and try again",
-      "type": "payment_required"
-    }
-  }
-  ```
-
-  ```json 403
-  {
-    "error": {
-      "code": 403,
-      "message": "Access forbidden, you do not have permission to access this resource",
-      "type": "permission_error"
-    }
-  }
-  ```
-
-  ```json 429
-  {
-    "error": {
-      "code": 429,
-      "message": "Too many requests, please try again later",
-      "type": "rate_limit_error"
+      "code": 433,
+      "message": "Insufficient account balance, please recharge and try again"
     }
   }
   ```
@@ -649,18 +597,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   {
     "error": {
       "code": 500,
-      "message": "Internal server error, please try again later",
-      "type": "server_error"
-    }
-  }
-  ```
-
-  ```json 502
-  {
-    "error": {
-      "code": 502,
-      "message": "Gateway error, the server is temporarily unavailable",
-      "type": "bad_gateway"
+      "message": "Internal server error, please try again later"
     }
   }
   ```

@@ -1,10 +1,9 @@
 ---
-title: 'Seedream-4.5 Image Generation'
+title: 'Seedream V4.5 Image Generation'
 description: |
     - Asynchronous processing mode, returns a task ID for subsequent queries
-    - Supports multiple generation modes including text-to-image, image-to-image, and image editing
-    - Generated image links are valid for 24 hours, please save them promptly
-api: 'POST https://api.apimart.ai/v1/images/generations'
+    - Higher quality image generation
+api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 ---
 ## Authorizations
 
@@ -24,232 +23,115 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
 ## Body
 
-<ParamField body="model" type="string" default="doubao-seedance-4-5" required>
-  Name of the image generation model
+<ParamField body="model" type="string" required>
+  Model name
 
-  Example: `"doubao-seedance-4-5"`
+  Fixed value: `"seedream_v4_5"`
 </ParamField>
 
-<ParamField body="prompt" type="string" required>
-  Text description for image generation
-</ParamField>
+<ParamField body="params" type="object" required>
+  Model parameters object
 
-<ParamField body="size" type="string" default="1:1">
-  Aspect ratio of the generated image
+  <Expandable title="params object properties">
+    <ParamField body="prompt" type="string" required>
+      Text description for image generation
 
-  Supported aspect ratios:
+      No limit
+    </ParamField>
 
-  * `1:1` - Square (default)
-  * `4:3` - Landscape 4:3
-  * `3:4` - Portrait 3:4
-  * `16:9` - Landscape widescreen
-  * `9:16` - Portrait vertical screen
-  * `3:2` - Landscape 3:2
-  * `2:3` - Portrait 2:3
-  * `21:9` - Ultra widescreen
-  * `9:21` - Ultra portrait
-</ParamField>
+    <ParamField body="image_url" type="array">
+      List of reference image URLs for image-to-image
 
-<ParamField body="resolution" type="string" default="2K">
-  Image resolution
+      * Up to 9 images
+      * Supports publicly accessible URLs
+    </ParamField>
 
-  Supported resolutions:
+    <ParamField body="aspect_ratio" type="string" default="1:1">
+      Aspect ratio for image generation
 
-  * `2K` - Standard resolution (default)
-  * `4K` - High definition resolution
+      Supported aspect ratios:
 
-  > **Note:** Seedream-4.5 does not support 1K resolution
+      * `1:1` - Square (default)
+      * `3:2` - Landscape 3:2
+      * `2:3` - Portrait 2:3
+      * `4:3` - Landscape 4:3
+      * `3:4` - Portrait 3:4
+      * `5:4` - Landscape 5:4
+      * `4:5` - Portrait 4:5
+      * `16:9` - Landscape widescreen
+      * `9:16` - Portrait vertical screen
+      * `21:9` - Ultra widescreen
+    </ParamField>
 
-  **Resolution reference sizes:**
+    <ParamField body="resolution" type="string" default="basic">
+      Image resolution
 
-  | Resolution | 1:1 Size    | 16:9 Size   |
-  | --- | --------- | --------- |
-  | 2K  | 2048x2048 | 2560x1440 |
-  | 4K  | 4096x4096 | 5404x3040 |
+      Supported resolutions:
 
-  <Expandable title="Full Pixel Mapping Table">
-    **2K Resolution**
-
-    | Ratio | Pixels     |
-    | ---- | --------- |
-    | 1:1  | 2048x2048 |
-    | 4:3  | 2304x1728 |
-    | 3:4  | 1728x2304 |
-    | 16:9 | 2560x1440 |
-    | 9:16 | 1440x2560 |
-    | 3:2  | 2496x1664 |
-    | 2:3  | 1664x2496 |
-    | 21:9 | 3024x1296 |
-    | 9:21 | 1296x3024 |
-
-    **4K Resolution**
-
-    | Ratio | Pixels     |
-    | ---- | --------- |
-    | 1:1  | 4096x4096 |
-    | 4:3  | 4694x3520 |
-    | 3:4  | 3520x4694 |
-    | 16:9 | 5404x3040 |
-    | 9:16 | 3040x5404 |
-    | 3:2  | 4992x3328 |
-    | 2:3  | 3328x4992 |
-    | 21:9 | 6198x2656 |
-    | 9:21 | 2656x6198 |
+      * `basic` - Basic resolution (default)
+      * `high` - High definition resolution
+    </ParamField>
   </Expandable>
 </ParamField>
 
-<ParamField body="n" type="integer">
-  Number of images to generate
+<ParamField body="callback_url" type="string">
+  Callback notification URL after task completion
 
-  Range: 1-15 (minimum 1, maximum 15)
-
-  Default: 1
-
-  **Note:**
-
-  * The actual number of images that can be generated depends not only on this parameter but also on the number of input reference images. Number of reference images + final generated images ≤ 15
-  * **Must input a pure number (e.g., `1`), do not add quotes, or an error will occur**
-
-  Charges will be pre-deducted according to the number of images generated
+  After the task is completed, the system will send a POST request to this URL to notify the result
 </ParamField>
 
-<ParamField body="image_urls" type="array">
-  List of URLs for reference images, used for image-to-image or image editing
+<ParamField body="metadata" type="object">
+  Custom metadata
 
-  Two supported formats:
-
-  **1. Full image URL address**
-
-  * Publicly accessible image URL (http\:// or https\://)
-  * Example: `https://example.com/image.jpg`
-
-  **2. Base64 encoding format**
-
-  * **Must use complete Data URI format**
-  * Format: `data:image/{format};base64,{base64_data}`
-  * Supported image formats: jpeg, png
-  * Example: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
-  * ⚠️ Note: Must include the `data:image/jpeg;base64,` prefix
-
-  **Limitations:**
-
-  * Maximum 10 images
-  * Image formats: jpeg, png
-  * Aspect ratio (width/height) range: \[1/3, 3]
-  * Width and height (px) > 14
-  * Single image size: no more than 10MB
-  * Total pixels: not exceeding 6000×6000 px
-</ParamField>
-
-<ParamField body="optimize_prompt_options.mode" type="string" default="standard">
-  Prompt optimization mode
-
-  * `standard`: Standard mode, higher quality generated content, longer time
-  * `fast`: Fast mode, faster generation time, moderate quality
-
-  Default: `standard`
-</ParamField>
-
-<ParamField body="sequential_image_generation" type="string" default="disabled">
-  Sequential image generation mode (exclusive feature of Doubao)
-
-  Controls whether to generate multiple images:
-
-  * `disabled`: Disable sequential mode, even with multiple reference images only 1 image is generated (default)
-  * `auto`: Enable sequential mode, multiple images can be generated
-
-  **Usage instructions:**
-
-  * ✅ Must provide `image_urls` - at least 1 reference image required
-  * ✅ Set `n: 3` or use `sequential_image_generation: "auto"` + `max_images: 3`
-  * ✅ This will generate 3 different images based on the reference images
-  * ⚠️ Automatically sets to `auto` when `n > 1`
-
-  **Limitations:**
-
-  * Pure text-to-image (no `image_urls`) cannot generate multiple images due to Doubao API limitations
-</ParamField>
-
-<ParamField body="sequential_image_generation_options" type="object">
-  Sequential image generation options
-
-  Available when `sequential_image_generation` is set to `auto`
-
-  **Properties:**
-
-  * `max_images` (integer): Specifies the number of images to generate, range: 1-15
-
-  **Example:**
-
-  ```json 
-  "sequential_image_generation": "auto",
-  "sequential_image_generation_options": {
-    "max_images": 3
-  }
-  ```
-</ParamField>
-
-<ParamField body="watermark" type="boolean" default="false">
-  Whether to add watermark to generated images
-
-  * `true`: Add watermark
-  * `false`: Do not add watermark (default)
+  Returned as-is when querying results, can be used for business identification
 </ParamField>
 
 ## Response
 
-<ResponseField name="code" type="integer">
-  Response status code
+<ResponseField name="task_id" type="string">
+  Task ID used to query the result
 </ResponseField>
 
-<ResponseField name="data" type="array">
-  Returned data array
+<ResponseField name="status" type="string">
+  Initial status, fixed as `"pending"`
+</ResponseField>
 
-  <Expandable title="Properties">
-    <ResponseField name="status" type="string">
-      Task status
+<ResponseField name="estimated_credits" type="number">
+  Estimated credits consumption
+</ResponseField>
 
-      * `submitted` - Submitted
-    </ResponseField>
-
-    <ResponseField name="task_id" type="string">
-      Unique task identifier
-    </ResponseField>
-  </Expandable>
+<ResponseField name="created_at" type="string">
+  Creation time (ISO format)
 </ResponseField>
 
 <RequestExample>
   ```bash cURL
   curl --request POST \
-    --url https://api.apimart.ai/v1/images/generations \
+    --url http://pxz-api.xinsulv.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
-      "model": "doubao-seedance-4-5",
-      "prompt": "Cute panda playing in bamboo forest",
-      "size": "1:1",
-      "resolution": "2K",
-      "n": 1,
-      "image_urls": [
-        "https://cdn.apimart.ai/doc/1761215838466614297_9852.png"
-      ],
+      "model": "seedream_v4_5",
+      "params": {
+        "prompt": "A fantastic forest night scene",
+        "aspect_ratio": "16:9",
+        "resolution": "high"
+      }
     }'
   ```
 
   ```python Python
   import requests
 
-  url = "https://api.apimart.ai/v1/images/generations"
+  url = "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload = {
-      "model": "doubao-seedance-4-5",
-      "prompt": "Cute panda playing in bamboo forest",
-      "size": "1:1",
-      "resolution": "2K",
-      "n": 1,
-      "image_urls": [
-          "https://cdn.apimart.ai/doc/1761215838466614297_9852.png"
-      ],
+      "model": "seedream_v4_5",
+      "params": {
+          "prompt": "A fantastic forest night scene",
+          "aspect_ratio": "16:9",
+          "resolution": "high"
+      }
   }
 
   headers = {
@@ -263,17 +145,15 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   ```
 
   ```javascript JavaScript
-  const url = "https://api.apimart.ai/v1/images/generations";
+  const url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
   const payload = {
-    model: "doubao-seedance-4-5",
-    prompt: "Cute panda playing in bamboo forest",
-    size: "1:1",
-    resolution: "2K",
-    n: 1,
-    image_urls: [
-      "https://cdn.apimart.ai/doc/1761215838466614297_9852.png"
-    ],
+    model: "seedream_v4_5",
+    params: {
+      prompt: "A fantastic forest night scene",
+      aspect_ratio: "16:9",
+      resolution: "high"
+    }
   };
 
   const headers = {
@@ -303,16 +183,14 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   )
 
   func main() {
-      url := "https://api.apimart.ai/v1/images/generations"
+      url := "http://pxz-api.xinsulv.com/api/openapi/submit"
 
       payload := map[string]interface{}{
-          "model":  "doubao-seedance-4-5",
-          "prompt": "Cute panda playing in bamboo forest",
-          "size":       "1:1",
-          "resolution": "2K",
-          "n":          1,
-          "image_urls": []string{
-              "https://cdn.apimart.ai/doc/1761215838466614297_9852.png",
+          "model": "seedream_v4_5",
+          "params": map[string]interface{}{
+              "prompt":       "A fantastic forest night scene",
+              "aspect_ratio": "16:9",
+              "resolution":   "high",
           },
       }
 
@@ -342,18 +220,16 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   public class Main {
       public static void main(String[] args) throws Exception {
-          String url = "https://api.apimart.ai/v1/images/generations";
+          String url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
           String payload = """
           {
-            "model": "doubao-seedance-4-5",
-            "prompt": "Cute panda playing in bamboo forest",
-            "size": "1:1",
-            "resolution": "2K",
-            "n": 1,
-            "image_urls": [
-              "https://cdn.apimart.ai/doc/1761215838466614297_9852.png"
-            ]
+            "model": "seedream_v4_5",
+            "params": {
+              "prompt": "A fantastic forest night scene",
+              "aspect_ratio": "16:9",
+              "resolution": "high"
+            }
           }
           """;
 
@@ -376,16 +252,14 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   ```php PHP
   <?php
 
-  $url = "https://api.apimart.ai/v1/images/generations";
+  $url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
   $payload = [
-      "model" => "doubao-seedance-4-5",
-      "prompt" => "Cute panda playing in bamboo forest",
-      "size" => "1:1",
-      "resolution" => "2K",
-      "n" => 1,
-      "image_urls" => [
-          "https://cdn.apimart.ai/doc/1761215838466614297_9852.png"
+      "model" => "seedream_v4_5",
+      "params" => [
+          "prompt" => "A fantastic forest night scene",
+          "aspect_ratio" => "16:9",
+          "resolution" => "high"
       ]
   ];
 
@@ -410,21 +284,18 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   require 'json'
   require 'uri'
 
-  url = URI("https://api.apimart.ai/v1/images/generations")
+  url = URI("http://pxz-api.xinsulv.com/api/openapi/submit")
 
   payload = {
-    model: "doubao-seedance-4-5",
-    prompt: "Cute panda playing in bamboo forest",
-    size: "1:1",
-    resolution: "2K",
-    n: 1,
-    image_urls: [
-      "https://cdn.apimart.ai/doc/1761215838466614297_9852.png"
-    ]
+    model: "seedream_v4_5",
+    params: {
+      prompt: "A fantastic forest night scene",
+      aspect_ratio: "16:9",
+      resolution: "high"
+    }
   }
 
   http = Net::HTTP.new(url.host, url.port)
-  http.use_ssl = true
 
   request = Net::HTTP::Post.new(url)
   request["Authorization"] = "Bearer <token>"
@@ -438,16 +309,14 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "https://api.apimart.ai/v1/images/generations")!
+  let url = URL(string: "http://pxz-api.xinsulv.com/api/openapi/submit")!
 
   let payload: [String: Any] = [
-      "model": "doubao-seedance-4-5",
-      "prompt": "Cute panda playing in bamboo forest",
-      "size": "1:1",
-      "resolution": "2K",
-      "n": 1,
-      "image_urls": [
-          "https://cdn.apimart.ai/doc/1761215838466614297_9852.png"
+      "model": "seedream_v4_5",
+      "params": [
+          "prompt": "A fantastic forest night scene",
+          "aspect_ratio": "16:9",
+          "resolution": "high"
       ]
   ]
 
@@ -462,7 +331,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
           print("Error: \(error)")
           return
       }
-      
+
       if let data = data, let responseString = String(data: data, encoding: .utf8) {
           print(responseString)
       }
@@ -481,17 +350,15 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   {
       static async Task Main(string[] args)
       {
-          var url = "https://api.apimart.ai/v1/images/generations";
+          var url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
           var payload = @"{
-              ""model"": ""doubao-seedance-4-5"",
-              ""prompt"": ""Cute panda playing in bamboo forest"",
-              ""size"": ""1:1"",
-              ""resolution"": ""2K"",
-              ""n"": 1,
-              ""image_urls"": [
-                  ""https://cdn.apimart.ai/doc/1761215838466614297_9852.png""
-              ]
+              ""model"": ""seedream_v4_5"",
+              ""params"": {
+                  ""prompt"": ""A fantastic forest night scene"",
+                  ""aspect_ratio"": ""16:9"",
+                  ""resolution"": ""high""
+              }
           }";
 
           using var client = new HttpClient();
@@ -518,14 +385,14 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
       curl = curl_easy_init();
 
       if(curl) {
-          const char *url = "https://api.apimart.ai/v1/images/generations";
+          const char *url = "http://pxz-api.xinsulv.com/api/openapi/submit";
           const char *payload = "{"
-              "\"model\":\"doubao-seedance-4-5\","
-              "\"prompt\":\"Cute panda playing in bamboo forest\","
-              "\"size\":\"1:1\","
-              "\"resolution\":\"2K\","
-              "\"n\":1,"
-              "\"image_urls\":[\"https://cdn.apimart.ai/doc/1761215838466614297_9852.png\"]"
+              "\"model\":\"seedream_v4_5\","
+              "\"params\":{"
+                  "\"prompt\":\"A fantastic forest night scene\","
+                  "\"aspect_ratio\":\"16:9\","
+                  "\"resolution\":\"high\""
+              "}"
           "}";
 
           struct curl_slist *headers = NULL;
@@ -557,42 +424,40 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
-          NSURL *url = [NSURL URLWithString:@"https://api.apimart.ai/v1/images/generations"];
-          
+          NSURL *url = [NSURL URLWithString:@"http://pxz-api.xinsulv.com/api/openapi/submit"];
+
           NSDictionary *payload = @{
-              @"model": @"doubao-seedance-4-5",
-              @"prompt": @"Cute panda playing in bamboo forest",
-              @"size": @"1:1",
-              @"resolution": @"2K",
-              @"n": @1,
-              @"image_urls": @[
-                  @"https://cdn.apimart.ai/doc/1761215838466614297_9852.png"
-              ]
+              @"model": @"seedream_v4_5",
+              @"params": @{
+                  @"prompt": @"A fantastic forest night scene",
+                  @"aspect_ratio": @"16:9",
+                  @"resolution": @"high"
+              }
           };
-          
+
           NSError *error;
           NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
                                                             options:0
                                                               error:&error];
-          
+
           NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
           [request setHTTPMethod:@"POST"];
           [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
           [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
           [request setHTTPBody:jsonData];
-          
-          NSURLSessionDataTask *task = [[NSURLSession sharedSession] 
+
+          NSURLSessionDataTask *task = [[NSURLSession sharedSession]
               dataTaskWithRequest:request
               completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
                   if (error) {
                       NSLog(@"Error: %@", error);
                       return;
                   }
-                  NSString *result = [[NSString alloc] initWithData:data 
+                  NSString *result = [[NSString alloc] initWithData:data
                                                           encoding:NSUTF8StringEncoding];
                   NSLog(@"%@", result);
               }];
-          
+
           [task resume];
           [[NSRunLoop mainRunLoop] run];
       }
@@ -606,17 +471,15 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   open Cohttp
   open Cohttp_lwt_unix
 
-  let url = "https://api.apimart.ai/v1/images/generations"
+  let url = "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   let payload = {|{
-    "model": "doubao-seedance-4-5",
-    "prompt": "Cute panda playing in bamboo forest",
-    "size": "1:1",
-    "resolution": "2K",
-    "n": 1,
-    "image_urls": [
-      "https://cdn.apimart.ai/doc/1761215838466614297_9852.png"
-    ]
+    "model": "seedream_v4_5",
+    "params": {
+      "prompt": "A fantastic forest night scene",
+      "aspect_ratio": "16:9",
+      "resolution": "high"
+    }
   }|}
 
   let () =
@@ -625,7 +488,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
       |> fun h -> Header.add h "Content-Type" "application/json"
     in
     let body = Cohttp_lwt.Body.of_string payload in
-    
+
     let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
       body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
       print_endline body_str
@@ -638,28 +501,26 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   import 'package:http/http.dart' as http;
 
   void main() async {
-    final url = Uri.parse('https://api.apimart.ai/v1/images/generations');
-    
+    final url = Uri.parse('http://pxz-api.xinsulv.com/api/openapi/submit');
+
     final payload = {
-      'model': 'doubao-seedance-4-5',
-      'prompt': 'Cute panda playing in bamboo forest',
-      'size': '1:1',
-      'resolution': '2K',
-      'n': 1,
-      'image_urls': [
-        'https://cdn.apimart.ai/doc/1761215838466614297_9852.png'
-      ]
+      'model': 'seedream_v4_5',
+      'params': {
+        'prompt': 'A fantastic forest night scene',
+        'aspect_ratio': '16:9',
+        'resolution': 'high'
+      }
     };
-    
+
     final response = await http.post(
       url,
       headers: {
         'Authorization': 'Bearer <token>',
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
       body: jsonEncode(payload),
     );
-    
+
     print(response.body);
   }
   ```
@@ -668,16 +529,14 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   library(httr)
   library(jsonlite)
 
-  url <- "https://api.apimart.ai/v1/images/generations"
+  url <- "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload <- list(
-    model = "doubao-seedance-4-5",
-    prompt = "Cute panda playing in bamboo forest",
-    size = "1:1",
-    resolution = "2K",
-    n = 1,
-    image_urls = list(
-      "https://cdn.apimart.ai/doc/1761215838466614297_9852.png"
+    model = "seedream_v4_5",
+    params = list(
+      prompt = "A fantastic forest night scene",
+      aspect_ratio = "16:9",
+      resolution = "high"
     )
   )
 
@@ -697,63 +556,38 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
 <ResponseExample>
   ```json 200
-  {
-    "code": 200,
-    "data": [
-      {
-        "status": "submitted",
-        "task_id": "task_01K8SGYNNNVBQTXNR4MM964S7K"
-      }
-    ]
-  }
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
+        "status": "pending",
+        "estimated_credits": 100,
+        "created_at": "2025-12-22T06:03:28.242Z"
+    }
+}
   ```
 
   ```json 400
-  {
-    "error": {
-      "code": 400,
-      "message": "Invalid request parameters",
-      "type": "invalid_request_error"
+    {
+        "statusCode": 400,
+        "message": "Invalid request parameters",
+        "ok": false
     }
-  }
   ```
-
   ```json 401
   {
     "error": {
       "code": 401,
-      "message": "Authentication failed, please check your API key",
-      "type": "authentication_error"
+      "message": "Authentication failed, please check your API key"
     }
   }
   ```
-
-  ```json 402
+```json 433
   {
     "error": {
-      "code": 402,
-      "message": "Insufficient account balance, please recharge and try again",
-      "type": "payment_required"
-    }
-  }
-  ```
-
-  ```json 403
-  {
-    "error": {
-      "code": 403,
-      "message": "Access forbidden, you do not have permission to access this resource",
-      "type": "permission_error"
-    }
-  }
-  ```
-
-  ```json 429
-  {
-    "error": {
-      "code": 429,
-      "message": "Too many requests, please try again later",
-      "type": "rate_limit_error"
+      "code": 433,
+      "message": "Insufficient account balance, please recharge and try again"
     }
   }
   ```
@@ -762,18 +596,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   {
     "error": {
       "code": 500,
-      "message": "Internal server error, please try again later",
-      "type": "server_error"
-    }
-  }
-  ```
-
-  ```json 502
-  {
-    "error": {
-      "code": 502,
-      "message": "Gateway error, server temporarily unavailable",
-      "type": "bad_gateway"
+      "message": "Internal server error, please try again later"
     }
   }
   ```

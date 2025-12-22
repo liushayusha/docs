@@ -1,20 +1,21 @@
 ---
-title: 'Sora2 ビデオ生成'
+title: 'Sora2 Pro Video Generation'
 description: |
-    - 非同期処理モード、後続のクエリ用にタスクIDを返す
-    - テキストからビデオ生成、画像からビデオ生成などの生成モードをサポート
+    - Asynchronous processing mode, returns task ID for subsequent queries
+    - Supports text-to-video, image-to-video and other generation modes
+    - Professional version, supports higher resolution
 api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 ---
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  すべてのエンドポイントはBearer Tokenによる認証が必要です
+  All endpoints require authentication using a Bearer Token
 
-  APIキーの取得方法：
+  Get the API Key:
 
-  [APIキー管理ページ](https://apimart.ai/console/token)にアクセスしてAPIキーを取得してください
+  Visit the [API Key management page](https://apimart.ai/console/token) to get your API Key
 
-  使用時はリクエストヘッダーに以下を追加します：
+  Add in the request headers:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -24,76 +25,85 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 ## Body
 
 <ParamField body="model" type="string" required>
-  モデル名
+  Model name
 
-  固定値：`"sora2"`
+  Fixed value: `"sora2_pro"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  モデルパラメーターオブジェクト
+  Model parameters object
 
-  <Expandable title="params オブジェクトのプロパティ">
+  <Expandable title="params object properties">
     <ParamField body="prompt" type="string" required>
-      動画生成のテキスト説明
+      Text description for video generation
 
-      制限なし
+      No limitations
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      参考画像のURL、動画生成（最初のフレーム）用
+      URL of the reference image for image-to-video (first frame)
 
-      * 単一画像のみ対応
-      * 公開アクセス可能なURLをサポート
+      * Supports only a single image
+      * Supports publicly accessible URLs
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="16:9">
-      動画のアスペクト比
+      Video aspect ratio
 
-      対応アスペクト比：
+      Supported aspect ratios:
 
-      * `16:9` - 横向き（デフォルト）
-      * `9:16` - 縦向き
+      * `16:9` - Landscape (default)
+      * `9:16` - Portrait
     </ParamField>
 
     <ParamField body="video_length" type="string" default="10">
-      動画の長さ（秒）
+      Video length (seconds)
 
-      対応長さ：
+      Supported lengths:
 
-      * `10` - 10秒（デフォルト）
-      * `15` - 15秒
+      * `10` - 10 seconds (default)
+      * `15` - 15 seconds
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="standard">
+      Video resolution
+
+      Supported resolutions:
+
+      * `standard` - Standard resolution (default)
+      * `high` - High resolution
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="callback_url" type="string">
-  タスク完了後のコールバック通知先URL
+  Callback URL for task completion notification
 
-  タスク完了後、システムはこのURLにPOSTリクエストを送信して結果を通知します
+  After the task is completed, the system will send a POST request to this URL to notify the result
 </ParamField>
 
 <ParamField body="metadata" type="object">
-  カスタムメタデータ
+  Custom metadata
 
-  クエリ結果時にそのまま返され、ビジネス識別に利用可能
+  Returned as-is when querying results, can be used for business identification
 </ParamField>
 
 ## Response
 
 <ResponseField name="task_id" type="string">
-  タスクID、結果を照会するために使用されます
+  Task ID, used to query the result
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  初期状態、固定で `"pending"`
+  Initial status, fixed as `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  予想消費クレジット
+  Estimated credit consumption
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  作成日時（ISO形式）
+  Creation time (ISO format)
 </ResponseField>
 
 <RequestExample>
@@ -103,11 +113,12 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
-      "model": "sora2",
+      "model": "sora2_pro",
       "params": {
-        "prompt": "一只猫在花园里散步",
+        "prompt": "A cat walking in the garden",
         "aspect_ratio": "16:9",
-        "video_length": "10"
+        "video_length": "15",
+        "resolution": "high"
       }
     }'
   ```
@@ -118,11 +129,12 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   url = "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload = {
-      "model": "sora2",
+      "model": "sora2_pro",
       "params": {
-          "prompt": "一只猫在花园里散步",
+          "prompt": "A cat walking in the garden",
           "aspect_ratio": "16:9",
-          "video_length": "10"
+          "video_length": "15",
+          "resolution": "high"
       }
   }
 
@@ -140,11 +152,12 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   const url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
   const payload = {
-    model: "sora2",
+    model: "sora2_pro",
     params: {
-      prompt: "一只猫在花园里散步",
+      prompt: "A cat walking in the garden",
       aspect_ratio: "16:9",
-      video_length: "10"
+      video_length: "15",
+      resolution: "high"
     }
   };
 
@@ -178,11 +191,12 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
       url := "http://pxz-api.xinsulv.com/api/openapi/submit"
 
       payload := map[string]interface{}{
-          "model": "sora2",
+          "model": "sora2_pro",
           "params": map[string]interface{}{
-              "prompt":       "一只猫在花园里散步",
+              "prompt":       "A cat walking in the garden",
               "aspect_ratio": "16:9",
-              "video_length": "10",
+              "video_length": "15",
+              "resolution":   "high",
           },
       }
 
@@ -221,7 +235,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
               conn.setRequestProperty("Content-Type", "application/json");
               conn.setDoOutput(true);
 
-              String jsonPayload = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"一只猫在花园里散步\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"}}";
+              String jsonPayload = "{\"model\":\"sora2_pro\",\"params\":{\"prompt\":\"A cat walking in the garden\",\"aspect_ratio\":\"16:9\",\"video_length\":\"15\",\"resolution\":\"high\"}}";
 
               OutputStream os = conn.getOutputStream();
               os.write(jsonPayload.getBytes());
@@ -249,11 +263,12 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   $url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
   $payload = array(
-      "model" => "sora2",
+      "model" => "sora2_pro",
       "params" => array(
-          "prompt" => "一只猫在花园里散歩",
+          "prompt" => "A cat walking in the garden",
           "aspect_ratio" => "16:9",
-          "video_length" => "10"
+          "video_length" => "15",
+          "resolution" => "high"
       )
   );
 
@@ -281,11 +296,12 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   url = URI.parse("http://pxz-api.xinsulv.com/api/openapi/submit")
 
   payload = {
-    model: "sora2",
+    model: "sora2_pro",
     params: {
-      prompt: "一只猫在花园里散歩",
+      prompt: "A cat walking in the garden",
       aspect_ratio: "16:9",
-      video_length: "10"
+      video_length: "15",
+      resolution: "high"
     }
   }
 
@@ -309,11 +325,12 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
   let payload: [String: Any] = [
-      "model": "sora2",
+      "model": "sora2_pro",
       "params": [
-          "prompt": "一只猫在花园里散歩",
+          "prompt": "A cat walking in the garden",
           "aspect_ratio": "16:9",
-          "video_length": "10"
+          "video_length": "15",
+          "resolution": "high"
       ]
   ]
 
@@ -338,7 +355,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
       static async Task Main(string[] args)
       {
           var url = "http://pxz-api.xinsulv.com/api/openapi/submit";
-          var payload = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"一只猫在花园里散歩\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"}}";
+          var payload = "{\"model\":\"sora2_pro\",\"params\":{\"prompt\":\"A cat walking in the garden\",\"aspect_ratio\":\"16:9\",\"video_length\":\"15\",\"resolution\":\"high\"}}";
 
           using (var client = new HttpClient())
           {
@@ -370,7 +387,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
           headers = curl_slist_append(headers, "Content-Type: application/json");
           curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-          const char *data = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"一只猫在花园里散歩\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"}}";
+          const char *data = "{\"model\":\"sora2_pro\",\"params\":{\"prompt\":\"A cat walking in the garden\",\"aspect_ratio\":\"16:9\",\"video_length\":\"15\",\"resolution\":\"high\"}}";
           curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
 
           res = curl_easy_perform(curl);
@@ -394,11 +411,12 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
           [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
 
           NSDictionary *payload = @{
-              @"model": @"sora2",
+              @"model": @"sora2_pro",
               @"params": @{
-                  @"prompt": @"一只猫在花园里散歩",
+                  @"prompt": @"A cat walking in the garden",
                   @"aspect_ratio": @"16:9",
-                  @"video_length": @"10"
+                  @"video_length": @"15",
+                  @"resolution": @"high"
               }
           };
 
@@ -426,7 +444,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 
   let url = "http://pxz-api.xinsulv.com/api/openapi/submit"
 
-  let payload = {|{"model":"sora2","params":{"prompt":"一只猫在花园里散歩","aspect_ratio":"16:9","video_length":"10"}}|}
+  let payload = {|{"model":"sora2_pro","params":{"prompt":"A cat walking in the garden","aspect_ratio":"16:9","video_length":"15","resolution":"high"}}|}
 
   let () =
     let headers = Header.init ()
@@ -449,11 +467,12 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
     var url = Uri.parse('http://pxz-api.xinsulv.com/api/openapi/submit');
 
     var payload = {
-      'model': 'sora2',
+      'model': 'sora2_pro',
       'params': {
-        'prompt': '一只猫在花园里散歩',
+        'prompt': 'A cat walking in the garden',
         'aspect_ratio': '16:9',
-        'video_length': '10'
+        'video_length': '15',
+        'resolution': 'high'
       }
     };
 
@@ -477,11 +496,12 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   url <- "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload <- list(
-    model = "sora2",
+    model = "sora2_pro",
     params = list(
-      prompt = "一只猫在花园里散歩",
+      prompt = "A cat walking in the garden",
       aspect_ratio = "16:9",
-      video_length = "10"
+      video_length = "15",
+      resolution = "high"
     )
   )
 
@@ -516,7 +536,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   ```json 400
     {
         "statusCode": 400,
-        "message": "リクエストパラメータが無効です",
+        "message": "Invalid request parameters",
         "ok": false
     }
   ```
@@ -524,7 +544,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   {
     "error": {
       "code": 401,
-      "message": "認証に失敗しました。APIキーをご確認ください"
+      "message": "Authentication failed, please check your API key"
     }
   }
   ```
@@ -532,7 +552,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   {
     "error": {
       "code": 433,
-      "message": "アカウント残高が不足しています。チャージ後に再試行してください"
+      "message": "Insufficient account balance, please top up and try again"
     }
   }
   ```
@@ -541,7 +561,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   {
     "error": {
       "code": 500,
-      "message": "サーバー内部エラーです。後でもう一度お試しください"
+      "message": "Internal server error, please try again later"
     }
   }
   ```

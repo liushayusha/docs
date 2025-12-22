@@ -1,10 +1,9 @@
 ---
 title: 'Sora2 Video Generation'
 description: |
-    - Asynchronous processing mode, returns task ID for subsequent queries
-    - Supports multiple generation modes including text-to-video and image-to-video
-    - Generated video links are valid for 24 hours, please save them promptly
-api: 'POST https://api.apimart.ai/v1/videos/generations'
+    - Asynchronous processing mode, returns task ID for subsequent query
+    - Supports text-to-video, image-to-video and other generation modes
+api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 ---
 ## Authorizations
 
@@ -24,203 +23,107 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
 ## Body
 
-<ParamField body="model" type="string" default="sora-2" required>
-  Video generation model name
+<ParamField body="model" type="string" required>
+  Model name
 
-  Supported models:
-
-  * `sora-2` - Standard version
-  * `sora-2-pro` - Professional version, supports longer duration
-
-  Example: `"sora-2"` or `"sora-2-pro"`
+  Fixed value: `"sora2"`
 </ParamField>
 
-<ParamField body="prompt" type="string" required>
-  Text description for video generation
+<ParamField body="params" type="object" required>
+  Model parameters object
 
-  **💡 @Role Mention Feature:**
+  <Expandable title="params object properties">
+    <ParamField body="prompt" type="string" required>
+      Text description for video generation
 
-  You can mention created characters in the prompt using the `@username` format to have the character appear in the generated video.
+      No limitations
+    </ParamField>
 
-  * The character's `username` can be obtained via the [Query Character Endpoint](/en/api-reference/videos/sora2/query-character)
-  * Multiple characters can be mentioned simultaneously
+    <ParamField body="image_url" type="string">
+      URL of the reference image for image-to-video (first frame)
 
-  Example: `"A kitten and a puppy driving a car together @duksvfkf.cruisingki @zdqwahgj.baronbarki"`
-</ParamField>
+      * Only single image supported
+      * Supports publicly accessible URL
+    </ParamField>
 
-<ParamField body="duration" type="integer">
-  Video duration (seconds)
+    <ParamField body="aspect_ratio" type="string" default="16:9">
+      Video aspect ratio
 
-  * `sora-2`: supports 10 or 15 seconds
-  * `sora-2-pro`: supports 15 seconds (HD) or 25 seconds
+      Supported aspect ratios:
 
-  Example: `10`
-</ParamField>
+      * `16:9` - landscape (default)
+      * `9:16` - portrait
+    </ParamField>
 
-<ParamField body="aspect_ratio" type="string">
-  Video resolution
+    <ParamField body="video_length" type="string" default="10">
+      Video length (seconds)
 
-  Supported formats:
+      Supported lengths:
 
-  * `16:9` (landscape)
-  * `9:16` (portrait)
-</ParamField>
-
-<ParamField body="image_urls" type="array">
-  Array of reference image URLs for image-to-video generation
-
-  **💡 Quick Fill (Try it area):**
-
-  1. Click "+ Add an item" to add an image URL
-  2. Enter the full URL of the image or base64 data
-
-  <Expandable title="Detailed Field Description">
-    <ParamField body="url" type="string" required>
-      Image URL address
-
-      Supports two formats:
-
-      **1. Full image URL**
-
-      * Publicly accessible image URL (http:// or https://)
-      * Example: `https://example.com/image.jpg`
-
-      **2. Base64 encoded format**
-
-      * **Must use the full Data URI format**
-      * Format: `data:image/{format};base64,{base64data}`
-      * Supported image formats: jpeg, png, webp, etc.
-      * Example: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
-      * ⚠️ Note: Must include the prefix `data:image/jpeg;base64,`
-
-      **Limitations:**
-
-      * Maximum file size: 10MB
-      * Supported formats: .jpeg, .jpg, .png, .webp
+      * `10` - 10 seconds (default)
+      * `15` - 15 seconds
     </ParamField>
   </Expandable>
 </ParamField>
 
-<ParamField body="watermark" type="boolean" default="false">
-  Whether to add a watermark in the generated video
+<ParamField body="callback_url" type="string">
+  Callback URL after task completion
 
-  * `false`: no watermark added
-  * `true`: adds the official Sora watermark in the video
-
-  Default Value: `false`
+  The system will send a POST request to this URL to notify the result after task completion
 </ParamField>
 
-<ParamField body="thumbnail" type="boolean">
-  Whether to generate a video thumbnail
+<ParamField body="metadata" type="object">
+  Custom metadata
 
-  * `true`: generates a video thumbnail for preview and display
-
-  Can be omitted if no thumbnail generation is needed
-</ParamField>
-
-<ParamField body="private" type="boolean" default="false">
-  Whether to enable privacy mode
-
-  * `true`: the video will not be published and remix (re-edit) operations will be disabled
-  * `false`: the video can be published and remixed
-
-  Default Value: `false`
-</ParamField>
-
-<ParamField body="style" type="string">
-  Video style
-
-  Supported values:
-
-  * `thanksgiving` - Thanksgiving style
-  * `comic` - Comic style
-  * `news` - News style
-  * `selfie` - Selfie style
-  * `nostalgic` - Vintage style
-  * `anime` - Anime style
-
-  Example: `"anime"`
-</ParamField>
-
-<ParamField body="storyboard" type="boolean">
-  Whether to use storyboard for more detailed control over video generation details
-
-  * `true`: enable storyboard feature
-  * `false`: do not use storyboard
-
-  Example: `true`
-</ParamField>
-
-<ParamField body="character_url" type="string">
-  Character URL from reference video
-
-  Used to reuse characters from the reference video in the generated video
-
-  Example: `"https://filesystem.site/cdn/20251030/javYrU4etHVFDqg8by7mViTWHlMOZy.mp4"`
-
-  **⚠️ Note:** Using this parameter will reduce the generated video duration by 1 second
-</ParamField>
-
-<ParamField body="character_timestamps" type="string">
-  Character appearance timestamps
-
-  Specify the time range in the reference video when the character appears; only supports 2-second intervals
-
-  Format: `"start_second,end_second"`
-
-  Example: `"1,3"` indicates the character appears from second 1 to second 3 in the reference video
-
-  **⚠️ Note:** Using this parameter will reduce the generated video duration by 1 second
+  Returned as-is in query results, can be used for business identification
 </ParamField>
 
 ## Response
 
-<ResponseField name="code" type="integer">
-  Response status code, 200 indicates success
+<ResponseField name="task_id" type="string">
+  Task ID, used to query the result
 </ResponseField>
 
-<ResponseField name="data" type="array">
-  Returned data array
+<ResponseField name="status" type="string">
+  Initial status, fixed as `"pending"`
+</ResponseField>
 
-  <Expandable title="Array Elements">
-    <ResponseField name="status" type="string">
-      Task status, initially `submitted` upon submission
-    </ResponseField>
+<ResponseField name="estimated_credits" type="number">
+  Estimated consumed credits
+</ResponseField>
 
-    <ResponseField name="task_id" type="string">
-      Unique identifier for the task, used to query the task status and results
-    </ResponseField>
-  </Expandable>
+<ResponseField name="created_at" type="string">
+  Creation time (ISO format)
 </ResponseField>
 
 <RequestExample>
   ```bash cURL
   curl --request POST \
-    --url https://api.apimart.ai/v1/videos/generations \
+    --url http://pxz-api.xinsulv.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
-      "model": "sora-2",
-      "prompt": "A waterfall cascading forming a rainbow",
-      "duration": 10,
-      "aspect_ratio": "16:9",
-      "private": false,
-      "image_urls": ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
+      "model": "sora2",
+      "params": {
+        "prompt": "A cat walking in the garden",
+        "aspect_ratio": "16:9",
+        "video_length": "10"
+      }
     }'
   ```
 
   ```python Python
   import requests
 
-  url = "https://api.apimart.ai/v1/videos/generations"
+  url = "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload = {
-      "model": "sora-2",
-      "prompt": "A waterfall cascading forming a rainbow",
-      "duration": 10,
-      "aspect_ratio": "16:9",
-      "private": False,
-      "image_urls": ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
+      "model": "sora2",
+      "params": {
+          "prompt": "A cat walking in the garden",
+          "aspect_ratio": "16:9",
+          "video_length": "10"
+      }
   }
 
   headers = {
@@ -234,15 +137,15 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   ```
 
   ```javascript JavaScript
-  const url = "https://api.apimart.ai/v1/videos/generations";
+  const url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
   const payload = {
-    model: "sora-2",
-    prompt: "A waterfall cascading forming a rainbow",
-    duration: 15,
-    aspect_ratio: "16:9",
-    private: false,
-    image_urls: ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
+    model: "sora2",
+    params: {
+      prompt: "A cat walking in the garden",
+      aspect_ratio: "16:9",
+      video_length: "10"
+    }
   };
 
   const headers = {
@@ -272,14 +175,15 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   )
 
   func main() {
-      url := "https://api.apimart.ai/v1/videos/generations"
+      url := "http://pxz-api.xinsulv.com/api/openapi/submit"
 
       payload := map[string]interface{}{
-          "model":      "sora-2",
-          "prompt":     "A waterfall cascading forming a rainbow",
-          "duration":   15,
-          "aspect_ratio": "16:9",
-          "image_urls":  ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"],
+          "model": "sora2",
+          "params": map[string]interface{}{
+              "prompt":       "A cat walking in the garden",
+              "aspect_ratio": "16:9",
+              "video_length": "10",
+          },
       }
 
       jsonData, _ := json.Marshal(payload)
@@ -301,62 +205,66 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   ```
 
   ```java Java
-  import java.net.http.HttpClient;
-  import java.net.http.HttpRequest;
-  import java.net.http.HttpResponse;
-  import java.net.URI;
+  import java.io.BufferedReader;
+  import java.io.InputStreamReader;
+  import java.io.OutputStream;
+  import java.net.HttpURLConnection;
+  import java.net.URL;
 
   public class Main {
-      public static void main(String[] args) throws Exception {
-          String url = "https://api.apimart.ai/v1/videos/generations";
+      public static void main(String[] args) {
+          try {
+              URL url = new URL("http://pxz-api.xinsulv.com/api/openapi/submit");
+              HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+              conn.setRequestMethod("POST");
+              conn.setRequestProperty("Authorization", "Bearer <token>");
+              conn.setRequestProperty("Content-Type", "application/json");
+              conn.setDoOutput(true);
 
-          String payload = """
-          {
-            "model": "sora-2",
-            "prompt": "A waterfall cascading forming a rainbow",
-            "duration": 10,
-            "aspect_ratio": "16:9",
-            "image_urls": ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
+              String jsonPayload = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"A cat walking in the garden\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"}}";
+
+              OutputStream os = conn.getOutputStream();
+              os.write(jsonPayload.getBytes());
+              os.flush();
+              os.close();
+
+              BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+              String line;
+              StringBuilder response = new StringBuilder();
+              while ((line = br.readLine()) != null) {
+                  response.append(line);
+              }
+              br.close();
+
+              System.out.println(response.toString());
+          } catch (Exception e) {
+              e.printStackTrace();
           }
-          """;
-
-          HttpClient client = HttpClient.newHttpClient();
-          HttpRequest request = HttpRequest.newBuilder()
-              .uri(URI.create(url))
-              .header("Authorization", "Bearer <token>")
-              .header("Content-Type", "application/json")
-              .POST(HttpRequest.BodyPublishers.ofString(payload))
-              .build();
-
-          HttpResponse<String> response = client.send(request,
-              HttpResponse.BodyHandlers.ofString());
-
-          System.out.println(response.body());
       }
   }
   ```
 
   ```php PHP
   <?php
+  $url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
-  $url = "https://api.apimart.ai/v1/videos/generations";
-
-  $payload = [
-      "model" => "sora-2",
-      "prompt" => "A waterfall cascading forming a rainbow",
-      "duration" => 15,
-      "aspect_ratio" => "16:9",
-      "image_urls" => ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
-  ];
+  $payload = array(
+      "model" => "sora2",
+      "params" => array(
+          "prompt" => "A cat walking in the garden",
+          "aspect_ratio" => "16:9",
+          "video_length" => "10"
+      )
+  );
 
   $ch = curl_init($url);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
   curl_setopt($ch, CURLOPT_POST, true);
-  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+  curl_setopt($ch, CURLOPT_HTTPHEADER, array(
       "Authorization: Bearer <token>",
       "Content-Type: application/json"
-  ]);
+  ));
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
 
   $response = curl_exec($ch);
   curl_close($ch);
@@ -370,20 +278,19 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   require 'json'
   require 'uri'
 
-  url = URI("https://api.apimart.ai/v1/videos/generations")
+  url = URI.parse("http://pxz-api.xinsulv.com/api/openapi/submit")
 
   payload = {
-    model: "sora-2",
-    prompt: "A waterfall cascading forming a rainbow",
-    duration: 15,
-    aspect_ratio: "16:9",
-    image_urls: ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
+    model: "sora2",
+    params: {
+      prompt: "A cat walking in the garden",
+      aspect_ratio: "16:9",
+      video_length: "10"
+    }
   }
 
   http = Net::HTTP.new(url.host, url.port)
-  http.use_ssl = true
-
-  request = Net::HTTP::Post.new(url)
+  request = Net::HTTP::Post.new(url.path)
   request["Authorization"] = "Bearer <token>"
   request["Content-Type"] = "application/json"
   request.body = payload.to_json
@@ -395,33 +302,28 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "https://api.apimart.ai/v1/videos/generations")!
-
-  let payload: [String: Any] = [
-      "model": "sora-2",
-      "prompt": "A waterfall cascading forming a rainbow",
-      "duration": 10,
-      "aspect_ratio": "16:9",
-      "image_urls": ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
-  ]
-
+  let url = URL(string: "http://pxz-api.xinsulv.com/api/openapi/submit")!
   var request = URLRequest(url: url)
   request.httpMethod = "POST"
   request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
   request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+  let payload: [String: Any] = [
+      "model": "sora2",
+      "params": [
+          "prompt": "A cat walking in the garden",
+          "aspect_ratio": "16:9",
+          "video_length": "10"
+      ]
+  ]
+
   request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
 
   let task = URLSession.shared.dataTask(with: request) { data, response, error in
-      if let error = error {
-          print("Error: \(error)")
-          return
-      }
-      
-      if let data = data, let responseString = String(data: data, encoding: .utf8) {
-          print(responseString)
+      if let data = data {
+          print(String(data: data, encoding: .utf8) ?? "")
       }
   }
-
   task.resume()
   ```
 
@@ -435,24 +337,17 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   {
       static async Task Main(string[] args)
       {
-          var url = "https://api.apimart.ai/v1/videos/generations";
+          var url = "http://pxz-api.xinsulv.com/api/openapi/submit";
+          var payload = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"A cat walking in the garden\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"}}";
 
-          var payload = @"{
-              ""model"": ""sora-2"",
-              ""prompt"": ""A waterfall cascading forming a rainbow"",
-              ""duration"": 15,
-              ""aspect_ratio"": ""16:9"",
-              ""image_urls"": [""https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png""]
-          }";
-
-          using var client = new HttpClient();
-          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
-
-          var content = new StringContent(payload, Encoding.UTF8, "application/json");
-          var response = await client.PostAsync(url, content);
-          var result = await response.Content.ReadAsStringAsync();
-
-          Console.WriteLine(result);
+          using (var client = new HttpClient())
+          {
+              client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+              var content = new StringContent(payload, Encoding.UTF8, "application/json");
+              var response = await client.PostAsync(url, content);
+              var result = await response.Content.ReadAsStringAsync();
+              Console.WriteLine(result);
+          }
       }
   }
   ```
@@ -461,43 +356,28 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   #include <stdio.h>
   #include <curl/curl.h>
 
-  int main(void) {
+  int main(void)
+  {
       CURL *curl;
       CURLcode res;
 
-      curl_global_init(CURL_GLOBAL_DEFAULT);
       curl = curl_easy_init();
-
       if(curl) {
-          const char *url = "https://api.apimart.ai/v1/videos/generations";
-          const char *payload = "{"
-              "\"model\":\"sora-2\","
-              "\"prompt\":\"A waterfall cascading forming a rainbow\","
-              "\"duration\":15,"
-              "\"aspect_ratio\":\"16:9\","
-              "\"image_urls\":[\"https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png\"]"
-          "}";
+          curl_easy_setopt(curl, CURLOPT_URL, "http://pxz-api.xinsulv.com/api/openapi/submit");
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
           headers = curl_slist_append(headers, "Content-Type: application/json");
-
-          curl_easy_setopt(curl, CURLOPT_URL, url);
-          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
           curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-          res = curl_easy_perform(curl);
+          const char *data = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"A cat walking in the garden\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"}}";
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
 
-          if(res != CURLE_OK) {
-              fprintf(stderr, "curl_easy_perform() failed: %s\n",
-                      curl_easy_strerror(res));
-          }
+          res = curl_easy_perform(curl);
 
           curl_slist_free_all(headers);
           curl_easy_cleanup(curl);
       }
-
-      curl_global_cleanup();
       return 0;
   }
   ```
@@ -507,72 +387,56 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
-          NSURL *url = [NSURL URLWithString:@"https://api.apimart.ai/v1/videos/generations"];
-          
-          NSDictionary *payload = @{
-              @"model": @"sora-2",
-              @"prompt": @"A waterfall cascading forming a rainbow",
-              @"duration": @15,
-              @"aspect_ratio": @"16:9",
-              @"image_urls": @[@"https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
-          };
-          
-          NSError *error;
-          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
-                                                            options:0
-                                                              error:&error];
-          
+          NSURL *url = [NSURL URLWithString:@"http://pxz-api.xinsulv.com/api/openapi/submit"];
           NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
           [request setHTTPMethod:@"POST"];
           [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
           [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+
+          NSDictionary *payload = @{
+              @"model": @"sora2",
+              @"params": @{
+                  @"prompt": @"A cat walking in the garden",
+                  @"aspect_ratio": @"16:9",
+                  @"video_length": @"10"
+              }
+          };
+
+          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload options:0 error:nil];
           [request setHTTPBody:jsonData];
-          
-          NSURLSessionDataTask *task = [[NSURLSession sharedSession] 
-              dataTaskWithRequest:request
-              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-                  if (error) {
-                      NSLog(@"Error: %@", error);
-                      return;
-                  }
-                  NSString *result = [[NSString alloc] initWithData:data 
-                                                          encoding:NSUTF8StringEncoding];
+
+          NSURLSession *session = [NSURLSession sharedSession];
+          NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+              if (data) {
+                  NSString *result = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
                   NSLog(@"%@", result);
-              }];
-          
+              }
+          }];
           [task resume];
-          [[NSRunLoop mainRunLoop] run];
+          [[NSRunLoop currentRunLoop] run];
       }
       return 0;
   }
   ```
 
   ```ocaml OCaml
-  (* Requires cohttp and yojson libraries *)
   open Lwt
   open Cohttp
   open Cohttp_lwt_unix
 
-  let url = "https://api.apimart.ai/v1/videos/generations"
+  let url = "http://pxz-api.xinsulv.com/api/openapi/submit"
 
-  let payload = {|{
-    "model": "sora-2",
-    "prompt": "A waterfall cascading forming a rainbow",
-    "duration": 10,
-          "aspect_ratio": "16:9",
-            "image_urls": ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
-  }|}
+  let payload = {|{"model":"sora2","params":{"prompt":"A cat walking in the garden","aspect_ratio":"16:9","video_length":"10"}}|}
 
   let () =
     let headers = Header.init ()
       |> fun h -> Header.add h "Authorization" "Bearer <token>"
-      |> fun h -> Header.add h "Content-Type" "application/json"
-    in
+      |> fun h -> Header.add h "Content-Type" "application/json" in
     let body = Cohttp_lwt.Body.of_string payload in
-    
+
     let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
-      body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
-      print_endline body_str
+      body |> Cohttp_lwt.Body.to_string >|= fun body ->
+      print_endline body
     in
     Lwt_main.run response
   ```
@@ -582,17 +446,18 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   import 'package:http/http.dart' as http;
 
   void main() async {
-    final url = Uri.parse('https://api.apimart.ai/v1/videos/generations');
-    
-    final payload = {
-      'model': 'sora-2',
-      'prompt': 'A waterfall cascading forming a rainbow',
-      'duration': 15,
-      'aspect_ratio': '16:9',
-      'image_urls': ['https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png']
+    var url = Uri.parse('http://pxz-api.xinsulv.com/api/openapi/submit');
+
+    var payload = {
+      'model': 'sora2',
+      'params': {
+        'prompt': 'A cat walking in the garden',
+        'aspect_ratio': '16:9',
+        'video_length': '10'
+      }
     };
-    
-    final response = await http.post(
+
+    var response = await http.post(
       url,
       headers: {
         'Authorization': 'Bearer <token>',
@@ -600,7 +465,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
       },
       body: jsonEncode(payload),
     );
-    
+
     print(response.body);
   }
   ```
@@ -609,14 +474,15 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   library(httr)
   library(jsonlite)
 
-  url <- "https://api.apimart.ai/v1/videos/generations"
+  url <- "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload <- list(
-    model = "sora-2",
-    prompt = "A waterfall cascading forming a rainbow",
-    duration = 15,
-    aspect_ratio = "16:9",
-    image_urls = c("https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png")
+    model = "sora2",
+    params = list(
+      prompt = "A cat walking in the garden",
+      aspect_ratio = "16:9",
+      video_length = "10"
+    )
   )
 
   response <- POST(
@@ -626,7 +492,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
       `Content-Type` = "application/json"
     ),
     body = toJSON(payload, auto_unbox = TRUE),
-    encode = "raw"
+    encode = "json"
   )
 
   cat(content(response, "text"))
@@ -635,63 +501,38 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
 <ResponseExample>
   ```json 200
-  {
-    "code": 200,
-    "data": [
-      {
-        "status": "submitted",
-        "task_id": "task_01K8SGYNNNVBQTXNR4MM964S7K"
-      }
-    ]
-  }
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
+        "status": "pending",
+        "estimated_credits": 100,
+        "created_at": "2025-12-22T06:03:28.242Z"
+    }
+}
   ```
 
   ```json 400
-  {
-    "error": {
-      "code": 400,
-      "message": "Invalid request parameters",
-      "type": "invalid_request_error"
+    {
+        "statusCode": 400,
+        "message": "Invalid request parameters",
+        "ok": false
     }
-  }
   ```
-
   ```json 401
   {
     "error": {
       "code": 401,
-      "message": "Authentication failed, please check your API key",
-      "type": "authentication_error"
+      "message": "Authentication failed, please check your API key"
     }
   }
   ```
-
-  ```json 402
+```json 433
   {
     "error": {
-      "code": 402,
-      "message": "Insufficient account balance, please top up and try again",
-      "type": "payment_required"
-    }
-  }
-  ```
-
-  ```json 403
-  {
-    "error": {
-      "code": 403,
-      "message": "Access forbidden, you do not have permission to access this resource",
-      "type": "permission_error"
-    }
-  }
-  ```
-
-  ```json 429
-  {
-    "error": {
-      "code": 429,
-      "message": "Too many requests, please try again later",
-      "type": "rate_limit_error"
+      "code": 433,
+      "message": "Insufficient account balance, please recharge and try again"
     }
   }
   ```
@@ -700,18 +541,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   {
     "error": {
       "code": 500,
-      "message": "Internal server error, please try again later",
-      "type": "server_error"
-    }
-  }
-  ```
-
-  ```json 502
-  {
-    "error": {
-      "code": 502,
-      "message": "Gateway error, server temporarily unavailable",
-      "type": "bad_gateway"
+      "message": "Internal server error, please try again later"
     }
   }
   ```

@@ -1,102 +1,228 @@
 ---
-title: 'APIMart — 兼容 OpenAI 的 API 网关（GPT-5, Claude, Gemini）'
-description: '适用于 GPT-5、Claude 和 Gemini 的兼容 OpenAI API。多供应商路由，透明定价，低延迟。企业级 SLA，SDK 支持，按需付费。'
+title: 'APIMart — AI 图像与视频生成 API 平台'
+description: '统一的 AI 图像和视频生成 API 平台。支持多种主流模型，包括 GPT-4o Image、Gemini、Sora2、VEO3 等。异步任务处理，透明定价，简单易用。'
 ---
-一个统一的兼容 OpenAI 的终端节点，支持 GPT-5、Claude 和 Gemini。只需将基础 URL 更改为 `https://api.apimart.ai/v1`，即可在几分钟内从 OpenAI 迁移——无须重写代码，继续使用现有 SDK。多供应商路由确保低延迟和高可用性。透明定价、企业级 SLA 以及全球 CDN 加速。
 
-## Quick Start
+APIMart 是一个统一的 AI 内容生成 API 平台，提供图像和视频生成服务。通过简单的 REST API 调用，即可使用 GPT-4o、Gemini、Sora2、VEO3 等多种主流 AI 模型生成高质量的图像和视频内容。
 
-<Card title="立即开始" icon="rocket" horizontal href="/en/api-reference/images/gpt-4o/generation">
-  通过我们的统一 API 接口开始生成图像和视频
-</Card>
+## 快速开始
 
-## API Endpoints
+<CardGroup cols={2}>
+  <Card title="图像生成" icon="image" href="/zh/api-reference/images/gpt-4o/generation">
+    使用 GPT-4o、Gemini、Seedream 等模型生成图像
+  </Card>
+  <Card title="视频生成" icon="video" href="/zh/api-reference/videos/sora2/generation">
+    使用 Sora2、VEO3 等模型生成视频内容
+  </Card>
+  <Card title="任务状态查询" icon="list-check" href="/zh/api-reference/tasks/status">
+    查询异步任务的执行状态和结果
+  </Card>
+  <Card title="获取 API Key" icon="key" href="https://apimart.ai/console/token">
+    访问控制台获取您的 API Key
+  </Card>
+</CardGroup>
 
-APIMart 提供标准化的图像和视频生成端点，支持多种 AI 模型和供应商。
+## API 工作流程
 
-### Image Creation API
+### 1. 提交生成任务
 
-使用 GPT-4o Image、Gemini 2.5 Flash Image-preview 模型进行图像创建。采用 OpenAI 风格的 API，实现无缝集成。
+所有图像和视频生成都采用异步处理模式。提交任务后，系统会立即返回一个 `task_id`：
 
-<Card title="Image Creation API" icon="image" href="/api-reference/images/gpt-4o/generation">
-  文本生成图像
-</Card>
+```bash
+curl --request POST \
+  --url http://pxz-api.xinsulv.com/api/openapi/submit \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "model": "gpt_4o",
+    "params": {
+      "prompt": "一只可爱的猫咪在花园里",
+      "aspect_ratio": "1:1"
+    }
+  }'
+```
 
-### Video Creation API
+### 2. 查询任务状态
 
-使用 OpenAI Sora2、Google VEO3 模型进行视频创建。支持异步任务管理，具有状态跟踪和 webhook 支持。
+使用返回的 `task_id` 查询任务进度和结果：
 
-<Card title="Video Creation API" icon="video" href="/api-reference/videos/veo3/generation">
-  带 webhook 的异步任务管理
-</Card>
+```bash
+curl --request POST \
+  --url http://pxz-api.xinsulv.com/api/openapi/query \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --header 'Content-Type: application/json' \
+  --data-raw '{
+    "task_id": "order_xxxxxxxxxxxx"
+  }'
+```
 
-## Platform Benefits
+### 3. 获取生成结果
+
+任务完成后，响应中会包含生成的图像或视频 URL：
+
+```json
+{
+  "statusCode": 200,
+  "message": "",
+  "data": {
+    "task_id": "order_xxxxxxxxxxxx",
+    "status": "completed",
+    "output": [
+      {
+        "url": "https://s1.pxz.ai/upload/image-generator/xxx.jpeg"
+      }
+    ]
+  }
+}
+```
+
+## 支持的模型
+
+### 图像生成系列
+
+APIMart 提供多种图像生成模型，支持文本生成图像和图生图功能：
+
+<CardGroup cols={2}>
+  <Card title="GPT-4o Image" icon="image" href="/zh/api-reference/images/gpt-4o/generation">
+    OpenAI 的高质量图像生成模型
+  </Card>
+  <Card title="Gemini-2.5-Flash (Nano banana)" icon="image" href="/zh/api-reference/images/nano-banana/generation">
+    Google 最新的快速图像生成模型
+  </Card>
+  <Card title="Gemini-3-Pro (Nano banana2)" icon="image" href="/zh/api-reference/images/gemini-3-pro/generation">
+    Google 专业级图像生成模型
+  </Card>
+  <Card title="Seedream-4.0" icon="image" href="/zh/api-reference/images/seedream-4/generation">
+    高效的图像生成解决方案
+  </Card>
+  <Card title="Seedream-4.5" icon="image" href="/zh/api-reference/images/seedream-4.5/generation">
+    Seedream 最新版本
+  </Card>
+</CardGroup>
+
+### 视频生成系列
+
+支持文本生成视频和图生视频，提供多种分辨率和时长选项：
+
+<CardGroup cols={2}>
+  <Card title="Sora2" icon="video" href="/zh/api-reference/videos/sora2/generation">
+    OpenAI Sora2 视频生成模型（10-15秒）
+  </Card>
+  <Card title="Sora2 Pro" icon="video" href="/zh/api-reference/videos/sora2-pro/generation">
+    Sora2 专业版，支持高清分辨率
+  </Card>
+  <Card title="VEO3.1" icon="video" href="/zh/api-reference/videos/veo3-1/generation">
+    Google VEO3.1 视频生成模型
+  </Card>
+  <Card title="VEO3.1 Fast" icon="video" href="/zh/api-reference/videos/veo3-1-fast/generation">
+    VEO3.1 快速版本
+  </Card>
+</CardGroup>
+
+## 核心功能
+
+### 异步任务处理
+
+所有生成请求采用异步处理模式，避免长时间等待：
+
+- 立即返回 `task_id`
+- 通过任务状态 API 查询进度
+- 支持 webhook 回调通知（可选）
+- 任务状态实时更新：`pending` → `processing` → `completed`
+
+### 多模型支持
+
+一个统一的 API 端点，支持多种图像和视频生成模型：
+
+- **图像生成**：GPT-4o、Gemini、Seedream 等 5 个模型
+- **视频生成**：Sora2、VEO3 等 4 个模型
+- 统一的请求格式和响应结构
+- 灵活的参数配置
 
 ### 透明定价
 
-按使用量付费，无需订阅。所有模型均有明确的每令牌价格，比官方供应商价格更实惠，同时保持相同质量和低延迟。
+按积分计费，透明清晰：
 
-* 所有模型均有明确的每令牌价格
-* 企业用户享有批量折扣
-* 无隐藏费用
-* 只为实际使用付费
+- 每个任务返回预估消耗积分
+- 任务完成后显示实际消耗积分
+- 只为成功生成的内容付费
+- 无隐藏费用
 
-### 多供应商路由与企业级SLA
+### 灵活配置
 
-内置多LLM供应商的智能路由，确保高可用性和低延迟。当某供应商出现故障时，自动切换请求至备用供应商，无服务中断。
+支持多种生成参数配置：
 
-### 99.9% 正常运行时间SLA
+- **图像**：多种宽高比（1:1、3:2、2:3）
+- **视频**：多种宽高比（16:9、9:16）、时长（10秒、15秒）、分辨率
+- 支持参考图像（图生图、图生视频）
+- 自定义元数据（metadata）
 
-企业级可靠性，具备自动故障转移。多供应商路由确保请求始终以最低延迟被处理。
+## 认证方式
 
-### 全球CDN加速
+所有 API 请求都需要使用 Bearer Token 进行认证：
 
-全球边缘节点，提供最低延迟。优化路由减少响应时间，提升全球用户体验。
+```
+Authorization: Bearer YOUR_API_KEY
+```
 
-### 限速管理
+**获取 API Key：**
 
-自动处理供应商间的限速。智能请求分配防止节流，确保平稳运行。
+访问 [API Key 管理页面](https://apimart.ai/console/token) 获取您的 API Key。
 
-### 实时状态
-
-监控端点健康状况和性能。跟踪图像和视频生成的异步任务进度，并通过webhook通知。[查看状态 →](/en/api-reference/tasks/status)
-
-## Supported Models
-
-通过统一的API端点访问领先的图像和视频生成AI模型。
-
-### Image Creation Models
-
-基于文本提示的图像生成：
-
-* **GPT-4o Image**：OpenAI图像生成模型
-* **Gemini 2.5 Flash Image-preview**：Google高效图像模型
-
-### Video Creation Models
-
-支持异步任务跟踪和webhook回调的视频生成：
-
-* **OpenAI Sora2**：OpenAI视频生成模型
-* **Google VEO3**：Google视频生成模型
-* **doubao-seedance-1-0-pro**：快速高质量视频生成
-* **MiniMax-Hailuo-02**：支持图像转视频的高效视频生成
-
-## FAQ
+## 常见问题
 
 <AccordionGroup>
-  <Accordion title="图像和视频生成是如何工作的？">
-    图像生成是同步的，能够立即返回结果。视频生成是异步的——您提交请求后会收到一个 task_id，然后通过轮询状态端点来检查进度并获取最终视频的 URL。
+  <Accordion title="如何获取 API Key？">
+    访问 [API Key 管理页面](https://apimart.ai/console/token)，登录后即可创建和管理您的 API Key。
   </Accordion>
 
-  <Accordion title="SLA 包含哪些内容？">
-    我们的企业 SLA 包括 99.9% 的正常运行时间保证、全球 CDN 加速、多供应商路由和自动故障转移，以及实时状态监控。异步任务支持速率限制管理和 webhook。
+  <Accordion title="图像和视频生成需要多长时间？">
+    所有生成任务都是异步处理的。图像生成通常需要几秒到几十秒，视频生成根据时长和分辨率，通常需要 1-5 分钟。提交任务后会立即返回 task_id，您可以通过状态查询 API 跟踪进度。
   </Accordion>
 
-  <Accordion title="定价是如何计算的？">
-    APIMart 提供透明的按请求计费，适用于图像和视频生成。按需付费，无需订阅，企业用户享有批量折扣，无隐藏费用。仅对成功生成的内容收费。
+  <Accordion title="如何查询任务状态？">
+    使用任务状态查询 API，传入提交任务时返回的 `task_id`：
+
+    ```bash
+    POST http://pxz-api.xinsulv.com/api/openapi/query
+    ```
+
+    查看 [任务状态查询文档](/zh/api-reference/tasks/status) 了解详情。
   </Accordion>
 
-  <Accordion title="延迟和性能如何？">
-    通过全球 CDN 加速和智能多供应商路由保证低延迟。图像生成通常是即时的，而视频生成时间取决于模型（40-300 秒）。实时状态监控让您跟踪异步任务进展。
+  <Accordion title="支持 webhook 回调吗？">
+    是的，在提交任务时可以传入 `callback_url` 参数。任务完成后，系统会向该地址发送 POST 请求，包含完整的任务结果。
+  </Accordion>
+
+  <Accordion title="如何计费？">
+    APIMart 采用积分制计费：
+
+    - 提交任务时返回预估消耗积分（`estimated_credits`）
+    - 任务完成后返回实际消耗积分（`credits_used`）
+    - 只为成功生成的内容付费，失败任务不收费
+    - 不同模型的积分消耗不同
+  </Accordion>
+
+  <Accordion title="支持哪些图像格式和视频格式？">
+    - **图像**：支持 JPEG、PNG 等常见格式
+    - **视频**：输出 MP4 格式
+    - **参考图像**：输入支持公开可访问的图像 URL
   </Accordion>
 </AccordionGroup>
+
+## 下一步
+
+<CardGroup cols={2}>
+  <Card title="查看图像生成文档" icon="image" href="/zh/api-reference/images/gpt-4o/generation">
+    了解如何使用各种图像生成模型
+  </Card>
+  <Card title="查看视频生成文档" icon="video" href="/zh/api-reference/videos/sora2/generation">
+    了解如何生成视频内容
+  </Card>
+  <Card title="任务管理" icon="list-check" href="/zh/api-reference/tasks/status">
+    学习如何管理和查询任务状态
+  </Card>
+  <Card title="获取 API Key" icon="key" href="https://apimart.ai/console/token">
+    立即开始使用 APIMart
+  </Card>
+</CardGroup>

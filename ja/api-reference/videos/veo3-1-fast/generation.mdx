@@ -1,20 +1,22 @@
 ---
-title: 'Sora2 ビデオ生成'
+title: 'VEO3.1 Fast ビデオ生成'
 description: |
-    - 非同期処理モード、後続のクエリ用にタスクIDを返す
-    - テキストからビデオ生成、画像からビデオ生成などの生成モードをサポート
+    - 非同期処理モード、タスクIDを返し後続のクエリに使用
+    - テキストからビデオ、画像からビデオなどの生成モードをサポート
+    - 高速バージョン、速度最適化対応
+    - 初フレームおよび末フレームの参照画像をサポート
 api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 ---
-## Authorizations
+## Authorization
 
 <ParamField header="Authorization" type="string" required>
-  すべてのエンドポイントはBearer Tokenによる認証が必要です
+  すべてのエンドポイントはBearer Tokenによる認証が必要です。
 
   APIキーの取得方法：
 
-  [APIキー管理ページ](https://apimart.ai/console/token)にアクセスしてAPIキーを取得してください
+  [APIキー管理ページ](https://apimart.ai/console/token) にアクセスしてAPIキーを取得してください。
 
-  使用時はリクエストヘッダーに以下を追加します：
+  利用時はリクエストヘッダーに以下を追加します：
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -26,11 +28,11 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 <ParamField body="model" type="string" required>
   モデル名
 
-  固定値：`"sora2"`
+  固定値：`"veo3_1_fast"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  モデルパラメーターオブジェクト
+  モデルパラメータオブジェクト
 
   <Expandable title="params オブジェクトのプロパティ">
     <ParamField body="prompt" type="string" required>
@@ -40,10 +42,17 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      参考画像のURL、動画生成（最初のフレーム）用
+      参考画像の URL（動画生成の先頭フレーム用）
 
       * 単一画像のみ対応
-      * 公開アクセス可能なURLをサポート
+      * 公開アクセス可能な URL サポート
+    </ParamField>
+
+    <ParamField body="end_image_url" type="string">
+      終了フレーム参考画像の URL
+
+      * 単一画像のみ対応
+      * 公開アクセス可能な URL サポート
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="16:9">
@@ -54,46 +63,37 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
       * `16:9` - 横向き（デフォルト）
       * `9:16` - 縦向き
     </ParamField>
-
-    <ParamField body="video_length" type="string" default="10">
-      動画の長さ（秒）
-
-      対応長さ：
-
-      * `10` - 10秒（デフォルト）
-      * `15` - 15秒
-    </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="callback_url" type="string">
   タスク完了後のコールバック通知先URL
 
-  タスク完了後、システムはこのURLにPOSTリクエストを送信して結果を通知します
+  タスク完了後、システムはこのURLにPOSTリクエストで結果を通知します
 </ParamField>
 
 <ParamField body="metadata" type="object">
   カスタムメタデータ
 
-  クエリ結果時にそのまま返され、ビジネス識別に利用可能
+  クエリ結果時にそのまま返され、業務識別に利用可能
 </ParamField>
 
 ## Response
 
 <ResponseField name="task_id" type="string">
-  タスクID、結果を照会するために使用されます
+  タスクID、結果の照会に使用されます
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  初期状態、固定で `"pending"`
+  初期状態で、固定値は `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  予想消費クレジット
+  推定消費クレジット
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  作成日時（ISO形式）
+  作成日時（ISOフォーマット）
 </ResponseField>
 
 <RequestExample>
@@ -103,11 +103,12 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
-      "model": "sora2",
+      "model": "veo3_1_fast",
       "params": {
-        "prompt": "一只猫在花园里散步",
-        "aspect_ratio": "16:9",
-        "video_length": "10"
+        "prompt": "山間の霧がゆっくりと流れる",
+        "image_url": "https://example.com/start.jpg",
+        "end_image_url": "https://example.com/end.jpg",
+        "aspect_ratio": "16:9"
       }
     }'
   ```
@@ -118,11 +119,12 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   url = "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload = {
-      "model": "sora2",
+      "model": "veo3_1_fast",
       "params": {
-          "prompt": "一只猫在花园里散步",
-          "aspect_ratio": "16:9",
-          "video_length": "10"
+          "prompt": "山間の霧がゆっくりと流れる",
+          "image_url": "https://example.com/start.jpg",
+          "end_image_url": "https://example.com/end.jpg",
+          "aspect_ratio": "16:9"
       }
   }
 
@@ -140,11 +142,12 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   const url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
   const payload = {
-    model: "sora2",
+    model: "veo3_1_fast",
     params: {
-      prompt: "一只猫在花园里散步",
-      aspect_ratio: "16:9",
-      video_length: "10"
+      prompt: "山間の霧がゆっくりと流れる",
+      image_url: "https://example.com/start.jpg",
+      end_image_url: "https://example.com/end.jpg",
+      aspect_ratio: "16:9"
     }
   };
 
@@ -178,11 +181,12 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
       url := "http://pxz-api.xinsulv.com/api/openapi/submit"
 
       payload := map[string]interface{}{
-          "model": "sora2",
+          "model": "veo3_1_fast",
           "params": map[string]interface{}{
-              "prompt":       "一只猫在花园里散步",
-              "aspect_ratio": "16:9",
-              "video_length": "10",
+              "prompt":        "山間の霧がゆっくりと流れる",
+              "image_url":     "https://example.com/start.jpg",
+              "end_image_url": "https://example.com/end.jpg",
+              "aspect_ratio":  "16:9",
           },
       }
 
@@ -221,7 +225,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
               conn.setRequestProperty("Content-Type", "application/json");
               conn.setDoOutput(true);
 
-              String jsonPayload = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"一只猫在花园里散步\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"}}";
+              String jsonPayload = "{\"model\":\"veo3_1_fast\",\"params\":{\"prompt\":\"山間の霧がゆっくりと流れる\",\"image_url\":\"https://example.com/start.jpg\",\"end_image_url\":\"https://example.com/end.jpg\",\"aspect_ratio\":\"16:9\"}}";
 
               OutputStream os = conn.getOutputStream();
               os.write(jsonPayload.getBytes());
@@ -249,11 +253,12 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   $url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
   $payload = array(
-      "model" => "sora2",
+      "model" => "veo3_1_fast",
       "params" => array(
-          "prompt" => "一只猫在花园里散歩",
-          "aspect_ratio" => "16:9",
-          "video_length" => "10"
+          "prompt" => "山間の霧がゆっくりと流れる",
+          "image_url" => "https://example.com/start.jpg",
+          "end_image_url" => "https://example.com/end.jpg",
+          "aspect_ratio" => "16:9"
       )
   );
 
@@ -281,11 +286,12 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   url = URI.parse("http://pxz-api.xinsulv.com/api/openapi/submit")
 
   payload = {
-    model: "sora2",
+    model: "veo3_1_fast",
     params: {
-      prompt: "一只猫在花园里散歩",
-      aspect_ratio: "16:9",
-      video_length: "10"
+      prompt: "山間の霧がゆっくりと流れる",
+      image_url: "https://example.com/start.jpg",
+      end_image_url: "https://example.com/end.jpg",
+      aspect_ratio: "16:9"
     }
   }
 
@@ -309,11 +315,12 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
   let payload: [String: Any] = [
-      "model": "sora2",
+      "model": "veo3_1_fast",
       "params": [
-          "prompt": "一只猫在花园里散歩",
-          "aspect_ratio": "16:9",
-          "video_length": "10"
+          "prompt": "山間の霧がゆっくりと流れる",
+          "image_url": "https://example.com/start.jpg",
+          "end_image_url": "https://example.com/end.jpg",
+          "aspect_ratio": "16:9"
       ]
   ]
 
@@ -338,7 +345,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
       static async Task Main(string[] args)
       {
           var url = "http://pxz-api.xinsulv.com/api/openapi/submit";
-          var payload = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"一只猫在花园里散歩\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"}}";
+          var payload = "{\"model\":\"veo3_1_fast\",\"params\":{\"prompt\":\"山間の霧がゆっくりと流れる\",\"image_url\":\"https://example.com/start.jpg\",\"end_image_url\":\"https://example.com/end.jpg\",\"aspect_ratio\":\"16:9\"}}";
 
           using (var client = new HttpClient())
           {
@@ -370,7 +377,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
           headers = curl_slist_append(headers, "Content-Type: application/json");
           curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-          const char *data = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"一只猫在花园里散歩\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"}}";
+          const char *data = "{\"model\":\"veo3_1_fast\",\"params\":{\"prompt\":\"山間の霧がゆっくりと流れる\",\"image_url\":\"https://example.com/start.jpg\",\"end_image_url\":\"https://example.com/end.jpg\",\"aspect_ratio\":\"16:9\"}}";
           curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
 
           res = curl_easy_perform(curl);
@@ -394,11 +401,12 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
           [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
 
           NSDictionary *payload = @{
-              @"model": @"sora2",
+              @"model": @"veo3_1_fast",
               @"params": @{
-                  @"prompt": @"一只猫在花园里散歩",
-                  @"aspect_ratio": @"16:9",
-                  @"video_length": @"10"
+                  @"prompt": @"山間の霧がゆっくりと流れる",
+                  @"image_url": @"https://example.com/start.jpg",
+                  @"end_image_url": @"https://example.com/end.jpg",
+                  @"aspect_ratio": @"16:9"
               }
           };
 
@@ -426,7 +434,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 
   let url = "http://pxz-api.xinsulv.com/api/openapi/submit"
 
-  let payload = {|{"model":"sora2","params":{"prompt":"一只猫在花园里散歩","aspect_ratio":"16:9","video_length":"10"}}|}
+  let payload = {|{"model":"veo3_1_fast","params":{"prompt":"山間の霧がゆっくりと流れる","image_url":"https://example.com/start.jpg","end_image_url":"https://example.com/end.jpg","aspect_ratio":"16:9"}}|}
 
   let () =
     let headers = Header.init ()
@@ -449,11 +457,12 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
     var url = Uri.parse('http://pxz-api.xinsulv.com/api/openapi/submit');
 
     var payload = {
-      'model': 'sora2',
+      'model': 'veo3_1_fast',
       'params': {
-        'prompt': '一只猫在花园里散歩',
-        'aspect_ratio': '16:9',
-        'video_length': '10'
+        'prompt': '山間の霧がゆっくりと流れる',
+        'image_url': 'https://example.com/start.jpg',
+        'end_image_url': 'https://example.com/end.jpg',
+        'aspect_ratio': '16:9'
       }
     };
 
@@ -477,11 +486,12 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   url <- "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload <- list(
-    model = "sora2",
+    model = "veo3_1_fast",
     params = list(
-      prompt = "一只猫在花园里散歩",
-      aspect_ratio = "16:9",
-      video_length = "10"
+      prompt = "山間の霧がゆっくりと流れる",
+      image_url = "https://example.com/start.jpg",
+      end_image_url = "https://example.com/end.jpg",
+      aspect_ratio = "16:9"
     )
   )
 
@@ -524,7 +534,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   {
     "error": {
       "code": 401,
-      "message": "認証に失敗しました。APIキーをご確認ください"
+      "message": "認証に失敗しました。APIキーを確認してください"
     }
   }
   ```
@@ -532,7 +542,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   {
     "error": {
       "code": 433,
-      "message": "アカウント残高が不足しています。チャージ後に再試行してください"
+      "message": "アカウント残高が不足しています。チャージ後に再度お試しください"
     }
   }
   ```
@@ -541,7 +551,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   {
     "error": {
       "code": 500,
-      "message": "サーバー内部エラーです。後でもう一度お試しください"
+      "message": "サーバー内部エラーが発生しました。しばらくしてから再度お試しください"
     }
   }
   ```

@@ -1,10 +1,9 @@
 ---
-title: 'GPT-4o-image Image Generation'
+title: 'GPT-4o Image Generation'
 description: |
     - Asynchronous processing mode, returns a task ID for subsequent queries
-    - Supports multiple generation modes including text-to-image, image-to-image, and image editing.
-    - Generated image links are valid for 24 hours, please save them promptly
-api: 'POST https://api.apimart.ai/v1/images/generations'
+    - Supports text-to-image, image-to-image and other generation modes
+api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 ---
 ## Authorizations
 
@@ -24,132 +23,98 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
 ## Body
 
-<ParamField body="model" type="string" default="gpt-4o-image" required>
-  Image generation model name
+<ParamField body="model" type="string" required>
+  Model name
 
-  Example: `"gpt-4o-image"`
+  Fixed value: `"gpt_4o"`
 </ParamField>
 
-<ParamField body="prompt" type="string" required>
-  Text description for image generation
+<ParamField body="params" type="object" required>
+  Model parameter object
 
-  Up to 1000 characters
-</ParamField>
+  <Expandable title="params object properties">
+    <ParamField body="prompt" type="string" required>
+      Text description for image generation
 
-<ParamField body="size" type="string">
-  Image generation size
+      No limitations
+    </ParamField>
 
-  Supported formats:
+    <ParamField body="image_url" type="string">
+      URL of the reference image, used for image-to-image generation
 
-  * Aspect ratios: `1:1`, `2:3`, `3:2`
-</ParamField>
+      * Supports only a single image
+      * Must be a publicly accessible URL
+    </ParamField>
 
-<ParamField body="n" type="integer">
-  Number of generated images
+    <ParamField body="aspect_ratio" type="string" default="1:1">
+      Aspect ratio for image generation
 
-  Supports 1, 2, 4, with pre-charging based on the number generated
+      Supported aspect ratios:
 
-  Default: 1
-
-  **⚠️ Note:** Must input a pure number (e.g., `1`), do not add quotes or an error will occur
-</ParamField>
-
-<ParamField body="image_urls" type="array">
-  List of reference image URLs, used for image-to-image or image editing
-
-  **💡 Quick fill (Try it section):**
-
-  1. Click "+ Add an item" to add an image URL
-  2. Enter the full URL or base64 data of the image
-
-  <Expandable title="Detailed field description">
-    <ParamField body="url" type="string" required>
-      Image URL address
-
-      Supports two formats:
-
-      **1. Full image URL**
-
-      * Publicly accessible image URL (http\:// or https\://)
-      * Example: `https://example.com/image.jpg`
-
-      **2. Base64 encoded format**
-
-      * **Must use complete Data URI format**
-      * Format: `data:image/{format};base64,{base64 data}`
-      * Supported image formats: jpeg, png, webp, etc.
-      * Example: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
-      * ⚠️ Note: Must include the `data:image/jpeg;base64,` prefix
-
-      **Limitations:**
-
-      * Single image not exceeding 10MB
-      * Supported formats: .jpeg, .jpg, .png, .webp
+      * `1:1` - Square (default)
+      * `3:2` - Landscape 3:2
+      * `2:3` - Portrait 2:3
     </ParamField>
   </Expandable>
-
-  **Limit:** Up to 5 images
 </ParamField>
 
-<ParamField body="mask_url" type="string">
-  URL of the mask image
+<ParamField body="callback_url" type="string">
+  Callback URL after task completion
 
-  * Must be in PNG format
-  * Size must match the reference image
-  * Not exceeding 4MB
+  After the task is completed, the system will send a POST request to this URL to notify the result
+</ParamField>
+
+<ParamField body="metadata" type="object">
+  Custom metadata
+
+  Returned as-is in query results, can be used for business identification
 </ParamField>
 
 ## Response
 
-<ResponseField name="code" type="integer">
-  Response status code
+<ResponseField name="task_id" type="string">
+  Task ID used to query the result
 </ResponseField>
 
-<ResponseField name="data" type="array">
-  Returned data array
+<ResponseField name="status" type="string">
+  Initial status, fixed as `"pending"`
+</ResponseField>
 
-  <Expandable title="Properties">
-    <ResponseField name="status" type="string">
-      Task status
+<ResponseField name="estimated_credits" type="number">
+  Estimated credits consumption
+</ResponseField>
 
-      * `submitted` - Submitted
-    </ResponseField>
-
-    <ResponseField name="task_id" type="string">
-      Unique task identifier
-    </ResponseField>
-  </Expandable>
+<ResponseField name="created_at" type="string">
+  Creation time (ISO format)
 </ResponseField>
 
 <RequestExample>
   ```bash cURL
   curl --request POST \
-    --url https://api.apimart.ai/v1/images/generations \
+    --url http://pxz-api.xinsulv.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
-      "model": "gpt-4o-image",
-      "prompt": "An ancient castle under the starry sky",
-      "size": "1:1",
-      "n": 1,
-      "image_urls": [
-        "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"
-      ]
+      "model": "gpt_4o",
+      "params": {
+        "prompt": "An ancient castle under the starry sky",
+        "aspect_ratio": "1:1"
+      }
     }'
   ```
 
   ```python Python
   import requests
 
-  url = "https://api.apimart.ai/v1/images/generations"
+  url = "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload = {
-      "model": "gpt-4o-image",
-      "prompt": "An ancient castle under the starry sky",
-      "size": "1:1",
-      "n": 1,
-      "image_urls": [
-          "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"    ]}
+      "model": "gpt_4o",
+      "params": {
+          "prompt": "An ancient castle under the starry sky",
+          "aspect_ratio": "1:1"
+      }
+  }
 
   headers = {
       "Authorization": "Bearer <token>",
@@ -162,15 +127,15 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   ```
 
   ```javascript JavaScript
-  const url = "https://api.apimart.ai/v1/images/generations";
+  const url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
   const payload = {
-    model: "gpt-4o-image",
-    prompt: "An ancient castle under the starry sky",
-    size: "1:1",
-    n: 1,
-    image_urls: [
-      "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"  ]};
+    model: "gpt_4o",
+    params: {
+      prompt: "An ancient castle under the starry sky",
+      aspect_ratio: "1:1"
+    }
+  };
 
   const headers = {
     "Authorization": "Bearer <token>",
@@ -199,16 +164,15 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   )
 
   func main() {
-      url := "https://api.apimart.ai/v1/images/generations"
+      url := "http://pxz-api.xinsulv.com/api/openapi/submit"
 
       payload := map[string]interface{}{
-          "model":  "gpt-4o-image",
-          "prompt": "An ancient castle under the starry sky",
-          "size":   "1:1",
-          "n":      1,
-          "image_urls": []string{
-              "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"
-    }    }
+          "model": "gpt_4o",
+          "params": map[string]interface{}{
+              "prompt":       "An ancient castle under the starry sky",
+              "aspect_ratio": "1:1",
+          },
+      }
 
       jsonData, _ := json.Marshal(payload)
 
@@ -236,17 +200,16 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   public class Main {
       public static void main(String[] args) throws Exception {
-          String url = "https://api.apimart.ai/v1/images/generations";
+          String url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
           String payload = """
           {
-            "model": "gpt-4o-image",
-            "prompt": "An ancient castle under the starry sky",
-            "size": "1:1",
-            "n": 1,
-            "image_urls": [
-              "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"
-            ]        }
+            "model": "gpt_4o",
+            "params": {
+              "prompt": "An ancient castle under the starry sky",
+              "aspect_ratio": "1:1"
+            }
+          }
           """;
 
           HttpClient client = HttpClient.newHttpClient();
@@ -268,15 +231,15 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   ```php PHP
   <?php
 
-  $url = "https://api.apimart.ai/v1/images/generations";
+  $url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
   $payload = [
-      "model" => "gpt-4o-image",
-      "prompt" => "An ancient castle under the starry sky",
-      "size" => "1:1",
-      "n" => 1,
-      "image_urls" => [
-          "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"    ]];
+      "model" => "gpt_4o",
+      "params" => [
+          "prompt" => "An ancient castle under the starry sky",
+          "aspect_ratio" => "1:1"
+      ]
+  ];
 
   $ch = curl_init($url);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -299,18 +262,17 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   require 'json'
   require 'uri'
 
-  url = URI("https://api.apimart.ai/v1/images/generations")
+  url = URI("http://pxz-api.xinsulv.com/api/openapi/submit")
 
   payload = {
-    model: "gpt-4o-image",
-    prompt: "An ancient castle under the starry sky",
-    size: "1:1",
-    n: 1,
-    image_urls: [
-      "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"  ]}
+    model: "gpt_4o",
+    params: {
+      prompt: "An ancient castle under the starry sky",
+      aspect_ratio: "1:1"
+    }
+  }
 
   http = Net::HTTP.new(url.host, url.port)
-  http.use_ssl = true
 
   request = Net::HTTP::Post.new(url)
   request["Authorization"] = "Bearer <token>"
@@ -324,15 +286,15 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "https://api.apimart.ai/v1/images/generations")!
+  let url = URL(string: "http://pxz-api.xinsulv.com/api/openapi/submit")!
 
   let payload: [String: Any] = [
-      "model": "gpt-4o-image",
-      "prompt": "An ancient castle under the starry sky",
-      "size": "1:1",
-      "n": 1,
-      "image_urls": [
-          "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"    ]]
+      "model": "gpt_4o",
+      "params": [
+          "prompt": "An ancient castle under the starry sky",
+          "aspect_ratio": "1:1"
+      ]
+  ]
 
   var request = URLRequest(url: url)
   request.httpMethod = "POST"
@@ -345,7 +307,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
           print("Error: \(error)")
           return
       }
-      
+
       if let data = data, let responseString = String(data: data, encoding: .utf8) {
           print(responseString)
       }
@@ -364,17 +326,15 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   {
       static async Task Main(string[] args)
       {
-          var url = "https://api.apimart.ai/v1/images/generations";
+          var url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
           var payload = @"{
-              ""model"": ""gpt-4o-image"",
-              ""prompt"": ""An ancient castle under the starry sky"",
-              ""size"": ""1:1"",
-              ""n"": 1,
-              ""image_urls"": [
-                  ""https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"",
-                  ""
-              ]        }";
+              ""model"": ""gpt_4o"",
+              ""params"": {
+                  ""prompt"": ""An ancient castle under the starry sky"",
+                  ""aspect_ratio"": ""1:1""
+              }
+          }";
 
           using var client = new HttpClient();
           client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
@@ -400,13 +360,13 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
       curl = curl_easy_init();
 
       if(curl) {
-          const char *url = "https://api.apimart.ai/v1/images/generations";
+          const char *url = "http://pxz-api.xinsulv.com/api/openapi/submit";
           const char *payload = "{"
-              "\"model\":\"gpt-4o-image\","
-              "\"prompt\":\"An ancient castle under the starry sky\","
-              "\"size\":\"1:1\","
-              "\"n\":1,"
-              "\"image_urls\":[\"https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png\"]"
+              "\"model\":\"gpt_4o\","
+              "\"params\":{"
+                  "\"prompt\":\"An ancient castle under the starry sky\","
+                  "\"aspect_ratio\":\"1:1\""
+              "}"
           "}";
 
           struct curl_slist *headers = NULL;
@@ -438,41 +398,39 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
-          NSURL *url = [NSURL URLWithString:@"https://api.apimart.ai/v1/images/generations"];
-          
+          NSURL *url = [NSURL URLWithString:@"http://pxz-api.xinsulv.com/api/openapi/submit"];
+
           NSDictionary *payload = @{
-              @"model": @"gpt-4o-image",
-              @"prompt": @"An ancient castle under the starry sky",
-              @"size": @"1:1",
-              @"n": @1,
-              @"image_urls": @[
-                  @"https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png",
-                  @
-              ]        };
-          
+              @"model": @"gpt_4o",
+              @"params": @{
+                  @"prompt": @"An ancient castle under the starry sky",
+                  @"aspect_ratio": @"1:1"
+              }
+          };
+
           NSError *error;
           NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
                                                             options:0
                                                               error:&error];
-          
+
           NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
           [request setHTTPMethod:@"POST"];
           [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
           [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
           [request setHTTPBody:jsonData];
-          
-          NSURLSessionDataTask *task = [[NSURLSession sharedSession] 
+
+          NSURLSessionDataTask *task = [[NSURLSession sharedSession]
               dataTaskWithRequest:request
               completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
                   if (error) {
                       NSLog(@"Error: %@", error);
                       return;
                   }
-                  NSString *result = [[NSString alloc] initWithData:data 
+                  NSString *result = [[NSString alloc] initWithData:data
                                                           encoding:NSUTF8StringEncoding];
                   NSLog(@"%@", result);
               }];
-          
+
           [task resume];
           [[NSRunLoop mainRunLoop] run];
       }
@@ -486,15 +444,15 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   open Cohttp
   open Cohttp_lwt_unix
 
-  let url = "https://api.apimart.ai/v1/images/generations"
+  let url = "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   let payload = {|{
-    "model": "gpt-4o-image",
-    "prompt": "An ancient castle under the starry sky",
-    "size": "1:1",
-    "n": 1,
-    "image_urls": [
-      "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"  ]}|}
+    "model": "gpt_4o",
+    "params": {
+      "prompt": "An ancient castle under the starry sky",
+      "aspect_ratio": "1:1"
+    }
+  }|}
 
   let () =
     let headers = Header.init ()
@@ -502,7 +460,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
       |> fun h -> Header.add h "Content-Type" "application/json"
     in
     let body = Cohttp_lwt.Body.of_string payload in
-    
+
     let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
       body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
       print_endline body_str
@@ -515,25 +473,25 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   import 'package:http/http.dart' as http;
 
   void main() async {
-    final url = Uri.parse('https://api.apimart.ai/v1/images/generations');
-    
+    final url = Uri.parse('http://pxz-api.xinsulv.com/api/openapi/submit');
+
     final payload = {
-      'model': 'gpt-4o-image',
-      'prompt': 'An ancient castle under the starry sky',
-      'size': '1:1',
-      'n': 1,
-      'image_urls': [
-        'https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png'    ]  };
-    
+      'model': 'gpt_4o',
+      'params': {
+        'prompt': 'An ancient castle under the starry sky',
+        'aspect_ratio': '1:1'
+      }
+    };
+
     final response = await http.post(
       url,
       headers: {
         'Authorization': 'Bearer <token>',
         'Content-Type': 'application/json'
-    },
+      },
       body: jsonEncode(payload),
     );
-    
+
     print(response.body);
   }
   ```
@@ -542,15 +500,15 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   library(httr)
   library(jsonlite)
 
-  url <- "https://api.apimart.ai/v1/images/generations"
+  url <- "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload <- list(
-    model = "gpt-4o-image",
-    prompt = "An ancient castle under the starry sky",
-    size = "1:1",
-    n = 1,
-    image_urls = list(
-      "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"  ))
+    model = "gpt_4o",
+    params = list(
+      prompt = "An ancient castle under the starry sky",
+      aspect_ratio = "1:1"
+    )
+  )
 
   response <- POST(
     url,
@@ -568,63 +526,38 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
 <ResponseExample>
   ```json 200
-  {
-    "code": 200,
-    "data": [
-      {
-        "status": "submitted",
-        "task_id": "task_01K8SGYNNNVBQTXNR4MM964S7K"
-      }
-    ]
-  }
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
+        "status": "pending",
+        "estimated_credits": 100,
+        "created_at": "2025-12-22T06:03:28.242Z"
+    }
+}
   ```
 
   ```json 400
-  {
-    "error": {
-      "code": 400,
-      "message": "Invalid request parameters",
-      "type": "invalid_request_error"
+    {
+        "statusCode": 400,
+        "message": "Invalid request parameters",
+        "ok": false
     }
-  }
   ```
-
   ```json 401
   {
     "error": {
       "code": 401,
-      "message": "Authentication failed, please check your API key",
-      "type": "authentication_error"
+      "message": "Authentication failed, please check your API key"
     }
   }
   ```
-
-  ```json 402
+```json 433
   {
     "error": {
-      "code": 402,
-      "message": "Insufficient account balance, please recharge and try again",
-      "type": "payment_required"
-    }
-  }
-  ```
-
-  ```json 403
-  {
-    "error": {
-      "code": 403,
-      "message": "Access forbidden, you do not have permission to access this resource",
-      "type": "permission_error"
-    }
-  }
-  ```
-
-  ```json 429
-  {
-    "error": {
-      "code": 429,
-      "message": "Too many requests, please try again later",
-      "type": "rate_limit_error"
+      "code": 433,
+      "message": "Insufficient account balance, please recharge and try again"
     }
   }
   ```
@@ -633,18 +566,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   {
     "error": {
       "code": 500,
-      "message": "Internal server error, please try again later",
-      "type": "server_error"
-    }
-  }
-  ```
-
-  ```json 502
-  {
-    "error": {
-      "code": 502,
-      "message": "Gateway error, server temporarily unavailable",
-      "type": "bad_gateway"
+      "message": "Internal server error, please try again later"
     }
   }
   ```

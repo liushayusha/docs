@@ -1,10 +1,9 @@
 ---
-title: 'Gemini-3-Pro-Image-preview (Nano banana2) 이미지 생성'
+title: 'Nano Banana Pro 이미지 생성'
 description: |
     - 비동기 처리 모드, 후속 조회를 위한 작업 ID 반환
-    - 고품질 이미지 생성, 전문적인 이미지 제작
-    - 생성된 이미지 링크, 유효 기간은 24시간이며 가능한 빨리 저장하세요
-api: 'POST https://api.apimart.ai/v1/images/generations'
+    - 고품질 이미지 생성, 전문 수준의 이미지 작성
+api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 ---
 ## Authorizations
 
@@ -24,137 +23,128 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
 ## Body
 
-<ParamField body="model" type="string" default="gemini-3-pro-image-preview" required>
-  이미지 생성 모델 이름
+<ParamField body="model" type="string" required>
+  모델 이름
 
-  예시: `"gemini-3-pro-image-preview"`
+  고정 값: `"nano_banana_pro"`
 </ParamField>
 
-<ParamField body="prompt" type="string" required>
-  이미지 생성을 위한 텍스트 설명
-</ParamField>
+<ParamField body="params" type="object" required>
+  모델 파라미터 객체
 
-<ParamField body="size" type="string">
-  이미지 생성 크기
+  <Expandable title="params 객체 속성">
+    <ParamField body="prompt" type="string" required>
+      이미지 생성을 위한 텍스트 설명
 
-  지원 형식:
+      제한 없음
+    </ParamField>
 
-  * 비율: `1:1`, `2:3`, `3:2`, `3:4`, `4:3`, `4:5`, `5:4`, `9:16`, `16:9`, `21:9`
-</ParamField>
+    <ParamField body="image_url" type="array">
+      이미지 참조용 URL 목록, 이미지 생성을 위해 사용
 
-<ParamField body="n" type="integer">
-  생성할 이미지 수
+      * 최대 8장
+      * 공개 접근 가능한 URL 지원
+    </ParamField>
 
-  고정값 1
+    <ParamField body="aspect_ratio" type="string" default="1:1">
+      이미지 생성의 가로세로 비율
 
-  **⚠️ 주의:** 반드시 순수 숫자(`1` 등)로 입력해야 하며, 따옴표를 포함하면 오류가 발생합니다
-</ParamField>
+      지원되는 비율:
 
-<ParamField body="resolution" type="string">
-  출력 이미지 해상도
+      * `auto` - 자동
+      * `1:1` - 정사각형 (기본값)
+      * `3:2` - 가로 3:2
+      * `2:3` - 세로 2:3
+      * `4:3` - 가로 4:3
+      * `3:4` - 세로 3:4
+      * `5:4` - 가로 5:4
+      * `4:5` - 세로 4:5
+      * `16:9` - 가로 와이드스크린
+      * `9:16` - 세로 세로스크린
+      * `21:9` - 울트라 와이드스크린
+    </ParamField>
 
-  지원 값:
+    <ParamField body="resolution" type="string" default="1K">
+      이미지 해상도
 
-  * `1K` - 1K 해상도 (기본값)
-  * `2K` - 2K 해상도
-  * `4K` - 4K 해상도
+      지원 해상도:
 
-  **⚠️ 주의:** base64 형식으로 4K 이미지를 생성할 경우 처리 시간이 길어집니다
-</ParamField>
+      * `1K` - 기본 해상도 (기본값)
+      * `2K` - 표준 해상도
+      * `4K` - 고해상도
+    </ParamField>
 
-<ParamField body="image_urls" type="array">
-  참조 이미지 URL 목록, 이미지 생성 또는 편집에 사용
+    <ParamField body="format" type="string" default="png">
+      이미지 출력 형식
 
-  **💡 빠른 입력 (Try it 영역):**
+      지원 형식:
 
-  1. "+ Add an item"을 클릭하여 이미지 URL 추가
-  2. 이미지의 전체 URL 주소 또는 base64 데이터를 입력
-
-  <Expandable title="상세 필드 설명">
-    <ParamField body="url" type="string" required>
-      이미지 URL 주소
-
-      두 가지 형식 지원:
-
-      **1. 전체 이미지 URL 주소**
-
-      * 공개 접근 가능한 이미지 URL (http\:// 또는 https\://)
-      * 예시: `https://example.com/image.jpg`
-
-      **2. Base64 인코딩 형식**
-
-      * **완전한 Data URI 형식을 반드시 사용**
-      * 형식: `data:image/{포맷};base64,{base64 데이터}`
-      * 지원 이미지 포맷: jpeg, png, webp 등
-      * 예시: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
-      * ⚠️ 주의: `data:image/jpeg;base64,` 접두어 부분이 반드시 포함되어야 합니다
-
-      **제한:**
-
-      * 단일 이미지 크기 최대 10MB
-      * 지원 포맷: .jpeg, .jpg, .png, .webp
+      * `png` - PNG 형식 (기본값)
+      * `jpg` - JPEG 형식
     </ParamField>
   </Expandable>
-
-  **제한:** 최대 5장 이미지
 </ParamField>
 
-<ParamField body="mask_url" type="string">
-  마스크 이미지 URL
+<ParamField body="callback_url" type="string">
+  작업 완료 후 콜백 알림 주소
 
-  * 반드시 PNG 형식
-  * 참조 이미지와 크기 일치 필요
-  * 4MB 이하
+  작업 완료 시 시스템이 해당 주소로 POST 요청을 보내 결과를 알립니다
+</ParamField>
+
+<ParamField body="metadata" type="object">
+  사용자 정의 메타데이터
+
+  조회 시 원본 그대로 반환되며, 비즈니스 식별에 사용할 수 있습니다
 </ParamField>
 
 ## Response
 
-<ResponseField name="code" type="integer">
-  응답 상태 코드
+<ResponseField name="task_id" type="string">
+  작업 ID, 결과 조회에 사용
 </ResponseField>
 
-<ResponseField name="data" type="array">
-  반환 데이터 배열
+<ResponseField name="status" type="string">
+  초기 상태로, 고정값 `"pending"`
+</ResponseField>
 
-  <Expandable title="속성">
-    <ResponseField name="status" type="string">
-      작업 상태
+<ResponseField name="estimated_credits" type="number">
+  예상 소모 크레딧
+</ResponseField>
 
-      * `submitted` - 제출됨
-    </ResponseField>
-
-    <ResponseField name="task_id" type="string">
-      작업 고유 식별자
-    </ResponseField>
-  </Expandable>
+<ResponseField name="created_at" type="string">
+  생성 시각 (ISO 형식)
 </ResponseField>
 
 <RequestExample>
   ```bash cURL
   curl --request POST \
-    --url https://api.apimart.ai/v1/images/generations \
+    --url http://pxz-api.xinsulv.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
-      "model": "gemini-3-pro-image-preview",
-      "prompt": "월광 아래 대나무 숲 오솔길",
-      "size": "1:1",
-      "n": 1,
-      "resolution": "1K"
+      "model": "nano_banana_pro",
+      "params": {
+        "prompt": "전문가급 도시 야경",
+        "aspect_ratio": "16:9",
+        "resolution": "2K",
+        "format": "png"
+      }
     }'
   ```
 
   ```python Python
   import requests
 
-  url = "https://api.apimart.ai/v1/images/generations"
+  url = "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload = {
-      "model": "gemini-3-pro-image-preview",
-      "prompt": "월광 아래 대나무 숲 오솔길",
-      "size": "1:1",
-      "n": 1,
-      "resolution": "1K"
+      "model": "nano_banana_pro",
+      "params": {
+          "prompt": "전문가급 도시 야경",
+          "aspect_ratio": "16:9",
+          "resolution": "2K",
+          "format": "png"
+      }
   }
 
   headers = {
@@ -168,14 +158,16 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   ```
 
   ```javascript JavaScript
-  const url = "https://api.apimart.ai/v1/images/generations";
+  const url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
   const payload = {
-    model: "gemini-3-pro-image-preview",
-    prompt: "월광 아래 대나무 숲 오솔길",
-    size: "1:1",
-    n: 1,
-    resolution: "2K"
+    model: "nano_banana_pro",
+    params: {
+      prompt: "전문가급 도시 야경",
+      aspect_ratio: "16:9",
+      resolution: "2K",
+      format: "png"
+    }
   };
 
   const headers = {
@@ -205,14 +197,16 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   )
 
   func main() {
-      url := "https://api.apimart.ai/v1/images/generations"
+      url := "http://pxz-api.xinsulv.com/api/openapi/submit"
 
       payload := map[string]interface{}{
-          "model":      "gemini-3-pro-image-preview",
-          "prompt":     "월광 아래 대나무 숲 오솔길",
-          "size":       "1:1",
-          "n":          1,
-          "resolution": "1K",
+          "model": "nano_banana_pro",
+          "params": map[string]interface{}{
+              "prompt":       "전문가급 도시 야경",
+              "aspect_ratio": "16:9",
+              "resolution":   "2K",
+              "format":       "png",
+          },
       }
 
       jsonData, _ := json.Marshal(payload)
@@ -241,15 +235,17 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   public class Main {
       public static void main(String[] args) throws Exception {
-          String url = "https://api.apimart.ai/v1/images/generations";
+          String url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
           String payload = """
           {
-            "model": "gemini-3-pro-image-preview",
-            "prompt": "월광 아래 대나무 숲 오솔길",
-            "size": "1:1",
-            "n": 1,
-            "resolution": "1K"
+            "model": "nano_banana_pro",
+            "params": {
+              "prompt": "전문가급 도시 야경",
+              "aspect_ratio": "16:9",
+              "resolution": "2K",
+              "format": "png"
+            }
           }
           """;
 
@@ -272,14 +268,16 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   ```php PHP
   <?php
 
-  $url = "https://api.apimart.ai/v1/images/generations";
+  $url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
   $payload = [
-      "model" => "gemini-3-pro-image-preview",
-      "prompt" => "월광 아래 대나무 숲 오솔길",
-      "size" => "1:1",
-      "n" => 1,
-      "resolution" => "2K"
+      "model" => "nano_banana_pro",
+      "params" => [
+          "prompt" => "전문가급 도시 야경",
+          "aspect_ratio" => "16:9",
+          "resolution" => "2K",
+          "format" => "png"
+      ]
   ];
 
   $ch = curl_init($url);
@@ -303,18 +301,19 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   require 'json'
   require 'uri'
 
-  url = URI("https://api.apimart.ai/v1/images/generations")
+  url = URI("http://pxz-api.xinsulv.com/api/openapi/submit")
 
   payload = {
-    model: "gemini-3-pro-image-preview",
-    prompt: "월광 아래 대나무 숲 오솔길",
-    size: "1:1",
-    n: 1,
-    resolution: "2K"
+    model: "nano_banana_pro",
+    params: {
+      prompt: "전문가급 도시 야경",
+      aspect_ratio: "16:9",
+      resolution: "2K",
+      format: "png"
+    }
   }
 
   http = Net::HTTP.new(url.host, url.port)
-  http.use_ssl = true
 
   request = Net::HTTP::Post.new(url)
   request["Authorization"] = "Bearer <token>"
@@ -328,14 +327,16 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "https://api.apimart.ai/v1/images/generations")!
+  let url = URL(string: "http://pxz-api.xinsulv.com/api/openapi/submit")!
 
   let payload: [String: Any] = [
-      "model": "gemini-3-pro-image-preview",
-      "prompt": "월광 아래 대나무 숲 오솔길",
-      "size": "1:1",
-      "n": 1,
-      "resolution": "1K"
+      "model": "nano_banana_pro",
+      "params": [
+          "prompt": "전문가급 도시 야경",
+          "aspect_ratio": "16:9",
+          "resolution": "2K",
+          "format": "png"
+      ]
   ]
 
   var request = URLRequest(url: url)
@@ -368,14 +369,16 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   {
       static async Task Main(string[] args)
       {
-          var url = "https://api.apimart.ai/v1/images/generations";
+          var url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
           var payload = @"{
-              ""model"": ""gemini-3-pro-image-preview"",
-              ""prompt"": ""월광 아래 대나무 숲 오솔길"",
-              ""size"": ""1:1"",
-              ""n"": 1,
-              ""resolution"": ""2K""
+              ""model"": ""nano_banana_pro"",
+              ""params"": {
+                  ""prompt"": ""전문가급 도시 야경"",
+                  ""aspect_ratio"": ""16:9"",
+                  ""resolution"": ""2K"",
+                  ""format"": ""png""
+              }
           }";
 
           using var client = new HttpClient();
@@ -402,13 +405,15 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
       curl = curl_easy_init();
 
       if(curl) {
-          const char *url = "https://api.apimart.ai/v1/images/generations";
+          const char *url = "http://pxz-api.xinsulv.com/api/openapi/submit";
           const char *payload = "{"
-              "\"model\":\"gemini-3-pro-image-preview\","
-              "\"prompt\":\"월광 아래 대나무 숲 오솔길\","
-              "\"size\":\"1:1\","
-              "\"n\":1,"
-              "\"resolution\":\"2K\""
+              "\"model\":\"nano_banana_pro\","
+              "\"params\":{"
+                  "\"prompt\":\"전문가급 도시 야경\","
+                  "\"aspect_ratio\":\"16:9\","
+                  "\"resolution\":\"2K\","
+                  "\"format\":\"png\""
+              "}"
           "}";
 
           struct curl_slist *headers = NULL;
@@ -440,14 +445,16 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
-          NSURL *url = [NSURL URLWithString:@"https://api.apimart.ai/v1/images/generations"];
+          NSURL *url = [NSURL URLWithString:@"http://pxz-api.xinsulv.com/api/openapi/submit"];
 
           NSDictionary *payload = @{
-              @"model": @"gemini-3-pro-image-preview",
-              @"prompt": @"월광 아래 대나무 숲 오솔길",
-              @"size": @"1:1",
-              @"n": @1,
-              @"resolution": @"2K"
+              @"model": @"nano_banana_pro",
+              @"params": @{
+                  @"prompt": @"전문가급 도시 야경",
+                  @"aspect_ratio": @"16:9",
+                  @"resolution": @"2K",
+                  @"format": @"png"
+              }
           };
 
           NSError *error;
@@ -486,14 +493,16 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   open Cohttp
   open Cohttp_lwt_unix
 
-  let url = "https://api.apimart.ai/v1/images/generations"
+  let url = "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   let payload = {|{
-    "model": "gemini-3-pro-image-preview",
-    "prompt": "월광 아래 대나무 숲 오솔길",
-    "size": "1:1",
-    "n": 1,
-    "resolution": "1K"
+    "model": "nano_banana_pro",
+    "params": {
+      "prompt": "전문가급 도시 야경",
+      "aspect_ratio": "16:9",
+      "resolution": "2K",
+      "format": "png"
+    }
   }|}
 
   let () =
@@ -515,14 +524,16 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   import 'package:http/http.dart' as http;
 
   void main() async {
-    final url = Uri.parse('https://api.apimart.ai/v1/images/generations');
+    final url = Uri.parse('http://pxz-api.xinsulv.com/api/openapi/submit');
 
     final payload = {
-      'model': 'gemini-3-pro-image-preview',
-      'prompt': '월광 아래 대나무 숲 오솔길',
-      'size': '1:1',
-      'n': 1,
-      'resolution': '1K'
+      'model': 'nano_banana_pro',
+      'params': {
+        'prompt': '전문가급 도시 야경',
+        'aspect_ratio': '16:9',
+        'resolution': '2K',
+        'format': 'png'
+      }
     };
 
     final response = await http.post(
@@ -530,7 +541,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
       headers: {
         'Authorization': 'Bearer <token>',
         'Content-Type': 'application/json'
-    },
+      },
       body: jsonEncode(payload),
     );
 
@@ -542,14 +553,16 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   library(httr)
   library(jsonlite)
 
-  url <- "https://api.apimart.ai/v1/images/generations"
+  url <- "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload <- list(
-    model = "gemini-3-pro-image-preview",
-    prompt = "월광 아래 대나무 숲 오솔길",
-    size = "1:1",
-    n = 1,
-    resolution = "1K"
+    model = "nano_banana_pro",
+    params = list(
+      prompt = "전문가급 도시 야경",
+      aspect_ratio = "16:9",
+      resolution = "2K",
+      format = "png"
+    )
   )
 
   response <- POST(
@@ -568,63 +581,38 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
 <ResponseExample>
   ```json 200
-  {
-    "code": 200,
-    "data": [
-      {
-        "status": "submitted",
-        "task_id": "task_01K8SGYNNNVBQTXNR4MM964S7K"
-      }
-    ]
-  }
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
+        "status": "pending",
+        "estimated_credits": 100,
+        "created_at": "2025-12-22T06:03:28.242Z"
+    }
+}
   ```
 
   ```json 400
-  {
-    "error": {
-      "code": 400,
-      "message": "잘못된 요청 파라미터",
-      "type": "invalid_request_error"
+    {
+        "statusCode": 400,
+        "message": "요청 매개변수 잘못됨",
+        "ok": false
     }
-  }
   ```
-
   ```json 401
   {
     "error": {
       "code": 401,
       "message": "인증 실패, API 키를 확인하세요",
-      "type": "authentication_error"
     }
   }
   ```
-
-  ```json 402
+```json 433
   {
     "error": {
-      "code": 402,
-      "message": "계정 잔액 부족, 충전 후 다시 시도하세요",
-      "type": "payment_required"
-    }
-  }
-  ```
-
-  ```json 403
-  {
-    "error": {
-      "code": 403,
-      "message": "접근 금지, 해당 자원에 대한 권한이 없습니다",
-      "type": "permission_error"
-    }
-  }
-  ```
-
-  ```json 429
-  {
-    "error": {
-      "code": 429,
-      "message": "요청이 너무 잦습니다, 나중에 다시 시도하세요",
-      "type": "rate_limit_error"
+      "code": 433,
+      "message": "계좌 잔액 부족, 충전 후 재시도하세요",
     }
   }
   ```
@@ -633,18 +621,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   {
     "error": {
       "code": 500,
-      "message": "서버 내부 오류, 나중에 다시 시도하세요",
-      "type": "server_error"
-    }
-  }
-  ```
-
-  ```json 502
-  {
-    "error": {
-      "code": 502,
-      "message": "게이트웨이 오류, 서버를 잠시 사용할 수 없습니다",
-      "type": "bad_gateway"
+      "message": "서버 내부 오류, 잠시 후 다시 시도하세요"
     }
   }
   ```

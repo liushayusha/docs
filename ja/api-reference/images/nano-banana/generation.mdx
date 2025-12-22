@@ -1,10 +1,9 @@
 ---
-title: 'Gemini-2.5-Flash-Image-preview (Nano banana) 画像生成'
+title: 'Nano Banana 画像生成'
 description: |
-    - 非同期処理モード、後続のクエリ用にタスクIDを返す
+    - 非同期処理モード、後続のクエリに使用するタスクIDを返します
     - 高速生成、迅速な画像作成に最適化
-    - 生成された画像リンクは有効期限24時間ですので、速やかに保存してください
-api: 'POST https://api.apimart.ai/v1/images/generations'
+api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 ---
 ## Authorizations
 
@@ -24,131 +23,116 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
 ## Body
 
-<ParamField body="model" type="string" default="gemini-2.5-flash-image-preview" required>
-  画像生成モデル名
+<ParamField body="model" type="string" required>
+  モデル名
 
-  Example: `"gemini-2.5-flash-image-preview"`
+  固定値：`"nano_banana"`
 </ParamField>
 
-<ParamField body="prompt" type="string" required>
-  画像生成のテキスト説明
+<ParamField body="params" type="object" required>
+  モデルパラメータオブジェクト
 
-  最大 1000 文字
-</ParamField>
+  <Expandable title="params オブジェクトのプロパティ">
+    <ParamField body="prompt" type="string" required>
+      画像生成のテキスト説明
 
-<ParamField body="size" type="string">
-  画像生成のサイズ
+      制限なし
+    </ParamField>
 
-  対応フォーマット：
+    <ParamField body="image_url" type="array">
+      参考画像のURLリスト（画像から画像生成用）
 
-  * アスペクト比：`1:1`、`2:3`、`3:2`、`3:4`、`4:3`、`4:5`、`5:4`、`9:16`、`16:9`、`21:9`
-</ParamField>
+      * 最大9枚の画像
+      * 公開アクセス可能なURLをサポート
+    </ParamField>
 
-<ParamField body="n" type="integer">
-  生成する画像の数
+    <ParamField body="aspect_ratio" type="string" default="auto">
+      画像生成のアスペクト比
 
-  固定値は 1
+      サポートされるアスペクト比：
 
-  **⚠️ 注意：** 数字のみを入力してください（例：`1`）、引用符は不要です。引用符をつけるとエラーが発生します
-</ParamField>
+      * `auto` - 自動（デフォルト）
+      * `1:1` - 正方形
+      * `3:2` - 横向き3:2
+      * `2:3` - 縦向き2:3
+      * `4:3` - 横向き4:3
+      * `3:4` - 縦向き3:4
+      * `5:4` - 横向き5:4
+      * `4:5` - 縦向き4:5
+      * `16:9` - 横向きワイドスクリーン
+      * `9:16` - 縦向き縦画面
+      * `21:9` - 超ワイドスクリーン
+    </ParamField>
 
-<ParamField body="image_urls" type="array">
-  参考画像の URL リスト、画像から画像への生成や画像編集に使用
+    <ParamField body="format" type="string" default="png">
+      画像出力フォーマット
 
-  **💡 クイック入力（Try it セクション）：**
+      サポートされるフォーマット：
 
-  1. "+ Add an item" をクリックして画像URLを追加
-  2. 画像の完全な URL または base64 データを入力
-
-  <Expandable title="詳細なフィールド説明">
-    <ParamField body="url" type="string" required>
-      画像URLアドレス
-
-      2種類のフォーマットをサポート：
-
-      **1. 完全な画像URLアドレス**
-
-      * 公開アクセス可能な画像URL（http\:// または https\://）
-      * 例：`https://example.com/image.jpg`
-
-      **2. Base64 エンコードフォーマット**
-
-      * **完全な Data URI フォーマットである必要があります**
-      * フォーマット：`data:image/{フォーマット};base64,{base64データ}`
-      * 対応画像フォーマット：jpeg、png、webp など
-      * 例：`data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
-      * ⚠️ 注意：`data:image/jpeg;base64,` というプレフィックスを含める必要があります
-
-      **制限：**
-
-      * 1枚あたり最大 10MB
-      * 対応フォーマット：.jpeg、.jpg、.png、.webp
+      * `png` - PNG形式（デフォルト）
+      * `jpeg` - JPEG形式
     </ParamField>
   </Expandable>
-
-  **制限：** 最大 5 枚の画像
 </ParamField>
 
-<ParamField body="mask_url" type="string">
-  マスク画像の URL
+<ParamField body="callback_url" type="string">
+  タスク完了後のコールバック通知用URL
 
-  * PNG フォーマットである必要があります
-  * 参考画像と同じサイズが必要です
-  * 4MB 以下
+  タスク完了後、システムがこのURLにPOSTリクエストを送信して結果を通知します
+</ParamField>
+
+<ParamField body="metadata" type="object">
+  カスタムメタデータ
+
+  クエリ結果でそのまま返され、ビジネス識別に利用可能
 </ParamField>
 
 ## Response
 
-<ResponseField name="code" type="integer">
-  レスポンスステータスコード
+<ResponseField name="task_id" type="string">
+  タスクID。結果を照会するために使用します
 </ResponseField>
 
-<ResponseField name="data" type="array">
-  返却データの配列
+<ResponseField name="status" type="string">
+  初期状態。固定で `"pending"`
+</ResponseField>
 
-  <Expandable title="Properties">
-    <ResponseField name="status" type="string">
-      タスクの状態
+<ResponseField name="estimated_credits" type="number">
+  推定消費クレジット
+</ResponseField>
 
-      * `submitted` - 提出済み
-    </ResponseField>
-
-    <ResponseField name="task_id" type="string">
-      タスクの一意識別子
-    </ResponseField>
-  </Expandable>
+<ResponseField name="created_at" type="string">
+  作成日時（ISOフォーマット）
 </ResponseField>
 
 <RequestExample>
   ```bash cURL
   curl --request POST \
-    --url https://api.apimart.ai/v1/images/generations \
+    --url http://pxz-api.xinsulv.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
-      "model": "gemini-2.5-flash-image-preview",
-      "prompt": "月光の下の竹林の小径",
-      "size": "1:1",
-      "n": 1,
-      "image_urls": [
-        "https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png"
-      ]
+      "model": "nano_banana",
+      "params": {
+        "prompt": "月光の下の竹林の小径",
+        "aspect_ratio": "16:9",
+        "format": "png"
+      }
     }'
   ```
 
   ```python Python
   import requests
 
-  url = "https://api.apimart.ai/v1/images/generations"
+  url = "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload = {
-      "model": "gemini-2.5-flash-image-preview",
-      "prompt": "月光の下の竹林の小径",
-      "size": "1:1",
-      "n": 1,
-      "image_urls": [
-          "https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png"
-      ]
+      "model": "nano_banana",
+      "params": {
+          "prompt": "月光の下の竹林の小径",
+          "aspect_ratio": "16:9",
+          "format": "png"
+      }
   }
 
   headers = {
@@ -162,16 +146,15 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   ```
 
   ```javascript JavaScript
-  const url = "https://api.apimart.ai/v1/images/generations";
+  const url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
   const payload = {
-    model: "gemini-2.5-flash-image-preview",
-    prompt: "月光の下の竹林の小径",
-    size: "1:1",
-    n: 1,
-    image_urls: [
-      "https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png"
-    ]
+    model: "nano_banana",
+    params: {
+      prompt: "月光の下の竹林の小径",
+      aspect_ratio: "16:9",
+      format: "png"
+    }
   };
 
   const headers = {
@@ -201,15 +184,14 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   )
 
   func main() {
-      url := "https://api.apimart.ai/v1/images/generations"
+      url := "http://pxz-api.xinsulv.com/api/openapi/submit"
 
       payload := map[string]interface{}{
-          "model":  "gemini-2.5-flash-image-preview",
-          "prompt": "月光の下の竹林の小径",
-          "size":   "1:1",
-          "n":      1,
-          "image_urls": []string{
-              "https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png",
+          "model": "nano_banana",
+          "params": map[string]interface{}{
+              "prompt":       "月光の下の竹林の小径",
+              "aspect_ratio": "16:9",
+              "format":       "png",
           },
       }
 
@@ -239,17 +221,16 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   public class Main {
       public static void main(String[] args) throws Exception {
-          String url = "https://api.apimart.ai/v1/images/generations";
+          String url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
           String payload = """
           {
-            "model": "gemini-2.5-flash-image-preview",
-            "prompt": "月光の下の竹林の小径",
-            "size": "1:1",
-            "n": 1,
-            "image_urls": [
-              "https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png"
-            ]
+            "model": "nano_banana",
+            "params": {
+              "prompt": "月光の下の竹林の小径",
+              "aspect_ratio": "16:9",
+              "format": "png"
+            }
           }
           """;
 
@@ -272,15 +253,14 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   ```php PHP
   <?php
 
-  $url = "https://api.apimart.ai/v1/images/generations";
+  $url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
   $payload = [
-      "model" => "gemini-2.5-flash-image-preview",
-      "prompt" => "月光の下の竹林の小径",
-      "size" => "1:1",
-      "n" => 1,
-      "image_urls" => [
-          "https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png"
+      "model" => "nano_banana",
+      "params" => [
+          "prompt" => "月光の下の竹林の小径",
+          "aspect_ratio" => "16:9",
+          "format" => "png"
       ]
   ];
 
@@ -305,20 +285,18 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   require 'json'
   require 'uri'
 
-  url = URI("https://api.apimart.ai/v1/images/generations")
+  url = URI("http://pxz-api.xinsulv.com/api/openapi/submit")
 
   payload = {
-    model: "gemini-2.5-flash-image-preview",
-    prompt: "月光の下の竹林の小径",
-    size: "1:1",
-    n: 1,
-    image_urls: [
-      "https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png"
-    ]
+    model: "nano_banana",
+    params: {
+      prompt: "月光の下の竹林の小径",
+      aspect_ratio: "16:9",
+      format: "png"
+    }
   }
 
   http = Net::HTTP.new(url.host, url.port)
-  http.use_ssl = true
 
   request = Net::HTTP::Post.new(url)
   request["Authorization"] = "Bearer <token>"
@@ -332,15 +310,14 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "https://api.apimart.ai/v1/images/generations")!
+  let url = URL(string: "http://pxz-api.xinsulv.com/api/openapi/submit")!
 
   let payload: [String: Any] = [
-      "model": "gemini-2.5-flash-image-preview",
-      "prompt": "月光の下の竹林の小径",
-      "size": "1:1",
-      "n": 1,
-      "image_urls": [
-          "https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png"
+      "model": "nano_banana",
+      "params": [
+          "prompt": "月光の下の竹林の小径",
+          "aspect_ratio": "16:9",
+          "format": "png"
       ]
   ]
 
@@ -374,16 +351,15 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   {
       static async Task Main(string[] args)
       {
-          var url = "https://api.apimart.ai/v1/images/generations";
+          var url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
           var payload = @"{
-              ""model"": ""gemini-2.5-flash-image-preview"",
-              ""prompt"": ""月光の下の竹林の小径"",
-              ""size"": ""1:1"",
-              ""n"": 1,
-              ""image_urls"": [
-                  ""https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png""
-              ]
+              ""model"": ""nano_banana"",
+              ""params"": {
+                  ""prompt"": ""月光の下の竹林の小径"",
+                  ""aspect_ratio"": ""16:9"",
+                  ""format"": ""png""
+              }
           }";
 
           using var client = new HttpClient();
@@ -410,13 +386,14 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
       curl = curl_easy_init();
 
       if(curl) {
-          const char *url = "https://api.apimart.ai/v1/images/generations";
+          const char *url = "http://pxz-api.xinsulv.com/api/openapi/submit";
           const char *payload = "{"
-              "\"model\":\"gemini-2.5-flash-image-preview\","
-              "\"prompt\":\"月光の下の竹林の小径\","
-              "\"size\":\"1:1\","
-              "\"n\":1,"
-              "\"image_urls\":[\"https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png\"]"
+              "\"model\":\"nano_banana\","
+              "\"params\":{"
+                  "\"prompt\":\"月光の下の竹林の小径\","
+                  "\"aspect_ratio\":\"16:9\","
+                  "\"format\":\"png\""
+              "}"
           "}";
 
           struct curl_slist *headers = NULL;
@@ -448,16 +425,15 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
-          NSURL *url = [NSURL URLWithString:@"https://api.apimart.ai/v1/images/generations"];
+          NSURL *url = [NSURL URLWithString:@"http://pxz-api.xinsulv.com/api/openapi/submit"];
 
           NSDictionary *payload = @{
-              @"model": @"gemini-2.5-flash-image-preview",
-              @"prompt": @"月光の下の竹林の小径",
-              @"size": @"1:1",
-              @"n": @1,
-              @"image_urls": @[
-                  @"https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png"
-              ]
+              @"model": @"nano_banana",
+              @"params": @{
+                  @"prompt": @"月光の下の竹林の小径",
+                  @"aspect_ratio": @"16:9",
+                  @"format": @"png"
+              }
           };
 
           NSError *error;
@@ -496,16 +472,15 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   open Cohttp
   open Cohttp_lwt_unix
 
-  let url = "https://api.apimart.ai/v1/images/generations"
+  let url = "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   let payload = {|{
-    "model": "gemini-2.5-flash-image-preview",
-    "prompt": "月光の下の竹林の小径",
-    "size": "1:1",
-    "n": 1,
-    "image_urls": [
-      "https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png"
-    ]
+    "model": "nano_banana",
+    "params": {
+      "prompt": "月光の下の竹林の小径",
+      "aspect_ratio": "16:9",
+      "format": "png"
+    }
   }|}
 
   let () =
@@ -527,16 +502,15 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   import 'package:http/http.dart' as http;
 
   void main() async {
-    final url = Uri.parse('https://api.apimart.ai/v1/images/generations');
+    final url = Uri.parse('http://pxz-api.xinsulv.com/api/openapi/submit');
 
     final payload = {
-      'model': 'gemini-2.5-flash-image-preview',
-      'prompt': '月光の下の竹林の小径',
-      'size': '1:1',
-      'n': 1,
-      'image_urls': [
-        'https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png'
-      ]
+      'model': 'nano_banana',
+      'params': {
+        'prompt': '月光の下の竹林の小径',
+        'aspect_ratio': '16:9',
+        'format': 'png'
+      }
     };
 
     final response = await http.post(
@@ -544,7 +518,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
       headers: {
         'Authorization': 'Bearer <token>',
         'Content-Type': 'application/json'
-    },
+      },
       body: jsonEncode(payload),
     );
 
@@ -556,15 +530,14 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   library(httr)
   library(jsonlite)
 
-  url <- "https://api.apimart.ai/v1/images/generations"
+  url <- "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload <- list(
-    model = "gemini-2.5-flash-image-preview",
-    prompt = "月光の下の竹林の小径",
-    size = "1:1",
-    n = 1,
-    image_urls = list(
-      "https://cdn.apimart.ai/files/9998237590083776-36dfe26e-f6dd-43d4-83d5-afc5e6d29070-image_task_01K9BX28VRC2WG4S6F0N0DYWPJ_0.png"
+    model = "nano_banana",
+    params = list(
+      prompt = "月光の下の竹林の小径",
+      aspect_ratio = "16:9",
+      format = "png"
     )
   )
 
@@ -584,63 +557,38 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
 <ResponseExample>
   ```json 200
-  {
-    "code": 200,
-    "data": [
-      {
-        "status": "submitted",
-        "task_id": "task_01K8SGYNNNVBQTXNR4MM964S7K"
-      }
-    ]
-  }
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
+        "status": "pending",
+        "estimated_credits": 100,
+        "created_at": "2025-12-22T06:03:28.242Z"
+    }
+}
   ```
 
   ```json 400
-  {
-    "error": {
-      "code": 400,
-      "message": "リクエストパラメータが無効です",
-      "type": "invalid_request_error"
+    {
+        "statusCode": 400,
+        "message": "リクエストパラメーターが無効です",
+        "ok": false
     }
-  }
   ```
-
   ```json 401
   {
     "error": {
       "code": 401,
-      "message": "認証に失敗しました。APIキーをご確認ください",
-      "type": "authentication_error"
+      "message": "認証に失敗しました。APIキーをご確認ください"
     }
   }
   ```
-
-  ```json 402
+```json 433
   {
     "error": {
-      "code": 402,
-      "message": "アカウント残高が不足しています。チャージしてから再度お試しください",
-      "type": "payment_required"
-    }
-  }
-  ```
-
-  ```json 403
-  {
-    "error": {
-      "code": 403,
-      "message": "アクセス禁止。このリソースにアクセスする権限がありません",
-      "type": "permission_error"
-    }
-  }
-  ```
-
-  ```json 429
-  {
-    "error": {
-      "code": 429,
-      "message": "リクエストが多すぎます。しばらくしてからお試しください",
-      "type": "rate_limit_error"
+      "code": 433,
+      "message": "アカウント残高が不足しています。チャージ後に再度お試しください"
     }
   }
   ```
@@ -649,18 +597,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   {
     "error": {
       "code": 500,
-      "message": "サーバー内部エラーです。しばらくしてから再試行してください",
-      "type": "server_error"
-    }
-  }
-  ```
-
-  ```json 502
-  {
-    "error": {
-      "code": 502,
-      "message": "ゲートウェイエラー。サーバーは現在利用できません",
-      "type": "bad_gateway"
+      "message": "サーバー内部エラーが発生しました。後でもう一度お試しください"
     }
   }
   ```

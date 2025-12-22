@@ -1,0 +1,27 @@
+[
+  {
+    "id": "__frontmatter__",
+    "hash": "f459bd87",
+    "index": 0
+  },
+  {
+    "id": "section-0-authorizations",
+    "hash": "deed641c",
+    "index": 1
+  },
+  {
+    "id": "section-1-path-parameters",
+    "hash": "4c0498ab",
+    "index": 2
+  },
+  {
+    "id": "section-2-query-parameters",
+    "hash": "33a7ffb8",
+    "index": 3
+  },
+  {
+    "id": "section-3-response",
+    "hash": "b83b1e25",
+    "index": 4
+  }
+]

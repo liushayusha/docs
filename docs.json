@@ -93,6 +93,13 @@
                 ]
               }
             ]
+          },
+          {
+            "group": "任务管理",
+            "icon": "list-check",
+            "pages": [
+              "zh/api-reference/tasks/status"
+            ]
           }
         ]
       },
@@ -178,6 +185,13 @@
                   "en/api-reference/videos/veo3-1-fast/generation"
                 ]
               }
+            ]
+          },
+          {
+            "group": "Task Management",
+            "icon": "list-check",
+            "pages": [
+              "en/api-reference/tasks/status"
             ]
           }
         ]
@@ -265,6 +279,13 @@
                 ]
               }
             ]
+          },
+          {
+            "group": "タスク管理",
+            "icon": "list-check",
+            "pages": [
+              "ja/api-reference/tasks/status"
+            ]
           }
         ]
       },
@@ -350,6 +371,13 @@
                   "ko/api-reference/videos/veo3-1-fast/generation"
                 ]
               }
+            ]
+          },
+          {
+            "group": "작업 관리",
+            "icon": "list-check",
+            "pages": [
+              "ko/api-reference/tasks/status"
             ]
           }
         ]
