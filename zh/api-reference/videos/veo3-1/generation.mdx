@@ -1,8 +1,9 @@
 ---
-title: 'Nano Banana 图片生成'
+title: 'VEO3.1 视频生成'
 description: |
     - 异步处理模式，返回任务ID用于后续查询
-    - 快速生成速度，针对快速图像创建进行优化
+    - 支持文本转视频、图生视频等生成模式
+    - 支持首帧和尾帧参考图
 api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 ---
 
@@ -27,7 +28,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 <ParamField body="model" type="string" required>
   模型名称
 
-  固定值：`"nano_banana"`
+  固定值：`"veo3_1"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
@@ -35,43 +36,32 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 
   <Expandable title="params 对象属性">
     <ParamField body="prompt" type="string" required>
-      图像生成的文本描述
+      视频生成的文本描述
 
       无限制
     </ParamField>
 
-    <ParamField body="image_url" type="array">
-      参考图像的 URL 列表，用于图生图
+    <ParamField body="image_url" type="string">
+      参考图像的 URL，用于图生视频（首帧）
 
-      * 最多 9 张图片
+      * 仅支持单张图片
       * 支持公开可访问的 URL
     </ParamField>
 
-    <ParamField body="aspect_ratio" type="string" default="auto">
-      图像生成的宽高比
+    <ParamField body="end_image_url" type="string">
+      尾帧参考图像的 URL
+
+      * 仅支持单张图片
+      * 支持公开可访问的 URL
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="16:9">
+      视频宽高比
 
       支持的宽高比：
 
-      * `auto` - 自动（默认）
-      * `1:1` - 正方形
-      * `3:2` - 横向 3:2
-      * `2:3` - 纵向 2:3
-      * `4:3` - 横向 4:3
-      * `3:4` - 纵向 3:4
-      * `5:4` - 横向 5:4
-      * `4:5` - 纵向 4:5
-      * `16:9` - 横向宽屏
-      * `9:16` - 纵向竖屏
-      * `21:9` - 超宽屏
-    </ParamField>
-
-    <ParamField body="format" type="string" default="png">
-      图像输出格式
-
-      支持的格式：
-
-      * `png` - PNG格式（默认）
-      * `jpeg` - JPEG格式
+      * `16:9` - 横向（默认）
+      * `9:16` - 竖向
     </ParamField>
   </Expandable>
 </ParamField>
@@ -113,11 +103,11 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
-      "model": "nano_banana",
+      "model": "veo3_1",
       "params": {
-        "prompt": "月光下的竹林小径",
-        "aspect_ratio": "16:9",
-        "format": "png"
+        "prompt": "让这张图片动起来",
+        "image_url": "https://example.com/reference.jpg",
+        "aspect_ratio": "16:9"
       }
     }'
   ```
@@ -128,11 +118,11 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   url = "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload = {
-      "model": "nano_banana",
+      "model": "veo3_1",
       "params": {
-          "prompt": "月光下的竹林小径",
-          "aspect_ratio": "16:9",
-          "format": "png"
+          "prompt": "让这张图片动起来",
+          "image_url": "https://example.com/reference.jpg",
+          "aspect_ratio": "16:9"
       }
   }
 
@@ -150,11 +140,11 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   const url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
   const payload = {
-    model: "nano_banana",
+    model: "veo3_1",
     params: {
-      prompt: "月光下的竹林小径",
-      aspect_ratio: "16:9",
-      format: "png"
+      prompt: "让这张图片动起来",
+      image_url: "https://example.com/reference.jpg",
+      aspect_ratio: "16:9"
     }
   };
 
@@ -188,11 +178,11 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
       url := "http://pxz-api.xinsulv.com/api/openapi/submit"
 
       payload := map[string]interface{}{
-          "model": "nano_banana",
+          "model": "veo3_1",
           "params": map[string]interface{}{
-              "prompt":       "月光下的竹林小径",
+              "prompt":       "让这张图片动起来",
+              "image_url":    "https://example.com/reference.jpg",
               "aspect_ratio": "16:9",
-              "format":       "png",
           },
       }
 
@@ -215,64 +205,66 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   ```
 
   ```java Java
-  import java.net.http.HttpClient;
-  import java.net.http.HttpRequest;
-  import java.net.http.HttpResponse;
-  import java.net.URI;
+  import java.io.BufferedReader;
+  import java.io.InputStreamReader;
+  import java.io.OutputStream;
+  import java.net.HttpURLConnection;
+  import java.net.URL;
 
   public class Main {
-      public static void main(String[] args) throws Exception {
-          String url = "http://pxz-api.xinsulv.com/api/openapi/submit";
+      public static void main(String[] args) {
+          try {
+              URL url = new URL("http://pxz-api.xinsulv.com/api/openapi/submit");
+              HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+              conn.setRequestMethod("POST");
+              conn.setRequestProperty("Authorization", "Bearer <token>");
+              conn.setRequestProperty("Content-Type", "application/json");
+              conn.setDoOutput(true);
 
-          String payload = """
-          {
-            "model": "nano_banana",
-            "params": {
-              "prompt": "月光下的竹林小径",
-              "aspect_ratio": "16:9",
-              "format": "png"
-            }
+              String jsonPayload = "{\"model\":\"veo3_1\",\"params\":{\"prompt\":\"让这张图片动起来\",\"image_url\":\"https://example.com/reference.jpg\",\"aspect_ratio\":\"16:9\"}}";
+
+              OutputStream os = conn.getOutputStream();
+              os.write(jsonPayload.getBytes());
+              os.flush();
+              os.close();
+
+              BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+              String line;
+              StringBuilder response = new StringBuilder();
+              while ((line = br.readLine()) != null) {
+                  response.append(line);
+              }
+              br.close();
+
+              System.out.println(response.toString());
+          } catch (Exception e) {
+              e.printStackTrace();
           }
-          """;
-
-          HttpClient client = HttpClient.newHttpClient();
-          HttpRequest request = HttpRequest.newBuilder()
-              .uri(URI.create(url))
-              .header("Authorization", "Bearer <token>")
-              .header("Content-Type", "application/json")
-              .POST(HttpRequest.BodyPublishers.ofString(payload))
-              .build();
-
-          HttpResponse<String> response = client.send(request,
-              HttpResponse.BodyHandlers.ofString());
-
-          System.out.println(response.body());
       }
   }
   ```
 
   ```php PHP
   <?php
-
   $url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
-  $payload = [
-      "model" => "nano_banana",
-      "params" => [
-          "prompt" => "月光下的竹林小径",
-          "aspect_ratio" => "16:9",
-          "format" => "png"
-      ]
-  ];
+  $payload = array(
+      "model" => "veo3_1",
+      "params" => array(
+          "prompt" => "让这张图片动起来",
+          "image_url" => "https://example.com/reference.jpg",
+          "aspect_ratio" => "16:9"
+      )
+  );
 
   $ch = curl_init($url);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
   curl_setopt($ch, CURLOPT_POST, true);
-  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+  curl_setopt($ch, CURLOPT_HTTPHEADER, array(
       "Authorization: Bearer <token>",
       "Content-Type: application/json"
-  ]);
+  ));
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
 
   $response = curl_exec($ch);
   curl_close($ch);
@@ -286,20 +278,19 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   require 'json'
   require 'uri'
 
-  url = URI("http://pxz-api.xinsulv.com/api/openapi/submit")
+  url = URI.parse("http://pxz-api.xinsulv.com/api/openapi/submit")
 
   payload = {
-    model: "nano_banana",
+    model: "veo3_1",
     params: {
-      prompt: "月光下的竹林小径",
-      aspect_ratio: "16:9",
-      format: "png"
+      prompt: "让这张图片动起来",
+      image_url: "https://example.com/reference.jpg",
+      aspect_ratio: "16:9"
     }
   }
 
   http = Net::HTTP.new(url.host, url.port)
-
-  request = Net::HTTP::Post.new(url)
+  request = Net::HTTP::Post.new(url.path)
   request["Authorization"] = "Bearer <token>"
   request["Content-Type"] = "application/json"
   request.body = payload.to_json
@@ -312,33 +303,27 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   import Foundation
 
   let url = URL(string: "http://pxz-api.xinsulv.com/api/openapi/submit")!
-
-  let payload: [String: Any] = [
-      "model": "nano_banana",
-      "params": [
-          "prompt": "月光下的竹林小径",
-          "aspect_ratio": "16:9",
-          "format": "png"
-      ]
-  ]
-
   var request = URLRequest(url: url)
   request.httpMethod = "POST"
   request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
   request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+  let payload: [String: Any] = [
+      "model": "veo3_1",
+      "params": [
+          "prompt": "让这张图片动起来",
+          "image_url": "https://example.com/reference.jpg",
+          "aspect_ratio": "16:9"
+      ]
+  ]
+
   request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
 
   let task = URLSession.shared.dataTask(with: request) { data, response, error in
-      if let error = error {
-          print("Error: \(error)")
-          return
-      }
-
-      if let data = data, let responseString = String(data: data, encoding: .utf8) {
-          print(responseString)
+      if let data = data {
+          print(String(data: data, encoding: .utf8) ?? "")
       }
   }
-
   task.resume()
   ```
 
@@ -353,24 +338,16 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
       static async Task Main(string[] args)
       {
           var url = "http://pxz-api.xinsulv.com/api/openapi/submit";
+          var payload = "{\"model\":\"veo3_1\",\"params\":{\"prompt\":\"让这张图片动起来\",\"image_url\":\"https://example.com/reference.jpg\",\"aspect_ratio\":\"16:9\"}}";
 
-          var payload = @"{
-              ""model"": ""nano_banana"",
-              ""params"": {
-                  ""prompt"": ""月光下的竹林小径"",
-                  ""aspect_ratio"": ""16:9"",
-                  ""format"": ""png""
-              }
-          }";
-
-          using var client = new HttpClient();
-          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
-
-          var content = new StringContent(payload, Encoding.UTF8, "application/json");
-          var response = await client.PostAsync(url, content);
-          var result = await response.Content.ReadAsStringAsync();
-
-          Console.WriteLine(result);
+          using (var client = new HttpClient())
+          {
+              client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+              var content = new StringContent(payload, Encoding.UTF8, "application/json");
+              var response = await client.PostAsync(url, content);
+              var result = await response.Content.ReadAsStringAsync();
+              Console.WriteLine(result);
+          }
       }
   }
   ```
@@ -379,44 +356,28 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   #include <stdio.h>
   #include <curl/curl.h>
 
-  int main(void) {
+  int main(void)
+  {
       CURL *curl;
       CURLcode res;
 
-      curl_global_init(CURL_GLOBAL_DEFAULT);
       curl = curl_easy_init();
-
       if(curl) {
-          const char *url = "http://pxz-api.xinsulv.com/api/openapi/submit";
-          const char *payload = "{"
-              "\"model\":\"nano_banana\","
-              "\"params\":{"
-                  "\"prompt\":\"月光下的竹林小径\","
-                  "\"aspect_ratio\":\"16:9\","
-                  "\"format\":\"png\""
-              "}"
-          "}";
+          curl_easy_setopt(curl, CURLOPT_URL, "http://pxz-api.xinsulv.com/api/openapi/submit");
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
           headers = curl_slist_append(headers, "Content-Type: application/json");
-
-          curl_easy_setopt(curl, CURLOPT_URL, url);
-          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
           curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-          res = curl_easy_perform(curl);
+          const char *data = "{\"model\":\"veo3_1\",\"params\":{\"prompt\":\"让这张图片动起来\",\"image_url\":\"https://example.com/reference.jpg\",\"aspect_ratio\":\"16:9\"}}";
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
 
-          if(res != CURLE_OK) {
-              fprintf(stderr, "curl_easy_perform() failed: %s\n",
-                      curl_easy_strerror(res));
-          }
+          res = curl_easy_perform(curl);
 
           curl_slist_free_all(headers);
           curl_easy_cleanup(curl);
       }
-
-      curl_global_cleanup();
       return 0;
   }
   ```
@@ -427,73 +388,55 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
           NSURL *url = [NSURL URLWithString:@"http://pxz-api.xinsulv.com/api/openapi/submit"];
-
-          NSDictionary *payload = @{
-              @"model": @"nano_banana",
-              @"params": @{
-                  @"prompt": @"月光下的竹林小径",
-                  @"aspect_ratio": @"16:9",
-                  @"format": @"png"
-              }
-          };
-
-          NSError *error;
-          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
-                                                            options:0
-                                                              error:&error];
-
           NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
           [request setHTTPMethod:@"POST"];
           [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
           [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+
+          NSDictionary *payload = @{
+              @"model": @"veo3_1",
+              @"params": @{
+                  @"prompt": @"让这张图片动起来",
+                  @"image_url": @"https://example.com/reference.jpg",
+                  @"aspect_ratio": @"16:9"
+              }
+          };
+
+          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload options:0 error:nil];
           [request setHTTPBody:jsonData];
 
-          NSURLSessionDataTask *task = [[NSURLSession sharedSession]
-              dataTaskWithRequest:request
-              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-                  if (error) {
-                      NSLog(@"Error: %@", error);
-                      return;
-                  }
-                  NSString *result = [[NSString alloc] initWithData:data
-                                                          encoding:NSUTF8StringEncoding];
+          NSURLSession *session = [NSURLSession sharedSession];
+          NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+              if (data) {
+                  NSString *result = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
                   NSLog(@"%@", result);
-              }];
-
+              }
+          }];
           [task resume];
-          [[NSRunLoop mainRunLoop] run];
+          [[NSRunLoop currentRunLoop] run];
       }
       return 0;
   }
   ```
 
   ```ocaml OCaml
-  (* Requires cohttp and yojson libraries *)
   open Lwt
   open Cohttp
   open Cohttp_lwt_unix
 
   let url = "http://pxz-api.xinsulv.com/api/openapi/submit"
 
-  let payload = {|{
-    "model": "nano_banana",
-    "params": {
-      "prompt": "月光下的竹林小径",
-      "aspect_ratio": "16:9",
-      "format": "png"
-    }
-  }|}
+  let payload = {|{"model":"veo3_1","params":{"prompt":"让这张图片动起来","image_url":"https://example.com/reference.jpg","aspect_ratio":"16:9"}}|}
 
   let () =
     let headers = Header.init ()
       |> fun h -> Header.add h "Authorization" "Bearer <token>"
-      |> fun h -> Header.add h "Content-Type" "application/json"
-    in
+      |> fun h -> Header.add h "Content-Type" "application/json" in
     let body = Cohttp_lwt.Body.of_string payload in
 
     let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
-      body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
-      print_endline body_str
+      body |> Cohttp_lwt.Body.to_string >|= fun body ->
+      print_endline body
     in
     Lwt_main.run response
   ```
@@ -503,22 +446,22 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   import 'package:http/http.dart' as http;
 
   void main() async {
-    final url = Uri.parse('http://pxz-api.xinsulv.com/api/openapi/submit');
+    var url = Uri.parse('http://pxz-api.xinsulv.com/api/openapi/submit');
 
-    final payload = {
-      'model': 'nano_banana',
+    var payload = {
+      'model': 'veo3_1',
       'params': {
-        'prompt': '月光下的竹林小径',
-        'aspect_ratio': '16:9',
-        'format': 'png'
+        'prompt': '让这张图片动起来',
+        'image_url': 'https://example.com/reference.jpg',
+        'aspect_ratio': '16:9'
       }
     };
 
-    final response = await http.post(
+    var response = await http.post(
       url,
       headers: {
         'Authorization': 'Bearer <token>',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       body: jsonEncode(payload),
     );
@@ -534,11 +477,11 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
   url <- "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload <- list(
-    model = "nano_banana",
+    model = "veo3_1",
     params = list(
-      prompt = "月光下的竹林小径",
-      aspect_ratio = "16:9",
-      format = "png"
+      prompt = "让这张图片动起来",
+      image_url = "https://example.com/reference.jpg",
+      aspect_ratio = "16:9"
     )
   )
 
@@ -549,7 +492,7 @@ api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
       `Content-Type` = "application/json"
     ),
     body = toJSON(payload, auto_unbox = TRUE),
-    encode = "raw"
+    encode = "json"
   )
 
   cat(content(response, "text"))

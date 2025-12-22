@@ -1,10 +1,9 @@
 ---
-title: 'GPT-4o-image 图像生成'
+title: 'GPT-4o 图片生成'
 description: |
     - 异步处理模式，返回任务ID用于后续查询
-    - 支持文本转图片、图生图、图像编辑等多种生成模式。
-    - 生成的图像链接，有效期为24小时，请尽快保存 
-api: 'POST https://api.apimart.ai/v1/images/generations'
+    - 支持文本转图片、图生图等生成模式
+api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 ---
 
 ## Authorizations
@@ -25,132 +24,98 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
 ## Body
 
-<ParamField body="model" type="string" default="gpt-4o-image" required>
-  图像生成模型名称
+<ParamField body="model" type="string" required>
+  模型名称
 
-  Example: `"gpt-4o-image"`
+  固定值：`"gpt_4o"`
 </ParamField>
 
-<ParamField body="prompt" type="string" required>
-  图像生成的文本描述
+<ParamField body="params" type="object" required>
+  模型参数对象
 
-  最长 1000 个字符
-</ParamField>
+  <Expandable title="params 对象属性">
+    <ParamField body="prompt" type="string" required>
+      图像生成的文本描述
 
-<ParamField body="size" type="string">
-  图像生成的尺寸
+      无限制
+    </ParamField>
 
-  支持的格式：
+    <ParamField body="image_url" type="string">
+      参考图像的 URL，用于图生图
 
-  * 比例：`1:1`、`2:3`、`3:2`
-</ParamField>
+      * 仅支持单张图片
+      * 支持公开可访问的 URL
+    </ParamField>
 
-<ParamField body="n" type="integer">
-  生成图像的数量
+    <ParamField body="aspect_ratio" type="string" default="1:1">
+      图像生成的宽高比
 
-  支持 1、2、4，会根据生成数量进行预扣费
+      支持的宽高比：
 
-  默认值：1
-
-  **⚠️ 注意：** 必须输入纯数字（如 `1`），不要加引号，否则会报错
-</ParamField>
-
-<ParamField body="image_urls" type="array">
-  参考图像的 URL 列表，用于图生图或图像编辑
-
-  **💡 快速填写（Try it 区域）：**
-
-  1. 点击 "+ Add an item" 添加一个图像URL
-  2. 输入图像的完整 URL 地址或base64数据
-
-  <Expandable title="详细字段说明">
-    <ParamField body="url" type="string" required>
-      图像URL地址
-
-      支持两种格式：
-
-      **1. 完整的图像URL地址**
-
-      * 公开可访问的图像URL（http\:// 或 https\://）
-      * 示例：`https://example.com/image.jpg`
-
-      **2. Base64 编码格式**
-
-      * **必须使用完整的 Data URI 格式**
-      * 格式：`data:image/{格式};base64,{base64数据}`
-      * 支持的图片格式：jpeg、png、webp 等
-      * 示例：`data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
-      * ⚠️ 注意：必须包含 `data:image/jpeg;base64,` 前缀部分
-
-      **限制：**
-
-      * 单张图片不超过 10MB
-      * 支持格式：.jpeg、.jpg、.png、.webp
+      * `1:1` - 正方形（默认）
+      * `3:2` - 横向 3:2
+      * `2:3` - 纵向 2:3
     </ParamField>
   </Expandable>
-
-  **限制：** 最多 5 张图片
 </ParamField>
 
-<ParamField body="mask_url" type="string">
-  蒙版图像的 URL
+<ParamField body="callback_url" type="string">
+  任务完成后的回调通知地址
 
-  * 必须是 PNG 格式
-  * 大小需要与参考图像一致
-  * 不超过 4MB
+  任务完成后，系统会向该地址发送 POST 请求通知结果
+</ParamField>
+
+<ParamField body="metadata" type="object">
+  自定义元数据
+
+  查询结果时原样返回，可用于业务标识
 </ParamField>
 
 ## Response
 
-<ResponseField name="code" type="integer">
-  响应状态码
+<ResponseField name="task_id" type="string">
+  任务ID，用于查询结果
 </ResponseField>
 
-<ResponseField name="data" type="array">
-  返回数据数组
+<ResponseField name="status" type="string">
+  初始状态，固定为 `"pending"`
+</ResponseField>
 
-  <Expandable title="属性">
-    <ResponseField name="status" type="string">
-      任务状态
+<ResponseField name="estimated_credits" type="number">
+  预估消耗积分
+</ResponseField>
 
-      * `submitted` - 已提交
-    </ResponseField>
-
-    <ResponseField name="task_id" type="string">
-      任务唯一标识符
-    </ResponseField>
-  </Expandable>
+<ResponseField name="created_at" type="string">
+  创建时间（ISO 格式）
 </ResponseField>
 
 <RequestExample>
   ```bash cURL
   curl --request POST \
-    --url https://api.apimart.ai/v1/images/generations \
+    --url http://pxz-api.xinsulv.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
-      "model": "gpt-4o-image",
-      "prompt": "星空下的古老城堡",
-      "size": "1:1",
-      "n": 1,
-      "image_urls": [
-        "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"
-      ]
+      "model": "gpt_4o",
+      "params": {
+        "prompt": "星空下的古老城堡",
+        "aspect_ratio": "1:1"
+      }
     }'
   ```
 
   ```python Python
   import requests
 
-  url = "https://api.apimart.ai/v1/images/generations"
+  url = "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload = {
-      "model": "gpt-4o-image",
-      "prompt": "星空下的古老城堡",
-      "size": "1:1",
-      "n": 1,
-      "image_urls": [
-          "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"    ]}
+      "model": "gpt_4o",
+      "params": {
+          "prompt": "星空下的古老城堡",
+          "aspect_ratio": "1:1"
+      }
+  }
 
   headers = {
       "Authorization": "Bearer <token>",
@@ -163,15 +128,15 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   ```
 
   ```javascript JavaScript
-  const url = "https://api.apimart.ai/v1/images/generations";
+  const url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
   const payload = {
-    model: "gpt-4o-image",
-    prompt: "星空下的古老城堡",
-    size: "1:1",
-    n: 1,
-    image_urls: [
-      "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"  ]};
+    model: "gpt_4o",
+    params: {
+      prompt: "星空下的古老城堡",
+      aspect_ratio: "1:1"
+    }
+  };
 
   const headers = {
     "Authorization": "Bearer <token>",
@@ -200,16 +165,15 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   )
 
   func main() {
-      url := "https://api.apimart.ai/v1/images/generations"
+      url := "http://pxz-api.xinsulv.com/api/openapi/submit"
 
       payload := map[string]interface{}{
-          "model":  "gpt-4o-image",
-          "prompt": "星空下的古老城堡",
-          "size":   "1:1",
-          "n":      1,
-          "image_urls": []string{
-              "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"
-    }    }
+          "model": "gpt_4o",
+          "params": map[string]interface{}{
+              "prompt":       "星空下的古老城堡",
+              "aspect_ratio": "1:1",
+          },
+      }
 
       jsonData, _ := json.Marshal(payload)
 
@@ -237,17 +201,16 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   public class Main {
       public static void main(String[] args) throws Exception {
-          String url = "https://api.apimart.ai/v1/images/generations";
+          String url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
           String payload = """
           {
-            "model": "gpt-4o-image",
-            "prompt": "星空下的古老城堡",
-            "size": "1:1",
-            "n": 1,
-            "image_urls": [
-              "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"
-            ]        }
+            "model": "gpt_4o",
+            "params": {
+              "prompt": "星空下的古老城堡",
+              "aspect_ratio": "1:1"
+            }
+          }
           """;
 
           HttpClient client = HttpClient.newHttpClient();
@@ -269,15 +232,15 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   ```php PHP
   <?php
 
-  $url = "https://api.apimart.ai/v1/images/generations";
+  $url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
   $payload = [
-      "model" => "gpt-4o-image",
-      "prompt" => "星空下的古老城堡",
-      "size" => "1:1",
-      "n" => 1,
-      "image_urls" => [
-          "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"    ]];
+      "model" => "gpt_4o",
+      "params" => [
+          "prompt" => "星空下的古老城堡",
+          "aspect_ratio" => "1:1"
+      ]
+  ];
 
   $ch = curl_init($url);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -300,18 +263,17 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   require 'json'
   require 'uri'
 
-  url = URI("https://api.apimart.ai/v1/images/generations")
+  url = URI("http://pxz-api.xinsulv.com/api/openapi/submit")
 
   payload = {
-    model: "gpt-4o-image",
-    prompt: "星空下的古老城堡",
-    size: "1:1",
-    n: 1,
-    image_urls: [
-      "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"  ]}
+    model: "gpt_4o",
+    params: {
+      prompt: "星空下的古老城堡",
+      aspect_ratio: "1:1"
+    }
+  }
 
   http = Net::HTTP.new(url.host, url.port)
-  http.use_ssl = true
 
   request = Net::HTTP::Post.new(url)
   request["Authorization"] = "Bearer <token>"
@@ -325,15 +287,15 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "https://api.apimart.ai/v1/images/generations")!
+  let url = URL(string: "http://pxz-api.xinsulv.com/api/openapi/submit")!
 
   let payload: [String: Any] = [
-      "model": "gpt-4o-image",
-      "prompt": "星空下的古老城堡",
-      "size": "1:1",
-      "n": 1,
-      "image_urls": [
-          "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"    ]]
+      "model": "gpt_4o",
+      "params": [
+          "prompt": "星空下的古老城堡",
+          "aspect_ratio": "1:1"
+      ]
+  ]
 
   var request = URLRequest(url: url)
   request.httpMethod = "POST"
@@ -346,7 +308,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
           print("Error: \(error)")
           return
       }
-      
+
       if let data = data, let responseString = String(data: data, encoding: .utf8) {
           print(responseString)
       }
@@ -365,17 +327,15 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   {
       static async Task Main(string[] args)
       {
-          var url = "https://api.apimart.ai/v1/images/generations";
+          var url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
           var payload = @"{
-              ""model"": ""gpt-4o-image"",
-              ""prompt"": ""星空下的古老城堡"",
-              ""size"": ""1:1"",
-              ""n"": 1,
-              ""image_urls"": [
-                  ""https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"",
-                  ""
-              ]        }";
+              ""model"": ""gpt_4o"",
+              ""params"": {
+                  ""prompt"": ""星空下的古老城堡"",
+                  ""aspect_ratio"": ""1:1""
+              }
+          }";
 
           using var client = new HttpClient();
           client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
@@ -401,13 +361,13 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
       curl = curl_easy_init();
 
       if(curl) {
-          const char *url = "https://api.apimart.ai/v1/images/generations";
+          const char *url = "http://pxz-api.xinsulv.com/api/openapi/submit";
           const char *payload = "{"
-              "\"model\":\"gpt-4o-image\","
-              "\"prompt\":\"星空下的古老城堡\","
-              "\"size\":\"1:1\","
-              "\"n\":1,"
-              "\"image_urls\":[\"https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png\"]"
+              "\"model\":\"gpt_4o\","
+              "\"params\":{"
+                  "\"prompt\":\"星空下的古老城堡\","
+                  "\"aspect_ratio\":\"1:1\""
+              "}"
           "}";
 
           struct curl_slist *headers = NULL;
@@ -439,41 +399,39 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
-          NSURL *url = [NSURL URLWithString:@"https://api.apimart.ai/v1/images/generations"];
-          
+          NSURL *url = [NSURL URLWithString:@"http://pxz-api.xinsulv.com/api/openapi/submit"];
+
           NSDictionary *payload = @{
-              @"model": @"gpt-4o-image",
-              @"prompt": @"星空下的古老城堡",
-              @"size": @"1:1",
-              @"n": @1,
-              @"image_urls": @[
-                  @"https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png",
-                  @
-              ]        };
-          
+              @"model": @"gpt_4o",
+              @"params": @{
+                  @"prompt": @"星空下的古老城堡",
+                  @"aspect_ratio": @"1:1"
+              }
+          };
+
           NSError *error;
           NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
                                                             options:0
                                                               error:&error];
-          
+
           NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
           [request setHTTPMethod:@"POST"];
           [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
           [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
           [request setHTTPBody:jsonData];
-          
-          NSURLSessionDataTask *task = [[NSURLSession sharedSession] 
+
+          NSURLSessionDataTask *task = [[NSURLSession sharedSession]
               dataTaskWithRequest:request
               completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
                   if (error) {
                       NSLog(@"Error: %@", error);
                       return;
                   }
-                  NSString *result = [[NSString alloc] initWithData:data 
+                  NSString *result = [[NSString alloc] initWithData:data
                                                           encoding:NSUTF8StringEncoding];
                   NSLog(@"%@", result);
               }];
-          
+
           [task resume];
           [[NSRunLoop mainRunLoop] run];
       }
@@ -487,15 +445,15 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   open Cohttp
   open Cohttp_lwt_unix
 
-  let url = "https://api.apimart.ai/v1/images/generations"
+  let url = "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   let payload = {|{
-    "model": "gpt-4o-image",
-    "prompt": "星空下的古老城堡",
-    "size": "1:1",
-    "n": 1,
-    "image_urls": [
-      "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"  ]}|}
+    "model": "gpt_4o",
+    "params": {
+      "prompt": "星空下的古老城堡",
+      "aspect_ratio": "1:1"
+    }
+  }|}
 
   let () =
     let headers = Header.init ()
@@ -503,7 +461,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
       |> fun h -> Header.add h "Content-Type" "application/json"
     in
     let body = Cohttp_lwt.Body.of_string payload in
-    
+
     let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
       body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
       print_endline body_str
@@ -516,25 +474,25 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   import 'package:http/http.dart' as http;
 
   void main() async {
-    final url = Uri.parse('https://api.apimart.ai/v1/images/generations');
-    
+    final url = Uri.parse('http://pxz-api.xinsulv.com/api/openapi/submit');
+
     final payload = {
-      'model': 'gpt-4o-image',
-      'prompt': '星空下的古老城堡',
-      'size': '1:1',
-      'n': 1,
-      'image_urls': [
-        'https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png'    ]  };
-    
+      'model': 'gpt_4o',
+      'params': {
+        'prompt': '星空下的古老城堡',
+        'aspect_ratio': '1:1'
+      }
+    };
+
     final response = await http.post(
       url,
       headers: {
         'Authorization': 'Bearer <token>',
         'Content-Type': 'application/json'
-    },
+      },
       body: jsonEncode(payload),
     );
-    
+
     print(response.body);
   }
   ```
@@ -543,15 +501,15 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   library(httr)
   library(jsonlite)
 
-  url <- "https://api.apimart.ai/v1/images/generations"
+  url <- "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload <- list(
-    model = "gpt-4o-image",
-    prompt = "星空下的古老城堡",
-    size = "1:1",
-    n = 1,
-    image_urls = list(
-      "https://cdn.apimart.ai/doc/9998238784524590-549804af-14bc-4fbc-bae5-9d8469d35de3-image_task_01K889V97T2YF8RHQW21XMVMS1_0.png"  ))
+    model = "gpt_4o",
+    params = list(
+      prompt = "星空下的古老城堡",
+      aspect_ratio = "1:1"
+    )
+  )
 
   response <- POST(
     url,
@@ -569,63 +527,38 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
 
 <ResponseExample>
   ```json 200
-  {
-    "code": 200,
-    "data": [
-      {
-        "status": "submitted",
-        "task_id": "task_01K8SGYNNNVBQTXNR4MM964S7K"
-      }
-    ]
-  }
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
+        "status": "pending",
+        "estimated_credits": 100,
+        "created_at": "2025-12-22T06:03:28.242Z"
+    }
+}
   ```
 
   ```json 400
-  {
-    "error": {
-      "code": 400,
-      "message": "请求参数无效",
-      "type": "invalid_request_error"
+    {
+        "statusCode": 400,
+        "message": "请求参数无效",
+        "ok": false
     }
-  }
   ```
-
   ```json 401
   {
     "error": {
       "code": 401,
-      "message": "身份验证失败，请检查您的API密钥",
-      "type": "authentication_error"
+      "message": "身份验证失败，请检查您的API密钥"
     }
   }
   ```
-
-  ```json 402
+```json 433
   {
     "error": {
-      "code": 402,
-      "message": "账户余额不足，请充值后再试",
-      "type": "payment_required"
-    }
-  }
-  ```
-
-  ```json 403
-  {
-    "error": {
-      "code": 403,
-      "message": "访问被禁止，您没有权限访问此资源",
-      "type": "permission_error"
-    }
-  }
-  ```
-
-  ```json 429
-  {
-    "error": {
-      "code": 429,
-      "message": "请求过于频繁，请稍后再试",
-      "type": "rate_limit_error"
+      "code": 433,
+      "message": "账户余额不足，请充值后再试"
     }
   }
   ```
@@ -634,18 +567,7 @@ api: 'POST https://api.apimart.ai/v1/images/generations'
   {
     "error": {
       "code": 500,
-      "message": "服务器内部错误，请稍后重试",
-      "type": "server_error"
-    }
-  }
-  ```
-
-  ```json 502
-  {
-    "error": {
-      "code": 502,
-      "message": "网关错误，服务器暂时不可用",
-      "type": "bad_gateway"
+      "message": "服务器内部错误，请稍后重试"
     }
   }
   ```

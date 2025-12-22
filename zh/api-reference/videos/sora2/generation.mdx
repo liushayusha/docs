@@ -2,9 +2,8 @@
 title: 'Sora2 视频生成'
 description: |
     - 异步处理模式，返回任务ID用于后续查询
-    - 支持文本转视频、图生视频等多种生成模式
-    - 生成的视频链接，有效期为24小时，请尽快保存
-api: 'POST https://api.apimart.ai/v1/videos/generations'
+    - 支持文本转视频、图生视频等生成模式
+api: 'POST http://pxz-api.xinsulv.com/api/openapi/submit'
 ---
 
 ## Authorizations
@@ -25,203 +24,107 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
 ## Body
 
-<ParamField body="model" type="string" default="sora-2" required>
-  视频生成模型名称
+<ParamField body="model" type="string" required>
+  模型名称
 
-  支持的模型：
-
-  * `sora-2` - 标准版本
-  * `sora-2-pro` - 专业版本，支持更长时长
-
-  示例：`"sora-2"` 或 `"sora-2-pro"`
+  固定值：`"sora2"`
 </ParamField>
 
-<ParamField body="prompt" type="string" required>
-  视频生成的文本描述
+<ParamField body="params" type="object" required>
+  模型参数对象
 
-  **💡 @角色引用功能：**
+  <Expandable title="params 对象属性">
+    <ParamField body="prompt" type="string" required>
+      视频生成的文本描述
 
-  可以在 prompt 中使用 `@username` 格式引用已创建的角色，让该角色出现在生成的视频中。
+      无限制
+    </ParamField>
 
-  * 角色的 `username` 可通过[查询角色接口](/cn/api-reference/videos/sora2/query-character)获取
-  * 支持同时引用多个角色
+    <ParamField body="image_url" type="string">
+      参考图像的 URL，用于图生视频（首帧）
 
-  示例：`"小猫和小狗一起开汽车 @duksvfkf.cruisingki @zdqwahgj.baronbarki"`
-</ParamField>
+      * 仅支持单张图片
+      * 支持公开可访问的 URL
+    </ParamField>
 
-<ParamField body="duration" type="integer">
-  视频时长（秒）
+    <ParamField body="aspect_ratio" type="string" default="16:9">
+      视频宽高比
 
-  * `sora-2`：支持 10 或 15 秒
-  * `sora-2-pro`：支持 15 秒（高清）或 25 秒
+      支持的宽高比：
 
-  示例：`10`
-</ParamField>
+      * `16:9` - 横向（默认）
+      * `9:16` - 竖向
+    </ParamField>
 
-<ParamField body="aspect_ratio" type="string">
-  视频分辨率
+    <ParamField body="video_length" type="string" default="10">
+      视频时长（秒）
 
-  支持的格式：
+      支持的时长：
 
-  * `16:9` (横屏)
-  * `9:16` (竖屏)
-</ParamField>
-
-<ParamField body="image_urls" type="array">
-  用于图生视频的参考图像 URL 数组
-
-  **💡 快速填写（Try it 区域）：**
-
-  1. 点击 "+ Add an item" 添加一个图像URL
-  2. 输入图像的完整 URL 地址或base64数据
-
-  <Expandable title="详细字段说明">
-    <ParamField body="url" type="string" required>
-      图像URL地址
-
-      支持两种格式：
-
-      **1. 完整的图像URL地址**
-
-      * 公开可访问的图像URL（http\:// 或 https\://）
-      * 示例：`https://example.com/image.jpg`
-
-      **2. Base64 编码格式**
-
-      * **必须使用完整的 Data URI 格式**
-      * 格式：`data:image/{格式};base64,{base64数据}`
-      * 支持的图片格式：jpeg、png、webp 等
-      * 示例：`data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
-      * ⚠️ 注意：必须包含 `data:image/jpeg;base64,` 前缀部分
-
-      **限制：**
-
-      * 最大文件大小：10MB
-      * 支持格式：.jpeg、.jpg、.png、.webp
+      * `10` - 10秒（默认）
+      * `15` - 15秒
     </ParamField>
   </Expandable>
 </ParamField>
 
-<ParamField body="watermark" type="boolean" default="false">
-  是否在生成的视频中添加水印
+<ParamField body="callback_url" type="string">
+  任务完成后的回调通知地址
 
-  * `false`：不添加水印
-  * `true`：在视频中添加Sora官方水印
-
-  默认值：`false`
+  任务完成后，系统会向该地址发送 POST 请求通知结果
 </ParamField>
 
-<ParamField body="thumbnail" type="boolean">
-  是否生成视频缩略图
+<ParamField body="metadata" type="object">
+  自定义元数据
 
-  * `true`：生成视频缩略图，方便预览和展示
-
-  如不需要生成缩略图，可省略此参数
-</ParamField>
-
-<ParamField body="private" type="boolean" default="false">
-  是否开启隐私模式
-
-  * `true`：视频不会发布，同时视频无法进行 remix 操作（二次编辑）
-  * `false`：视频可以发布和进行 remix 操作
-
-  默认值：`false`
-</ParamField>
-
-<ParamField body="style" type="string">
-  视频风格
-
-  支持的值：
-
-  * `thanksgiving` - 感恩节风格
-  * `comic` - 漫画风格
-  * `news` - 新闻风格
-  * `selfie` - 自拍风格
-  * `nostalgic` - 复古风格
-  * `anime` - 动漫风格
-
-  示例：`"anime"`
-</ParamField>
-
-<ParamField body="storyboard" type="boolean">
-  是否使用故事板实现更精细的视频生成细节控制
-
-  * `true`：启用故事板功能
-  * `false`：不使用故事板
-
-  示例：`true`
-</ParamField>
-
-<ParamField body="character_url" type="string">
-  参考视频里的角色 URL
-
-  用于在生成的视频中复用参考视频中的角色
-
-  示例：`"https://filesystem.site/cdn/20251030/javYrU4etHVFDqg8by7mViTWHlMOZy.mp4"`
-
-  **⚠️ 注意：** 使用此参数时，生成的视频时长会减少 1 秒
-</ParamField>
-
-<ParamField body="character_timestamps" type="string">
-  角色出现的时间戳
-
-  指定参考视频中角色出现的时间范围，只支持 2 秒的时间段
-
-  格式：`"起始秒,结束秒"`
-
-  示例：`"1,3"` 表示参考视频中第 1 秒到第 3 秒的角色
-
-  **⚠️ 注意：** 使用此参数时，生成的视频时长会减少 1 秒
+  查询结果时原样返回，可用于业务标识
 </ParamField>
 
 ## Response
 
-<ResponseField name="code" type="integer">
-  响应状态码，成功时为 200
+<ResponseField name="task_id" type="string">
+  任务ID，用于查询结果
 </ResponseField>
 
-<ResponseField name="data" type="array">
-  返回数据数组
+<ResponseField name="status" type="string">
+  初始状态，固定为 `"pending"`
+</ResponseField>
 
-  <Expandable title="数组元素">
-    <ResponseField name="status" type="string">
-      任务状态，初始提交时为 `submitted`
-    </ResponseField>
+<ResponseField name="estimated_credits" type="number">
+  预估消耗积分
+</ResponseField>
 
-    <ResponseField name="task_id" type="string">
-      任务唯一标识符，用于查询任务状态和结果
-    </ResponseField>
-  </Expandable>
+<ResponseField name="created_at" type="string">
+  创建时间（ISO 格式）
 </ResponseField>
 
 <RequestExample>
   ```bash cURL
   curl --request POST \
-    --url https://api.apimart.ai/v1/videos/generations \
+    --url http://pxz-api.xinsulv.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
-      "model": "sora-2",
-      "prompt": "瀑布倾泻而下形成彩虹",
-      "duration": 10,
-      "aspect_ratio": "16:9",
-      "private": false,
-      "image_urls": ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
+      "model": "sora2",
+      "params": {
+        "prompt": "一只猫在花园里散步",
+        "aspect_ratio": "16:9",
+        "video_length": "10"
+      }
     }'
   ```
 
   ```python Python
   import requests
 
-  url = "https://api.apimart.ai/v1/videos/generations"
+  url = "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload = {
-      "model": "sora-2",
-      "prompt": "瀑布倾泻而下形成彩虹",
-      "duration": 10,
-      "aspect_ratio": "16:9",
-      "private": False,
-      "image_urls": ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
+      "model": "sora2",
+      "params": {
+          "prompt": "一只猫在花园里散步",
+          "aspect_ratio": "16:9",
+          "video_length": "10"
+      }
   }
 
   headers = {
@@ -235,15 +138,15 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   ```
 
   ```javascript JavaScript
-  const url = "https://api.apimart.ai/v1/videos/generations";
+  const url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
   const payload = {
-    model: "sora-2",
-    prompt: "瀑布倾泻而下形成彩虹",
-    duration: 15,
-    aspect_ratio: "16:9",
-    private: false,
-    image_urls: ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
+    model: "sora2",
+    params: {
+      prompt: "一只猫在花园里散步",
+      aspect_ratio: "16:9",
+      video_length: "10"
+    }
   };
 
   const headers = {
@@ -273,14 +176,15 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   )
 
   func main() {
-      url := "https://api.apimart.ai/v1/videos/generations"
+      url := "http://pxz-api.xinsulv.com/api/openapi/submit"
 
       payload := map[string]interface{}{
-          "model":      "sora-2",
-          "prompt":     "瀑布倾泻而下形成彩虹",
-          "duration":   15,
-          "aspect_ratio": "16:9",
-          "image_urls":  ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"],
+          "model": "sora2",
+          "params": map[string]interface{}{
+              "prompt":       "一只猫在花园里散步",
+              "aspect_ratio": "16:9",
+              "video_length": "10",
+          },
       }
 
       jsonData, _ := json.Marshal(payload)
@@ -302,62 +206,66 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   ```
 
   ```java Java
-  import java.net.http.HttpClient;
-  import java.net.http.HttpRequest;
-  import java.net.http.HttpResponse;
-  import java.net.URI;
+  import java.io.BufferedReader;
+  import java.io.InputStreamReader;
+  import java.io.OutputStream;
+  import java.net.HttpURLConnection;
+  import java.net.URL;
 
   public class Main {
-      public static void main(String[] args) throws Exception {
-          String url = "https://api.apimart.ai/v1/videos/generations";
+      public static void main(String[] args) {
+          try {
+              URL url = new URL("http://pxz-api.xinsulv.com/api/openapi/submit");
+              HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+              conn.setRequestMethod("POST");
+              conn.setRequestProperty("Authorization", "Bearer <token>");
+              conn.setRequestProperty("Content-Type", "application/json");
+              conn.setDoOutput(true);
 
-          String payload = """
-          {
-            "model": "sora-2",
-            "prompt": "瀑布倾泻而下形成彩虹",
-            "duration": 10,
-            "aspect_ratio": "16:9",
-            "image_urls": ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
+              String jsonPayload = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"一只猫在花园里散步\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"}}";
+
+              OutputStream os = conn.getOutputStream();
+              os.write(jsonPayload.getBytes());
+              os.flush();
+              os.close();
+
+              BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+              String line;
+              StringBuilder response = new StringBuilder();
+              while ((line = br.readLine()) != null) {
+                  response.append(line);
+              }
+              br.close();
+
+              System.out.println(response.toString());
+          } catch (Exception e) {
+              e.printStackTrace();
           }
-          """;
-
-          HttpClient client = HttpClient.newHttpClient();
-          HttpRequest request = HttpRequest.newBuilder()
-              .uri(URI.create(url))
-              .header("Authorization", "Bearer <token>")
-              .header("Content-Type", "application/json")
-              .POST(HttpRequest.BodyPublishers.ofString(payload))
-              .build();
-
-          HttpResponse<String> response = client.send(request,
-              HttpResponse.BodyHandlers.ofString());
-
-          System.out.println(response.body());
       }
   }
   ```
 
   ```php PHP
   <?php
+  $url = "http://pxz-api.xinsulv.com/api/openapi/submit";
 
-  $url = "https://api.apimart.ai/v1/videos/generations";
-
-  $payload = [
-      "model" => "sora-2",
-      "prompt" => "瀑布倾泻而下形成彩虹",
-      "duration" => 15,
-      "aspect_ratio" => "16:9",
-      "image_urls" => ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
-  ];
+  $payload = array(
+      "model" => "sora2",
+      "params" => array(
+          "prompt" => "一只猫在花园里散步",
+          "aspect_ratio" => "16:9",
+          "video_length" => "10"
+      )
+  );
 
   $ch = curl_init($url);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
   curl_setopt($ch, CURLOPT_POST, true);
-  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+  curl_setopt($ch, CURLOPT_HTTPHEADER, array(
       "Authorization: Bearer <token>",
       "Content-Type: application/json"
-  ]);
+  ));
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
 
   $response = curl_exec($ch);
   curl_close($ch);
@@ -371,20 +279,19 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   require 'json'
   require 'uri'
 
-  url = URI("https://api.apimart.ai/v1/videos/generations")
+  url = URI.parse("http://pxz-api.xinsulv.com/api/openapi/submit")
 
   payload = {
-    model: "sora-2",
-    prompt: "瀑布倾泻而下形成彩虹",
-    duration: 15,
-    aspect_ratio: "16:9",
-    image_urls: ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
+    model: "sora2",
+    params: {
+      prompt: "一只猫在花园里散步",
+      aspect_ratio: "16:9",
+      video_length: "10"
+    }
   }
 
   http = Net::HTTP.new(url.host, url.port)
-  http.use_ssl = true
-
-  request = Net::HTTP::Post.new(url)
+  request = Net::HTTP::Post.new(url.path)
   request["Authorization"] = "Bearer <token>"
   request["Content-Type"] = "application/json"
   request.body = payload.to_json
@@ -396,33 +303,28 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "https://api.apimart.ai/v1/videos/generations")!
-
-  let payload: [String: Any] = [
-      "model": "sora-2",
-      "prompt": "瀑布倾泻而下形成彩虹",
-      "duration": 10,
-      "aspect_ratio": "16:9",
-      "image_urls": ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
-  ]
-
+  let url = URL(string: "http://pxz-api.xinsulv.com/api/openapi/submit")!
   var request = URLRequest(url: url)
   request.httpMethod = "POST"
   request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
   request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+  let payload: [String: Any] = [
+      "model": "sora2",
+      "params": [
+          "prompt": "一只猫在花园里散步",
+          "aspect_ratio": "16:9",
+          "video_length": "10"
+      ]
+  ]
+
   request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
 
   let task = URLSession.shared.dataTask(with: request) { data, response, error in
-      if let error = error {
-          print("Error: \(error)")
-          return
-      }
-      
-      if let data = data, let responseString = String(data: data, encoding: .utf8) {
-          print(responseString)
+      if let data = data {
+          print(String(data: data, encoding: .utf8) ?? "")
       }
   }
-
   task.resume()
   ```
 
@@ -436,24 +338,17 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   {
       static async Task Main(string[] args)
       {
-          var url = "https://api.apimart.ai/v1/videos/generations";
+          var url = "http://pxz-api.xinsulv.com/api/openapi/submit";
+          var payload = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"一只猫在花园里散步\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"}}";
 
-          var payload = @"{
-              ""model"": ""sora-2"",
-              ""prompt"": ""瀑布倾泻而下形成彩虹"",
-              ""duration"": 15,
-              ""aspect_ratio"": ""16:9"",
-              ""image_urls"": [""https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png""]
-          }";
-
-          using var client = new HttpClient();
-          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
-
-          var content = new StringContent(payload, Encoding.UTF8, "application/json");
-          var response = await client.PostAsync(url, content);
-          var result = await response.Content.ReadAsStringAsync();
-
-          Console.WriteLine(result);
+          using (var client = new HttpClient())
+          {
+              client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+              var content = new StringContent(payload, Encoding.UTF8, "application/json");
+              var response = await client.PostAsync(url, content);
+              var result = await response.Content.ReadAsStringAsync();
+              Console.WriteLine(result);
+          }
       }
   }
   ```
@@ -462,43 +357,28 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   #include <stdio.h>
   #include <curl/curl.h>
 
-  int main(void) {
+  int main(void)
+  {
       CURL *curl;
       CURLcode res;
 
-      curl_global_init(CURL_GLOBAL_DEFAULT);
       curl = curl_easy_init();
-
       if(curl) {
-          const char *url = "https://api.apimart.ai/v1/videos/generations";
-          const char *payload = "{"
-              "\"model\":\"sora-2\","
-              "\"prompt\":\"瀑布倾泻而下形成彩虹\","
-              "\"duration\":15,"
-              "\"aspect_ratio\":\"16:9\","
-              "\"image_urls\":[\"https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png\"]"
-          "}";
+          curl_easy_setopt(curl, CURLOPT_URL, "http://pxz-api.xinsulv.com/api/openapi/submit");
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
           headers = curl_slist_append(headers, "Content-Type: application/json");
-
-          curl_easy_setopt(curl, CURLOPT_URL, url);
-          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
           curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-          res = curl_easy_perform(curl);
+          const char *data = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"一只猫在花园里散步\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"}}";
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
 
-          if(res != CURLE_OK) {
-              fprintf(stderr, "curl_easy_perform() failed: %s\n",
-                      curl_easy_strerror(res));
-          }
+          res = curl_easy_perform(curl);
 
           curl_slist_free_all(headers);
           curl_easy_cleanup(curl);
       }
-
-      curl_global_cleanup();
       return 0;
   }
   ```
@@ -508,72 +388,56 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
-          NSURL *url = [NSURL URLWithString:@"https://api.apimart.ai/v1/videos/generations"];
-          
-          NSDictionary *payload = @{
-              @"model": @"sora-2",
-              @"prompt": @"瀑布倾泻而下形成彩虹",
-              @"duration": @15,
-              @"aspect_ratio": @"16:9",
-              @"image_urls": @[@"https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
-          };
-          
-          NSError *error;
-          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
-                                                            options:0
-                                                              error:&error];
-          
+          NSURL *url = [NSURL URLWithString:@"http://pxz-api.xinsulv.com/api/openapi/submit"];
           NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
           [request setHTTPMethod:@"POST"];
           [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
           [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+
+          NSDictionary *payload = @{
+              @"model": @"sora2",
+              @"params": @{
+                  @"prompt": @"一只猫在花园里散步",
+                  @"aspect_ratio": @"16:9",
+                  @"video_length": @"10"
+              }
+          };
+
+          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload options:0 error:nil];
           [request setHTTPBody:jsonData];
-          
-          NSURLSessionDataTask *task = [[NSURLSession sharedSession] 
-              dataTaskWithRequest:request
-              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-                  if (error) {
-                      NSLog(@"Error: %@", error);
-                      return;
-                  }
-                  NSString *result = [[NSString alloc] initWithData:data 
-                                                          encoding:NSUTF8StringEncoding];
+
+          NSURLSession *session = [NSURLSession sharedSession];
+          NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+              if (data) {
+                  NSString *result = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
                   NSLog(@"%@", result);
-              }];
-          
+              }
+          }];
           [task resume];
-          [[NSRunLoop mainRunLoop] run];
+          [[NSRunLoop currentRunLoop] run];
       }
       return 0;
   }
   ```
 
   ```ocaml OCaml
-  (* Requires cohttp and yojson libraries *)
   open Lwt
   open Cohttp
   open Cohttp_lwt_unix
 
-  let url = "https://api.apimart.ai/v1/videos/generations"
+  let url = "http://pxz-api.xinsulv.com/api/openapi/submit"
 
-  let payload = {|{
-    "model": "sora-2",
-    "prompt": "瀑布倾泻而下形成彩虹",
-    "duration": 10,
-          "aspect_ratio": "16:9",
-            "image_urls": ["https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png"]
-  }|}
+  let payload = {|{"model":"sora2","params":{"prompt":"一只猫在花园里散步","aspect_ratio":"16:9","video_length":"10"}}|}
 
   let () =
     let headers = Header.init ()
       |> fun h -> Header.add h "Authorization" "Bearer <token>"
-      |> fun h -> Header.add h "Content-Type" "application/json"
-    in
+      |> fun h -> Header.add h "Content-Type" "application/json" in
     let body = Cohttp_lwt.Body.of_string payload in
-    
+
     let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
-      body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
-      print_endline body_str
+      body |> Cohttp_lwt.Body.to_string >|= fun body ->
+      print_endline body
     in
     Lwt_main.run response
   ```
@@ -583,17 +447,18 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   import 'package:http/http.dart' as http;
 
   void main() async {
-    final url = Uri.parse('https://api.apimart.ai/v1/videos/generations');
-    
-    final payload = {
-      'model': 'sora-2',
-      'prompt': '瀑布倾泻而下形成彩虹',
-      'duration': 15,
-      'aspect_ratio': '16:9',
-      'image_urls': ['https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png']
+    var url = Uri.parse('http://pxz-api.xinsulv.com/api/openapi/submit');
+
+    var payload = {
+      'model': 'sora2',
+      'params': {
+        'prompt': '一只猫在花园里散步',
+        'aspect_ratio': '16:9',
+        'video_length': '10'
+      }
     };
-    
-    final response = await http.post(
+
+    var response = await http.post(
       url,
       headers: {
         'Authorization': 'Bearer <token>',
@@ -601,7 +466,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
       },
       body: jsonEncode(payload),
     );
-    
+
     print(response.body);
   }
   ```
@@ -610,14 +475,15 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   library(httr)
   library(jsonlite)
 
-  url <- "https://api.apimart.ai/v1/videos/generations"
+  url <- "http://pxz-api.xinsulv.com/api/openapi/submit"
 
   payload <- list(
-    model = "sora-2",
-    prompt = "瀑布倾泻而下形成彩虹",
-    duration = 15,
-    aspect_ratio = "16:9",
-    image_urls = c("https://cdn.apimart.ai/doc/9998238782946594-f62f70ce-348c-4b13-bb5f-15f17bee676b-image_task_01K88BEGZHVJWJ3ZV6HY99SWQR_0.png")
+    model = "sora2",
+    params = list(
+      prompt = "一只猫在花园里散步",
+      aspect_ratio = "16:9",
+      video_length = "10"
+    )
   )
 
   response <- POST(
@@ -627,7 +493,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
       `Content-Type` = "application/json"
     ),
     body = toJSON(payload, auto_unbox = TRUE),
-    encode = "raw"
+    encode = "json"
   )
 
   cat(content(response, "text"))
@@ -636,63 +502,38 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
 
 <ResponseExample>
   ```json 200
-  {
-    "code": 200,
-    "data": [
-      {
-        "status": "submitted",
-        "task_id": "task_01K8SGYNNNVBQTXNR4MM964S7K"
-      }
-    ]
-  }
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
+        "status": "pending",
+        "estimated_credits": 100,
+        "created_at": "2025-12-22T06:03:28.242Z"
+    }
+}
   ```
 
   ```json 400
-  {
-    "error": {
-      "code": 400,
-      "message": "请求参数无效",
-      "type": "invalid_request_error"
+    {
+        "statusCode": 400,
+        "message": "请求参数无效",
+        "ok": false
     }
-  }
   ```
-
   ```json 401
   {
     "error": {
       "code": 401,
-      "message": "身份验证失败，请检查您的API密钥",
-      "type": "authentication_error"
+      "message": "身份验证失败，请检查您的API密钥"
     }
   }
   ```
-
-  ```json 402
+```json 433
   {
     "error": {
-      "code": 402,
-      "message": "账户余额不足，请充值后再试",
-      "type": "payment_required"
-    }
-  }
-  ```
-
-  ```json 403
-  {
-    "error": {
-      "code": 403,
-      "message": "访问被禁止，您没有权限访问此资源",
-      "type": "permission_error"
-    }
-  }
-  ```
-
-  ```json 429
-  {
-    "error": {
-      "code": 429,
-      "message": "请求过于频繁，请稍后再试",
-      "type": "rate_limit_error"
+      "code": 433,
+      "message": "账户余额不足，请充值后再试"
     }
   }
   ```
@@ -701,18 +542,7 @@ api: 'POST https://api.apimart.ai/v1/videos/generations'
   {
     "error": {
       "code": 500,
-      "message": "服务器内部错误，请稍后重试",
-      "type": "server_error"
-    }
-  }
-  ```
-
-  ```json 502
-  {
-    "error": {
-      "code": 502,
-      "message": "网关错误，服务器暂时不可用",
-      "type": "bad_gateway"
+      "message": "服务器内部错误，请稍后重试"
     }
   }
   ```

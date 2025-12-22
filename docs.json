@@ -65,34 +65,31 @@
             "icon": "video",
             "pages": [
               {
-                "group": "doubao-seedance-1-0-pro",
-                "icon": "video",
-                "pages": [
-                  "zh/api-reference/videos/doubao/generation"
-                ]
-              },
-              {
                 "group": "Sora2",
                 "icon": "video",
                 "pages": [
-                  "zh/api-reference/videos/sora2/generation",
-                  "zh/api-reference/videos/sora2/create-character",
-                  "zh/api-reference/videos/sora2/query-character",
-                  "zh/api-reference/videos/sora2/remix"
+                  "zh/api-reference/videos/sora2/generation"
                 ]
               },
               {
-                "group": "VEO3",
+                "group": "Sora2 Pro",
                 "icon": "video",
                 "pages": [
-                  "zh/api-reference/videos/veo3/generation"
+                  "zh/api-reference/videos/sora2-pro/generation"
                 ]
               },
               {
-                "group": "MiniMax-Hailuo-02",
+                "group": "VEO3.1",
                 "icon": "video",
                 "pages": [
-                  "zh/api-reference/videos/minimax-hailuo/generation"
+                  "zh/api-reference/videos/veo3-1/generation"
+                ]
+              },
+              {
+                "group": "VEO3.1 Fast",
+                "icon": "video",
+                "pages": [
+                  "zh/api-reference/videos/veo3-1-fast/generation"
                 ]
               }
             ]
@@ -154,34 +151,31 @@
             "icon": "video",
             "pages": [
               {
-                "group": "doubao-seedance-1-0-pro",
-                "icon": "video",
-                "pages": [
-                  "en/api-reference/videos/doubao/generation"
-                ]
-              },
-              {
                 "group": "Sora2",
                 "icon": "video",
                 "pages": [
-                  "en/api-reference/videos/sora2/generation",
-                  "en/api-reference/videos/sora2/create-character",
-                  "en/api-reference/videos/sora2/query-character",
-                  "en/api-reference/videos/sora2/remix"
+                  "en/api-reference/videos/sora2/generation"
                 ]
               },
               {
-                "group": "VEO3",
+                "group": "Sora2 Pro",
                 "icon": "video",
                 "pages": [
-                  "en/api-reference/videos/veo3/generation"
+                  "en/api-reference/videos/sora2-pro/generation"
                 ]
               },
               {
-                "group": "MiniMax-Hailuo-02",
+                "group": "VEO3.1",
                 "icon": "video",
                 "pages": [
-                  "en/api-reference/videos/minimax-hailuo/generation"
+                  "en/api-reference/videos/veo3-1/generation"
+                ]
+              },
+              {
+                "group": "VEO3.1 Fast",
+                "icon": "video",
+                "pages": [
+                  "en/api-reference/videos/veo3-1-fast/generation"
                 ]
               }
             ]
@@ -243,34 +237,31 @@
             "icon": "video",
             "pages": [
               {
-                "group": "doubao-seedance-1-0-pro",
-                "icon": "video",
-                "pages": [
-                  "ja/api-reference/videos/doubao/generation"
-                ]
-              },
-              {
                 "group": "Sora2",
                 "icon": "video",
                 "pages": [
-                  "ja/api-reference/videos/sora2/generation",
-                  "ja/api-reference/videos/sora2/create-character",
-                  "ja/api-reference/videos/sora2/query-character",
-                  "ja/api-reference/videos/sora2/remix"
+                  "ja/api-reference/videos/sora2/generation"
                 ]
               },
               {
-                "group": "VEO3",
+                "group": "Sora2 Pro",
                 "icon": "video",
                 "pages": [
-                  "ja/api-reference/videos/veo3/generation"
+                  "ja/api-reference/videos/sora2-pro/generation"
                 ]
               },
               {
-                "group": "MiniMax-Hailuo-02",
+                "group": "VEO3.1",
                 "icon": "video",
                 "pages": [
-                  "ja/api-reference/videos/minimax-hailuo/generation"
+                  "ja/api-reference/videos/veo3-1/generation"
+                ]
+              },
+              {
+                "group": "VEO3.1 Fast",
+                "icon": "video",
+                "pages": [
+                  "ja/api-reference/videos/veo3-1-fast/generation"
                 ]
               }
             ]
@@ -332,34 +323,31 @@
             "icon": "video",
             "pages": [
               {
-                "group": "doubao-seedance-1-0-pro",
-                "icon": "video",
-                "pages": [
-                  "ko/api-reference/videos/doubao/generation"
-                ]
-              },
-              {
                 "group": "Sora2",
                 "icon": "video",
                 "pages": [
-                  "ko/api-reference/videos/sora2/generation",
-                  "ko/api-reference/videos/sora2/create-character",
-                  "ko/api-reference/videos/sora2/query-character",
-                  "ko/api-reference/videos/sora2/remix"
+                  "ko/api-reference/videos/sora2/generation"
                 ]
               },
               {
-                "group": "VEO3",
+                "group": "Sora2 Pro",
                 "icon": "video",
                 "pages": [
-                  "ko/api-reference/videos/veo3/generation"
+                  "ko/api-reference/videos/sora2-pro/generation"
                 ]
               },
               {
-                "group": "MiniMax-Hailuo-02",
+                "group": "VEO3.1",
                 "icon": "video",
                 "pages": [
-                  "ko/api-reference/videos/minimax-hailuo/generation"
+                  "ko/api-reference/videos/veo3-1/generation"
+                ]
+              },
+              {
+                "group": "VEO3.1 Fast",
+                "icon": "video",
+                "pages": [
+                  "ko/api-reference/videos/veo3-1-fast/generation"
                 ]
               }
             ]
