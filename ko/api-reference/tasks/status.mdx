@@ -2,157 +2,132 @@
 title: '작업 상태 조회'
 description: |
     - 비동기 작업의 실행 상태 및 결과 조회
-    - 실시간 상태 갱신 및 진행 상황 추적
+    - 실시간 상태 업데이트 및 진행 상황 추적
     - 작업 완료 시 생성 결과 획득
-    - 다국어 응답 지원(zh/en/ko/ja)
-api: 'GET https://api.apimart.ai/v1/tasks/{task_id}'
+api: 'POST http://pxz-api.xinsulv.com/api/openapi/query'
 ---
+
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  모든 API는 Bearer Token 인증이 필요합니다.
+  모든 인터페이스는 Bearer Token을 사용한 인증이 필요합니다
 
-  API 키 받기:
+  API Key 획득:
 
-  [API Key 관리 페이지](https://apimart.ai/console/token)에 접속하여 API 키를 받으세요.
+  [API Key 관리 페이지](https://apimart.ai/console/token)를 방문하여 API Key를 획득하세요
 
-  요청 헤더에 다음을 추가하여 사용합니다:
+  사용 시 요청 헤더에 추가:
 
   ```
   Authorization: Bearer YOUR_API_KEY
   ```
 </ParamField>
 
-## Path parameters
+## Body
 
-<ParamField path="task_id" type="string" required>
-  API가 반환하는 작업 ID 생성
-</ParamField>
-
-## Query parameters
-
-<ParamField query="language" type="string">
-  반환 내용의 언어로, 다음 값을 지원합니다:
-
-  * `zh` - 중국어
-  * `en` - 영어
-  * `ko` - 한국어
-  * `ja` - 일본어
-
-  기본값은 영어입니다
+<ParamField body="task_id" type="string" required>
+  생성 API에서 반환된 작업 ID
 </ParamField>
 
 ## Response
 
-<ResponseField name="id" type="string">
-  작업 고유 식별자
+<ResponseField name="task_id" type="string">
+  작업 ID
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  작업 상태 값:
+  작업 상태:
 
-  * `pending` - 대기 중
+  * `pending` - 처리 대기 중
   * `processing` - 처리 중
   * `completed` - 성공적으로 완료
   * `failed` - 실패
-  * `cancelled` - 사용자에 의해 취소됨
 </ResponseField>
 
-<ResponseField name="progress" type="integer">
-  작업 진행률 백분율 (0–100)
+<ResponseField name="input" type="object">
+  작업 입력(선택 사항, 특정 경우에만 반환)
+
+  작업 제출 시의 완전한 매개변수 정보를 포함
 </ResponseField>
 
-<ResponseField name="result" type="object">
-  작업 결과, 상태가 `completed`일 때만 반환
+<ResponseField name="output" type="array">
+  작업 출력(작업 완료 후 반환)
 
-  <Expandable title="Properties">
-    <ResponseField name="images" type="array">
-      생성된 이미지 객체 배열 (이미지 생성 작업)
-    </ResponseField>
-
-    <ResponseField name="videos" type="array">
-      생성된 동영상 객체 배열 (동영상 생성 작업)
-    </ResponseField>
-
-    <ResponseField name="thumbnail_url" type="string">
-      동영상 썸네일 URL (동영상 생성 작업)
-
-      <Note>
-        **중요:** 이 필드는 생성 작업 요청 시 썸네일 생성이 명시적으로 지정된 경우에만 반환됩니다. 요청에 썸네일 생성이 지정되지 않은 경우, 응답에 이 필드가 포함되지 않습니다.
-      </Note>
-    </ResponseField>
-  </Expandable>
-</ResponseField>
-
-<ResponseField name="created" type="integer">
-  작업 생성 타임스탬프
-</ResponseField>
-
-<ResponseField name="completed" type="integer">
-  작업 완료 타임스탬프 (완료 시에만 존재)
-</ResponseField>
-
-<ResponseField name="estimated_time" type="integer">
-  예상 완료 시간 (초)
-</ResponseField>
-
-<ResponseField name="actual_time" type="integer">
-  실제 완료 시간 (초) (완료 시에만 존재)
+  생성 결과를 포함하는 배열, 각 요소는 생성된 리소스를 가리키는 `url` 필드를 포함
 </ResponseField>
 
 <ResponseField name="error" type="object">
-  오류 세부 정보 (상태가 `failed`일 때만 존재)
+  오류 정보(작업 실패 시 반환)
 
-  <Expandable title="Properties">
-    <ResponseField name="code" type="integer">
+  <Expandable title="속성">
+    <ResponseField name="code" type="string">
       오류 코드
     </ResponseField>
 
     <ResponseField name="message" type="string">
       오류 메시지
     </ResponseField>
-
-    <ResponseField name="type" type="string">
-      오류 유형
-    </ResponseField>
   </Expandable>
+</ResponseField>
+
+<ResponseField name="credits_used" type="number">
+  소비된 크레딧
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  생성 시간(ISO 8601 형식)
+</ResponseField>
+
+<ResponseField name="completed_at" type="string">
+  완료 시간(작업 완료 후 반환, ISO 8601 형식)
 </ResponseField>
 
 <RequestExample>
   ```bash cURL
-  curl --request GET \
-    --url 'https://api.apimart.ai/v1/tasks/task-unified-1757156493-imcg5zqt?language=zh' \
-    --header 'Authorization: Bearer <token>'
+  curl --request POST \
+    --url 'http://pxz-api.xinsulv.com/api/openapi/query' \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data-raw '{
+      "task_id": "order_lwU2d-VkUq9-tlCCmrdYu"
+    }'
   ```
 
   ```python Python
   import requests
 
-  url = "https://api.apimart.ai/v1/tasks/task-unified-1757156493-imcg5zqt"
+  url = "http://pxz-api.xinsulv.com/api/openapi/query"
 
   headers = {
-      "Authorization": "Bearer <token>"
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
   }
 
-  params = {
-      "language": "zh"
+  payload = {
+      "task_id": "order_lwU2d-VkUq9-tlCCmrdYu"
   }
 
-  response = requests.get(url, headers=headers, params=params)
+  response = requests.post(url, json=payload, headers=headers)
 
   print(response.json())
   ```
 
   ```javascript JavaScript
-  const url = "https://api.apimart.ai/v1/tasks/task-unified-1757156493-imcg5zqt?language=zh";
+  const url = "http://pxz-api.xinsulv.com/api/openapi/query";
 
   const headers = {
-    "Authorization": "Bearer <token>"
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  const payload = {
+    task_id: "order_lwU2d-VkUq9-tlCCmrdYu"
   };
 
   fetch(url, {
-    method: "GET",
-    headers: headers
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
   })
     .then(response => response.json())
     .then(data => console.log(data))
@@ -163,16 +138,25 @@ api: 'GET https://api.apimart.ai/v1/tasks/{task_id}'
   package main
 
   import (
+      "bytes"
+      "encoding/json"
       "fmt"
       "io/ioutil"
       "net/http"
   )
 
   func main() {
-      url := "https://api.apimart.ai/v1/tasks/task-unified-1757156493-imcg5zqt?language=zh"
+      url := "http://pxz-api.xinsulv.com/api/openapi/query"
 
-      req, _ := http.NewRequest("GET", url, nil)
+      payload := map[string]interface{}{
+          "task_id": "order_lwU2d-VkUq9-tlCCmrdYu",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
       req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
 
       client := &http.Client{}
       resp, err := client.Do(req)
@@ -187,26 +171,41 @@ api: 'GET https://api.apimart.ai/v1/tasks/{task_id}'
   ```
 
   ```java Java
-  import java.net.http.HttpClient;
-  import java.net.http.HttpRequest;
-  import java.net.http.HttpResponse;
-  import java.net.URI;
+  import java.io.BufferedReader;
+  import java.io.InputStreamReader;
+  import java.io.OutputStream;
+  import java.net.HttpURLConnection;
+  import java.net.URL;
 
   public class Main {
-      public static void main(String[] args) throws Exception {
-          String url = "https://api.apimart.ai/v1/tasks/task-unified-1757156493-imcg5zqt?language=zh";
+      public static void main(String[] args) {
+          try {
+              URL url = new URL("http://pxz-api.xinsulv.com/api/openapi/query");
+              HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+              conn.setRequestMethod("POST");
+              conn.setRequestProperty("Authorization", "Bearer <token>");
+              conn.setRequestProperty("Content-Type", "application/json");
+              conn.setDoOutput(true);
 
-          HttpClient client = HttpClient.newHttpClient();
-          HttpRequest request = HttpRequest.newBuilder()
-              .uri(URI.create(url))
-              .header("Authorization", "Bearer <token>")
-              .GET()
-              .build();
+              String jsonPayload = "{\"task_id\":\"order_lwU2d-VkUq9-tlCCmrdYu\"}";
 
-          HttpResponse<String> response = client.send(request,
-              HttpResponse.BodyHandlers.ofString());
+              OutputStream os = conn.getOutputStream();
+              os.write(jsonPayload.getBytes());
+              os.flush();
+              os.close();
 
-          System.out.println(response.body());
+              BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+              String line;
+              StringBuilder response = new StringBuilder();
+              while ((line = br.readLine()) != null) {
+                  response.append(line);
+              }
+              br.close();
+
+              System.out.println(response.toString());
+          } catch (Exception e) {
+              e.printStackTrace();
+          }
       }
   }
   ```
@@ -214,13 +213,20 @@ api: 'GET https://api.apimart.ai/v1/tasks/{task_id}'
   ```php PHP
   <?php
 
-  $url = "https://api.apimart.ai/v1/tasks/task-unified-1757156493-imcg5zqt?language=zh";
+  $url = "http://pxz-api.xinsulv.com/api/openapi/query";
+
+  $payload = array(
+      "task_id" => "order_lwU2d-VkUq9-tlCCmrdYu"
+  );
 
   $ch = curl_init($url);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-  curl_setopt($ch, CURLOPT_HTTPHEADER, [
-      "Authorization: Bearer <token>"
-  ]);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ));
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
 
   $response = curl_exec($ch);
   curl_close($ch);
@@ -234,13 +240,17 @@ api: 'GET https://api.apimart.ai/v1/tasks/{task_id}'
   require 'json'
   require 'uri'
 
-  url = URI("https://api.apimart.ai/v1/tasks/task-unified-1757156493-imcg5zqt?language=zh")
+  url = URI.parse("http://pxz-api.xinsulv.com/api/openapi/query")
+
+  payload = {
+    task_id: "order_lwU2d-VkUq9-tlCCmrdYu"
+  }
 
   http = Net::HTTP.new(url.host, url.port)
-  http.use_ssl = true
-
-  request = Net::HTTP::Get.new(url)
+  request = Net::HTTP::Post.new(url.path)
   request["Authorization"] = "Bearer <token>"
+  request["Content-Type"] = "application/json"
+  request.body = payload.to_json
 
   response = http.request(request)
   puts response.body
@@ -249,11 +259,17 @@ api: 'GET https://api.apimart.ai/v1/tasks/{task_id}'
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "https://api.apimart.ai/v1/tasks/task-unified-1757156493-imcg5zqt?language=zh")!
-
+  let url = URL(string: "http://pxz-api.xinsulv.com/api/openapi/query")!
   var request = URLRequest(url: url)
-  request.httpMethod = "GET"
+  request.httpMethod = "POST"
   request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+  let payload: [String: Any] = [
+      "task_id": "order_lwU2d-VkUq9-tlCCmrdYu"
+  ]
+
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
 
   let task = URLSession.shared.dataTask(with: request) { data, response, error in
       if let error = error {
@@ -272,18 +288,20 @@ api: 'GET https://api.apimart.ai/v1/tasks/{task_id}'
   ```csharp C#
   using System;
   using System.Net.Http;
+  using System.Text;
   using System.Threading.Tasks;
 
   class Program
   {
       static async Task Main(string[] args)
       {
-          var url = "https://api.apimart.ai/v1/tasks/task-unified-1757156493-imcg5zqt?language=zh";
+          var url = "http://pxz-api.xinsulv.com/api/openapi/query";
+          var payload = "{\"task_id\":\"order_lwU2d-VkUq9-tlCCmrdYu\"}";
 
           using var client = new HttpClient();
           client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
-
-          var response = await client.GetAsync(url);
+          var content = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
           var result = await response.Content.ReadAsStringAsync();
 
           Console.WriteLine(result);
@@ -303,13 +321,17 @@ api: 'GET https://api.apimart.ai/v1/tasks/{task_id}'
       curl = curl_easy_init();
 
       if(curl) {
-          const char *url = "https://api.apimart.ai/v1/tasks/task-unified-1757156493-imcg5zqt?language=zh";
+          const char *url = "http://pxz-api.xinsulv.com/api/openapi/query";
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
+          headers = curl_slist_append(headers, "Content-Type: application/json");
+
+          const char *data = "{\"task_id\":\"order_lwU2d-VkUq9-tlCCmrdYu\"}";
 
           curl_easy_setopt(curl, CURLOPT_URL, url);
           curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
 
           res = curl_easy_perform(curl);
 
@@ -332,11 +354,19 @@ api: 'GET https://api.apimart.ai/v1/tasks/{task_id}'
 
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
-          NSURL *url = [NSURL URLWithString:@"https://api.apimart.ai/v1/tasks/task-unified-1757156493-imcg5zqt?language=zh"];
+          NSURL *url = [NSURL URLWithString:@"http://pxz-api.xinsulv.com/api/openapi/query"];
 
           NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
-          [request setHTTPMethod:@"GET"];
+          [request setHTTPMethod:@"POST"];
           [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
+          [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+
+          NSDictionary *payload = @{
+              @"task_id": @"order_lwU2d-VkUq9-tlCCmrdYu"
+          };
+
+          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload options:0 error:nil];
+          [request setHTTPBody:jsonData];
 
           NSURLSessionDataTask *task = [[NSURLSession sharedSession]
               dataTaskWithRequest:request
@@ -363,14 +393,18 @@ api: 'GET https://api.apimart.ai/v1/tasks/{task_id}'
   open Cohttp
   open Cohttp_lwt_unix
 
-  let url = "https://api.apimart.ai/v1/tasks/task-unified-1757156493-imcg5zqt?language=zh"
+  let url = "http://pxz-api.xinsulv.com/api/openapi/query"
+
+  let payload = {|{"task_id":"order_lwU2d-VkUq9-tlCCmrdYu"}|}
 
   let () =
     let headers = Header.init ()
       |> fun h -> Header.add h "Authorization" "Bearer <token>"
+      |> fun h -> Header.add h "Content-Type" "application/json"
     in
+    let body = Cohttp_lwt.Body.of_string payload in
 
-    let response = Client.get ~headers (Uri.of_string url) >>= fun (resp, body) ->
+    let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
       body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
       print_endline body_str
     in
@@ -378,16 +412,23 @@ api: 'GET https://api.apimart.ai/v1/tasks/{task_id}'
   ```
 
   ```dart Dart
+  import 'dart:convert';
   import 'package:http/http.dart' as http;
 
   void main() async {
-    final url = Uri.parse('https://api.apimart.ai/v1/tasks/task-unified-1757156493-imcg5zqt?language=zh');
+    final url = Uri.parse('http://pxz-api.xinsulv.com/api/openapi/query');
 
-    final response = await http.get(
+    final payload = {
+      'task_id': 'order_lwU2d-VkUq9-tlCCmrdYu'
+    };
+
+    final response = await http.post(
       url,
       headers: {
         'Authorization': 'Bearer <token>',
+        'Content-Type': 'application/json',
       },
+      body: jsonEncode(payload),
     );
 
     print(response.body);
@@ -396,14 +437,22 @@ api: 'GET https://api.apimart.ai/v1/tasks/{task_id}'
 
   ```r R
   library(httr)
+  library(jsonlite)
 
-  url <- "https://api.apimart.ai/v1/tasks/task-unified-1757156493-imcg5zqt?language=zh"
+  url <- "http://pxz-api.xinsulv.com/api/openapi/query"
 
-  response <- GET(
+  payload <- list(
+    task_id = "order_lwU2d-VkUq9-tlCCmrdYu"
+  )
+
+  response <- POST(
     url,
     add_headers(
-      Authorization = "Bearer <token>"
-    )
+      Authorization = "Bearer <token>",
+      `Content-Type` = "application/json"
+    ),
+    body = toJSON(payload, auto_unbox = TRUE),
+    encode = "json"
   )
 
   cat(content(response, "text"))
@@ -411,104 +460,44 @@ api: 'GET https://api.apimart.ai/v1/tasks/{task_id}'
 </RequestExample>
 
 <ResponseExample>
-  ```json 200 - 이미지 생성 작업
-  {
-    "code": 200,
+  ```json 200
+{
+    "statusCode": 200,
+    "message": "",
     "data": {
-      "id": "task_01KA040M0HP1GJWBJYZMKX1XS1",
-      "status": "completed",
-      "progress": 100,
-      "result": {
-        "images": [
-          {
-            "url": [
-              "https://upload.apimart.ai/f/image/9998236911693428-e8d7441f-f7b4-4130-97ad-9ef8a0dde2ce-image_task_01KA0413RT2GGNZJ9GWQ4PXF2F_0.png"
-            ],
-            "expires_at": 1763174708
-          }
+        "task_id": "order_lwU2d-VkUq9-tlCCmrdYu",
+        "status": "completed",
+        "created_at": "2025-12-18T10:12:11.000Z",
+        "completed_at": "2025-12-18T10:13:41.000Z",
+        "input": {
+            "model": "nano_banana",
+            "params": {
+                "format": "jpeg",
+                "prompt": "dog",
+                "image_url": "https://s1.pxz.ai/upload/nano_banana/20251217/lAI2Anos92Un0NLgGyDwl.png,https://s1.pxz.ai/upload/nano_banana/20251217/p9DkzlcwX2pleV-kf5XK4.png,https://s1.pxz.ai/upload/nano_banana/20251217/UMM7vnF_JPqmvqt8bO2Uo.jpeg",
+                "show_public": true,
+                "aspect_ratio": "16:9"
+            },
+            "showPublic": 0,
+            "attachments": [
+                "https://s1.pxz.ai/upload/nano_banana/20251217/lAI2Anos92Un0NLgGyDwl.png,https://s1.pxz.ai/upload/nano_banana/20251217/p9DkzlcwX2pleV-kf5XK4.png,https://s1.pxz.ai/upload/nano_banana/20251217/UMM7vnF_JPqmvqt8bO2Uo.jpeg"
+            ]
+        },
+        "credits_used": 100,
+        "output": [
+            {
+                "url": "https://s1.pxz.ai/upload/image-generator/20251218/hYtdX7AInk4HgErJCgD-w-item-0.jpeg"
+            }
         ]
-      },
-      "created": 1763088289,
-      "completed": 1763088308,
-      "estimated_time": 60,
-      "actual_time": 19
     }
-  }
-  ```
-
-  ```json 200 - 동영상 생성 작업 (썸네일 포함)
-  {
-    "code": 200,
-    "data": {
-      "id": "task_01K9S419324DREZFBWNSVXYR6H",
-      "status": "completed",
-      "progress": 100,
-      "result": {
-        "thumbnail_url": "https://upload.apimart.ai/f/image/9998237146274576-da8a0eed-9229-4b31-97df-f3e9817d74c2-thumbnail_task_01K9S419324DREZFBWNSVXYR6H.jpg",
-        "videos": [
-          {
-            "url": [
-              "https://upload.apimart.ai/f/video/9998237146293438-170e0d9d-5d1d-421d-94fe-bcd0be7ae50a-video_task_01K9S419324DREZFBWNSVXYR6H.mp4"
-            ],
-            "expires_at": 1762940095
-          }
-        ]
-      },
-      "created": 1762853430,
-      "completed": 1762853695,
-      "estimated_time": 600,
-      "actual_time": 265
-    }
-  }
+}
   ```
 
   ```json 400
   {
-    "error": {
-      "code": 400,
-      "message": "유효하지 않은 작업 ID",
-      "type": "invalid_request_error"
-    }
-  }
-  ```
-
-  ```json 401
-  {
-    "error": {
-      "code": 401,
-      "message": "인증 실패, API 키를 확인하세요",
-      "type": "authentication_error"
-    }
-  }
-  ```
-
-  ```json 402
-  {
-    "error": {
-      "code": 402,
-      "message": "계정 잔액 부족, 충전 후 다시 시도하세요",
-      "type": "payment_required"
-    }
-  }
-  ```
-
-  ```json 403
-  {
-    "error": {
-      "code": 403,
-      "message": "접근 금지, 리소스 접근 권한이 없습니다",
-      "type": "permission_error"
-    }
-  }
-  ```
-
-  ```json 429
-  {
-    "error": {
-      "code": 429,
-      "message": "요청이 너무 많습니다, 나중에 다시 시도하세요",
-      "type": "rate_limit_error"
-    }
+    "statusCode": 400,
+    "message": "Missing required field: task_id",
+    "ok": false
   }
   ```
 
@@ -516,18 +505,7 @@ api: 'GET https://api.apimart.ai/v1/tasks/{task_id}'
   {
     "error": {
       "code": 500,
-      "message": "서버 내부 오류, 나중에 다시 시도하세요",
-      "type": "server_error"
-    }
-  }
-  ```
-
-  ```json 502
-  {
-    "error": {
-      "code": 502,
-      "message": "게이트웨이 오류, 서버가 일시적으로 사용 불가",
-      "type": "bad_gateway"
+      "message": "서버 내부 오류, 잠시 후 다시 시도하십시오"
     }
   }
   ```

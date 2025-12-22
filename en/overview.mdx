@@ -1,102 +1,228 @@
 ---
-title: 'APIMart — OpenAI Compatible API Gateway (GPT-5, Claude, Gemini)'
-description: 'OpenAI compatible API for GPT-5, Claude, and Gemini. Multi-vendor routing, transparent pricing, low latency. Enterprise-grade SLA, SDK support, pay-as-you-go.'
+title: 'APIMart — AI Image & Video Generation API Platform'
+description: 'Unified AI image and video generation API platform. Supports multiple mainstream models including GPT-4o Image, Gemini, Sora2, VEO3, and more. Asynchronous task processing, transparent pricing, simple and easy to use.'
 ---
-A unified endpoint compatible with OpenAI, supporting GPT-5, Claude, and Gemini. Simply change the base URL to `https://api.apimart.ai/v1` to migrate from OpenAI within minutes—no code rewriting required, continue using existing SDKs. Multi-vendor routing ensures low latency and high availability. Transparent pricing, enterprise-level SLA, and global CDN acceleration.
+
+APIMart is a unified AI content generation API platform that provides image and video generation services. With simple REST API calls, you can use various mainstream AI models like GPT-4o, Gemini, Sora2, VEO3 to generate high-quality images and video content.
 
 ## Quick Start
 
-<Card title="Get Started Now" icon="rocket" horizontal href="/en/api-reference/images/gpt-4o/generation">
-  Start generating images and videos through our unified API endpoint
-</Card>
+<CardGroup cols={2}>
+  <Card title="Image Generation" icon="image" href="/en/api-reference/images/gpt-4o/generation">
+    Generate images using GPT-4o, Gemini, Seedream, and other models
+  </Card>
+  <Card title="Video Generation" icon="video" href="/en/api-reference/videos/sora2/generation">
+    Generate video content using Sora2, VEO3, and other models
+  </Card>
+  <Card title="Task Status Query" icon="list-check" href="/en/api-reference/tasks/status">
+    Query the execution status and results of asynchronous tasks
+  </Card>
+  <Card title="Get API Key" icon="key" href="https://apimart.ai/console/token">
+    Visit the console to get your API Key
+  </Card>
+</CardGroup>
 
-## API Endpoints
+## API Workflow
 
-APIMart offers standardized image and video generation endpoints supporting multiple AI models and providers.
+### 1. Submit Generation Task
 
-### Image Creation API
+All image and video generation uses asynchronous processing. After submitting a task, the system immediately returns a `task_id`:
 
-Use GPT-4o Image, Gemini 2.5 Flash Image-preview models for image creation. Implements OpenAI-style API for seamless integration.
+```bash
+curl --request POST \
+  --url http://pxz-api.xinsulv.com/api/openapi/submit \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "model": "gpt_4o",
+    "params": {
+      "prompt": "一只可爱的猫咪在花园里",
+      "aspect_ratio": "1:1"
+    }
+  }'
+```
 
-<Card title="Image Creation API" icon="image" href="/api-reference/images/gpt-4o/generation">
-  Text-to-image generation
-</Card>
+### 2. Query Task Status
 
-### Video Creation API
+Use the returned `task_id` to query task progress and results:
 
-Use OpenAI Sora2, Google VEO3 models for video creation. Supports asynchronous task management with status tracking and webhook support.
+```bash
+curl --request POST \
+  --url http://pxz-api.xinsulv.com/api/openapi/query \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --header 'Content-Type: application/json' \
+  --data-raw '{
+    "task_id": "order_xxxxxxxxxxxx"
+  }'
+```
 
-<Card title="Video Creation API" icon="video" href="/api-reference/videos/veo3/generation">
-  Asynchronous task management with webhook
-</Card>
+### 3. Get Generation Results
 
-## Platform Benefits
+Once the task is completed, the response will contain the generated image or video URL:
 
-### Transparent Pricing
-
-Pay-as-you-go, no subscription required. All models have clear per-token pricing, more affordable than official provider prices, while maintaining the same quality and low latency.
-
-* All models have clear per-token pricing
-* Enterprise users enjoy bulk discounts
-* No hidden fees
-* Pay only for actual usage
-
-### Multi-Provider Routing and Enterprise-Grade SLA
-
-Built-in intelligent routing across multiple LLM providers ensures high availability and low latency. Automatically switches requests to backup providers during a provider failure with no service interruption.
-
-### 99.9% Uptime SLA
-
-Enterprise-grade reliability with automatic failover. Multi-provider routing ensures requests are always processed with minimal latency.
-
-### Global CDN Acceleration
-
-Global edge nodes provide the lowest latency. Optimized routing reduces response times and enhances the experience for global users.
-
-### Rate Limit Management
-
-Automatically handles rate limits among providers. Intelligent request allocation prevents throttling to ensure smooth operation.
-
-### Real-time Status
-
-Monitors endpoint health and performance. Tracks the progress of asynchronous image and video generation tasks and notifies via webhook. [View Status →](/en/api-reference/tasks/status)
+```json
+{
+  "statusCode": 200,
+  "message": "",
+  "data": {
+    "task_id": "order_xxxxxxxxxxxx",
+    "status": "completed",
+    "output": [
+      {
+        "url": "https://s1.pxz.ai/upload/image-generator/xxx.jpeg"
+      }
+    ]
+  }
+}
+```
 
 ## Supported Models
 
-Access leading image and video generation AI models through a unified API endpoint.
+### Image Generation Series
 
-### Image Creation Models
+APIMart provides multiple image generation models, supporting text-to-image and image-to-image functionality:
 
-Text prompt-based image generation:
+<CardGroup cols={2}>
+  <Card title="GPT-4o Image" icon="image" href="/en/api-reference/images/gpt-4o/generation">
+    OpenAI's high-quality image generation model
+  </Card>
+  <Card title="Gemini-2.5-Flash (Nano banana)" icon="image" href="/en/api-reference/images/nano-banana/generation">
+    Google's latest fast image generation model
+  </Card>
+  <Card title="Gemini-3-Pro (Nano banana2)" icon="image" href="/en/api-reference/images/gemini-3-pro/generation">
+    Google's professional-grade image generation model
+  </Card>
+  <Card title="Seedream-4.0" icon="image" href="/en/api-reference/images/seedream-4/generation">
+    Efficient image generation solution
+  </Card>
+  <Card title="Seedream-4.5" icon="image" href="/en/api-reference/images/seedream-4.5/generation">
+    Latest version of Seedream
+  </Card>
+</CardGroup>
 
-* **GPT-4o Image**: OpenAI image generation model
-* **Gemini 2.5 Flash Image-preview**: Google efficient image model
+### Video Generation Series
 
-### Video Creation Models
+Supports text-to-video and image-to-video, providing multiple resolution and duration options:
 
-Video generation supporting asynchronous task tracking and webhook callbacks:
+<CardGroup cols={2}>
+  <Card title="Sora2" icon="video" href="/en/api-reference/videos/sora2/generation">
+    OpenAI Sora2 video generation model (10-15 seconds)
+  </Card>
+  <Card title="Sora2 Pro" icon="video" href="/en/api-reference/videos/sora2-pro/generation">
+    Sora2 professional version with HD resolution support
+  </Card>
+  <Card title="VEO3.1" icon="video" href="/en/api-reference/videos/veo3-1/generation">
+    Google VEO3.1 video generation model
+  </Card>
+  <Card title="VEO3.1 Fast" icon="video" href="/en/api-reference/videos/veo3-1-fast/generation">
+    VEO3.1 fast version
+  </Card>
+</CardGroup>
 
-* **OpenAI Sora2**: OpenAI video generation model
-* **Google VEO3**: Google video generation model
-* **doubao-seedance-1-0-pro**: Fast high-quality video generation
-* **MiniMax-Hailuo-02**: Efficient video generation supporting image-to-video
+## Core Features
 
-## FAQ
+### Asynchronous Task Processing
+
+All generation requests use asynchronous processing to avoid long waiting times:
+
+- Immediately returns `task_id`
+- Query progress through task status API
+- Support webhook callback notifications (optional)
+- Real-time task status updates: `pending` → `processing` → `completed`
+
+### Multi-Model Support
+
+A unified API endpoint supporting multiple image and video generation models:
+
+- **Image Generation**: 5 models including GPT-4o, Gemini, Seedream
+- **Video Generation**: 4 models including Sora2, VEO3
+- Unified request format and response structure
+- Flexible parameter configuration
+
+### Transparent Pricing
+
+Credit-based billing, transparent and clear:
+
+- Each task returns estimated credit consumption
+- Actual credits used displayed after task completion
+- Only pay for successfully generated content
+- No hidden fees
+
+### Flexible Configuration
+
+Supports various generation parameter configurations:
+
+- **Images**: Multiple aspect ratios (1:1, 3:2, 2:3)
+- **Videos**: Multiple aspect ratios (16:9, 9:16), durations (10s, 15s), resolutions
+- Support reference images (image-to-image, image-to-video)
+- Custom metadata
+
+## Authentication
+
+All API requests require Bearer Token authentication:
+
+```
+Authorization: Bearer YOUR_API_KEY
+```
+
+**Getting API Key:**
+
+Visit the [API Key Management Page](https://apimart.ai/console/token) to get your API Key.
+
+## Frequently Asked Questions
 
 <AccordionGroup>
-  <Accordion title="How do image and video generation work?">
-    Image generation is synchronous and returns results immediately. Video generation is asynchronous — after you submit a request, you receive a task_id, then poll the status endpoint to check progress and get the final video URL.
+  <Accordion title="How do I get an API Key?">
+    Visit the [API Key Management Page](https://apimart.ai/console/token), and you can create and manage your API Key after logging in.
   </Accordion>
 
-  <Accordion title="What does the SLA include?">
-    Our enterprise SLA includes a 99.9% uptime guarantee, global CDN acceleration, multi-vendor routing with automatic failover, and real-time status monitoring. Asynchronous tasks support rate limit management and webhooks.
+  <Accordion title="How long does image and video generation take?">
+    All generation tasks are processed asynchronously. Image generation typically takes a few seconds to tens of seconds, while video generation usually takes 1-5 minutes depending on duration and resolution. After submitting a task, you'll immediately receive a task_id, and you can track progress through the status query API.
   </Accordion>
 
-  <Accordion title="How is pricing calculated?">
-    APIMart offers transparent pay-per-request billing for image and video generation. Pay as you go, no subscriptions required, with volume discounts for enterprise users and no hidden fees. Charges apply only to successfully generated content.
+  <Accordion title="How do I query task status?">
+    Use the task status query API with the `task_id` returned when submitting the task:
+
+    ```bash
+    POST http://pxz-api.xinsulv.com/api/openapi/query
+    ```
+
+    See the [Task Status Query Documentation](/en/api-reference/tasks/status) for details.
   </Accordion>
 
-  <Accordion title="What about latency and performance?">
-    Low latency is ensured through global CDN acceleration and intelligent multi-vendor routing. Image generation is generally instantaneous, while video generation time depends on the model (40–300 seconds). Real-time status monitoring lets you track asynchronous task progress.
+  <Accordion title="Do you support webhook callbacks?">
+    Yes, you can pass the `callback_url` parameter when submitting a task. After the task is completed, the system will send a POST request to that address containing the complete task results.
+  </Accordion>
+
+  <Accordion title="How does billing work?">
+    APIMart uses a credit-based billing system:
+
+    - Estimated credit consumption (`estimated_credits`) is returned when submitting a task
+    - Actual credits used (`credits_used`) is returned after task completion
+    - Only pay for successfully generated content, failed tasks are not charged
+    - Different models have different credit consumption rates
+  </Accordion>
+
+  <Accordion title="What image and video formats are supported?">
+    - **Images**: Supports common formats like JPEG, PNG
+    - **Videos**: Output in MP4 format
+    - **Reference Images**: Input supports publicly accessible image URLs
   </Accordion>
 </AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="View Image Generation Documentation" icon="image" href="/en/api-reference/images/gpt-4o/generation">
+    Learn how to use various image generation models
+  </Card>
+  <Card title="View Video Generation Documentation" icon="video" href="/en/api-reference/videos/sora2/generation">
+    Learn how to generate video content
+  </Card>
+  <Card title="Task Management" icon="list-check" href="/en/api-reference/tasks/status">
+    Learn how to manage and query task status
+  </Card>
+  <Card title="Get API Key" icon="key" href="https://apimart.ai/console/token">
+    Start using APIMart now
+  </Card>
+</CardGroup>

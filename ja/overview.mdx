@@ -1,102 +1,228 @@
 ---
-title: 'APIMart — OpenAI互換APIゲートウェイ（GPT-5、Claude、Gemini）'
-description: 'GPT-5、Claude、Gemini向けのOpenAI互換API。マルチベンダールーティング、透明な価格設定、低遅延。企業向けSLA、SDK対応、オンデマンド課金。'
+title: 'APIMart — AI 画像・動画生成 API プラットフォーム'
+description: '統合された AI 画像および動画生成 API プラットフォーム。GPT-4o Image、Gemini、Sora2、VEO3 などの複数の主流モデルをサポート。非同期タスク処理、透明な料金設定、シンプルで使いやすい。'
 ---
-OpenAI互換の統一されたエンドポイントで、GPT-5、Claude、Geminiをサポートしています。基本URLを`https://api.apimart.ai/v1`に変更するだけで、数分でOpenAIから移行可能—コードを書き直す必要なく、既存のSDKを引き続き使用できます。マルチベンダールーティングで低遅延と高可用性を実現。透明な価格設定、エンタープライズレベルのSLA、グローバルCDNによる高速化。
 
-## Quick Start
+APIMart は、画像と動画の生成サービスを提供する統合 AI コンテンツ生成 API プラットフォームです。シンプルな REST API 呼び出しで、GPT-4o、Gemini、Sora2、VEO3 などの様々な主流 AI モデルを使用して、高品質な画像や動画コンテンツを生成できます。
 
-<Card title="すぐに開始" icon="rocket" horizontal href="/en/api-reference/images/gpt-4o/generation">
-  私たちの統合APIインターフェースを通じて画像と動画の生成を開始します
-</Card>
+## クイックスタート
 
-## API Endpoints
+<CardGroup cols={2}>
+  <Card title="画像生成" icon="image" href="/ja/api-reference/images/gpt-4o/generation">
+    GPT-4o、Gemini、Seedream などのモデルを使用して画像を生成
+  </Card>
+  <Card title="動画生成" icon="video" href="/ja/api-reference/videos/sora2/generation">
+    Sora2、VEO3 などのモデルを使用して動画コンテンツを生成
+  </Card>
+  <Card title="タスクステータス照会" icon="list-check" href="/ja/api-reference/tasks/status">
+    非同期タスクの実行状態と結果を照会
+  </Card>
+  <Card title="API Key を取得" icon="key" href="https://apimart.ai/console/token">
+    コンソールにアクセスして API Key を取得
+  </Card>
+</CardGroup>
 
-APIMart は、複数の AI モデルとプロバイダーに対応した標準化された画像および動画生成のエンドポイントを提供しています。
+## API ワークフロー
 
-### 画像生成 API
+### 1. 生成タスクの送信
 
-GPT-4o Image、Gemini 2.5 Flash Image-preview モデルを使用して画像を生成します。OpenAI スタイルの API を採用しており、シームレスな統合を実現しています。
+すべての画像と動画の生成は非同期処理を採用しています。タスクを送信すると、システムはすぐに `task_id` を返します:
 
-<Card title="画像生成 API" icon="image" href="/api-reference/images/gpt-4o/generation">
-  テキストから画像の生成
-</Card>
+```bash
+curl --request POST \
+  --url http://pxz-api.xinsulv.com/api/openapi/submit \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "model": "gpt_4o",
+    "params": {
+      "prompt": "一只可爱的猫咪在花园里",
+      "aspect_ratio": "1:1"
+    }
+  }'
+```
 
-### 動画生成 API
+### 2. タスクステータスの照会
 
-OpenAI Sora2、Google VEO3 モデルを使用して動画を生成します。非同期タスク管理に対応しており、状態追跡と webhook サポートを備えています。
+返された `task_id` を使用してタスクの進捗と結果を照会します:
 
-<Card title="動画生成 API" icon="video" href="/api-reference/videos/veo3/generation">
-  webhook 対応の非同期タスク管理
-</Card>
+```bash
+curl --request POST \
+  --url http://pxz-api.xinsulv.com/api/openapi/query \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --header 'Content-Type: application/json' \
+  --data-raw '{
+    "task_id": "order_xxxxxxxxxxxx"
+  }'
+```
 
-## Platform Benefits
+### 3. 生成結果の取得
 
-### 透明な価格設定
+タスクが完了すると、レスポンスに生成された画像または動画の URL が含まれます:
 
-利用量に応じた支払いで、サブスクリプションは不要です。すべてのモデルに明確なトークン単価が設定されており、公式プロバイダーよりもお得で、同等の品質と低遅延を維持しています。
+```json
+{
+  "statusCode": 200,
+  "message": "",
+  "data": {
+    "task_id": "order_xxxxxxxxxxxx",
+    "status": "completed",
+    "output": [
+      {
+        "url": "https://s1.pxz.ai/upload/image-generator/xxx.jpeg"
+      }
+    ]
+  }
+}
+```
 
-* すべてのモデルに明確なトークン単価が設定
-* 法人ユーザーは大量割引を享受可能
-* 隠れた費用なし
-* 実際の利用分のみ支払い
+## サポートされているモデル
 
-### マルチプロバイダーのルーティングとエンタープライズグレードSLA
+### 画像生成シリーズ
 
-複数のLLMプロバイダーを内蔵したインテリジェントルーティングにより、高可用性と低遅延を保証します。プロバイダーに障害が発生した場合は、自動的に予備のプロバイダーにリクエストを切り替え、サービスの中断を防ぎます。
+APIMart は複数の画像生成モデルを提供し、テキストから画像への生成および画像から画像への機能をサポートしています:
 
-### 99.9%稼働率のSLA
+<CardGroup cols={2}>
+  <Card title="GPT-4o Image" icon="image" href="/ja/api-reference/images/gpt-4o/generation">
+    OpenAI の高品質画像生成モデル
+  </Card>
+  <Card title="Gemini-2.5-Flash (Nano banana)" icon="image" href="/ja/api-reference/images/nano-banana/generation">
+    Google の最新高速画像生成モデル
+  </Card>
+  <Card title="Gemini-3-Pro (Nano banana2)" icon="image" href="/ja/api-reference/images/gemini-3-pro/generation">
+    Google のプロフェッショナルグレード画像生成モデル
+  </Card>
+  <Card title="Seedream-4.0" icon="image" href="/ja/api-reference/images/seedream-4/generation">
+    効率的な画像生成ソリューション
+  </Card>
+  <Card title="Seedream-4.5" icon="image" href="/ja/api-reference/images/seedream-4.5/generation">
+    Seedream の最新バージョン
+  </Card>
+</CardGroup>
 
-エンタープライズレベルの信頼性と自動フェイルオーバーを備えています。マルチプロバイダーのルーティングにより、常に最低遅延でリクエストが処理されます。
+### 動画生成シリーズ
 
-### グローバルCDNアクセラレーション
+テキストから動画、画像から動画をサポートし、複数の解像度と時間のオプションを提供します:
 
-世界中のエッジノードにより最低遅延を提供します。最適化されたルーティングで応答時間を短縮し、世界中のユーザー体験を向上させます。
+<CardGroup cols={2}>
+  <Card title="Sora2" icon="video" href="/ja/api-reference/videos/sora2/generation">
+    OpenAI Sora2 動画生成モデル(10-15秒)
+  </Card>
+  <Card title="Sora2 Pro" icon="video" href="/ja/api-reference/videos/sora2-pro/generation">
+    Sora2 プロフェッショナル版、HD 解像度をサポート
+  </Card>
+  <Card title="VEO3.1" icon="video" href="/ja/api-reference/videos/veo3-1/generation">
+    Google VEO3.1 動画生成モデル
+  </Card>
+  <Card title="VEO3.1 Fast" icon="video" href="/ja/api-reference/videos/veo3-1-fast/generation">
+    VEO3.1 高速バージョン
+  </Card>
+</CardGroup>
 
-### レート制限管理
+## コア機能
 
-プロバイダー間のレート制限を自動で処理します。インテリジェントなリクエスト配分によりスロットリングを防ぎ、スムーズな運用を保証します。
+### 非同期タスク処理
 
-### リアルタイムステータス
+すべての生成リクエストは非同期処理を採用し、長時間の待機を回避します:
 
-エンドポイントのヘルスとパフォーマンスを監視します。画像や動画生成の非同期タスクの進捗を追跡し、Webhookで通知します。[ステータスを見る →](/en/api-reference/tasks/status)
+- `task_id` を即座に返却
+- タスクステータス API を通じて進捗を照会
+- webhook コールバック通知をサポート(オプション)
+- タスクステータスのリアルタイム更新: `pending` → `processing` → `completed`
 
-## Supported Models
+### マルチモデルサポート
 
-統一されたAPIエンドポイントを通じて、先進的な画像および動画生成AIモデルにアクセスします。
+複数の画像および動画生成モデルをサポートする統一 API エンドポイント:
 
-### Image Creation Models
+- **画像生成**: GPT-4o、Gemini、Seedream など 5 つのモデル
+- **動画生成**: Sora2、VEO3 など 4 つのモデル
+- 統一されたリクエスト形式とレスポンス構造
+- 柔軟なパラメータ設定
 
-テキストプロンプトに基づく画像生成：
+### 透明な料金設定
 
-* **GPT-4o Image**：OpenAI画像生成モデル
-* **Gemini 2.5 Flash Image-preview**：Googleの高性能画像モデル
+クレジットベースの課金で、透明で明確:
 
-### Video Creation Models
+- 各タスクで推定消費クレジットを返却
+- タスク完了後に実際の消費クレジットを表示
+- 成功した生成コンテンツのみに課金
+- 隠れた費用なし
 
-非同期タスク追跡とwebhookコールバックに対応した動画生成：
+### 柔軟な設定
 
-* **OpenAI Sora2**：OpenAI動画生成モデル
-* **Google VEO3**：Google動画生成モデル
-* **doubao-seedance-1-0-pro**：高速で高品質な動画生成
-* **MiniMax-Hailuo-02**：画像から動画への変換をサポートする効率的な動画生成
+様々な生成パラメータ設定をサポート:
 
-## FAQ
+- **画像**: 複数のアスペクト比(1:1、3:2、2:3)
+- **動画**: 複数のアスペクト比(16:9、9:16)、時間(10秒、15秒)、解像度
+- 参照画像をサポート(画像から画像、画像から動画)
+- カスタムメタデータ
+
+## 認証方法
+
+すべての API リクエストには Bearer Token による認証が必要です:
+
+```
+Authorization: Bearer YOUR_API_KEY
+```
+
+**API Key の取得:**
+
+[API Key 管理ページ](https://apimart.ai/console/token) にアクセスして API Key を取得してください。
+
+## よくある質問
 
 <AccordionGroup>
-  <Accordion title="画像と動画の生成はどのように機能しますか？">
-    画像生成は同期的で、すぐに結果を返すことができます。動画生成は非同期で、リクエストを送信すると task_id が返され、その後ステータスのエンドポイントをポーリングして進捗を確認し、最終的な動画の URL を取得します。
+  <Accordion title="API Key を取得するにはどうすればよいですか?">
+    [API Key 管理ページ](https://apimart.ai/console/token) にアクセスし、ログイン後に API Key を作成および管理できます。
   </Accordion>
 
-  <Accordion title="SLAには何が含まれていますか？">
-    当社のエンタープライズSLAには、99.9%の稼働率保証、グローバルCDNアクセラレーション、マルチベンダールーティングと自動フェイルオーバー、リアルタイム状態監視が含まれます。非同期タスクはレート制限管理とWebhookをサポートしています。
+  <Accordion title="画像と動画の生成にはどのくらい時間がかかりますか?">
+    すべての生成タスクは非同期処理されます。画像生成は通常数秒から数十秒かかり、動画生成は時間と解像度に応じて通常 1-5 分かかります。タスクを送信すると即座に task_id が返され、ステータス照会 API で進捗を追跡できます。
   </Accordion>
 
-  <Accordion title="料金はどのように計算されますか？">
-    APIMartは画像・動画生成に対し、透明性のあるリクエスト単位の課金を提供しています。サブスクリプション不要の従量制で、エンタープライズユーザーにはまとめて割引があり、隠れた料金はありません。成功した生成コンテンツのみ課金されます。
+  <Accordion title="タスクステータスを照会するにはどうすればよいですか?">
+    タスク送信時に返された `task_id` を使用してタスクステータス照会 API を使用します:
+
+    ```bash
+    POST http://pxz-api.xinsulv.com/api/openapi/query
+    ```
+
+    詳細は [タスクステータス照会ドキュメント](/ja/api-reference/tasks/status) をご覧ください。
   </Accordion>
 
-  <Accordion title="遅延とパフォーマンスはどうですか？">
-    グローバルCDNアクセラレーションとスマートなマルチベンダールーティングにより低遅延を保証します。画像生成は通常即時ですが、動画生成時間はモデルによって異なり（40～300秒）、リアルタイム状態監視により非同期タスクの進捗を追跡できます。
+  <Accordion title="webhook コールバックはサポートされていますか?">
+    はい、タスク送信時に `callback_url` パラメータを渡すことができます。タスク完了後、システムはそのアドレスに完全なタスク結果を含む POST リクエストを送信します。
+  </Accordion>
+
+  <Accordion title="課金はどのように行われますか?">
+    APIMart はクレジット制の課金を採用しています:
+
+    - タスク送信時に推定消費クレジット(`estimated_credits`)を返却
+    - タスク完了後に実際の消費クレジット(`credits_used`)を返却
+    - 成功した生成コンテンツのみに課金、失敗したタスクは課金されません
+    - モデルによって消費クレジットが異なります
+  </Accordion>
+
+  <Accordion title="どの画像形式と動画形式がサポートされていますか?">
+    - **画像**: JPEG、PNG などの一般的な形式をサポート
+    - **動画**: MP4 形式で出力
+    - **参照画像**: 公開アクセス可能な画像 URL の入力をサポート
   </Accordion>
 </AccordionGroup>
+
+## 次のステップ
+
+<CardGroup cols={2}>
+  <Card title="画像生成ドキュメントを見る" icon="image" href="/ja/api-reference/images/gpt-4o/generation">
+    様々な画像生成モデルの使用方法を学ぶ
+  </Card>
+  <Card title="動画生成ドキュメントを見る" icon="video" href="/ja/api-reference/videos/sora2/generation">
+    動画コンテンツの生成方法を学ぶ
+  </Card>
+  <Card title="タスク管理" icon="list-check" href="/ja/api-reference/tasks/status">
+    タスクステータスの管理と照会方法を学ぶ
+  </Card>
+  <Card title="API Key を取得" icon="key" href="https://apimart.ai/console/token">
+    今すぐ APIMart を使い始める
+  </Card>
+</CardGroup>

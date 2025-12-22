@@ -1,102 +1,228 @@
 ---
-title: 'APIMart — OpenAI 호환 API 게이트웨이(GPT-5, Claude, Gemini)'
-description: 'GPT-5, Claude 및 Gemini에 적합한 OpenAI 호환 API. 다중 공급자 라우팅, 투명한 가격, 낮은 지연 시간. 엔터프라이즈급 SLA, SDK 지원, 사용량 기준 과금.'
+title: 'APIMart — AI 이미지 및 비디오 생성 API 플랫폼'
+description: '통합 AI 이미지 및 비디오 생성 API 플랫폼. GPT-4o Image, Gemini, Sora2, VEO3 등 여러 주류 모델을 지원. 비동기 작업 처리, 투명한 가격 책정, 간단하고 사용하기 쉬움.'
 ---
-GPT-5, Claude 및 Gemini를 지원하는 OpenAI 호환의 통합 엔드포인트입니다. 기본 URL을 `https://api.apimart.ai/v1`로 변경하기만 하면 몇 분 내에 OpenAI에서 마이그레이션할 수 있으며 코드를 다시 작성하지 않고 기존 SDK를 계속 사용할 수 있습니다. 다중 공급업체 라우팅으로 낮은 지연 시간과 높은 가용성을 보장합니다. 투명한 가격 책정, 기업 수준의 SLA 및 글로벌 CDN 가속을 제공합니다.
 
-## Quick Start
+APIMart는 이미지 및 비디오 생성 서비스를 제공하는 통합 AI 콘텐츠 생성 API 플랫폼입니다. 간단한 REST API 호출을 통해 GPT-4o, Gemini, Sora2, VEO3 등 다양한 주류 AI 모델을 사용하여 고품질 이미지 및 비디오 콘텐츠를 생성할 수 있습니다.
 
-<Card title="바로 시작하기" icon="rocket" horizontal href="/en/api-reference/images/gpt-4o/generation">
-  통합 API 엔드포인트를 통해 이미지와 비디오 생성을 시작하세요
-</Card>
+## 빠른 시작
 
-## API Endpoints
+<CardGroup cols={2}>
+  <Card title="이미지 생성" icon="image" href="/ko/api-reference/images/gpt-4o/generation">
+    GPT-4o, Gemini, Seedream 등의 모델을 사용하여 이미지 생성
+  </Card>
+  <Card title="비디오 생성" icon="video" href="/ko/api-reference/videos/sora2/generation">
+    Sora2, VEO3 등의 모델을 사용하여 비디오 콘텐츠 생성
+  </Card>
+  <Card title="작업 상태 조회" icon="list-check" href="/ko/api-reference/tasks/status">
+    비동기 작업의 실행 상태 및 결과 조회
+  </Card>
+  <Card title="API Key 받기" icon="key" href="https://apimart.ai/console/token">
+    콘솔을 방문하여 API Key 받기
+  </Card>
+</CardGroup>
 
-APIMart는 다양한 AI 모델과 공급자를 지원하는 표준화된 이미지 및 비디오 생성 엔드포인트를 제공합니다.
+## API 워크플로
 
-### Image Creation API
+### 1. 생성 작업 제출
 
-GPT-4o Image, Gemini 2.5 Flash Image-preview 모델을 사용하여 이미지를 생성합니다. OpenAI 스타일 API로 매끄러운 통합을 구현합니다.
+모든 이미지 및 비디오 생성은 비동기 처리 방식을 채택합니다. 작업을 제출하면 시스템은 즉시 `task_id`를 반환합니다:
 
-<Card title="Image Creation API" icon="image" href="/api-reference/images/gpt-4o/generation">
-  텍스트로 이미지 생성
-</Card>
+```bash
+curl --request POST \
+  --url http://pxz-api.xinsulv.com/api/openapi/submit \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "model": "gpt_4o",
+    "params": {
+      "prompt": "一只可爱的猫咪在花园里",
+      "aspect_ratio": "1:1"
+    }
+  }'
+```
 
-### Video Creation API
+### 2. 작업 상태 조회
 
-OpenAI Sora2, Google VEO3 모델을 사용하여 비디오를 생성합니다. 비동기 작업 관리를 지원하며 상태 추적 및 webhook 지원 기능이 포함되어 있습니다.
+반환된 `task_id`를 사용하여 작업 진행 상황과 결과를 조회합니다:
 
-<Card title="Video Creation API" icon="video" href="/api-reference/videos/veo3/generation">
-  webhook이 포함된 비동기 작업 관리
-</Card>
+```bash
+curl --request POST \
+  --url http://pxz-api.xinsulv.com/api/openapi/query \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --header 'Content-Type: application/json' \
+  --data-raw '{
+    "task_id": "order_xxxxxxxxxxxx"
+  }'
+```
 
-## Platform Benefits
+### 3. 생성 결과 받기
 
-### 투명한 가격 정책
+작업이 완료되면 응답에 생성된 이미지 또는 비디오 URL이 포함됩니다:
 
-사용량 기반 요금제로 구독이 필요 없습니다. 모든 모델은 명확한 토큰당 가격을 제공하며, 공식 공급업체 가격보다 더 경제적이면서도 동일한 품질과 낮은 지연 시간을 유지합니다.
+```json
+{
+  "statusCode": 200,
+  "message": "",
+  "data": {
+    "task_id": "order_xxxxxxxxxxxx",
+    "status": "completed",
+    "output": [
+      {
+        "url": "https://s1.pxz.ai/upload/image-generator/xxx.jpeg"
+      }
+    ]
+  }
+}
+```
 
-* 모든 모델에 명확한 토큰당 가격 제공
-* 기업 고객을 위한 대량 할인
-* 숨겨진 비용 없음
-* 실제 사용한 만큼만 요금 부과
+## 지원 모델
 
-### 다중 공급업체 라우팅 및 기업급 SLA
+### 이미지 생성 시리즈
 
-내장된 다중 LLM 공급업체의 지능형 라우팅으로 높은 가용성과 낮은 지연 시간을 보장합니다. 특정 공급업체에 장애가 발생하면 자동으로 대체 공급업체로 요청이 전환되어 서비스 중단이 없습니다.
+APIMart는 여러 이미지 생성 모델을 제공하며, 텍스트에서 이미지 및 이미지에서 이미지 기능을 지원합니다:
 
-### 99.9% 정상 가동 시간 SLA
+<CardGroup cols={2}>
+  <Card title="GPT-4o Image" icon="image" href="/ko/api-reference/images/gpt-4o/generation">
+    OpenAI의 고품질 이미지 생성 모델
+  </Card>
+  <Card title="Gemini-2.5-Flash (Nano banana)" icon="image" href="/ko/api-reference/images/nano-banana/generation">
+    Google의 최신 고속 이미지 생성 모델
+  </Card>
+  <Card title="Gemini-3-Pro (Nano banana2)" icon="image" href="/ko/api-reference/images/gemini-3-pro/generation">
+    Google의 전문가급 이미지 생성 모델
+  </Card>
+  <Card title="Seedream-4.0" icon="image" href="/ko/api-reference/images/seedream-4/generation">
+    효율적인 이미지 생성 솔루션
+  </Card>
+  <Card title="Seedream-4.5" icon="image" href="/ko/api-reference/images/seedream-4.5/generation">
+    Seedream 최신 버전
+  </Card>
+</CardGroup>
 
-기업급 신뢰성 및 자동 장애 조치 기능을 제공합니다. 다중 공급업체 라우팅으로 요청이 항상 최저 지연 시간으로 처리됩니다.
+### 비디오 생성 시리즈
 
-### 전 세계 CDN 가속
+텍스트에서 비디오 및 이미지에서 비디오를 지원하며, 여러 해상도 및 재생 시간 옵션을 제공합니다:
 
-전 세계 엣지 노드로 최저 지연 시간을 제공합니다. 최적화된 라우팅으로 응답 시간을 단축하여 전 세계 사용자 경험을 향상시킵니다.
+<CardGroup cols={2}>
+  <Card title="Sora2" icon="video" href="/ko/api-reference/videos/sora2/generation">
+    OpenAI Sora2 비디오 생성 모델 (10-15초)
+  </Card>
+  <Card title="Sora2 Pro" icon="video" href="/ko/api-reference/videos/sora2-pro/generation">
+    Sora2 전문가 버전, HD 해상도 지원
+  </Card>
+  <Card title="VEO3.1" icon="video" href="/ko/api-reference/videos/veo3-1/generation">
+    Google VEO3.1 비디오 생성 모델
+  </Card>
+  <Card title="VEO3.1 Fast" icon="video" href="/ko/api-reference/videos/veo3-1-fast/generation">
+    VEO3.1 빠른 버전
+  </Card>
+</CardGroup>
 
-### 속도 제한 관리
+## 핵심 기능
 
-공급업체 간 속도 제한을 자동으로 처리합니다. 지능형 요청 분배로 스로틀링을 방지하여 원활한 운영을 보장합니다.
+### 비동기 작업 처리
 
-### 실시간 상태
+모든 생성 요청은 비동기 처리 방식을 채택하여 긴 대기 시간을 방지합니다:
 
-엔드포인트의 상태와 성능을 모니터링합니다. 이미지 및 비디오 생성 비동기 작업 진행 상황을 추적하고 webhook으로 알림을 제공합니다. [상태 보기 →](/en/api-reference/tasks/status)
+- `task_id` 즉시 반환
+- 작업 상태 API를 통한 진행 상황 조회
+- webhook 콜백 알림 지원 (선택 사항)
+- 작업 상태 실시간 업데이트: `pending` → `processing` → `completed`
 
-## Supported Models
+### 다중 모델 지원
 
-통합 API 엔드포인트를 통해 선도적인 이미지 및 비디오 생성 AI 모델에 액세스할 수 있습니다.
+여러 이미지 및 비디오 생성 모델을 지원하는 통합 API 엔드포인트:
 
-### Image Creation Models
+- **이미지 생성**: GPT-4o, Gemini, Seedream 등 5개 모델
+- **비디오 생성**: Sora2, VEO3 등 4개 모델
+- 통일된 요청 형식 및 응답 구조
+- 유연한 매개변수 구성
 
-텍스트 프롬프트 기반 이미지 생성:
+### 투명한 가격 책정
 
-* **GPT-4o Image**：OpenAI 이미지 생성 모델
-* **Gemini 2.5 Flash Image-preview**：Google 고효율 이미지 모델
+크레딧 기반 과금, 투명하고 명확함:
 
-### Video Creation Models
+- 각 작업에서 예상 소비 크레딧 반환
+- 작업 완료 후 실제 소비 크레딧 표시
+- 성공적으로 생성된 콘텐츠에만 비용 청구
+- 숨겨진 비용 없음
 
-비동기 작업 추적 및 웹훅 콜백을 지원하는 비디오 생성:
+### 유연한 구성
 
-* **OpenAI Sora2**：OpenAI 비디오 생성 모델
-* **Google VEO3**：Google 비디오 생성 모델
-* **doubao-seedance-1-0-pro**：빠르고 고품질 비디오 생성
-* **MiniMax-Hailuo-02**：이미지에서 비디오로 변환을 지원하는 고효율 비디오 생성
+다양한 생성 매개변수 구성 지원:
 
-## FAQ
+- **이미지**: 여러 종횡비 (1:1, 3:2, 2:3)
+- **비디오**: 여러 종횡비 (16:9, 9:16), 재생 시간 (10초, 15초), 해상도
+- 참조 이미지 지원 (이미지에서 이미지, 이미지에서 비디오)
+- 사용자 지정 메타데이터
+
+## 인증 방법
+
+모든 API 요청에는 Bearer Token 인증이 필요합니다:
+
+```
+Authorization: Bearer YOUR_API_KEY
+```
+
+**API Key 받기:**
+
+[API Key 관리 페이지](https://apimart.ai/console/token)를 방문하여 API Key를 받으세요.
+
+## 자주 묻는 질문
 
 <AccordionGroup>
-  <Accordion title="이미지 및 비디오 생성은 어떻게 작동합니까?">
-    이미지 생성은 동기식으로 즉시 결과를 반환합니다. 비디오 생성은 비동기로, 요청을 제출하면 task_id를 받고 상태 엔드포인트를 폴링하여 진행 상황을 확인하고 최종 비디오 URL을 획득합니다.
+  <Accordion title="API Key를 어떻게 받나요?">
+    [API Key 관리 페이지](https://apimart.ai/console/token)를 방문하여 로그인 후 API Key를 생성하고 관리할 수 있습니다.
   </Accordion>
 
-  <Accordion title="SLA에는 무엇이 포함되어 있습니까?">
-    당사의 엔터프라이즈 SLA에는 99.9% 가동 시간 보장, 글로벌 CDN 가속, 다중 공급업체 라우팅 및 자동 장애 조치, 실시간 상태 모니터링이 포함됩니다. 비동기 작업은 속도 제한 관리 및 웹훅을 지원합니다.
+  <Accordion title="이미지와 비디오 생성에는 얼마나 걸리나요?">
+    모든 생성 작업은 비동기로 처리됩니다. 이미지 생성은 일반적으로 몇 초에서 수십 초가 걸리고, 비디오 생성은 재생 시간과 해상도에 따라 일반적으로 1-5분이 걸립니다. 작업을 제출하면 즉시 task_id가 반환되며, 상태 조회 API를 통해 진행 상황을 추적할 수 있습니다.
   </Accordion>
 
-  <Accordion title="가격은 어떻게 계산됩니까?">
-    APIMart는 이미지 및 비디오 생성에 대해 투명한 요청별 과금 방식을 제공합니다. 구독이 필요 없으며, 엔터프라이즈 고객은 대량 할인 혜택을 받으며 숨겨진 비용이 없습니다. 성공적으로 생성된 콘텐츠에만 비용이 부과됩니다.
+  <Accordion title="작업 상태를 어떻게 조회하나요?">
+    작업 제출 시 반환된 `task_id`를 사용하여 작업 상태 조회 API를 사용합니다:
+
+    ```bash
+    POST http://pxz-api.xinsulv.com/api/openapi/query
+    ```
+
+    자세한 내용은 [작업 상태 조회 문서](/ko/api-reference/tasks/status)를 참조하세요.
   </Accordion>
 
-  <Accordion title="지연 시간과 성능은 어떻습니까?">
-    글로벌 CDN 가속과 스마트 다중 공급업체 라우팅으로 낮은 지연 시간을 보장합니다. 이미지 생성은 일반적으로 즉시 완료되며, 비디오 생성 시간은 모델에 따라 40~300초가 소요됩니다. 실시간 상태 모니터링을 통해 비동기 작업 진행 상황을 추적할 수 있습니다.
+  <Accordion title="webhook 콜백을 지원하나요?">
+    네, 작업 제출 시 `callback_url` 매개변수를 전달할 수 있습니다. 작업이 완료되면 시스템이 해당 주소로 완전한 작업 결과를 포함한 POST 요청을 보냅니다.
+  </Accordion>
+
+  <Accordion title="과금은 어떻게 이루어지나요?">
+    APIMart는 크레딧 기반 과금 시스템을 채택합니다:
+
+    - 작업 제출 시 예상 소비 크레딧(`estimated_credits`) 반환
+    - 작업 완료 후 실제 소비 크레딧(`credits_used`) 반환
+    - 성공적으로 생성된 콘텐츠에만 비용 청구, 실패한 작업은 청구되지 않음
+    - 모델에 따라 크레딧 소비량이 다름
+  </Accordion>
+
+  <Accordion title="어떤 이미지 및 비디오 형식을 지원하나요?">
+    - **이미지**: JPEG, PNG 등 일반적인 형식 지원
+    - **비디오**: MP4 형식으로 출력
+    - **참조 이미지**: 공개적으로 액세스 가능한 이미지 URL 입력 지원
   </Accordion>
 </AccordionGroup>
+
+## 다음 단계
+
+<CardGroup cols={2}>
+  <Card title="이미지 생성 문서 보기" icon="image" href="/ko/api-reference/images/gpt-4o/generation">
+    다양한 이미지 생성 모델 사용 방법 배우기
+  </Card>
+  <Card title="비디오 생성 문서 보기" icon="video" href="/ko/api-reference/videos/sora2/generation">
+    비디오 콘텐츠 생성 방법 배우기
+  </Card>
+  <Card title="작업 관리" icon="list-check" href="/ko/api-reference/tasks/status">
+    작업 상태 관리 및 조회 방법 배우기
+  </Card>
+  <Card title="API Key 받기" icon="key" href="https://apimart.ai/console/token">
+    지금 APIMart 사용 시작하기
+  </Card>
+</CardGroup>
