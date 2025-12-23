@@ -5,16 +5,18 @@ description: |
     - High-quality image generation, professional-grade image creation
 api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 ---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  All endpoints require authentication using a Bearer Token.
+  All endpoints require authentication using a Bearer Token
 
   Get the API Key:
 
-  Visit the [API Key management page](https://apimart.ai/console/token) to get your API Key.
+  Visit the <a href={apiKeyUrl} target="_blank">API Key management page</a> to obtain your API Key
 
-  Add to the request headers:
+  Add the following to the request header when using:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -30,17 +32,17 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  Model parameter object
+  Model parameters object
 
   <Expandable title="params object properties">
     <ParamField body="prompt" type="string" required>
       Text description for image generation
 
-      No limitations
+      No limit
     </ParamField>
 
     <ParamField body="image_url" type="array">
-      List of reference image URLs for image-to-image
+      List of URLs of reference images for image-to-image
 
       * Up to 8 images
       * Supports publicly accessible URLs
@@ -59,9 +61,9 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       * `3:4` - Portrait 3:4
       * `5:4` - Landscape 5:4
       * `4:5` - Portrait 4:5
-      * `16:9` - Landscape widescreen
-      * `9:16` - Portrait vertical screen
-      * `21:9` - Ultra widescreen
+      * `16:9` - Widescreen landscape
+      * `9:16` - Widescreen portrait
+      * `21:9` - Ultra wide screen
     </ParamField>
 
     <ParamField body="resolution" type="string" default="1K">
@@ -69,7 +71,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 
       Supported resolutions:
 
-      * `1K` - Basic resolution (default)
+      * `1K` - Base resolution (default)
       * `2K` - Standard resolution
       * `4K` - High definition resolution
     </ParamField>
@@ -85,22 +87,32 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   </Expandable>
 </ParamField>
 
-<ParamField body="callback_url" type="string">
-  Callback URL for task completion notification
+<ParamField body="out_task_id" type="string" required>
+  Initiator task ID
 
-  The system will send a POST request to this URL after the task is completed to notify the result
+  User-defined task identifier, required
+</ParamField>
+
+<ParamField body="callback_url" type="string">
+  Callback notification URL after task completion
+
+  After the task completes, the system will send a POST request to this URL to notify the result
 </ParamField>
 
 <ParamField body="metadata" type="object">
   Custom metadata
 
-  Returned as-is when querying results, can be used for business identification
+  Returned as-is in query results, can be used for business identification
 </ParamField>
 
 ## Response
 
 <ResponseField name="task_id" type="string">
-  Task ID used to query the result
+  Task ID, used to query the result
+</ResponseField>
+
+<ResponseField name="out_task_id" type="string">
+  Initiator's task ID, can be used to query the result
 </ResponseField>
 
 <ResponseField name="status" type="string">
@@ -108,7 +120,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  Estimated credits consumed
+  Estimated credits consumption
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
@@ -124,11 +136,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     --data '{
       "model": "nano_banana_pro",
       "params": {
-        "prompt": "Professional city nightscape",
+        "prompt": "Professional-grade city nightscape",
         "aspect_ratio": "16:9",
         "resolution": "2K",
         "format": "png"
-      }
+      },
+      "out_task_id": "my_task_123456"
     }'
   ```
 
@@ -140,11 +153,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   payload = {
       "model": "nano_banana_pro",
       "params": {
-          "prompt": "Professional city nightscape",
+          "prompt": "Professional-grade city nightscape",
           "aspect_ratio": "16:9",
           "resolution": "2K",
           "format": "png"
-      }
+      },
+      "out_task_id": "my_task_123456"
   }
 
   headers = {
@@ -163,11 +177,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   const payload = {
     model: "nano_banana_pro",
     params: {
-      prompt: "Professional city nightscape",
+      prompt: "Professional-grade city nightscape",
       aspect_ratio: "16:9",
       resolution: "2K",
       format: "png"
-    }
+    },
+    out_task_id: "my_task_123456"
   };
 
   const headers = {
@@ -202,11 +217,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       payload := map[string]interface{}{
           "model": "nano_banana_pro",
           "params": map[string]interface{}{
-              "prompt":       "Professional city nightscape",
+              "prompt":       "Professional-grade city nightscape",
               "aspect_ratio": "16:9",
               "resolution":   "2K",
               "format":       "png",
           },
+          "out_task_id": "my_task_123456",
       }
 
       jsonData, _ := json.Marshal(payload)
@@ -241,11 +257,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           {
             "model": "nano_banana_pro",
             "params": {
-              "prompt": "Professional city nightscape",
+              "prompt": "Professional-grade city nightscape",
               "aspect_ratio": "16:9",
               "resolution": "2K",
               "format": "png"
-            }
+            },
+            "out_task_id": "my_task_123456"
           }
           """;
 
@@ -273,11 +290,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   $payload = [
       "model" => "nano_banana_pro",
       "params" => [
-          "prompt" => "Professional city nightscape",
+          "prompt" => "Professional-grade city nightscape",
           "aspect_ratio" => "16:9",
           "resolution" => "2K",
           "format" => "png"
-      ]
+      ],
+      "out_task_id" => "my_task_123456"
   ];
 
   $ch = curl_init($url);
@@ -306,11 +324,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   payload = {
     model: "nano_banana_pro",
     params: {
-      prompt: "Professional city nightscape",
+      prompt: "Professional-grade city nightscape",
       aspect_ratio: "16:9",
       resolution: "2K",
       format: "png"
-    }
+    },
+    out_task_id: "my_task_123456"
   }
 
   http = Net::HTTP.new(url.host, url.port)
@@ -332,11 +351,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   let payload: [String: Any] = [
       "model": "nano_banana_pro",
       "params": [
-          "prompt": "Professional city nightscape",
+          "prompt": "Professional-grade city nightscape",
           "aspect_ratio": "16:9",
           "resolution": "2K",
           "format": "png"
-      ]
+      ],
+      "out_task_id": "my_task_123456"
   ]
 
   var request = URLRequest(url: url)
@@ -374,11 +394,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           var payload = @"{
               ""model"": ""nano_banana_pro"",
               ""params"": {
-                  ""prompt"": ""Professional city nightscape"",
+                  ""prompt"": ""Professional-grade city nightscape"",
                   ""aspect_ratio"": ""16:9"",
                   ""resolution"": ""2K"",
                   ""format"": ""png""
-              }
+              },
+              ""out_task_id"": ""my_task_123456""
           }";
 
           using var client = new HttpClient();
@@ -409,11 +430,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           const char *payload = "{"
               "\"model\":\"nano_banana_pro\","
               "\"params\":{"
-                  "\"prompt\":\"Professional city nightscape\","
+                  "\"prompt\":\"Professional-grade city nightscape\","
                   "\"aspect_ratio\":\"16:9\","
                   "\"resolution\":\"2K\","
                   "\"format\":\"png\""
-              "}"
+              "},"
+              "\"out_task_id\":\"my_task_123456\""
           "}";
 
           struct curl_slist *headers = NULL;
@@ -450,11 +472,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           NSDictionary *payload = @{
               @"model": @"nano_banana_pro",
               @"params": @{
-                  @"prompt": @"Professional city nightscape",
+                  @"prompt": @"Professional-grade city nightscape",
                   @"aspect_ratio": @"16:9",
                   @"resolution": @"2K",
                   @"format": @"png"
-              }
+              },
+              @"out_task_id": @"my_task_123456"
           };
 
           NSError *error;
@@ -498,11 +521,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   let payload = {|{
     "model": "nano_banana_pro",
     "params": {
-      "prompt": "Professional city nightscape",
+      "prompt": "Professional-grade city nightscape",
       "aspect_ratio": "16:9",
       "resolution": "2K",
       "format": "png"
-    }
+    },
+    "out_task_id": "my_task_123456"
   }|}
 
   let () =
@@ -529,11 +553,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     final payload = {
       'model': 'nano_banana_pro',
       'params': {
-        'prompt': 'Professional city nightscape',
+        'prompt': 'Professional-grade city nightscape',
         'aspect_ratio': '16:9',
         'resolution': '2K',
         'format': 'png'
-      }
+      },
+      'out_task_id': 'my_task_123456'
     };
 
     final response = await http.post(
@@ -558,11 +583,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   payload <- list(
     model = "nano_banana_pro",
     params = list(
-      prompt = "Professional city nightscape",
+      prompt = "Professional-grade city nightscape",
       aspect_ratio = "16:9",
       resolution = "2K",
       format = "png"
-    )
+    ),
+    out_task_id = "my_task_123456"
   )
 
   response <- POST(
@@ -586,6 +612,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     "message": "",
     "data": {
         "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
+        "out_task_id": "my_task_123456",
         "status": "pending",
         "estimated_credits": 100,
         "created_at": "2025-12-22T06:03:28.242Z"

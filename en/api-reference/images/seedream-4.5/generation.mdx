@@ -1,20 +1,22 @@
 ---
 title: 'Seedream V4.5 Image Generation'
 description: |
-    - Asynchronous processing mode, returns a task ID for subsequent queries
+    - Asynchronous processing mode, returns task ID for subsequent querying
     - Higher quality image generation
 api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 ---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
   All endpoints require authentication using a Bearer Token.
 
-  Get the API Key:
+  Get your API Key:
 
-  Visit the [API Key Management Page](https://apimart.ai/console/token) to get your API Key.
+  Visit the <a href={apiKeyUrl} target="_blank">API Key Management Page</a> to obtain your API Key.
 
-  Add the following in the request header:
+  Add the following to the request header:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -24,32 +26,32 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 ## Body
 
 <ParamField body="model" type="string" required>
-  Model name
+  Model Name
 
-  Fixed value: `"seedream_v4_5"`
+  Fixed Value: `"seedream_v4_5"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  Model parameters object
+  Model Parameters Object
 
-  <Expandable title="params object properties">
+  <Expandable title="params Object Properties">
     <ParamField body="prompt" type="string" required>
-      Text description for image generation
+      Text Description for Image Generation
 
-      No limit
+      No Limit
     </ParamField>
 
     <ParamField body="image_url" type="array">
-      List of reference image URLs for image-to-image
+      List of Reference Image URLs for Image-to-Image
 
       * Up to 9 images
       * Supports publicly accessible URLs
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="1:1">
-      Aspect ratio for image generation
+      Aspect Ratio for Image Generation
 
-      Supported aspect ratios:
+      Supported Aspect Ratios:
 
       * `1:1` - Square (default)
       * `3:2` - Landscape 3:2
@@ -58,30 +60,35 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       * `3:4` - Portrait 3:4
       * `5:4` - Landscape 5:4
       * `4:5` - Portrait 4:5
-      * `16:9` - Landscape widescreen
-      * `9:16` - Portrait vertical screen
-      * `21:9` - Ultra widescreen
+      * `16:9` - Landscape Widescreen
+      * `9:16` - Portrait Vertical Screen
+      * `21:9` - Ultra Widescreen
     </ParamField>
 
     <ParamField body="resolution" type="string" default="basic">
-      Image resolution
+      Image Resolution
 
-      Supported resolutions:
+      Supported Resolutions:
 
-      * `basic` - Basic resolution (default)
-      * `high` - High definition resolution
+      * `basic` - Basic Resolution (default)
+      * `high` - High Resolution
     </ParamField>
   </Expandable>
 </ParamField>
 
-<ParamField body="callback_url" type="string">
-  Callback notification URL after task completion
+<ParamField body="out_task_id" type="string" required>
+  Initiator Task ID
 
-  After the task is completed, the system will send a POST request to this URL to notify the result
+  User-defined Task Identifier, Required
+</ParamField>
+<ParamField body="callback_url" type="string">
+  Callback Notification URL after Task Completion
+
+  The system will send a POST request to this address to notify the result after task completion
 </ParamField>
 
 <ParamField body="metadata" type="object">
-  Custom metadata
+  Custom Metadata
 
   Returned as-is when querying results, can be used for business identification
 </ParamField>
@@ -89,9 +96,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 ## Response
 
 <ResponseField name="task_id" type="string">
-  Task ID used to query the result
+  Task ID, used to query the result
 </ResponseField>
 
+<ResponseField name="out_task_id" type="string">
+  Initiator's Task ID, can be used to query the result
+</ResponseField>
 <ResponseField name="status" type="string">
   Initial status, fixed as `"pending"`
 </ResponseField>
@@ -113,10 +123,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     --data '{
       "model": "seedream_v4_5",
       "params": {
-        "prompt": "A fantastic forest night scene",
+        "prompt": "A dreamlike forest night scene",
         "aspect_ratio": "16:9",
         "resolution": "high"
-      }
+      },
+      "out_task_id": "my_task_123456"
     }'
   ```
 
@@ -128,10 +139,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   payload = {
       "model": "seedream_v4_5",
       "params": {
-          "prompt": "A fantastic forest night scene",
+          "prompt": "A dreamlike forest night scene",
           "aspect_ratio": "16:9",
           "resolution": "high"
-      }
+      },
+      "out_task_id": "my_task_123456"
   }
 
   headers = {
@@ -150,7 +162,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   const payload = {
     model: "seedream_v4_5",
     params: {
-      prompt: "A fantastic forest night scene",
+      prompt: "A dreamlike forest night scene",
       aspect_ratio: "16:9",
       resolution: "high"
     }
@@ -188,10 +200,10 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       payload := map[string]interface{}{
           "model": "seedream_v4_5",
           "params": map[string]interface{}{
-              "prompt":       "A fantastic forest night scene",
+              "prompt":       "A dreamlike forest night scene",
               "aspect_ratio": "16:9",
               "resolution":   "high",
-          },
+    
       }
 
       jsonData, _ := json.Marshal(payload)
@@ -226,9 +238,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           {
             "model": "seedream_v4_5",
             "params": {
-              "prompt": "A fantastic forest night scene",
+              "prompt": "A dreamlike forest night scene",
               "aspect_ratio": "16:9",
               "resolution": "high"
+
+      "out_task_id": "my_task_123456"
             }
           }
           """;
@@ -257,7 +271,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   $payload = [
       "model" => "seedream_v4_5",
       "params" => [
-          "prompt" => "A fantastic forest night scene",
+          "prompt" => "A dreamlike forest night scene",
           "aspect_ratio" => "16:9",
           "resolution" => "high"
       ]
@@ -289,7 +303,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   payload = {
     model: "seedream_v4_5",
     params: {
-      prompt: "A fantastic forest night scene",
+      prompt: "A dreamlike forest night scene",
       aspect_ratio: "16:9",
       resolution: "high"
     }
@@ -314,9 +328,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   let payload: [String: Any] = [
       "model": "seedream_v4_5",
       "params": [
-          "prompt": "A fantastic forest night scene",
+          "prompt": "A dreamlike forest night scene",
           "aspect_ratio": "16:9",
           "resolution": "high"
+
+      "out_task_id": "my_task_123456"
       ]
   ]
 
@@ -355,7 +371,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           var payload = @"{
               ""model"": ""seedream_v4_5"",
               ""params"": {
-                  ""prompt"": ""A fantastic forest night scene"",
+                  ""prompt"": ""A dreamlike forest night scene"",
                   ""aspect_ratio"": ""16:9"",
                   ""resolution"": ""high""
               }
@@ -389,7 +405,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           const char *payload = "{"
               "\"model\":\"seedream_v4_5\","
               "\"params\":{"
-                  "\"prompt\":\"A fantastic forest night scene\","
+                  "\"prompt\":\"A dreamlike forest night scene\","
                   "\"aspect_ratio\":\"16:9\","
                   "\"resolution\":\"high\""
               "}"
@@ -429,7 +445,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           NSDictionary *payload = @{
               @"model": @"seedream_v4_5",
               @"params": @{
-                  @"prompt": @"A fantastic forest night scene",
+                  @"prompt": @"A dreamlike forest night scene",
                   @"aspect_ratio": @"16:9",
                   @"resolution": @"high"
               }
@@ -476,9 +492,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   let payload = {|{
     "model": "seedream_v4_5",
     "params": {
-      "prompt": "A fantastic forest night scene",
+      "prompt": "A dreamlike forest night scene",
       "aspect_ratio": "16:9",
       "resolution": "high"
+
+      "out_task_id": "my_task_123456"
     }
   }|}
 
@@ -506,7 +524,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     final payload = {
       'model': 'seedream_v4_5',
       'params': {
-        'prompt': 'A fantastic forest night scene',
+        'prompt': 'A dreamlike forest night scene',
         'aspect_ratio': '16:9',
         'resolution': 'high'
       }
@@ -517,7 +535,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       headers: {
         'Authorization': 'Bearer <token>',
         'Content-Type': 'application/json'
-      },
+
       body: jsonEncode(payload),
     );
 
@@ -534,7 +552,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   payload <- list(
     model = "seedream_v4_5",
     params = list(
-      prompt = "A fantastic forest night scene",
+      prompt = "A dreamlike forest night scene",
       aspect_ratio = "16:9",
       resolution = "high"
     )
@@ -561,6 +579,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     "message": "",
     "data": {
         "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
+        "out_task_id": "my_task_123456",
         "status": "pending",
         "estimated_credits": 100,
         "created_at": "2025-12-22T06:03:28.242Z"

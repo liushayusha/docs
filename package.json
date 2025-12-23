@@ -1,7 +1,7 @@
 {
-  "name": "apimart-docs",
+  "name": "aireiter-docs",
   "version": "1.0.0",
-  "description": "APIMart API Documentation - Multilingual Translation System",
+  "description": "AIReiter API Documentation - Multilingual Translation System",
   "scripts": {
     "translate": "tsx translate.ts",
     "translate:force": "tsx translate.ts --force"

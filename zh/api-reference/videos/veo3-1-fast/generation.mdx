@@ -8,6 +8,8 @@ description: |
 api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 ---
 
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
@@ -15,7 +17,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 
   获取 API Key：
 
-  访问 [API Key 管理页面](https://apimart.ai/console/token) 获取您的 API Key
+  访问 <a href={apiKeyUrl} target="_blank">API Key 管理页面</a> 获取您的 API Key
 
   使用时在请求头中添加：
 
@@ -67,6 +69,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   </Expandable>
 </ParamField>
 
+<ParamField body="out_task_id" type="string" required>
+  发起方任务ID
+
+  用户自定义的任务标识，必填
+</ParamField>
 <ParamField body="callback_url" type="string">
   任务完成后的回调通知地址
 
@@ -85,6 +92,9 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   任务ID，用于查询结果
 </ResponseField>
 
+<ResponseField name="out_task_id" type="string">
+  发起方任务ID，可用于查询结果
+</ResponseField>
 <ResponseField name="status" type="string">
   初始状态，固定为 `"pending"`
 </ResponseField>
@@ -110,7 +120,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
         "image_url": "https://example.com/start.jpg",
         "end_image_url": "https://example.com/end.jpg",
         "aspect_ratio": "16:9"
-      }
+      },
+      "out_task_id": "my_task_123456"
     }'
   ```
 
@@ -126,7 +137,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           "image_url": "https://example.com/start.jpg",
           "end_image_url": "https://example.com/end.jpg",
           "aspect_ratio": "16:9"
-      }
+      },
+      "out_task_id": "my_task_123456"
   }
 
   headers = {
@@ -149,7 +161,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       image_url: "https://example.com/start.jpg",
       end_image_url: "https://example.com/end.jpg",
       aspect_ratio: "16:9"
-    }
+    },
+    out_task_id: "my_task_123456"
   };
 
   const headers = {
@@ -189,6 +202,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
               "end_image_url": "https://example.com/end.jpg",
               "aspect_ratio":  "16:9",
           },
+          "out_task_id": "my_task_123456",
       }
 
       jsonData, _ := json.Marshal(payload)
@@ -226,7 +240,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
               conn.setRequestProperty("Content-Type", "application/json");
               conn.setDoOutput(true);
 
-              String jsonPayload = "{\"model\":\"veo3_1_fast\",\"params\":{\"prompt\":\"山间的雾气缓缓流动\",\"image_url\":\"https://example.com/start.jpg\",\"end_image_url\":\"https://example.com/end.jpg\",\"aspect_ratio\":\"16:9\"}}";
+              String jsonPayload = "{\"model\":\"veo3_1_fast\",\"params\":{\"prompt\":\"山间的雾气缓缓流动\",\"image_url\":\"https://example.com/start.jpg\",\"end_image_url\":\"https://example.com/end.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
 
               OutputStream os = conn.getOutputStream();
               os.write(jsonPayload.getBytes());
@@ -260,7 +274,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           "image_url" => "https://example.com/start.jpg",
           "end_image_url" => "https://example.com/end.jpg",
           "aspect_ratio" => "16:9"
-      )
+      ),
+      "out_task_id" => "my_task_123456"
   );
 
   $ch = curl_init($url);
@@ -293,7 +308,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       image_url: "https://example.com/start.jpg",
       end_image_url: "https://example.com/end.jpg",
       aspect_ratio: "16:9"
-    }
+    },
+    out_task_id: "my_task_123456"
   }
 
   http = Net::HTTP.new(url.host, url.port)
@@ -322,7 +338,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           "image_url": "https://example.com/start.jpg",
           "end_image_url": "https://example.com/end.jpg",
           "aspect_ratio": "16:9"
-      ]
+      ],
+      "out_task_id": "my_task_123456"
   ]
 
   request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
@@ -346,7 +363,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       static async Task Main(string[] args)
       {
           var url = "https://pxz-api.xinsulv.com/api/openapi/submit";
-          var payload = "{\"model\":\"veo3_1_fast\",\"params\":{\"prompt\":\"山间的雾气缓缓流动\",\"image_url\":\"https://example.com/start.jpg\",\"end_image_url\":\"https://example.com/end.jpg\",\"aspect_ratio\":\"16:9\"}}";
+          var payload = "{\"model\":\"veo3_1_fast\",\"params\":{\"prompt\":\"山间的雾气缓缓流动\",\"image_url\":\"https://example.com/start.jpg\",\"end_image_url\":\"https://example.com/end.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
 
           using (var client = new HttpClient())
           {
@@ -378,7 +395,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           headers = curl_slist_append(headers, "Content-Type: application/json");
           curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-          const char *data = "{\"model\":\"veo3_1_fast\",\"params\":{\"prompt\":\"山间的雾气缓缓流动\",\"image_url\":\"https://example.com/start.jpg\",\"end_image_url\":\"https://example.com/end.jpg\",\"aspect_ratio\":\"16:9\"}}";
+          const char *data = "{\"model\":\"veo3_1_fast\",\"params\":{\"prompt\":\"山间的雾气缓缓流动\",\"image_url\":\"https://example.com/start.jpg\",\"end_image_url\":\"https://example.com/end.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
           curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
 
           res = curl_easy_perform(curl);
@@ -408,7 +425,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
                   @"image_url": @"https://example.com/start.jpg",
                   @"end_image_url": @"https://example.com/end.jpg",
                   @"aspect_ratio": @"16:9"
-              }
+              },
+              @"out_task_id": @"my_task_123456"
           };
 
           NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload options:0 error:nil];
@@ -435,7 +453,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 
   let url = "https://pxz-api.xinsulv.com/api/openapi/submit"
 
-  let payload = {|{"model":"veo3_1_fast","params":{"prompt":"山间的雾气缓缓流动","image_url":"https://example.com/start.jpg","end_image_url":"https://example.com/end.jpg","aspect_ratio":"16:9"}}|}
+  let payload = {|{"model":"veo3_1_fast","params":{"prompt":"山间的雾气缓缓流动","image_url":"https://example.com/start.jpg","end_image_url":"https://example.com/end.jpg","aspect_ratio":"16:9"},"out_task_id":"my_task_123456"}|}
 
   let () =
     let headers = Header.init ()
@@ -464,7 +482,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
         'image_url': 'https://example.com/start.jpg',
         'end_image_url': 'https://example.com/end.jpg',
         'aspect_ratio': '16:9'
-      }
+      },
+      'out_task_id': 'my_task_123456'
     };
 
     var response = await http.post(
@@ -493,7 +512,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       image_url = "https://example.com/start.jpg",
       end_image_url = "https://example.com/end.jpg",
       aspect_ratio = "16:9"
-    )
+    ),
+    out_task_id = "my_task_123456"
   )
 
   response <- POST(
@@ -517,6 +537,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     "message": "",
     "data": {
         "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
+        "out_task_id": "my_task_123456",
+        "out_task_id": "my_task_123456",
         "status": "pending",
         "estimated_credits": 100,
         "created_at": "2025-12-22T06:03:28.242Z"

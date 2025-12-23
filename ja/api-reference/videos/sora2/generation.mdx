@@ -1,10 +1,12 @@
 ---
 title: 'Sora2 ビデオ生成'
 description: |
-    - 非同期処理モード、後続のクエリ用にタスクIDを返す
-    - テキストからビデオ生成、画像からビデオ生成などの生成モードをサポート
+    - 非同期処理モードで、後続のクエリに使用するタスクIDを返します
+    - テキストからビデオへの変換、画像からビデオ生成などのモードをサポート
 api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 ---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
@@ -12,9 +14,9 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 
   APIキーの取得方法：
 
-  [APIキー管理ページ](https://apimart.ai/console/token)にアクセスしてAPIキーを取得してください
+  <a href={apiKeyUrl} target="_blank">APIキー管理ページ</a>にアクセスして、APIキーを取得してください
 
-  使用時はリクエストヘッダーに以下を追加します：
+  利用時はリクエストヘッダーに以下を追加します：
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -30,7 +32,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  モデルパラメーターオブジェクト
+  モデルパラメータオブジェクト
 
   <Expandable title="params オブジェクトのプロパティ">
     <ParamField body="prompt" type="string" required>
@@ -40,10 +42,10 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      参考画像のURL、動画生成（最初のフレーム）用
+      参考画像のURL（動画生成の最初のフレーム用）
 
       * 単一画像のみ対応
-      * 公開アクセス可能なURLをサポート
+      * 公開アクセス可能なURLのみ対応
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="16:9">
@@ -66,26 +68,34 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   </Expandable>
 </ParamField>
 
+<ParamField body="out_task_id" type="string" required>
+  発注者のタスクID
+
+  ユーザー定義のタスク識別子、必須
+</ParamField>
 <ParamField body="callback_url" type="string">
   タスク完了後のコールバック通知先URL
 
-  タスク完了後、システムはこのURLにPOSTリクエストを送信して結果を通知します
+  タスク完了後、システムはこのURLにPOSTリクエストで結果を通知します
 </ParamField>
 
 <ParamField body="metadata" type="object">
   カスタムメタデータ
 
-  クエリ結果時にそのまま返され、ビジネス識別に利用可能
+  クエリ結果時にそのまま返却され、業務識別に利用可能
 </ParamField>
 
 ## Response
 
 <ResponseField name="task_id" type="string">
-  タスクID、結果を照会するために使用されます
+  タスクID、結果を問い合わせるために使用されます
 </ResponseField>
 
+<ResponseField name="out_task_id" type="string">
+  発起者側のタスクID、結果を問い合わせるために使用できます
+</ResponseField>
 <ResponseField name="status" type="string">
-  初期状態、固定で `"pending"`
+  初期状態、固定で`"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
@@ -93,7 +103,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  作成日時（ISO形式）
+  作成日時（ISOフォーマット）
 </ResponseField>
 
 <RequestExample>
@@ -108,7 +118,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
         "prompt": "一只猫在花园里散步",
         "aspect_ratio": "16:9",
         "video_length": "10"
-      }
+      },
+      "out_task_id": "my_task_123456"
     }'
   ```
 
@@ -123,7 +134,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           "prompt": "一只猫在花园里散步",
           "aspect_ratio": "16:9",
           "video_length": "10"
-      }
+      },
+      "out_task_id": "my_task_123456"
   }
 
   headers = {
@@ -145,7 +157,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       prompt: "一只猫在花园里散步",
       aspect_ratio: "16:9",
       video_length: "10"
-    }
+    },
+    out_task_id: "my_task_123456"
   };
 
   const headers = {
@@ -184,6 +197,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
               "aspect_ratio": "16:9",
               "video_length": "10",
           },
+          "out_task_id": "my_task_123456",
       }
 
       jsonData, _ := json.Marshal(payload)
@@ -221,7 +235,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
               conn.setRequestProperty("Content-Type", "application/json");
               conn.setDoOutput(true);
 
-              String jsonPayload = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"一只猫在花园里散步\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"}}";
+              String jsonPayload = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"一只猫在花园里散步\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"},\"out_task_id\":\"my_task_123456\"}";
 
               OutputStream os = conn.getOutputStream();
               os.write(jsonPayload.getBytes());
@@ -254,7 +268,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           "prompt" => "一只猫在花园里散歩",
           "aspect_ratio" => "16:9",
           "video_length" => "10"
-      )
+      ),
+      "out_task_id" => "my_task_123456"
   );
 
   $ch = curl_init($url);
@@ -286,7 +301,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       prompt: "一只猫在花园里散歩",
       aspect_ratio: "16:9",
       video_length: "10"
-    }
+    },
+    out_task_id: "my_task_123456"
   }
 
   http = Net::HTTP.new(url.host, url.port)
@@ -314,7 +330,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           "prompt": "一只猫在花园里散歩",
           "aspect_ratio": "16:9",
           "video_length": "10"
-      ]
+      ],
+      "out_task_id": "my_task_123456"
   ]
 
   request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
@@ -338,7 +355,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       static async Task Main(string[] args)
       {
           var url = "https://pxz-api.xinsulv.com/api/openapi/submit";
-          var payload = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"一只猫在花园里散歩\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"}}";
+          var payload = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"一只猫在花园里散歩\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"},\"out_task_id\":\"my_task_123456\"}";
 
           using (var client = new HttpClient())
           {
@@ -370,7 +387,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           headers = curl_slist_append(headers, "Content-Type: application/json");
           curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-          const char *data = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"一只猫在花园里散歩\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"}}";
+          const char *data = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"一只猫在花园里散歩\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"},\"out_task_id\":\"my_task_123456\"}";
           curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
 
           res = curl_easy_perform(curl);
@@ -399,7 +416,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
                   @"prompt": @"一只猫在花园里散歩",
                   @"aspect_ratio": @"16:9",
                   @"video_length": @"10"
-              }
+              },
+              @"out_task_id": @"my_task_123456"
           };
 
           NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload options:0 error:nil];
@@ -426,7 +444,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 
   let url = "https://pxz-api.xinsulv.com/api/openapi/submit"
 
-  let payload = {|{"model":"sora2","params":{"prompt":"一只猫在花园里散歩","aspect_ratio":"16:9","video_length":"10"}}|}
+  let payload = {|{"model":"sora2","params":{"prompt":"一只猫在花园里散歩","aspect_ratio":"16:9","video_length":"10"},"out_task_id":"my_task_123456"}|}
 
   let () =
     let headers = Header.init ()
@@ -454,7 +472,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
         'prompt': '一只猫在花园里散歩',
         'aspect_ratio': '16:9',
         'video_length': '10'
-      }
+      },
+      'out_task_id': 'my_task_123456'
     };
 
     var response = await http.post(
@@ -482,7 +501,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       prompt = "一只猫在花园里散歩",
       aspect_ratio = "16:9",
       video_length = "10"
-    )
+    ),
+    out_task_id = "my_task_123456"
   )
 
   response <- POST(
@@ -506,6 +526,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     "message": "",
     "data": {
         "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
+        "out_task_id": "my_task_123456",
         "status": "pending",
         "estimated_credits": 100,
         "created_at": "2025-12-22T06:03:28.242Z"
@@ -524,7 +545,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   {
     "error": {
       "code": 401,
-      "message": "認証に失敗しました。APIキーをご確認ください"
+      "message": "認証に失敗しました。APIキーを確認してください"
     }
   }
   ```

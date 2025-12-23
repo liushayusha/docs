@@ -2,19 +2,21 @@
 title: 'GPT-4o 이미지 생성'
 description: |
     - 비동기 처리 모드, 후속 조회를 위한 작업 ID 반환
-    - 텍스트에서 이미지 생성, 이미지에서 이미지 생성 등 지원
+    - 텍스트-투-이미지, 이미지-투-이미지 등 생성 모드 지원
 api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 ---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  모든 API는 Bearer Token을 사용하여 인증해야 합니다.
+  모든 엔드포인트는 Bearer Token 인증을 필요로 합니다
 
-  API Key 얻기:
+  API 키 받기:
 
-  [API Key 관리 페이지](https://apimart.ai/console/token)에서 API Key를 받으세요.
+  <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a>에 접속하여 API 키를 받으세요
 
-  사용 시 요청 헤더에 다음을 추가하세요:
+  요청 헤더에 다음을 추가하여 사용합니다:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -26,58 +28,68 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 <ParamField body="model" type="string" required>
   모델 이름
 
-  고정 값: `"gpt_4o"`
+  고정값: `"gpt_4o"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  모델 매개변수 객체
+  모델 파라미터 객체
 
   <Expandable title="params 객체 속성">
     <ParamField body="prompt" type="string" required>
-      이미지 생성 텍스트 설명
+      이미지 생성을 위한 텍스트 설명
 
       제한 없음
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      참조 이미지의 URL, 이미지-투-이미지 용
+      이미지 생성 참고용 URL
 
-      * 단일 이미지만 지원
-      * 공개적으로 접근 가능한 URL 지원
+      * 단일 이미지 만 지원
+      * 공개 접근 가능한 URL 지원
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="1:1">
-      이미지 생성의 가로세로 비율
+      이미지 생성의 가로 세로 비율
 
-      지원 가로세로 비율:
+      지원하는 비율:
 
-      * `1:1` - 정사각형(기본값)
+      * `1:1` - 정사각형 (기본값)
       * `3:2` - 가로 3:2
       * `2:3` - 세로 2:3
     </ParamField>
   </Expandable>
 </ParamField>
 
+<ParamField body="out_task_id" type="string" required>
+  발신자 작업 ID
+
+  사용자가 정의한 작업 식별자, 필수
+</ParamField>
+
 <ParamField body="callback_url" type="string">
   작업 완료 후 콜백 알림 주소
 
-  작업 완료 시 시스템이 POST 요청으로 결과를 해당 주소에 알림
+  작업 완료 후 시스템이 해당 주소로 POST 요청을 보내 결과를 알림
 </ParamField>
 
 <ParamField body="metadata" type="object">
   사용자 정의 메타데이터
 
-  쿼리 결과 시 그대로 반환되며, 비즈니스 식별에 사용 가능
+  조회 시 원본 그대로 반환, 비즈니스 식별에 사용 가능
 </ParamField>
 
 ## Response
 
 <ResponseField name="task_id" type="string">
-  작업 ID, 결과 조회에 사용
+  작업 ID, 결과 조회용
+</ResponseField>
+
+<ResponseField name="out_task_id" type="string">
+  발신자 작업 ID, 결과 조회에 사용 가능
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  초기 상태, 고정값 `"pending"`
+  초기 상태, 고정 값 `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
@@ -85,7 +97,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  생성 시간(ISO 형식)
+  생성 시간 (ISO 형식)
 </ResponseField>
 
 <RequestExample>
@@ -97,9 +109,10 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     --data '{
       "model": "gpt_4o",
       "params": {
-        "prompt": "별이 빛나는 밤의 고성",
+        "prompt": "별빛 아래 고대 성",
         "aspect_ratio": "1:1"
-      }
+      },
+      "out_task_id": "my_task_123456"
     }'
   ```
 
@@ -111,9 +124,10 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   payload = {
       "model": "gpt_4o",
       "params": {
-          "prompt": "별이 빛나는 밤의 고성",
+          "prompt": "별빛 아래 고대 성",
           "aspect_ratio": "1:1"
-      }
+      },
+      "out_task_id": "my_task_123456"
   }
 
   headers = {
@@ -132,9 +146,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   const payload = {
     model: "gpt_4o",
     params: {
-      prompt: "별이 빛나는 밤의 고성",
+      prompt: "별빛 아래 고대 성",
       aspect_ratio: "1:1"
-    }
+    },
+    out_task_id: "my_task_123456",
+    out_task_id: "my_task_123456"
   };
 
   const headers = {
@@ -169,9 +185,10 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       payload := map[string]interface{}{
           "model": "gpt_4o",
           "params": map[string]interface{}{
-              "prompt":       "별이 빛나는 밤의 고성",
+              "prompt":       "별빛 아래 고대 성",
               "aspect_ratio": "1:1",
           },
+          "out_task_id": "my_task_123456",
       }
 
       jsonData, _ := json.Marshal(payload)
@@ -206,9 +223,10 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           {
             "model": "gpt_4o",
             "params": {
-              "prompt": "별이 빛나는 밤의 고성",
+              "prompt": "별빛 아래 고대 성",
               "aspect_ratio": "1:1"
-            }
+            },
+            "out_task_id": "my_task_123456"
           }
           """;
 
@@ -236,9 +254,10 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   $payload = [
       "model" => "gpt_4o",
       "params" => [
-          "prompt" => "별이 빛나는 밤의 고성",
+          "prompt" => "별빛 아래 고대 성",
           "aspect_ratio" => "1:1"
-      ]
+      ],
+      "out_task_id" => "my_task_123456"
   ];
 
   $ch = curl_init($url);
@@ -267,9 +286,10 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   payload = {
     model: "gpt_4o",
     params: {
-      prompt: "별이 빛나는 밤의 고성",
+      prompt: "별빛 아래 고대 성",
       aspect_ratio: "1:1"
-    }
+    },
+    out_task_id: "my_task_123456"
   }
 
   http = Net::HTTP.new(url.host, url.port)
@@ -291,9 +311,10 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   let payload: [String: Any] = [
       "model": "gpt_4o",
       "params": [
-          "prompt": "별이 빛나는 밤의 고성",
+          "prompt": "별빛 아래 고대 성",
           "aspect_ratio": "1:1"
-      ]
+      ],
+      "out_task_id": "my_task_123456"
   ]
 
   var request = URLRequest(url: url)
@@ -331,7 +352,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           var payload = @"{
               ""model"": ""gpt_4o"",
               ""params"": {
-                  ""prompt"": ""별이 빛나는 밤의 고성"",
+                  ""prompt"": ""별빛 아래 고대 성"",
                   ""aspect_ratio"": ""1:1""
               }
           }";
@@ -364,7 +385,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           const char *payload = "{"
               "\"model\":\"gpt_4o\","
               "\"params\":{"
-                  "\"prompt\":\"별이 빛나는 밤의 고성\","
+                  "\"prompt\":\"별빛 아래 고대 성\","
                   "\"aspect_ratio\":\"1:1\""
               "}"
           "}";
@@ -403,7 +424,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           NSDictionary *payload = @{
               @"model": @"gpt_4o",
               @"params": @{
-                  @"prompt": @"별이 빛나는 밤의 고성",
+                  @"prompt": @"별빛 아래 고대 성",
                   @"aspect_ratio": @"1:1"
               }
           };
@@ -449,7 +470,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   let payload = {|{
     "model": "gpt_4o",
     "params": {
-      "prompt": "별이 빛나는 밤의 고성",
+      "prompt": "별빛 아래 고대 성",
       "aspect_ratio": "1:1"
     }
   }|}
@@ -478,7 +499,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     final payload = {
       'model': 'gpt_4o',
       'params': {
-        'prompt': '별이 빛나는 밤의 고성',
+        'prompt': '별빛 아래 고대 성',
         'aspect_ratio': '1:1'
       }
     };
@@ -505,7 +526,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   payload <- list(
     model = "gpt_4o",
     params = list(
-      prompt = "별이 빛나는 밤의 고성",
+      prompt = "별빛 아래 고대 성",
       aspect_ratio = "1:1"
     )
   )
@@ -531,6 +552,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     "message": "",
     "data": {
         "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
+        "out_task_id": "my_task_123456",
         "status": "pending",
         "estimated_credits": 100,
         "created_at": "2025-12-22T06:03:28.242Z"
@@ -541,7 +563,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   ```json 400
     {
         "statusCode": 400,
-        "message": "요청 파라미터가 유효하지 않음",
+        "message": "요청 파라미터가 유효하지 않습니다",
         "ok": false
     }
   ```

@@ -1,20 +1,22 @@
 ---
 title: 'Seedream V4 Image Generation'
 description: |
-    - Asynchronous processing mode, returns a task ID for subsequent queries
+    - Asynchronous processing mode, returns task ID for subsequent queries
     - Supports multiple generation modes such as text-to-image and image-to-image
 api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 ---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  All endpoints require authentication with a Bearer Token.
+  All endpoints require authentication using a Bearer Token.
 
-  Get API Key:
+  Get the API Key:
 
-  Visit [API Key Management Page](https://apimart.ai/console/token) to get your API Key.
+  Visit the <a href={apiKeyUrl} target="_blank">API Key Management Page</a> to obtain your API key.
 
-  Add the following to request headers:
+  When using, add to the request headers:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -36,11 +38,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     <ParamField body="prompt" type="string" required>
       Text description for image generation
 
-      No limitation
+      No limits
     </ParamField>
 
     <ParamField body="image_url" type="array">
-      List of reference image URLs for image-to-image generation
+      List of URLs for reference images, used for image-to-image
 
       * Up to 9 images
       * Supports publicly accessible URLs
@@ -80,30 +82,38 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   </Expandable>
 </ParamField>
 
+<ParamField body="out_task_id" type="string" required>
+  Initiator task ID
+
+  User-defined task identifier, required
+</ParamField>
 <ParamField body="callback_url" type="string">
   Callback notification URL after task completion
 
-  After completion, the system will send a POST request to notify the result
+  After completion, the system will send a POST request to this URL to notify the result
 </ParamField>
 
 <ParamField body="metadata" type="object">
   Custom metadata
 
-  Returned as-is in query results, can be used for business identification
+  Returned as-is when querying results, can be used for business identification
 </ParamField>
 
 ## Response
 
 <ResponseField name="task_id" type="string">
-  Task ID used to query the result
+  Task ID, used to query the result
 </ResponseField>
 
+<ResponseField name="out_task_id" type="string">
+  Initiator's task ID, can be used to query the result
+</ResponseField>
 <ResponseField name="status" type="string">
   Initial status, fixed as `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  Estimated consumed credits
+  Estimated credits consumed
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
@@ -119,7 +129,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     --data '{
       "model": "seedream_v4",
       "params": {
-        "prompt": "Beautiful sunset by the sea",
+        "prompt": "Beautiful sunset by the seaside",
         "aspect_ratio": "16:9",
         "resolution": "2K",
         "output_n": "2"
@@ -135,7 +145,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   payload = {
       "model": "seedream_v4",
       "params": {
-          "prompt": "Beautiful sunset by the sea",
+          "prompt": "Beautiful sunset by the seaside",
           "aspect_ratio": "16:9",
           "resolution": "2K",
           "output_n": "2"
@@ -158,7 +168,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   const payload = {
     model: "seedream_v4",
     params: {
-      prompt: "Beautiful sunset by the sea",
+      prompt: "Beautiful sunset by the seaside",
       aspect_ratio: "16:9",
       resolution: "2K",
       output_n: "2"
@@ -197,7 +207,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       payload := map[string]interface{}{
           "model": "seedream_v4",
           "params": map[string]interface{}{
-              "prompt":       "Beautiful sunset by the sea",
+              "prompt":       "Beautiful sunset by the seaside",
               "aspect_ratio": "16:9",
               "resolution":   "2K",
               "output_n":     "2",
@@ -236,7 +246,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           {
             "model": "seedream_v4",
             "params": {
-              "prompt": "Beautiful sunset by the sea",
+              "prompt": "Beautiful sunset by the seaside",
               "aspect_ratio": "16:9",
               "resolution": "2K",
               "output_n": "2"
@@ -268,7 +278,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   $payload = [
       "model" => "seedream_v4",
       "params" => [
-          "prompt" => "Beautiful sunset by the sea",
+          "prompt" => "Beautiful sunset by the seaside",
           "aspect_ratio" => "16:9",
           "resolution" => "2K",
           "output_n" => "2"
@@ -301,7 +311,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   payload = {
     model: "seedream_v4",
     params: {
-      prompt: "Beautiful sunset by the sea",
+      prompt: "Beautiful sunset by the seaside",
       aspect_ratio: "16:9",
       resolution: "2K",
       output_n: "2"
@@ -327,7 +337,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   let payload: [String: Any] = [
       "model": "seedream_v4",
       "params": [
-          "prompt": "Beautiful sunset by the sea",
+          "prompt": "Beautiful sunset by the seaside",
           "aspect_ratio": "16:9",
           "resolution": "2K",
           "output_n": "2"
@@ -369,7 +379,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           var payload = @"{
               ""model"": ""seedream_v4"",
               ""params"": {
-                  ""prompt"": ""Beautiful sunset by the sea"",
+                  ""prompt"": ""Beautiful sunset by the seaside"",
                   ""aspect_ratio"": ""16:9"",
                   ""resolution"": ""2K"",
                   ""output_n"": ""2""
@@ -404,7 +414,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           const char *payload = "{"
               "\"model\":\"seedream_v4\","
               "\"params\":{"
-                  "\"prompt\":\"Beautiful sunset by the sea\","
+                  "\"prompt\":\"Beautiful sunset by the seaside\","
                   "\"aspect_ratio\":\"16:9\","
                   "\"resolution\":\"2K\","
                   "\"output_n\":\"2\""
@@ -445,7 +455,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           NSDictionary *payload = @{
               @"model": @"seedream_v4",
               @"params": @{
-                  @"prompt": @"Beautiful sunset by the sea",
+                  @"prompt": @"Beautiful sunset by the seaside",
                   @"aspect_ratio": @"16:9",
                   @"resolution": @"2K",
                   @"output_n": @"2"
@@ -493,7 +503,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   let payload = {|{
     "model": "seedream_v4",
     "params": {
-      "prompt": "Beautiful sunset by the sea",
+      "prompt": "Beautiful sunset by the seaside",
       "aspect_ratio": "16:9",
       "resolution": "2K",
       "output_n": "2"
@@ -524,7 +534,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     final payload = {
       'model': 'seedream_v4',
       'params': {
-        'prompt': 'Beautiful sunset by the sea',
+        'prompt': 'Beautiful sunset by the seaside',
         'aspect_ratio': '16:9',
         'resolution': '2K',
         'output_n': '2'
@@ -553,7 +563,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   payload <- list(
     model = "seedream_v4",
     params = list(
-      prompt = "Beautiful sunset by the sea",
+      prompt = "Beautiful sunset by the seaside",
       aspect_ratio = "16:9",
       resolution = "2K",
       output_n = "2"
@@ -581,6 +591,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     "message": "",
     "data": {
         "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
+        "out_task_id": "my_task_123456",
         "status": "pending",
         "estimated_credits": 100,
         "created_at": "2025-12-22T06:03:28.242Z"

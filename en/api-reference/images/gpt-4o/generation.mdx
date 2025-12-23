@@ -1,10 +1,12 @@
 ---
 title: 'GPT-4o Image Generation'
 description: |
-    - Asynchronous processing mode, returns a task ID for subsequent queries
+    - Asynchronous processing mode, returns task ID for subsequent queries
     - Supports text-to-image, image-to-image and other generation modes
 api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 ---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
@@ -12,9 +14,9 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 
   Get the API Key:
 
-  Visit the [API Key Management Page](https://apimart.ai/console/token) to obtain your API Key.
+  Visit the <a href={apiKeyUrl} target="_blank">API Key Management Page</a> to obtain your API Key.
 
-  Add the following to the request header:
+  Include in the request header:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -30,20 +32,20 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  Model parameter object
+  Model parameters object
 
-  <Expandable title="params object properties">
+  <Expandable title="Properties of params object">
     <ParamField body="prompt" type="string" required>
       Text description for image generation
 
-      No limitations
+      No limit
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      URL of the reference image, used for image-to-image generation
+      URL of the reference image for image-to-image generation
 
-      * Supports only a single image
-      * Must be a publicly accessible URL
+      * Only supports a single image
+      * Supports publicly accessible URLs
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="1:1">
@@ -52,14 +54,20 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       Supported aspect ratios:
 
       * `1:1` - Square (default)
-      * `3:2` - Landscape 3:2
-      * `2:3` - Portrait 2:3
+      * `3:2` - Horizontal 3:2
+      * `2:3` - Vertical 2:3
     </ParamField>
   </Expandable>
 </ParamField>
 
+<ParamField body="out_task_id" type="string" required>
+  Initiator task ID
+
+  User-defined task identifier, required
+</ParamField>
+
 <ParamField body="callback_url" type="string">
-  Callback URL after task completion
+  Callback notification URL after task completion
 
   After the task is completed, the system will send a POST request to this URL to notify the result
 </ParamField>
@@ -67,13 +75,17 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 <ParamField body="metadata" type="object">
   Custom metadata
 
-  Returned as-is in query results, can be used for business identification
+  Returned as-is when querying results, can be used for business identification
 </ParamField>
 
 ## Response
 
 <ResponseField name="task_id" type="string">
-  Task ID used to query the result
+  Task ID, used for retrieving results
+</ResponseField>
+
+<ResponseField name="out_task_id" type="string">
+  Initiator's task ID, can be used to retrieve results
 </ResponseField>
 
 <ResponseField name="status" type="string">
@@ -81,7 +93,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  Estimated credits consumption
+  Estimated credits consumed
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
@@ -99,7 +111,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       "params": {
         "prompt": "An ancient castle under the starry sky",
         "aspect_ratio": "1:1"
-      }
+      },
+      "out_task_id": "my_task_123456"
     }'
   ```
 
@@ -113,7 +126,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       "params": {
           "prompt": "An ancient castle under the starry sky",
           "aspect_ratio": "1:1"
-      }
+      },
+      "out_task_id": "my_task_123456"
   }
 
   headers = {
@@ -134,7 +148,9 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     params: {
       prompt: "An ancient castle under the starry sky",
       aspect_ratio: "1:1"
-    }
+    },
+    out_task_id: "my_task_123456",
+    out_task_id: "my_task_123456"
   };
 
   const headers = {
@@ -172,6 +188,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
               "prompt":       "An ancient castle under the starry sky",
               "aspect_ratio": "1:1",
           },
+          "out_task_id": "my_task_123456",
       }
 
       jsonData, _ := json.Marshal(payload)
@@ -208,7 +225,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
             "params": {
               "prompt": "An ancient castle under the starry sky",
               "aspect_ratio": "1:1"
-            }
+            },
+            "out_task_id": "my_task_123456"
           }
           """;
 
@@ -238,7 +256,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       "params" => [
           "prompt" => "An ancient castle under the starry sky",
           "aspect_ratio" => "1:1"
-      ]
+      ],
+      "out_task_id" => "my_task_123456"
   ];
 
   $ch = curl_init($url);
@@ -269,7 +288,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     params: {
       prompt: "An ancient castle under the starry sky",
       aspect_ratio: "1:1"
-    }
+    },
+    out_task_id: "my_task_123456"
   }
 
   http = Net::HTTP.new(url.host, url.port)
@@ -293,7 +313,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       "params": [
           "prompt": "An ancient castle under the starry sky",
           "aspect_ratio": "1:1"
-      ]
+      ],
+      "out_task_id": "my_task_123456"
   ]
 
   var request = URLRequest(url: url)
@@ -531,6 +552,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     "message": "",
     "data": {
         "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
+        "out_task_id": "my_task_123456",
         "status": "pending",
         "estimated_credits": 100,
         "created_at": "2025-12-22T06:03:28.242Z"

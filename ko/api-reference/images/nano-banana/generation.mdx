@@ -2,19 +2,21 @@
 title: 'Nano Banana 이미지 생성'
 description: |
     - 비동기 처리 모드, 후속 조회를 위한 작업 ID 반환
-    - 빠른 생성 속도, 빠른 이미지 생성을 위해 최적화
+    - 빠른 생성 속도, 신속한 이미지 생성을 위해 최적화
 api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 ---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  모든 엔드포인트는 Bearer Token 인증이 필요합니다
+  모든 엔드포인트는 Bearer Token을 사용한 인증이 필요합니다
 
   API Key 받기:
 
-  [API Key 관리 페이지](https://apimart.ai/console/token) 에서 API Key를 받으세요
+  <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a>에 방문하여 API Key를 받으세요
 
-  사용 시 요청 헤더에 추가:
+  요청 헤더에 다음과 같이 추가하여 사용하세요:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -30,7 +32,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  모델 파라미터 객체
+  모델 매개변수 객체
 
   <Expandable title="params 객체 속성">
     <ParamField body="prompt" type="string" required>
@@ -40,18 +42,18 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     </ParamField>
 
     <ParamField body="image_url" type="array">
-      참조 이미지의 URL 목록, 이미지에서 이미지로 변환 시 사용
+      이미지 생성에 참고할 이미지 URL 목록
 
-      * 최대 9개 이미지
-      * 공개 접근 가능한 URL 지원
+      * 최대 9장의 이미지
+      * 공개적으로 접근 가능한 URL 지원
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="auto">
-      이미지 생성 시 가로 세로 비율
+      이미지 생성 시 가로세로 비율
 
-      지원 비율:
+      지원하는 가로세로 비율:
 
-      * `auto` - 자동(기본값)
+      * `auto` - 자동 (기본값)
       * `1:1` - 정사각형
       * `3:2` - 가로 3:2
       * `2:3` - 세로 2:3
@@ -60,45 +62,55 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       * `5:4` - 가로 5:4
       * `4:5` - 세로 4:5
       * `16:9` - 가로 와이드스크린
-      * `9:16` - 세로 세로스크린
+      * `9:16` - 세로 일반 화면
       * `21:9` - 울트라 와이드스크린
     </ParamField>
 
     <ParamField body="format" type="string" default="png">
-      이미지 출력 포맷
+      이미지 출력 형식
 
-      지원 포맷:
+      지원하는 형식:
 
-      * `png` - PNG 포맷(기본값)
-      * `jpeg` - JPEG 포맷
+      * `png` - PNG 형식 (기본값)
+      * `jpeg` - JPEG 형식
     </ParamField>
   </Expandable>
 </ParamField>
 
-<ParamField body="callback_url" type="string">
-  작업 완료 후 콜백 알림 주소
+<ParamField body="out_task_id" type="string" required>
+  발신자 작업 ID
 
-  작업이 완료되면 시스템이 해당 주소로 POST 요청을 보내 결과를 알림
+  사용자 정의 작업 식별자, 필수 입력
+</ParamField>
+
+<ParamField body="callback_url" type="string">
+  작업 완료 후 콜백 알림 URL
+
+  작업 완료 시 시스템이 해당 주소로 POST 요청을 보내 결과를 알림
 </ParamField>
 
 <ParamField body="metadata" type="object">
   사용자 정의 메타데이터
 
-  조회 시 원본 그대로 반환되며, 비즈니스 식별에 사용 가능
+  조회 결과 반환 시 그대로 반환되며, 비즈니스 식별에 사용 가능
 </ParamField>
 
 ## Response
 
 <ResponseField name="task_id" type="string">
-  작업 ID로 결과 조회에 사용됩니다
+  작업 ID, 결과 조회에 사용
+</ResponseField>
+
+<ResponseField name="out_task_id" type="string">
+  요청자 작업 ID, 결과 조회에 사용 가능
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  초기 상태로 고정된 `"pending"`
+  초기 상태, 고정값 `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  예상 소모 크레딧
+  예상 소모 포인트
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
@@ -114,10 +126,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     --data '{
       "model": "nano_banana",
       "params": {
-        "prompt": "월광 아래 대나무 숲 오솔길",
+        "prompt": "달빛 아래 대나무 숲 산책로",
         "aspect_ratio": "16:9",
         "format": "png"
-      }
+      },
+      "out_task_id": "my_task_123456"
     }'
   ```
 
@@ -129,10 +142,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   payload = {
       "model": "nano_banana",
       "params": {
-          "prompt": "월광 아래 대나무 숲 오솔길",
+          "prompt": "달빛 아래 대나무 숲 산책로",
           "aspect_ratio": "16:9",
           "format": "png"
-      }
+      },
+      "out_task_id": "my_task_123456"
   }
 
   headers = {
@@ -151,10 +165,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   const payload = {
     model: "nano_banana",
     params: {
-      prompt: "월광 아래 대나무 숲 오솔길",
+      prompt: "달빛 아래 대나무 숲 산책로",
       aspect_ratio: "16:9",
       format: "png"
-    }
+    },
+    out_task_id: "my_task_123456"
   };
 
   const headers = {
@@ -189,10 +204,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       payload := map[string]interface{}{
           "model": "nano_banana",
           "params": map[string]interface{}{
-              "prompt":       "월광 아래 대나무 숲 오솔길",
+              "prompt":       "달빛 아래 대나무 숲 산책로",
               "aspect_ratio": "16:9",
               "format":       "png",
           },
+          "out_task_id": "my_task_123456",
       }
 
       jsonData, _ := json.Marshal(payload)
@@ -227,10 +243,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           {
             "model": "nano_banana",
             "params": {
-              "prompt": "월광 아래 대나무 숲 오솔길",
+              "prompt": "달빛 아래 대나무 숲 산책로",
               "aspect_ratio": "16:9",
               "format": "png"
-            }
+            },
+            "out_task_id": "my_task_123456"
           }
           """;
 
@@ -258,10 +275,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   $payload = [
       "model" => "nano_banana",
       "params" => [
-          "prompt" => "월광 아래 대나무 숲 오솔길",
+          "prompt" => "달빛 아래 대나무 숲 산책로",
           "aspect_ratio" => "16:9",
           "format" => "png"
-      ]
+      ],
+      "out_task_id" => "my_task_123456"
   ];
 
   $ch = curl_init($url);
@@ -290,10 +308,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   payload = {
     model: "nano_banana",
     params: {
-      prompt: "월광 아래 대나무 숲 오솔길",
+      prompt: "달빛 아래 대나무 숲 산책로",
       aspect_ratio: "16:9",
       format: "png"
-    }
+    },
+    out_task_id: "my_task_123456"
   }
 
   http = Net::HTTP.new(url.host, url.port)
@@ -315,7 +334,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   let payload: [String: Any] = [
       "model": "nano_banana",
       "params": [
-          "prompt": "월광 아래 대나무 숲 오솔길",
+          "prompt": "달빛 아래 대나무 숲 산책로",
           "aspect_ratio": "16:9",
           "format": "png"
       ]
@@ -356,7 +375,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           var payload = @"{
               ""model"": ""nano_banana"",
               ""params"": {
-                  ""prompt"": ""월광 아래 대나무 숲 오솔길"",
+                  ""prompt"": ""달빛 아래 대나무 숲 산책로"",
                   ""aspect_ratio"": ""16:9"",
                   ""format"": ""png""
               }
@@ -390,7 +409,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           const char *payload = "{"
               "\"model\":\"nano_banana\","
               "\"params\":{"
-                  "\"prompt\":\"월광 아래 대나무 숲 오솔길\","
+                  "\"prompt\":\"달빛 아래 대나무 숲 산책로\","
                   "\"aspect_ratio\":\"16:9\","
                   "\"format\":\"png\""
               "}"
@@ -430,7 +449,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           NSDictionary *payload = @{
               @"model": @"nano_banana",
               @"params": @{
-                  @"prompt": @"월광 아래 대나무 숲 오솔길",
+                  @"prompt": @"달빛 아래 대나무 숲 산책로",
                   @"aspect_ratio": @"16:9",
                   @"format": @"png"
               }
@@ -477,7 +496,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   let payload = {|{
     "model": "nano_banana",
     "params": {
-      "prompt": "월광 아래 대나무 숲 오솔길",
+      "prompt": "달빛 아래 대나무 숲 산책로",
       "aspect_ratio": "16:9",
       "format": "png"
     }
@@ -507,7 +526,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     final payload = {
       'model': 'nano_banana',
       'params': {
-        'prompt': '월광 아래 대나무 숲 오솔길',
+        'prompt': '달빛 아래 대나무 숲 산책로',
         'aspect_ratio': '16:9',
         'format': 'png'
       }
@@ -535,7 +554,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   payload <- list(
     model = "nano_banana",
     params = list(
-      prompt = "월광 아래 대나무 숲 오솔길",
+      prompt = "달빛 아래 대나무 숲 산책로",
       aspect_ratio = "16:9",
       format = "png"
     )
@@ -562,6 +581,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     "message": "",
     "data": {
         "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
+        "out_task_id": "my_task_123456",
         "status": "pending",
         "estimated_credits": 100,
         "created_at": "2025-12-22T06:03:28.242Z"
@@ -572,7 +592,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   ```json 400
     {
         "statusCode": 400,
-        "message": "요청 파라미터가 유효하지 않습니다",
+        "message": "잘못된 요청 파라미터",
         "ok": false
     }
   ```
@@ -588,7 +608,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   {
     "error": {
       "code": 433,
-      "message": "계정 잔액이 부족합니다. 충전 후 다시 시도하세요"
+      "message": "계정 잔액 부족, 충전 후 다시 시도하세요"
     }
   }
   ```
@@ -597,7 +617,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   {
     "error": {
       "code": 500,
-      "message": "서버 내부 오류, 나중에 다시 시도하세요"
+      "message": "서버 내부 오류, 잠시 후 다시 시도하세요"
     }
   }
   ```

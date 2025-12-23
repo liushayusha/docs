@@ -3,20 +3,21 @@ title: 'Get Task Status'
 description: |
     - Query the execution status and results of asynchronous tasks
     - Real-time status updates and progress tracking
-    - Get generation results when tasks are completed
+    - Retrieve generated results upon task completion
 api: 'POST https://pxz-api.xinsulv.com/api/openapi/query'
 ---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  All interfaces require authentication using Bearer Token
+  All endpoints require authentication using a Bearer Token.
 
-  Get API Key:
+  Get the API Key:
 
-  Visit [API Key Management Page](https://apimart.ai/console/token) to get your API Key
+  Visit the <a href={apiKeyUrl} target="_blank">API Key management page</a> to obtain your API Key.
 
-  Add to request header when using:
+  Add the following to the request headers:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -25,8 +26,16 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/query'
 
 ## Body
 
-<ParamField body="task_id" type="string" required>
-  Task ID returned by the generation API
+<ParamField body="task_id" type="string">
+  Task ID returned by the Generate API
+
+  Choose one between this and out_task_id, one must be provided
+</ParamField>
+
+<ParamField body="out_task_id" type="string">
+  Initiator's task ID
+
+  Choose one between this and task_id, one must be provided
 </ParamField>
 
 ## Response
@@ -47,17 +56,17 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/query'
 <ResponseField name="input" type="object">
   Task input (optional, returned only in certain cases)
 
-  Contains complete parameter information when the task was submitted
+  Contains the full parameter information submitted with the task
 </ResponseField>
 
 <ResponseField name="output" type="array">
   Task output (returned after task completion)
 
-  Array containing generation results, each element includes a `url` field pointing to the generated resource
+  An array containing generation results, each element includes a `url` field pointing to the generated resource
 </ResponseField>
 
 <ResponseField name="error" type="object">
-  Error information (returned when task fails)
+  Error information (returned when the task fails)
 
   <Expandable title="Properties">
     <ResponseField name="code" type="string">
@@ -71,7 +80,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/query'
 </ResponseField>
 
 <ResponseField name="credits_used" type="number">
-  Credits consumed
+  Credits used
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
@@ -83,7 +92,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/query'
 </ResponseField>
 
 <RequestExample>
-  ```bash cURL
+  ```bash cURL (using task_id)
   curl --request POST \
     --url 'https://pxz-api.xinsulv.com/api/openapi/query' \
     --header 'Authorization: Bearer <token>' \
@@ -93,7 +102,17 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/query'
     }'
   ```
 
-  ```python Python
+  ```bash cURL (using out_task_id)
+  curl --request POST \
+    --url 'https://pxz-api.xinsulv.com/api/openapi/query' \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data-raw '{
+      "out_task_id": "my_task_123456"
+    }'
+  ```
+
+  ```python Python (using task_id)
   import requests
 
   url = "https://pxz-api.xinsulv.com/api/openapi/query"
@@ -105,6 +124,25 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/query'
 
   payload = {
       "task_id": "order_lwU2d-VkUq9-tlCCmrdYu"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```python Python (using out_task_id)
+  import requests
+
+  url = "https://pxz-api.xinsulv.com/api/openapi/query"
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  payload = {
+      "out_task_id": "my_task_123456"
   }
 
   response = requests.post(url, json=payload, headers=headers)

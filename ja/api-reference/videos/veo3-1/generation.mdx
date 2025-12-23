@@ -1,21 +1,23 @@
 ---
 title: 'VEO3.1 ビデオ生成'
 description: |
-    - 非同期処理モードで、タスクIDを返し、後続のクエリに使用可能
-    - テキストからビデオへの変換、画像生成ビデオなどの生成モードに対応
-    - 最初のフレームと最後のフレームの参照画像をサポート
+    - 非同期処理モードで、タスクIDを返し後続のクエリに使用可能
+    - テキストからビデオ、画像生成ビデオなどの生成モードに対応
+    - 最初と最後のフレームの参照画像をサポート
 api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 ---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  すべてのエンドポイントはBearer Token認証を必要とします
+  すべてのエンドポイントはBearerトークン認証が必要です
 
-  API Keyの取得:
+  API Keyの取得方法：
 
-  [API Key管理ページ](https://apimart.ai/console/token) にアクセスしてAPI Keyを取得してください
+  <a href={apiKeyUrl} target="_blank">API Key管理ページ</a>にアクセスしてAPI Keyを取得してください
 
-  使用時はリクエストヘッダーに以下を追加してください:
+  使用時はリクエストヘッダーに以下を追加します：
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -35,54 +37,66 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 
   <Expandable title="params オブジェクトのプロパティ">
     <ParamField body="prompt" type="string" required>
-      動画生成のテキスト説明
+      ビデオ生成のテキスト説明
 
       制限なし
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      参照画像のURL（動画生成のための最初のフレーム）
+      参考画像のURL、ビデオ生成用の画像（最初のフレーム）
 
-      * 単一画像のみサポート
+      * 単一画像のみ対応
       * 公開されてアクセス可能なURLをサポート
     </ParamField>
 
     <ParamField body="end_image_url" type="string">
-      最終フレームの参照画像のURL
+      最終フレーム参考画像のURL
 
-      * 単一画像のみサポート
+      * 単一画像のみ対応
       * 公開されてアクセス可能なURLをサポート
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="16:9">
-      動画のアスペクト比
+      ビデオのアスペクト比
 
-      サポートされているアスペクト比：
+      対応可能なアスペクト比：
 
-      * `16:9` - 横向き（デフォルト）
-      * `9:16` - 縦向き
+      * `16:9` - 横（デフォルト）
+      * `9:16` - 縦
     </ParamField>
   </Expandable>
 </ParamField>
 
+<ParamField body="out_task_id" type="string" required>
+  発注者タスクID
+
+  ユーザー定義のタスク識別子、必須
+</ParamField>
 <ParamField body="callback_url" type="string">
   タスク完了後のコールバック通知先URL
 
-  タスク完了時にこのURLへPOSTリクエストで結果を通知します
+  タスク完了後、システムはこのURLにPOSTリクエストで結果を通知します
 </ParamField>
 
 <ParamField body="metadata" type="object">
   カスタムメタデータ
 
-  検索結果時にそのまま返され、業務識別に利用可能です
+  クエリ結果時にそのまま返却され、ビジネス識別に利用可能
 </ParamField>
 
 ## Response
 
 <ResponseField name="task_id" type="string">
-  タスクID、結果の照会に使用
+  タスクID、結果を照会するために使用
 </ResponseField>
 
+<ResponseField name="out_task_id" type="string">
+  発信側タスクID、結果を照会するために使用可能
+</ResponseField>
+
+<ResponseField name="out_task_id" type="string">
+  発信側タスクID、結果を照会するために使用可能
+</ResponseField>
 <ResponseField name="status" type="string">
   初期状態、固定で `"pending"`
 </ResponseField>
@@ -92,7 +106,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  作成日時（ISOフォーマット）
+  作成日時（ISO形式）
 </ResponseField>
 
 <RequestExample>
@@ -107,7 +121,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
         "prompt": "この画像を動かしてください",
         "image_url": "https://example.com/reference.jpg",
         "aspect_ratio": "16:9"
-      }
+      },
+      "out_task_id": "my_task_123456"
     }'
   ```
 
@@ -122,7 +137,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           "prompt": "この画像を動かしてください",
           "image_url": "https://example.com/reference.jpg",
           "aspect_ratio": "16:9"
-      }
+      },
+      "out_task_id": "my_task_123456"
   }
 
   headers = {
@@ -144,7 +160,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       prompt: "この画像を動かしてください",
       image_url: "https://example.com/reference.jpg",
       aspect_ratio: "16:9"
-    }
+    },
+    out_task_id: "my_task_123456"
   };
 
   const headers = {
@@ -183,6 +200,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
               "image_url":    "https://example.com/reference.jpg",
               "aspect_ratio": "16:9",
           },
+          "out_task_id": "my_task_123456",
       }
 
       jsonData, _ := json.Marshal(payload)
@@ -220,7 +238,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
               conn.setRequestProperty("Content-Type", "application/json");
               conn.setDoOutput(true);
 
-              String jsonPayload = "{\"model\":\"veo3_1\",\"params\":{\"prompt\":\"この画像を動かしてください\",\"image_url\":\"https://example.com/reference.jpg\",\"aspect_ratio\":\"16:9\"}}";
+              String jsonPayload = "{\"model\":\"veo3_1\",\"params\":{\"prompt\":\"この画像を動かしてください\",\"image_url\":\"https://example.com/reference.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
 
               OutputStream os = conn.getOutputStream();
               os.write(jsonPayload.getBytes());
@@ -253,7 +271,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           "prompt" => "この画像を動かしてください",
           "image_url" => "https://example.com/reference.jpg",
           "aspect_ratio" => "16:9"
-      )
+      ),
+      "out_task_id" => "my_task_123456"
   );
 
   $ch = curl_init($url);
@@ -285,7 +304,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       prompt: "この画像を動かしてください",
       image_url: "https://example.com/reference.jpg",
       aspect_ratio: "16:9"
-    }
+    },
+    out_task_id: "my_task_123456"
   }
 
   http = Net::HTTP.new(url.host, url.port)
@@ -313,7 +333,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           "prompt": "この画像を動かしてください",
           "image_url": "https://example.com/reference.jpg",
           "aspect_ratio": "16:9"
-      ]
+      ],
+      "out_task_id": "my_task_123456"
   ]
 
   request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
@@ -337,7 +358,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       static async Task Main(string[] args)
       {
           var url = "https://pxz-api.xinsulv.com/api/openapi/submit";
-          var payload = "{\"model\":\"veo3_1\",\"params\":{\"prompt\":\"この画像を動かしてください\",\"image_url\":\"https://example.com/reference.jpg\",\"aspect_ratio\":\"16:9\"}}";
+          var payload = "{\"model\":\"veo3_1\",\"params\":{\"prompt\":\"この画像を動かしてください\",\"image_url\":\"https://example.com/reference.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
 
           using (var client = new HttpClient())
           {
@@ -369,7 +390,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           headers = curl_slist_append(headers, "Content-Type: application/json");
           curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-          const char *data = "{\"model\":\"veo3_1\",\"params\":{\"prompt\":\"この画像を動かしてください\",\"image_url\":\"https://example.com/reference.jpg\",\"aspect_ratio\":\"16:9\"}}";
+          const char *data = "{\"model\":\"veo3_1\",\"params\":{\"prompt\":\"この画像を動かしてください\",\"image_url\":\"https://example.com/reference.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
           curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
 
           res = curl_easy_perform(curl);
@@ -398,7 +419,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
                   @"prompt": @"この画像を動かしてください",
                   @"image_url": @"https://example.com/reference.jpg",
                   @"aspect_ratio": @"16:9"
-              }
+              },
+              @"out_task_id": @"my_task_123456"
           };
 
           NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload options:0 error:nil];
@@ -425,7 +447,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 
   let url = "https://pxz-api.xinsulv.com/api/openapi/submit"
 
-  let payload = {|{"model":"veo3_1","params":{"prompt":"この画像を動かしてください","image_url":"https://example.com/reference.jpg","aspect_ratio":"16:9"}}|}
+  let payload = {|{"model":"veo3_1","params":{"prompt":"この画像を動かしてください","image_url":"https://example.com/reference.jpg","aspect_ratio":"16:9"},"out_task_id":"my_task_123456"}|}
 
   let () =
     let headers = Header.init ()
@@ -453,7 +475,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
         'prompt': 'この画像を動かしてください',
         'image_url': 'https://example.com/reference.jpg',
         'aspect_ratio': '16:9'
-      }
+      },
+      'out_task_id': 'my_task_123456'
     };
 
     var response = await http.post(
@@ -481,7 +504,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       prompt = "この画像を動かしてください",
       image_url = "https://example.com/reference.jpg",
       aspect_ratio = "16:9"
-    )
+    ),
+    out_task_id = "my_task_123456"
   )
 
   response <- POST(
@@ -505,6 +529,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     "message": "",
     "data": {
         "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
+        "out_task_id": "my_task_123456",
+        "out_task_id": "my_task_123456",
         "status": "pending",
         "estimated_credits": 100,
         "created_at": "2025-12-22T06:03:28.242Z"
@@ -523,7 +549,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   {
     "error": {
       "code": 401,
-      "message": "認証失敗です。APIキーをご確認ください"
+      "message": "認証に失敗しました。APIキーを確認してください"
     }
   }
   ```
@@ -531,7 +557,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   {
     "error": {
       "code": 433,
-      "message": "アカウント残高不足です。チャージ後に再度お試しください"
+      "message": "アカウント残高が不足しています。チャージ後に再試行してください"
     }
   }
   ```
@@ -540,7 +566,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   {
     "error": {
       "code": 500,
-      "message": "サーバー内部エラーです。後で再試行してください"
+      "message": "サーバー内部エラーが発生しました。後でもう一度お試しください"
     }
   }
   ```

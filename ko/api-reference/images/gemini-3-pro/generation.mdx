@@ -2,19 +2,21 @@
 title: 'Nano Banana Pro 이미지 생성'
 description: |
     - 비동기 처리 모드, 후속 조회를 위한 작업 ID 반환
-    - 고품질 이미지 생성, 전문 수준의 이미지 작성
+    - 고품질 이미지 생성, 전문가급 이미지 제작
 api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 ---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  모든 API는 Bearer Token 인증이 필요합니다.
+  모든 엔드포인트는 Bearer Token 인증을 필요로 합니다.
 
   API Key 받기:
 
-  [API Key 관리 페이지](https://apimart.ai/console/token) 를 방문하여 API Key를 받으세요.
+  <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a>에 접속하여 API Key를 받으세요.
 
-  요청 헤더에 다음을 추가하여 사용합니다:
+  요청 헤더에 다음과 같이 추가합니다:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -26,7 +28,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 <ParamField body="model" type="string" required>
   모델 이름
 
-  고정 값: `"nano_banana_pro"`
+  고정값: `"nano_banana_pro"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
@@ -40,16 +42,16 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     </ParamField>
 
     <ParamField body="image_url" type="array">
-      이미지 참조용 URL 목록, 이미지 생성을 위해 사용
+      참조 이미지 URL 목록, 이미지 변환용
 
-      * 최대 8장
+      * 최대 8장 이미지
       * 공개 접근 가능한 URL 지원
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="1:1">
-      이미지 생성의 가로세로 비율
+      이미지 생성 가로세로 비율
 
-      지원되는 비율:
+      지원하는 비율:
 
       * `auto` - 자동
       * `1:1` - 정사각형 (기본값)
@@ -60,7 +62,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       * `5:4` - 가로 5:4
       * `4:5` - 세로 4:5
       * `16:9` - 가로 와이드스크린
-      * `9:16` - 세로 세로스크린
+      * `9:16` - 세로 와이드스크린
       * `21:9` - 울트라 와이드스크린
     </ParamField>
 
@@ -75,26 +77,32 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     </ParamField>
 
     <ParamField body="format" type="string" default="png">
-      이미지 출력 형식
+      이미지 출력 포맷
 
-      지원 형식:
+      지원 포맷:
 
-      * `png` - PNG 형식 (기본값)
-      * `jpg` - JPEG 형식
+      * `png` - PNG 포맷 (기본값)
+      * `jpg` - JPEG 포맷
     </ParamField>
   </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  요청자 작업 ID
+
+  사용자가 정의하는 작업 식별자, 필수 입력
 </ParamField>
 
 <ParamField body="callback_url" type="string">
   작업 완료 후 콜백 알림 주소
 
-  작업 완료 시 시스템이 해당 주소로 POST 요청을 보내 결과를 알립니다
+  작업 완료 시 시스템이 해당 주소로 POST 요청을 보내 결과를 알림
 </ParamField>
 
 <ParamField body="metadata" type="object">
   사용자 정의 메타데이터
 
-  조회 시 원본 그대로 반환되며, 비즈니스 식별에 사용할 수 있습니다
+  조회 시 원본 그대로 반환되며, 비즈니스 식별에 사용 가능
 </ParamField>
 
 ## Response
@@ -103,16 +111,20 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   작업 ID, 결과 조회에 사용
 </ResponseField>
 
+<ResponseField name="out_task_id" type="string">
+  요청자 작업 ID, 결과 조회에 사용 가능
+</ResponseField>
+
 <ResponseField name="status" type="string">
-  초기 상태로, 고정값 `"pending"`
+  초기 상태, 고정값 `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  예상 소모 크레딧
+  예상 사용 크레딧
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  생성 시각 (ISO 형식)
+  생성 시간 (ISO 형식)
 </ResponseField>
 
 <RequestExample>
@@ -128,7 +140,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
         "aspect_ratio": "16:9",
         "resolution": "2K",
         "format": "png"
-      }
+      },
+      "out_task_id": "my_task_123456"
     }'
   ```
 
@@ -144,7 +157,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           "aspect_ratio": "16:9",
           "resolution": "2K",
           "format": "png"
-      }
+      },
+      "out_task_id": "my_task_123456"
   }
 
   headers = {
@@ -167,7 +181,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       aspect_ratio: "16:9",
       resolution: "2K",
       format: "png"
-    }
+    },
+    out_task_id: "my_task_123456"
   };
 
   const headers = {
@@ -207,6 +222,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
               "resolution":   "2K",
               "format":       "png",
           },
+          "out_task_id": "my_task_123456",
       }
 
       jsonData, _ := json.Marshal(payload)
@@ -245,7 +261,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
               "aspect_ratio": "16:9",
               "resolution": "2K",
               "format": "png"
-            }
+            },
+            "out_task_id": "my_task_123456"
           }
           """;
 
@@ -277,7 +294,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           "aspect_ratio" => "16:9",
           "resolution" => "2K",
           "format" => "png"
-      ]
+      ],
+      "out_task_id" => "my_task_123456"
   ];
 
   $ch = curl_init($url);
@@ -310,7 +328,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       aspect_ratio: "16:9",
       resolution: "2K",
       format: "png"
-    }
+    },
+    out_task_id: "my_task_123456"
   }
 
   http = Net::HTTP.new(url.host, url.port)
@@ -336,7 +355,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           "aspect_ratio": "16:9",
           "resolution": "2K",
           "format": "png"
-      ]
+      ],
+      "out_task_id": "my_task_123456"
   ]
 
   var request = URLRequest(url: url)
@@ -378,7 +398,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
                   ""aspect_ratio"": ""16:9"",
                   ""resolution"": ""2K"",
                   ""format"": ""png""
-              }
+              },
+              ""out_task_id"": ""my_task_123456""
           }";
 
           using var client = new HttpClient();
@@ -413,7 +434,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
                   "\"aspect_ratio\":\"16:9\","
                   "\"resolution\":\"2K\","
                   "\"format\":\"png\""
-              "}"
+              "},"
+              "\"out_task_id\":\"my_task_123456\""
           "}";
 
           struct curl_slist *headers = NULL;
@@ -454,7 +476,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
                   @"aspect_ratio": @"16:9",
                   @"resolution": @"2K",
                   @"format": @"png"
-              }
+              },
+              @"out_task_id": @"my_task_123456"
           };
 
           NSError *error;
@@ -502,7 +525,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       "aspect_ratio": "16:9",
       "resolution": "2K",
       "format": "png"
-    }
+    },
+    "out_task_id": "my_task_123456"
   }|}
 
   let () =
@@ -533,7 +557,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
         'aspect_ratio': '16:9',
         'resolution': '2K',
         'format': 'png'
-      }
+      },
+      'out_task_id': 'my_task_123456'
     };
 
     final response = await http.post(
@@ -562,7 +587,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       aspect_ratio = "16:9",
       resolution = "2K",
       format = "png"
-    )
+    ),
+    out_task_id = "my_task_123456"
   )
 
   response <- POST(
@@ -586,6 +612,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     "message": "",
     "data": {
         "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
+        "out_task_id": "my_task_123456",
         "status": "pending",
         "estimated_credits": 100,
         "created_at": "2025-12-22T06:03:28.242Z"
@@ -596,7 +623,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   ```json 400
     {
         "statusCode": 400,
-        "message": "요청 매개변수 잘못됨",
+        "message": "요청 파라미터가 유효하지 않습니다",
         "ok": false
     }
   ```
@@ -612,7 +639,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   {
     "error": {
       "code": 433,
-      "message": "계좌 잔액 부족, 충전 후 재시도하세요",
+      "message": "계정 잔액 부족, 충전 후 다시 시도하세요",
     }
   }
   ```

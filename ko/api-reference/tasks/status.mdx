@@ -1,22 +1,23 @@
 ---
-title: '작업 상태 조회'
+title: '작업 상태 가져오기'
 description: |
     - 비동기 작업의 실행 상태 및 결과 조회
     - 실시간 상태 업데이트 및 진행 상황 추적
-    - 작업 완료 시 생성 결과 획득
+    - 작업 완료 시 생성 결과 가져오기
 api: 'POST https://pxz-api.xinsulv.com/api/openapi/query'
 ---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  모든 인터페이스는 Bearer Token을 사용한 인증이 필요합니다
+  모든 엔드포인트는 Bearer Token 인증이 필요합니다.
 
-  API Key 획득:
+  API Key 받기:
 
-  [API Key 관리 페이지](https://apimart.ai/console/token)를 방문하여 API Key를 획득하세요
+  <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a>에 방문하여 API Key를 받으세요.
 
-  사용 시 요청 헤더에 추가:
+  요청 헤더에 다음을 추가하여 사용하세요:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -25,8 +26,16 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/query'
 
 ## Body
 
-<ParamField body="task_id" type="string" required>
-  생성 API에서 반환된 작업 ID
+<ParamField body="task_id" type="string">
+  생성 API가 반환하는 작업 ID
+
+  out_task_id와 둘 중 하나를 선택해야 하며, 반드시 하나를 제공해야 합니다
+</ParamField>
+
+<ParamField body="out_task_id" type="string">
+  발신자 작업 ID
+
+  task_id와 둘 중 하나를 선택해야 하며, 반드시 하나를 제공해야 합니다
 </ParamField>
 
 ## Response
@@ -38,28 +47,28 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/query'
 <ResponseField name="status" type="string">
   작업 상태:
 
-  * `pending` - 처리 대기 중
+  * `pending` - 대기 중
   * `processing` - 처리 중
-  * `completed` - 성공적으로 완료
+  * `completed` - 성공적으로 완료됨
   * `failed` - 실패
 </ResponseField>
 
 <ResponseField name="input" type="object">
-  작업 입력(선택 사항, 특정 경우에만 반환)
+  작업 입력 (선택 사항, 일부 경우에만 반환)
 
-  작업 제출 시의 완전한 매개변수 정보를 포함
+  작업 제출 시의 전체 파라미터 정보를 포함
 </ResponseField>
 
 <ResponseField name="output" type="array">
-  작업 출력(작업 완료 후 반환)
+  작업 출력 (작업 완료 후 반환)
 
-  생성 결과를 포함하는 배열, 각 요소는 생성된 리소스를 가리키는 `url` 필드를 포함
+  생성 결과 배열을 포함하며, 각 요소는 생성된 리소스를 가리키는 `url` 필드를 포함
 </ResponseField>
 
 <ResponseField name="error" type="object">
-  오류 정보(작업 실패 시 반환)
+  오류 정보 (작업 실패 시 반환)
 
-  <Expandable title="속성">
+  <Expandable title="Properties">
     <ResponseField name="code" type="string">
       오류 코드
     </ResponseField>
@@ -71,19 +80,19 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/query'
 </ResponseField>
 
 <ResponseField name="credits_used" type="number">
-  소비된 크레딧
+  소모된 크레딧
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  생성 시간(ISO 8601 형식)
+  생성 시간 (ISO 8601 형식)
 </ResponseField>
 
 <ResponseField name="completed_at" type="string">
-  완료 시간(작업 완료 후 반환, ISO 8601 형식)
+  완료 시간 (작업 완료 후 반환, ISO 8601 형식)
 </ResponseField>
 
 <RequestExample>
-  ```bash cURL
+  ```bash cURL (task_id 사용)
   curl --request POST \
     --url 'https://pxz-api.xinsulv.com/api/openapi/query' \
     --header 'Authorization: Bearer <token>' \
@@ -93,7 +102,17 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/query'
     }'
   ```
 
-  ```python Python
+  ```bash cURL (out_task_id 사용)
+  curl --request POST \
+    --url 'https://pxz-api.xinsulv.com/api/openapi/query' \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data-raw '{
+      "out_task_id": "my_task_123456"
+    }'
+  ```
+
+  ```python Python (task_id 사용)
   import requests
 
   url = "https://pxz-api.xinsulv.com/api/openapi/query"
@@ -105,6 +124,25 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/query'
 
   payload = {
       "task_id": "order_lwU2d-VkUq9-tlCCmrdYu"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```python Python (out_task_id 사용)
+  import requests
+
+  url = "https://pxz-api.xinsulv.com/api/openapi/query"
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  payload = {
+      "out_task_id": "my_task_123456"
   }
 
   response = requests.post(url, json=payload, headers=headers)
@@ -496,7 +534,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/query'
   ```json 400
   {
     "statusCode": 400,
-    "message": "Missing required field: task_id",
+    "message": "필수 필드 누락: task_id",
     "ok": false
   }
   ```
@@ -505,7 +543,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/query'
   {
     "error": {
       "code": 500,
-      "message": "서버 내부 오류, 잠시 후 다시 시도하십시오"
+      "message": "서버 내부 오류가 발생했습니다. 나중에 다시 시도하십시오."
     }
   }
   ```

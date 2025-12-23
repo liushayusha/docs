@@ -212,7 +212,7 @@ export TRANSLATE_MODEL="gpt-4.1-mini"            # 可选，默认 gpt-4.1-mini
 {
   "doNotTranslate": {
     "headers": ["Authorization", "Response", "Request"],
-    "terms": ["APIMart", "OpenAI", "GPT-4o", "API", "SDK"]
+    "terms": ["AIReiter", "OpenAI", "GPT-4o", "API", "SDK"]
   },
   "preserveFormatting": {
     "h2Headers": true,

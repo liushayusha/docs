@@ -1,9 +1,11 @@
 ---
-title: 'APIMart — AI 图像与视频生成 API 平台'
+title: 'AIReiter — AI 图像与视频生成 API 平台'
 description: '统一的 AI 图像和视频生成 API 平台。支持多种主流模型，包括 GPT-4o Image、Gemini、Sora2、VEO3 等。异步任务处理，透明定价，简单易用。'
 ---
 
-APIMart 是一个统一的 AI 内容生成 API 平台，提供图像和视频生成服务。通过简单的 REST API 调用，即可使用 GPT-4o、Gemini、Sora2、VEO3 等多种主流 AI 模型生成高质量的图像和视频内容。
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+AIReiter 是一个统一的 AI 内容生成 API 平台，提供图像和视频生成服务。通过简单的 REST API 调用，即可使用 GPT-4o、Gemini、Sora2、VEO3 等多种主流 AI 模型生成高质量的图像和视频内容。
 
 ## 快速开始
 
@@ -17,7 +19,7 @@ APIMart 是一个统一的 AI 内容生成 API 平台，提供图像和视频生
   <Card title="任务状态查询" icon="list-check" href="/zh/api-reference/tasks/status">
     查询异步任务的执行状态和结果
   </Card>
-  <Card title="获取 API Key" icon="key" href="https://apimart.ai/console/token">
+  <Card title="获取 API Key" icon="key" href={apiKeyUrl}>
     访问控制台获取您的 API Key
   </Card>
 </CardGroup>
@@ -26,7 +28,7 @@ APIMart 是一个统一的 AI 内容生成 API 平台，提供图像和视频生
 
 ### 1. 提交生成任务
 
-所有图像和视频生成都采用异步处理模式。提交任务后，系统会立即返回一个 `task_id`：
+所有图像和视频生成都采用异步处理模式。提交任务时需要传入 `out_task_id`（发起方任务ID），系统会返回 `task_id` 和 `out_task_id`：
 
 ```bash
 curl --request POST \
@@ -38,21 +40,32 @@ curl --request POST \
     "params": {
       "prompt": "一只可爱的猫咪在花园里",
       "aspect_ratio": "1:1"
-    }
+    },
+    "out_task_id": "my_task_123456"
   }'
 ```
 
 ### 2. 查询任务状态
 
-使用返回的 `task_id` 查询任务进度和结果：
+使用返回的 `task_id` 或您提交时的 `out_task_id` 查询任务进度和结果（二选一）：
 
 ```bash
+# 使用 task_id 查询
 curl --request POST \
   --url https://pxz-api.xinsulv.com/api/openapi/query \
   --header 'Authorization: Bearer YOUR_API_KEY' \
   --header 'Content-Type: application/json' \
   --data-raw '{
     "task_id": "order_xxxxxxxxxxxx"
+  }'
+
+# 或使用 out_task_id 查询
+curl --request POST \
+  --url https://pxz-api.xinsulv.com/api/openapi/query \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --header 'Content-Type: application/json' \
+  --data-raw '{
+    "out_task_id": "my_task_123456"
   }'
 ```
 
@@ -66,6 +79,7 @@ curl --request POST \
   "message": "",
   "data": {
     "task_id": "order_xxxxxxxxxxxx",
+    "out_task_id": "my_task_123456",
     "status": "completed",
     "output": [
       {
@@ -80,7 +94,7 @@ curl --request POST \
 
 ### 图像生成系列
 
-APIMart 提供多种图像生成模型，支持文本生成图像和图生图功能：
+AIReiter 提供多种图像生成模型，支持文本生成图像和图生图功能：
 
 <CardGroup cols={2}>
   <Card title="GPT-4o Image" icon="image" href="/zh/api-reference/images/gpt-4o/generation">
@@ -89,7 +103,7 @@ APIMart 提供多种图像生成模型，支持文本生成图像和图生图功
   <Card title="Gemini-2.5-Flash (Nano banana)" icon="image" href="/zh/api-reference/images/nano-banana/generation">
     Google 最新的快速图像生成模型
   </Card>
-  <Card title="Gemini-3-Pro (Nano banana2)" icon="image" href="/zh/api-reference/images/gemini-3-pro/generation">
+  <Card title="Gemini-3-Pro (Nano banana pro)" icon="image" href="/zh/api-reference/images/gemini-3-pro/generation">
     Google 专业级图像生成模型
   </Card>
   <Card title="Seedream-4.0" icon="image" href="/zh/api-reference/images/seedream-4/generation">
@@ -125,8 +139,9 @@ APIMart 提供多种图像生成模型，支持文本生成图像和图生图功
 
 所有生成请求采用异步处理模式，避免长时间等待：
 
-- 立即返回 `task_id`
-- 通过任务状态 API 查询进度
+- 提交任务时需传入 `out_task_id`（发起方任务ID，用于业务标识）
+- 立即返回系统生成的 `task_id` 和您提交的 `out_task_id`
+- 可使用 `task_id` 或 `out_task_id` 查询任务状态（二选一）
 - 支持 webhook 回调通知（可选）
 - 任务状态实时更新：`pending` → `processing` → `completed`
 
@@ -167,13 +182,13 @@ Authorization: Bearer YOUR_API_KEY
 
 **获取 API Key：**
 
-访问 [API Key 管理页面](https://apimart.ai/console/token) 获取您的 API Key。
+访问 <a href={apiKeyUrl} target="_blank">API Key 管理页面</a> 获取您的 API Key。
 
 ## 常见问题
 
 <AccordionGroup>
   <Accordion title="如何获取 API Key？">
-    访问 [API Key 管理页面](https://apimart.ai/console/token)，登录后即可创建和管理您的 API Key。
+    访问 <a href={apiKeyUrl} target="_blank">API Key 管理页面</a>，登录后即可创建和管理您的 API Key。
   </Accordion>
 
   <Accordion title="图像和视频生成需要多长时间？">
@@ -181,7 +196,7 @@ Authorization: Bearer YOUR_API_KEY
   </Accordion>
 
   <Accordion title="如何查询任务状态？">
-    使用任务状态查询 API，传入提交任务时返回的 `task_id`：
+    使用任务状态查询 API，可以传入提交任务时返回的 `task_id`，或者您自己设置的 `out_task_id`（二选一）：
 
     ```bash
     POST https://pxz-api.xinsulv.com/api/openapi/query
@@ -190,12 +205,21 @@ Authorization: Bearer YOUR_API_KEY
     查看 [任务状态查询文档](/zh/api-reference/tasks/status) 了解详情。
   </Accordion>
 
+  <Accordion title="什么是 out_task_id？">
+    `out_task_id` 是发起方任务ID，由您在提交任务时自定义设置：
+
+    - **必填参数**：提交任务时必须传入 `out_task_id`
+    - **业务标识**：可以使用您系统中的订单号、业务ID等作为标识
+    - **查询灵活**：可以直接使用 `out_task_id` 查询任务状态，无需保存系统返回的 `task_id`
+    - **结果关联**：在查询结果中会同时返回 `task_id` 和 `out_task_id`，方便您关联业务数据
+  </Accordion>
+
   <Accordion title="支持 webhook 回调吗？">
     是的，在提交任务时可以传入 `callback_url` 参数。任务完成后，系统会向该地址发送 POST 请求，包含完整的任务结果。
   </Accordion>
 
   <Accordion title="如何计费？">
-    APIMart 采用积分制计费：
+    AIReiter 采用积分制计费：
 
     - 提交任务时返回预估消耗积分（`estimated_credits`）
     - 任务完成后返回实际消耗积分（`credits_used`）
@@ -222,7 +246,7 @@ Authorization: Bearer YOUR_API_KEY
   <Card title="任务管理" icon="list-check" href="/zh/api-reference/tasks/status">
     学习如何管理和查询任务状态
   </Card>
-  <Card title="获取 API Key" icon="key" href="https://apimart.ai/console/token">
-    立即开始使用 APIMart
+  <Card title="获取 API Key" icon="key" href={apiKeyUrl}>
+    立即开始使用 AIReiter
   </Card>
 </CardGroup>

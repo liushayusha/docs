@@ -1,22 +1,23 @@
 ---
-title: 'タスクステータスの取得'
+title: 'タスクのステータス取得'
 description: |
-    - 非同期タスクの実行状態と結果を照会
-    - リアルタイムステータス更新と進捗追跡
-    - タスク完了時に生成結果を取得
+    - 非同期タスクの実行状態と結果を問い合わせる
+    - リアルタイムのステータス更新と進行状況の追跡
+    - タスク完了時に生成結果を取得する
 api: 'POST https://pxz-api.xinsulv.com/api/openapi/query'
 ---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  すべてのインターフェースはBearer Tokenを使用した認証が必要です
+  すべてのエンドポイントでBearer Tokenによる認証が必要です
 
-  APIキーの取得:
+  APIキーの取得方法：
 
-  [APIキー管理ページ](https://apimart.ai/console/token)にアクセスしてAPIキーを取得してください
+  <a href={apiKeyUrl} target="_blank">APIキー管理ページ</a>にアクセスしてAPIキーを取得してください
 
-  使用時にリクエストヘッダーに追加:
+  使用時はリクエストヘッダに以下を追加します：
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -25,8 +26,16 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/query'
 
 ## Body
 
-<ParamField body="task_id" type="string" required>
-  生成APIから返されたタスクID
+<ParamField body="task_id" type="string">
+  生成APIから返されるタスクID
+
+  out_task_idとどちらか一方を選択し、どちらか一方を必ず提供してください
+</ParamField>
+
+<ParamField body="out_task_id" type="string">
+  発注側のタスクID
+
+  task_idとどちらか一方を選択し、どちらか一方を必ず提供してください
 </ParamField>
 
 ## Response
@@ -36,30 +45,30 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/query'
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  タスクステータス:
+  タスクステータス：
 
-  * `pending` - 処理待ちキュー
+  * `pending` - 処理待ち状態
   * `processing` - 処理中
-  * `completed` - 正常に完了
+  * `completed` - 成功完了
   * `failed` - 失敗
 </ResponseField>
 
 <ResponseField name="input" type="object">
-  タスク入力(オプション、特定の場合にのみ返される)
+  タスク入力（オプションで、一部の場合のみ返されます）
 
-  タスク送信時の完全なパラメータ情報を含む
+  タスクを提出したときの完全なパラメータ情報を含みます
 </ResponseField>
 
 <ResponseField name="output" type="array">
-  タスク出力(タスク完了後に返される)
+  タスク出力（タスク完了後に返されます）
 
-  生成結果を含む配列、各要素は生成されたリソースを指す`url`フィールドを含む
+  生成結果の配列で、各要素は生成されたリソースへの `url` フィールドを含みます
 </ResponseField>
 
 <ResponseField name="error" type="object">
-  エラー情報(タスク失敗時に返される)
+  エラー情報（タスク失敗時に返されます）
 
-  <Expandable title="属性">
+  <Expandable title="Properties">
     <ResponseField name="code" type="string">
       エラーコード
     </ResponseField>
@@ -71,19 +80,19 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/query'
 </ResponseField>
 
 <ResponseField name="credits_used" type="number">
-  消費されたクレジット
+  使用したクレジット
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  作成時刻(ISO 8601形式)
+  作成日時（ISO 8601形式）
 </ResponseField>
 
 <ResponseField name="completed_at" type="string">
-  完了時刻(タスク完了後に返される、ISO 8601形式)
+  完了日時（タスク完了後に返されます、ISO 8601形式）
 </ResponseField>
 
 <RequestExample>
-  ```bash cURL
+  ```bash cURL (task_idを使用)
   curl --request POST \
     --url 'https://pxz-api.xinsulv.com/api/openapi/query' \
     --header 'Authorization: Bearer <token>' \
@@ -93,7 +102,17 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/query'
     }'
   ```
 
-  ```python Python
+  ```bash cURL (out_task_idを使用)
+  curl --request POST \
+    --url 'https://pxz-api.xinsulv.com/api/openapi/query' \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data-raw '{
+      "out_task_id": "my_task_123456"
+    }'
+  ```
+
+  ```python Python (task_idを使用)
   import requests
 
   url = "https://pxz-api.xinsulv.com/api/openapi/query"
@@ -105,6 +124,25 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/query'
 
   payload = {
       "task_id": "order_lwU2d-VkUq9-tlCCmrdYu"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```python Python (out_task_idを使用)
+  import requests
+
+  url = "https://pxz-api.xinsulv.com/api/openapi/query"
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  payload = {
+      "out_task_id": "my_task_123456"
   }
 
   response = requests.post(url, json=payload, headers=headers)
@@ -496,7 +534,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/query'
   ```json 400
   {
     "statusCode": 400,
-    "message": "Missing required field: task_id",
+    "message": "必須フィールドがありません: task_id",
     "ok": false
   }
   ```
@@ -505,7 +543,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/query'
   {
     "error": {
       "code": 500,
-      "message": "サーバー内部エラー、しばらくしてからもう一度お試しください"
+      "message": "サーバー内部エラーです。しばらくしてから再試行してください。"
     }
   }
   ```

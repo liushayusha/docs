@@ -6,6 +6,8 @@ description: |
 api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 ---
 
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
@@ -13,7 +15,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 
   获取 API Key：
 
-  访问 [API Key 管理页面](https://apimart.ai/console/token) 获取您的 API Key
+  访问 <a href={apiKeyUrl} target="_blank">API Key 管理页面</a> 获取您的 API Key
 
   使用时在请求头中添加：
 
@@ -59,6 +61,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   </Expandable>
 </ParamField>
 
+<ParamField body="out_task_id" type="string" required>
+  发起方任务ID
+
+  用户自定义的任务标识，必填
+</ParamField>
+
 <ParamField body="callback_url" type="string">
   任务完成后的回调通知地址
 
@@ -75,6 +83,10 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 
 <ResponseField name="task_id" type="string">
   任务ID，用于查询结果
+</ResponseField>
+
+<ResponseField name="out_task_id" type="string">
+  发起方任务ID，可用于查询结果
 </ResponseField>
 
 <ResponseField name="status" type="string">
@@ -100,7 +112,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       "params": {
         "prompt": "星空下的古老城堡",
         "aspect_ratio": "1:1"
-      }
+      },
+      "out_task_id": "my_task_123456"
     }'
   ```
 
@@ -114,7 +127,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       "params": {
           "prompt": "星空下的古老城堡",
           "aspect_ratio": "1:1"
-      }
+      },
+      "out_task_id": "my_task_123456"
   }
 
   headers = {
@@ -135,7 +149,9 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     params: {
       prompt: "星空下的古老城堡",
       aspect_ratio: "1:1"
-    }
+    },
+    out_task_id: "my_task_123456",
+    out_task_id: "my_task_123456"
   };
 
   const headers = {
@@ -173,6 +189,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
               "prompt":       "星空下的古老城堡",
               "aspect_ratio": "1:1",
           },
+          "out_task_id": "my_task_123456",
       }
 
       jsonData, _ := json.Marshal(payload)
@@ -209,7 +226,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
             "params": {
               "prompt": "星空下的古老城堡",
               "aspect_ratio": "1:1"
-            }
+            },
+            "out_task_id": "my_task_123456"
           }
           """;
 
@@ -239,7 +257,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       "params" => [
           "prompt" => "星空下的古老城堡",
           "aspect_ratio" => "1:1"
-      ]
+      ],
+      "out_task_id" => "my_task_123456"
   ];
 
   $ch = curl_init($url);
@@ -270,7 +289,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     params: {
       prompt: "星空下的古老城堡",
       aspect_ratio: "1:1"
-    }
+    },
+    out_task_id: "my_task_123456"
   }
 
   http = Net::HTTP.new(url.host, url.port)
@@ -294,7 +314,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       "params": [
           "prompt": "星空下的古老城堡",
           "aspect_ratio": "1:1"
-      ]
+      ],
+      "out_task_id": "my_task_123456"
   ]
 
   var request = URLRequest(url: url)
@@ -532,6 +553,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     "message": "",
     "data": {
         "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
+        "out_task_id": "my_task_123456",
         "status": "pending",
         "estimated_credits": 100,
         "created_at": "2025-12-22T06:03:28.242Z"

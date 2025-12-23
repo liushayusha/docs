@@ -1,21 +1,23 @@
 ---
 title: 'Sora2 Pro Video Generation'
 description: |
-    - Asynchronous processing mode, returns task ID for subsequent queries
+    - Asynchronous processing mode, returns a task ID for subsequent queries
     - Supports text-to-video, image-to-video and other generation modes
     - Professional version, supports higher resolution
 api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 ---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
   All endpoints require authentication using a Bearer Token
 
-  Get the API Key:
+  Obtain API Key:
 
-  Visit the [API Key management page](https://apimart.ai/console/token) to get your API Key
+  Visit the <a href={apiKeyUrl} target="_blank">API Key Management page</a> to get your API Key
 
-  Add in the request headers:
+  Add the following in the request header:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -37,13 +39,13 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     <ParamField body="prompt" type="string" required>
       Text description for video generation
 
-      No limitations
+      No limits
     </ParamField>
 
     <ParamField body="image_url" type="string">
       URL of the reference image for image-to-video (first frame)
 
-      * Supports only a single image
+      * Only supports a single image
       * Supports publicly accessible URLs
     </ParamField>
 
@@ -76,24 +78,32 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   </Expandable>
 </ParamField>
 
-<ParamField body="callback_url" type="string">
-  Callback URL for task completion notification
+<ParamField body="out_task_id" type="string" required>
+  Initiator task ID
 
-  After the task is completed, the system will send a POST request to this URL to notify the result
+  User-defined task identifier, required
+</ParamField>
+<ParamField body="callback_url" type="string">
+  Callback notification URL after task completion
+
+  After task completion, the system will send a POST request to this URL to notify the result
 </ParamField>
 
 <ParamField body="metadata" type="object">
   Custom metadata
 
-  Returned as-is when querying results, can be used for business identification
+  Returned as-is in query results, can be used for business identification
 </ParamField>
 
 ## Response
 
 <ResponseField name="task_id" type="string">
-  Task ID, used to query the result
+  Task ID, used for querying the result
 </ResponseField>
 
+<ResponseField name="out_task_id" type="string">
+  Initiator's task ID, can be used for querying the result
+</ResponseField>
 <ResponseField name="status" type="string">
   Initial status, fixed as `"pending"`
 </ResponseField>
@@ -119,7 +129,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
         "aspect_ratio": "16:9",
         "video_length": "15",
         "resolution": "high"
-      }
+      },
+      "out_task_id": "my_task_123456"
     }'
   ```
 
@@ -135,7 +146,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           "aspect_ratio": "16:9",
           "video_length": "15",
           "resolution": "high"
-      }
+      },
+      "out_task_id": "my_task_123456"
   }
 
   headers = {
@@ -158,7 +170,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       aspect_ratio: "16:9",
       video_length: "15",
       resolution: "high"
-    }
+    },
+    out_task_id: "my_task_123456"
   };
 
   const headers = {
@@ -198,6 +211,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
               "video_length": "15",
               "resolution":   "high",
           },
+          "out_task_id": "my_task_123456",
       }
 
       jsonData, _ := json.Marshal(payload)
@@ -235,7 +249,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
               conn.setRequestProperty("Content-Type", "application/json");
               conn.setDoOutput(true);
 
-              String jsonPayload = "{\"model\":\"sora2_pro\",\"params\":{\"prompt\":\"A cat walking in the garden\",\"aspect_ratio\":\"16:9\",\"video_length\":\"15\",\"resolution\":\"high\"}}";
+              String jsonPayload = "{\"model\":\"sora2_pro\",\"params\":{\"prompt\":\"A cat walking in the garden\",\"aspect_ratio\":\"16:9\",\"video_length\":\"15\",\"resolution\":\"high\"},\"out_task_id\":\"my_task_123456\"}";
 
               OutputStream os = conn.getOutputStream();
               os.write(jsonPayload.getBytes());
@@ -269,7 +283,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           "aspect_ratio" => "16:9",
           "video_length" => "15",
           "resolution" => "high"
-      )
+      ),
+      "out_task_id" => "my_task_123456"
   );
 
   $ch = curl_init($url);
@@ -302,7 +317,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       aspect_ratio: "16:9",
       video_length: "15",
       resolution: "high"
-    }
+    },
+    out_task_id: "my_task_123456"
   }
 
   http = Net::HTTP.new(url.host, url.port)
@@ -331,7 +347,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           "aspect_ratio": "16:9",
           "video_length": "15",
           "resolution": "high"
-      ]
+      ],
+      "out_task_id": "my_task_123456"
   ]
 
   request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
@@ -355,7 +372,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       static async Task Main(string[] args)
       {
           var url = "https://pxz-api.xinsulv.com/api/openapi/submit";
-          var payload = "{\"model\":\"sora2_pro\",\"params\":{\"prompt\":\"A cat walking in the garden\",\"aspect_ratio\":\"16:9\",\"video_length\":\"15\",\"resolution\":\"high\"}}";
+          var payload = "{\"model\":\"sora2_pro\",\"params\":{\"prompt\":\"A cat walking in the garden\",\"aspect_ratio\":\"16:9\",\"video_length\":\"15\",\"resolution\":\"high\"},\"out_task_id\":\"my_task_123456\"}";
 
           using (var client = new HttpClient())
           {
@@ -387,7 +404,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           headers = curl_slist_append(headers, "Content-Type: application/json");
           curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-          const char *data = "{\"model\":\"sora2_pro\",\"params\":{\"prompt\":\"A cat walking in the garden\",\"aspect_ratio\":\"16:9\",\"video_length\":\"15\",\"resolution\":\"high\"}}";
+          const char *data = "{\"model\":\"sora2_pro\",\"params\":{\"prompt\":\"A cat walking in the garden\",\"aspect_ratio\":\"16:9\",\"video_length\":\"15\",\"resolution\":\"high\"},\"out_task_id\":\"my_task_123456\"}";
           curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
 
           res = curl_easy_perform(curl);
@@ -417,7 +434,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
                   @"aspect_ratio": @"16:9",
                   @"video_length": @"15",
                   @"resolution": @"high"
-              }
+              },
+              @"out_task_id": @"my_task_123456"
           };
 
           NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload options:0 error:nil];
@@ -444,7 +462,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 
   let url = "https://pxz-api.xinsulv.com/api/openapi/submit"
 
-  let payload = {|{"model":"sora2_pro","params":{"prompt":"A cat walking in the garden","aspect_ratio":"16:9","video_length":"15","resolution":"high"}}|}
+  let payload = {|{"model":"sora2_pro","params":{"prompt":"A cat walking in the garden","aspect_ratio":"16:9","video_length":"15","resolution":"high"},"out_task_id":"my_task_123456"}|}
 
   let () =
     let headers = Header.init ()
@@ -473,7 +491,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
         'aspect_ratio': '16:9',
         'video_length': '15',
         'resolution': 'high'
-      }
+      },
+      'out_task_id': 'my_task_123456'
     };
 
     var response = await http.post(
@@ -502,7 +521,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       aspect_ratio = "16:9",
       video_length = "15",
       resolution = "high"
-    )
+    ),
+    out_task_id = "my_task_123456"
   )
 
   response <- POST(
@@ -526,6 +546,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     "message": "",
     "data": {
         "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
+        "out_task_id": "my_task_123456",
         "status": "pending",
         "estimated_credits": 100,
         "created_at": "2025-12-22T06:03:28.242Z"
@@ -552,7 +573,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   {
     "error": {
       "code": 433,
-      "message": "Insufficient account balance, please top up and try again"
+      "message": "Insufficient account balance, please recharge and try again"
     }
   }
   ```

@@ -1,37 +1,47 @@
 [
   {
     "id": "__frontmatter__",
-    "hash": "cce7855d",
+    "hash": "0097f1bd",
     "index": 0
   },
   {
     "id": "__prologue__",
-    "hash": "a9874bd8",
+    "hash": "90da1801",
     "index": 1
   },
   {
-    "id": "section-0-quick-start",
-    "hash": "6b5b6be9",
+    "id": "section-0-快速开始",
+    "hash": "b86291b3",
     "index": 2
   },
   {
-    "id": "section-1-api-endpoints",
-    "hash": "cd62ed13",
+    "id": "section-1-api-工作流程",
+    "hash": "43c62e5f",
     "index": 3
   },
   {
-    "id": "section-2-platform-benefits",
-    "hash": "c2f8026e",
+    "id": "section-2-支持的模型",
+    "hash": "4694be43",
     "index": 4
   },
   {
-    "id": "section-3-supported-models",
-    "hash": "93b0b25f",
+    "id": "section-3-核心功能",
+    "hash": "f3e4a60c",
     "index": 5
   },
   {
-    "id": "section-4-faq",
-    "hash": "ac721616",
+    "id": "section-4-认证方式",
+    "hash": "5ba5a9ee",
     "index": 6
+  },
+  {
+    "id": "section-5-常见问题",
+    "hash": "a5d35c0f",
+    "index": 7
+  },
+  {
+    "id": "section-6-下一步",
+    "hash": "fb0e0884",
+    "index": 8
   }
 ]

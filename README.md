@@ -1,4 +1,4 @@
-# APIMart API Documentation
+# API Documentation
 
 多语言 API 文档，支持英语、中文、日语和韩语。
 

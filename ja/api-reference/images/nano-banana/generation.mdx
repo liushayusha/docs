@@ -2,19 +2,21 @@
 title: 'Nano Banana 画像生成'
 description: |
     - 非同期処理モード、後続のクエリに使用するタスクIDを返します
-    - 高速生成、迅速な画像作成に最適化
+    - 高速生成速度、迅速な画像作成に最適化されています
 api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 ---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  すべてのエンドポイントはBearer Tokenで認証が必要です
+  すべてのエンドポイントはBearer Tokenによる認証が必要です
 
-  API Keyの取得：
+  APIキーの取得：
 
-  [API Key 管理ページ](https://apimart.ai/console/token)にアクセスしてAPI Keyを取得してください
+  <a href={apiKeyUrl} target="_blank">API Key 管理ページ</a>にアクセスしてAPIキーを取得してください
 
-  使用時にはリクエストヘッダーに次のように追加します：
+  リクエストヘッダーに以下を追加してください：
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -40,7 +42,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     </ParamField>
 
     <ParamField body="image_url" type="array">
-      参考画像のURLリスト（画像から画像生成用）
+      参考画像のURLリスト。画像から画像への生成に使用
 
       * 最大9枚の画像
       * 公開アクセス可能なURLをサポート
@@ -60,7 +62,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       * `5:4` - 横向き5:4
       * `4:5` - 縦向き4:5
       * `16:9` - 横向きワイドスクリーン
-      * `9:16` - 縦向き縦画面
+      * `9:16` - 縦向きスクリーン
       * `21:9` - 超ワイドスクリーン
     </ParamField>
 
@@ -69,40 +71,50 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 
       サポートされるフォーマット：
 
-      * `png` - PNG形式（デフォルト）
-      * `jpeg` - JPEG形式
+      * `png` - PNGフォーマット（デフォルト）
+      * `jpeg` - JPEGフォーマット
     </ParamField>
   </Expandable>
 </ParamField>
 
-<ParamField body="callback_url" type="string">
-  タスク完了後のコールバック通知用URL
+<ParamField body="out_task_id" type="string" required>
+  発行者タスクID
 
-  タスク完了後、システムがこのURLにPOSTリクエストを送信して結果を通知します
+  ユーザー定義のタスク識別子、必須
+</ParamField>
+
+<ParamField body="callback_url" type="string">
+  タスク完了後のコールバック通知先URL
+
+  タスク完了時、システムがこのURLにPOSTリクエストで結果を通知します
 </ParamField>
 
 <ParamField body="metadata" type="object">
   カスタムメタデータ
 
-  クエリ結果でそのまま返され、ビジネス識別に利用可能
+  クエリ結果時にそのまま返され、ビジネス識別に使用可能
 </ParamField>
 
 ## Response
 
 <ResponseField name="task_id" type="string">
-  タスクID。結果を照会するために使用します
+  タスクID。結果の照会に使用します。
+</ResponseField>
+
+<ResponseField name="out_task_id" type="string">
+  発信者のタスクID。結果の照会に使用可能です。
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  初期状態。固定で `"pending"`
+  初期状態で、固定値は `"pending"` です。
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  推定消費クレジット
+  推定消費クレジット数
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  作成日時（ISOフォーマット）
+  作成日時（ISO 形式）
 </ResponseField>
 
 <RequestExample>
@@ -114,10 +126,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     --data '{
       "model": "nano_banana",
       "params": {
-        "prompt": "月光の下の竹林の小径",
+        "prompt": "月光下の竹林の小径",
         "aspect_ratio": "16:9",
         "format": "png"
-      }
+      },
+      "out_task_id": "my_task_123456"
     }'
   ```
 
@@ -129,10 +142,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   payload = {
       "model": "nano_banana",
       "params": {
-          "prompt": "月光の下の竹林の小径",
+          "prompt": "月光下の竹林の小径",
           "aspect_ratio": "16:9",
           "format": "png"
-      }
+      },
+      "out_task_id": "my_task_123456"
   }
 
   headers = {
@@ -151,10 +165,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   const payload = {
     model: "nano_banana",
     params: {
-      prompt: "月光の下の竹林の小径",
+      prompt: "月光下の竹林の小径",
       aspect_ratio: "16:9",
       format: "png"
-    }
+    },
+    out_task_id: "my_task_123456"
   };
 
   const headers = {
@@ -189,10 +204,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       payload := map[string]interface{}{
           "model": "nano_banana",
           "params": map[string]interface{}{
-              "prompt":       "月光の下の竹林の小径",
+              "prompt":       "月光下の竹林の小径",
               "aspect_ratio": "16:9",
               "format":       "png",
           },
+          "out_task_id": "my_task_123456",
       }
 
       jsonData, _ := json.Marshal(payload)
@@ -227,10 +243,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           {
             "model": "nano_banana",
             "params": {
-              "prompt": "月光の下の竹林の小径",
+              "prompt": "月光下の竹林の小径",
               "aspect_ratio": "16:9",
               "format": "png"
-            }
+            },
+            "out_task_id": "my_task_123456"
           }
           """;
 
@@ -258,10 +275,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   $payload = [
       "model" => "nano_banana",
       "params" => [
-          "prompt" => "月光の下の竹林の小径",
+          "prompt" => "月光下の竹林の小径",
           "aspect_ratio" => "16:9",
           "format" => "png"
-      ]
+      ],
+      "out_task_id" => "my_task_123456"
   ];
 
   $ch = curl_init($url);
@@ -290,10 +308,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   payload = {
     model: "nano_banana",
     params: {
-      prompt: "月光の下の竹林の小径",
+      prompt: "月光下の竹林の小径",
       aspect_ratio: "16:9",
       format: "png"
-    }
+    },
+    out_task_id: "my_task_123456"
   }
 
   http = Net::HTTP.new(url.host, url.port)
@@ -315,7 +334,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   let payload: [String: Any] = [
       "model": "nano_banana",
       "params": [
-          "prompt": "月光の下の竹林の小径",
+          "prompt": "月光下の竹林の小径",
           "aspect_ratio": "16:9",
           "format": "png"
       ]
@@ -356,7 +375,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           var payload = @"{
               ""model"": ""nano_banana"",
               ""params"": {
-                  ""prompt"": ""月光の下の竹林の小径"",
+                  ""prompt"": ""月光下の竹林の小径"",
                   ""aspect_ratio"": ""16:9"",
                   ""format"": ""png""
               }
@@ -390,7 +409,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           const char *payload = "{"
               "\"model\":\"nano_banana\","
               "\"params\":{"
-                  "\"prompt\":\"月光の下の竹林の小径\","
+                  "\"prompt\":\"月光下の竹林の小径\","
                   "\"aspect_ratio\":\"16:9\","
                   "\"format\":\"png\""
               "}"
@@ -430,7 +449,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           NSDictionary *payload = @{
               @"model": @"nano_banana",
               @"params": @{
-                  @"prompt": @"月光の下の竹林の小径",
+                  @"prompt": @"月光下の竹林の小径",
                   @"aspect_ratio": @"16:9",
                   @"format": @"png"
               }
@@ -477,7 +496,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   let payload = {|{
     "model": "nano_banana",
     "params": {
-      "prompt": "月光の下の竹林の小径",
+      "prompt": "月光下の竹林の小径",
       "aspect_ratio": "16:9",
       "format": "png"
     }
@@ -507,7 +526,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     final payload = {
       'model': 'nano_banana',
       'params': {
-        'prompt': '月光の下の竹林の小径',
+        'prompt': '月光下の竹林の小径',
         'aspect_ratio': '16:9',
         'format': 'png'
       }
@@ -535,7 +554,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   payload <- list(
     model = "nano_banana",
     params = list(
-      prompt = "月光の下の竹林の小径",
+      prompt = "月光下の竹林の小径",
       aspect_ratio = "16:9",
       format = "png"
     )
@@ -562,6 +581,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     "message": "",
     "data": {
         "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
+        "out_task_id": "my_task_123456",
         "status": "pending",
         "estimated_credits": 100,
         "created_at": "2025-12-22T06:03:28.242Z"
@@ -572,7 +592,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   ```json 400
     {
         "statusCode": 400,
-        "message": "リクエストパラメーターが無効です",
+        "message": "リクエストパラメータが無効です",
         "ok": false
     }
   ```
@@ -580,7 +600,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   {
     "error": {
       "code": 401,
-      "message": "認証に失敗しました。APIキーをご確認ください"
+      "message": "認証に失敗しました。APIキーを確認してください"
     }
   }
   ```
@@ -588,7 +608,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   {
     "error": {
       "code": 433,
-      "message": "アカウント残高が不足しています。チャージ後に再度お試しください"
+      "message": "アカウント残高不足です。チャージ後に再試行してください"
     }
   }
   ```
@@ -597,7 +617,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   {
     "error": {
       "code": 500,
-      "message": "サーバー内部エラーが発生しました。後でもう一度お試しください"
+      "message": "サーバー内部エラーです。しばらくしてから再試行してください"
     }
   }
   ```

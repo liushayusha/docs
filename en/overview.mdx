@@ -1,32 +1,33 @@
 ---
-title: 'APIMart — AI Image & Video Generation API Platform'
-description: 'Unified AI image and video generation API platform. Supports multiple mainstream models including GPT-4o Image, Gemini, Sora2, VEO3, and more. Asynchronous task processing, transparent pricing, simple and easy to use.'
+title: 'AIReiter — AI Image and Video Generation API Platform'
+description: 'A unified AI image and video generation API platform. Supports various mainstream models including GPT-4o Image, Gemini, Sora2, VEO3, and more. Asynchronous task processing, transparent pricing, and easy to use.'
 ---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
 
-APIMart is a unified AI content generation API platform that provides image and video generation services. With simple REST API calls, you can use various mainstream AI models like GPT-4o, Gemini, Sora2, VEO3 to generate high-quality images and video content.
+AIReiter is a unified AI content generation API platform that offers image and video generation services. By making simple REST API calls, you can use various mainstream AI models such as GPT-4o, Gemini, Sora2, and VEO3 to generate high-quality image and video content.
 
 ## Quick Start
 
 <CardGroup cols={2}>
   <Card title="Image Generation" icon="image" href="/en/api-reference/images/gpt-4o/generation">
-    Generate images using GPT-4o, Gemini, Seedream, and other models
+    Generate images using models such as GPT-4o, Gemini, and Seedream
   </Card>
   <Card title="Video Generation" icon="video" href="/en/api-reference/videos/sora2/generation">
-    Generate video content using Sora2, VEO3, and other models
+    Generate video content using models such as Sora2 and VEO3
   </Card>
   <Card title="Task Status Query" icon="list-check" href="/en/api-reference/tasks/status">
     Query the execution status and results of asynchronous tasks
   </Card>
-  <Card title="Get API Key" icon="key" href="https://apimart.ai/console/token">
-    Visit the console to get your API Key
+  <Card title="Get API Key" icon="key" href={apiKeyUrl}>
+    Access the console to get your API key
   </Card>
 </CardGroup>
 
 ## API Workflow
 
-### 1. Submit Generation Task
+### 1. Submit a Generate Task
 
-All image and video generation uses asynchronous processing. After submitting a task, the system immediately returns a `task_id`:
+All image and video generation use an asynchronous processing mode. When submitting a task, you need to pass `out_task_id` (initiator task ID). The system will return `task_id` and `out_task_id`:
 
 ```bash
 curl --request POST \
@@ -36,17 +37,19 @@ curl --request POST \
   --data '{
     "model": "gpt_4o",
     "params": {
-      "prompt": "一只可爱的猫咪在花园里",
+      "prompt": "A cute cat in the garden",
       "aspect_ratio": "1:1"
-    }
+    },
+    "out_task_id": "my_task_123456"
   }'
 ```
 
 ### 2. Query Task Status
 
-Use the returned `task_id` to query task progress and results:
+Use the returned `task_id` or the `out_task_id` you submitted to check the task progress and result (either one):
 
 ```bash
+# Query by task_id
 curl --request POST \
   --url https://pxz-api.xinsulv.com/api/openapi/query \
   --header 'Authorization: Bearer YOUR_API_KEY' \
@@ -54,11 +57,20 @@ curl --request POST \
   --data-raw '{
     "task_id": "order_xxxxxxxxxxxx"
   }'
+
+# Or query by out_task_id
+curl --request POST \
+  --url https://pxz-api.xinsulv.com/api/openapi/query \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --header 'Content-Type: application/json' \
+  --data-raw '{
+    "out_task_id": "my_task_123456"
+  }'
 ```
 
-### 3. Get Generation Results
+### 3. Get Generate Result
 
-Once the task is completed, the response will contain the generated image or video URL:
+After the task is completed, the response will include the generated image or video URL:
 
 ```json
 {
@@ -66,6 +78,7 @@ Once the task is completed, the response will contain the generated image or vid
   "message": "",
   "data": {
     "task_id": "order_xxxxxxxxxxxx",
+    "out_task_id": "my_task_123456",
     "status": "completed",
     "output": [
       {
@@ -80,7 +93,7 @@ Once the task is completed, the response will contain the generated image or vid
 
 ### Image Generation Series
 
-APIMart provides multiple image generation models, supporting text-to-image and image-to-image functionality:
+AIReiter offers a variety of image generation models, supporting text-to-image and image-to-image capabilities:
 
 <CardGroup cols={2}>
   <Card title="GPT-4o Image" icon="image" href="/en/api-reference/images/gpt-4o/generation">
@@ -89,7 +102,7 @@ APIMart provides multiple image generation models, supporting text-to-image and 
   <Card title="Gemini-2.5-Flash (Nano banana)" icon="image" href="/en/api-reference/images/nano-banana/generation">
     Google's latest fast image generation model
   </Card>
-  <Card title="Gemini-3-Pro (Nano banana2)" icon="image" href="/en/api-reference/images/gemini-3-pro/generation">
+  <Card title="Gemini-3-Pro (Nano banana pro)" icon="image" href="/en/api-reference/images/gemini-3-pro/generation">
     Google's professional-grade image generation model
   </Card>
   <Card title="Seedream-4.0" icon="image" href="/en/api-reference/images/seedream-4/generation">
@@ -102,20 +115,20 @@ APIMart provides multiple image generation models, supporting text-to-image and 
 
 ### Video Generation Series
 
-Supports text-to-video and image-to-video, providing multiple resolution and duration options:
+Supports text-to-video and image-to-video, offering multiple resolution and duration options:
 
 <CardGroup cols={2}>
   <Card title="Sora2" icon="video" href="/en/api-reference/videos/sora2/generation">
     OpenAI Sora2 video generation model (10-15 seconds)
   </Card>
   <Card title="Sora2 Pro" icon="video" href="/en/api-reference/videos/sora2-pro/generation">
-    Sora2 professional version with HD resolution support
+    Sora2 Pro, supports HD resolution
   </Card>
   <Card title="VEO3.1" icon="video" href="/en/api-reference/videos/veo3-1/generation">
     Google VEO3.1 video generation model
   </Card>
   <Card title="VEO3.1 Fast" icon="video" href="/en/api-reference/videos/veo3-1-fast/generation">
-    VEO3.1 fast version
+    VEO3.1 Fast version
   </Card>
 </CardGroup>
 
@@ -123,16 +136,17 @@ Supports text-to-video and image-to-video, providing multiple resolution and dur
 
 ### Asynchronous Task Processing
 
-All generation requests use asynchronous processing to avoid long waiting times:
+All generation requests use an asynchronous processing model to avoid long waiting times:
 
-- Immediately returns `task_id`
-- Query progress through task status API
-- Support webhook callback notifications (optional)
-- Real-time task status updates: `pending` → `processing` → `completed`
+- When submitting a task, provide `out_task_id` (initiator's task ID, used for business identification)
+- Immediately return the system-generated `task_id` and your submitted `out_task_id`
+- You can query the task status using either `task_id` or `out_task_id`
+- Supports webhook callback notifications (optional)
+- Task status updates in real time: `pending` → `processing` → `completed`
 
 ### Multi-Model Support
 
-A unified API endpoint supporting multiple image and video generation models:
+A unified API endpoint supports various image and video generation models:
 
 - **Image Generation**: 5 models including GPT-4o, Gemini, Seedream
 - **Video Generation**: 4 models including Sora2, VEO3
@@ -141,47 +155,47 @@ A unified API endpoint supporting multiple image and video generation models:
 
 ### Transparent Pricing
 
-Credit-based billing, transparent and clear:
+Charged by credits, clear and transparent:
 
-- Each task returns estimated credit consumption
-- Actual credits used displayed after task completion
-- Only pay for successfully generated content
+- Each task returns an estimated credit consumption
+- Actual credit consumption shown after task completion
+- Pay only for successfully generated content
 - No hidden fees
 
 ### Flexible Configuration
 
-Supports various generation parameter configurations:
+Supports various generation parameter settings:
 
-- **Images**: Multiple aspect ratios (1:1, 3:2, 2:3)
-- **Videos**: Multiple aspect ratios (16:9, 9:16), durations (10s, 15s), resolutions
-- Support reference images (image-to-image, image-to-video)
+- **Images**: multiple aspect ratios (1:1, 3:2, 2:3)
+- **Videos**: multiple aspect ratios (16:9, 9:16), durations (10 seconds, 15 seconds), resolutions
+- Supports reference images (image-to-image, image-to-video)
 - Custom metadata
 
-## Authentication
+## Authentication Method
 
-All API requests require Bearer Token authentication:
+All API requests require authentication using a Bearer Token:
 
 ```
 Authorization: Bearer YOUR_API_KEY
 ```
 
-**Getting API Key:**
+**Get API Key:**
 
-Visit the [API Key Management Page](https://apimart.ai/console/token) to get your API Key.
+Visit the <a href={apiKeyUrl} target="_blank">API Key Management Page</a> to get your API Key.
 
-## Frequently Asked Questions
+## FAQ
 
 <AccordionGroup>
-  <Accordion title="How do I get an API Key?">
-    Visit the [API Key Management Page](https://apimart.ai/console/token), and you can create and manage your API Key after logging in.
+  <Accordion title="How to get the API Key?">
+    Visit the <a href={apiKeyUrl} target="_blank">API Key management page</a>, log in to create and manage your API Keys.
   </Accordion>
 
-  <Accordion title="How long does image and video generation take?">
-    All generation tasks are processed asynchronously. Image generation typically takes a few seconds to tens of seconds, while video generation usually takes 1-5 minutes depending on duration and resolution. After submitting a task, you'll immediately receive a task_id, and you can track progress through the status query API.
+  <Accordion title="How long does it take to generate images and videos?">
+    All generation tasks are processed asynchronously. Image generation usually takes a few seconds to tens of seconds. Video generation typically takes 1-5 minutes depending on duration and resolution. After submitting a task, a task_id is returned immediately, and you can track progress through the status query API.
   </Accordion>
 
-  <Accordion title="How do I query task status?">
-    Use the task status query API with the `task_id` returned when submitting the task:
+  <Accordion title="How to query the task status?">
+    Use the task status query API by passing the `task_id` returned when submitting the task, or your own set `out_task_id` (either one):
 
     ```bash
     POST https://pxz-api.xinsulv.com/api/openapi/query
@@ -190,23 +204,32 @@ Visit the [API Key Management Page](https://apimart.ai/console/token) to get you
     See the [Task Status Query Documentation](/en/api-reference/tasks/status) for details.
   </Accordion>
 
-  <Accordion title="Do you support webhook callbacks?">
-    Yes, you can pass the `callback_url` parameter when submitting a task. After the task is completed, the system will send a POST request to that address containing the complete task results.
+  <Accordion title="What is out_task_id?">
+    `out_task_id` is the initiator’s task ID, which you customize when submitting the task:
+
+    - **Required parameter**: must include `out_task_id` when submitting the task
+    - **Business identifier**: can use your system’s order number, business ID, etc. as the identifier
+    - **Flexible querying**: you can use `out_task_id` directly to query task status without saving the system returned `task_id`
+    - **Result association**: both `task_id` and `out_task_id` are returned in the query result to help link your business data
   </Accordion>
 
-  <Accordion title="How does billing work?">
-    APIMart uses a credit-based billing system:
-
-    - Estimated credit consumption (`estimated_credits`) is returned when submitting a task
-    - Actual credits used (`credits_used`) is returned after task completion
-    - Only pay for successfully generated content, failed tasks are not charged
-    - Different models have different credit consumption rates
+  <Accordion title="Is webhook callback supported?">
+    Yes, you can pass the `callback_url` parameter when submitting the task. After completion, the system will send a POST request to that URL containing the full task result.
   </Accordion>
 
-  <Accordion title="What image and video formats are supported?">
-    - **Images**: Supports common formats like JPEG, PNG
-    - **Videos**: Output in MP4 format
-    - **Reference Images**: Input supports publicly accessible image URLs
+  <Accordion title="How is billing handled?">
+    AIReiter uses a credit-based billing system:
+
+    - The estimated credit consumption (`estimated_credits`) is returned when submitting a task
+    - The actual credits used (`credits_used`) are returned after task completion
+    - You only pay for successfully generated content; failed tasks are free
+    - Credit consumption varies by model
+  </Accordion>
+
+  <Accordion title="Which image and video formats are supported?">
+    - **Images**: supports common formats such as JPEG and PNG
+    - **Videos**: outputs in MP4 format
+    - **Reference images**: input supports publicly accessible image URLs
   </Accordion>
 </AccordionGroup>
 
@@ -222,7 +245,7 @@ Visit the [API Key Management Page](https://apimart.ai/console/token) to get you
   <Card title="Task Management" icon="list-check" href="/en/api-reference/tasks/status">
     Learn how to manage and query task status
   </Card>
-  <Card title="Get API Key" icon="key" href="https://apimart.ai/console/token">
-    Start using APIMart now
+  <Card title="Get API Key" icon="key" href={apiKeyUrl}>
+    Start using AIReiter now
   </Card>
 </CardGroup>

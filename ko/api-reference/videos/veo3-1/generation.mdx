@@ -1,21 +1,23 @@
 ---
 title: 'VEO3.1 비디오 생성'
 description: |
-    - 비동기 처리 모드, 작업 ID를 반환하여 이후 조회에 사용
-    - 텍스트-비디오 변환, 이미지-비디오 생성 등 생성 모드 지원
-    - 첫 프레임 및 마지막 프레임 참고 이미지 지원
+    - 비동기 처리 모드, 후속 쿼리를 위한 작업 ID 반환
+    - 텍스트에서 비디오, 이미지에서 비디오 등 생성 모드 지원
+    - 첫 프레임과 마지막 프레임 참조 이미지 지원
 api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 ---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  모든 API는 Bearer Token 인증이 필요합니다
+  모든 엔드포인트는 Bearer Token을 사용하여 인증해야 합니다.
 
-  API Key 받기:
+  API 키 얻기:
 
-  [API Key 관리 페이지](https://apimart.ai/console/token)에서 API Key를 확인하세요
+  <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a>에 접속하여 API 키를 받으세요.
 
-  요청 헤더에 다음을 추가하세요:
+  요청 헤더에 다음을 추가하여 사용합니다:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -27,7 +29,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 <ParamField body="model" type="string" required>
   모델 이름
 
-  고정값: `"veo3_1"`
+  고정 값: `"veo3_1"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
@@ -35,40 +37,45 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 
   <Expandable title="params 객체 속성">
     <ParamField body="prompt" type="string" required>
-      영상 생성 텍스트 설명
+      영상 생성용 텍스트 설명
 
       제한 없음
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      영상 생성용 참조 이미지 URL (첫 프레임)
+      참조 이미지의 URL, 영상 생성용(첫 프레임)
 
       * 단일 이미지만 지원
-      * 공개 접근 가능한 URL 지원
+      * 공개적으로 접근 가능한 URL 지원
     </ParamField>
 
     <ParamField body="end_image_url" type="string">
-      마지막 프레임 참조 이미지 URL
+      마지막 프레임 참조 이미지의 URL
 
       * 단일 이미지만 지원
-      * 공개 접근 가능한 URL 지원
+      * 공개적으로 접근 가능한URL 지원
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="16:9">
       영상 가로세로 비율
 
-      지원하는 비율:
+      지원하는 가로세로 비율:
 
-      * `16:9` - 가로 (기본)
-      * `9:16` - 세로
+      * `16:9` - 가로 방향(기본값)
+      * `9:16` - 세로 방향
     </ParamField>
   </Expandable>
 </ParamField>
 
+<ParamField body="out_task_id" type="string" required>
+  발신자 작업 ID
+
+  사용자가 정의한 작업 식별자로, 필수 항목
+</ParamField>
 <ParamField body="callback_url" type="string">
   작업 완료 후 콜백 알림 주소
 
-  작업 완료 시 시스템이 해당 주소로 POST 요청을 보내 결과를 알림
+  작업 완료 시, 시스템이 해당 주소로 POST 요청을 보내 결과를 알림
 </ParamField>
 
 <ParamField body="metadata" type="object">
@@ -80,11 +87,18 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 ## Response
 
 <ResponseField name="task_id" type="string">
-  작업 ID로 결과 조회에 사용됩니다
+  작업 ID, 결과 조회에 사용
 </ResponseField>
 
+<ResponseField name="out_task_id" type="string">
+  발신자 작업 ID, 결과 조회에 사용 가능
+</ResponseField>
+
+<ResponseField name="out_task_id" type="string">
+  발신자 작업 ID, 결과 조회에 사용 가능
+</ResponseField>
 <ResponseField name="status" type="string">
-  초기 상태로 고정값 `"pending"`
+  초기 상태, 고정값 `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
@@ -92,7 +106,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  생성 시간 (ISO 형식)
+  생성 시간(ISO 형식)
 </ResponseField>
 
 <RequestExample>
@@ -104,10 +118,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     --data '{
       "model": "veo3_1",
       "params": {
-        "prompt": "이 이미지를 움직이게 하세요",
+        "prompt": "이 이미지를 움직이게 해주세요",
         "image_url": "https://example.com/reference.jpg",
         "aspect_ratio": "16:9"
-      }
+      },
+      "out_task_id": "my_task_123456"
     }'
   ```
 
@@ -119,10 +134,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   payload = {
       "model": "veo3_1",
       "params": {
-          "prompt": "이 이미지를 움직이게 하세요",
+          "prompt": "이 이미지를 움직이게 해주세요",
           "image_url": "https://example.com/reference.jpg",
           "aspect_ratio": "16:9"
-      }
+      },
+      "out_task_id": "my_task_123456"
   }
 
   headers = {
@@ -141,10 +157,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   const payload = {
     model: "veo3_1",
     params: {
-      prompt: "이 이미지를 움직이게 하세요",
+      prompt: "이 이미지를 움직이게 해주세요",
       image_url: "https://example.com/reference.jpg",
       aspect_ratio: "16:9"
-    }
+    },
+    out_task_id: "my_task_123456"
   };
 
   const headers = {
@@ -179,10 +196,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       payload := map[string]interface{}{
           "model": "veo3_1",
           "params": map[string]interface{}{
-              "prompt":       "이 이미지를 움직이게 하세요",
+              "prompt":       "이 이미지를 움직이게 해주세요",
               "image_url":    "https://example.com/reference.jpg",
               "aspect_ratio": "16:9",
           },
+          "out_task_id": "my_task_123456",
       }
 
       jsonData, _ := json.Marshal(payload)
@@ -220,7 +238,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
               conn.setRequestProperty("Content-Type", "application/json");
               conn.setDoOutput(true);
 
-              String jsonPayload = "{\"model\":\"veo3_1\",\"params\":{\"prompt\":\"이 이미지를 움직이게 하세요\",\"image_url\":\"https://example.com/reference.jpg\",\"aspect_ratio\":\"16:9\"}}";
+              String jsonPayload = "{\"model\":\"veo3_1\",\"params\":{\"prompt\":\"이 이미지를 움직이게 해주세요\",\"image_url\":\"https://example.com/reference.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
 
               OutputStream os = conn.getOutputStream();
               os.write(jsonPayload.getBytes());
@@ -250,10 +268,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   $payload = array(
       "model" => "veo3_1",
       "params" => array(
-          "prompt" => "이 이미지를 움직이게 하세요",
+          "prompt" => "이 이미지를 움직이게 해주세요",
           "image_url" => "https://example.com/reference.jpg",
           "aspect_ratio" => "16:9"
-      )
+      ),
+      "out_task_id" => "my_task_123456"
   );
 
   $ch = curl_init($url);
@@ -282,10 +301,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   payload = {
     model: "veo3_1",
     params: {
-      prompt: "이 이미지를 움직이게 하세요",
+      prompt: "이 이미지를 움직이게 해주세요",
       image_url: "https://example.com/reference.jpg",
       aspect_ratio: "16:9"
-    }
+    },
+    out_task_id: "my_task_123456"
   }
 
   http = Net::HTTP.new(url.host, url.port)
@@ -310,10 +330,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   let payload: [String: Any] = [
       "model": "veo3_1",
       "params": [
-          "prompt": "이 이미지를 움직이게 하세요",
+          "prompt": "이 이미지를 움직이게 해주세요",
           "image_url": "https://example.com/reference.jpg",
           "aspect_ratio": "16:9"
-      ]
+      ],
+      "out_task_id": "my_task_123456"
   ]
 
   request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
@@ -337,7 +358,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       static async Task Main(string[] args)
       {
           var url = "https://pxz-api.xinsulv.com/api/openapi/submit";
-          var payload = "{\"model\":\"veo3_1\",\"params\":{\"prompt\":\"이 이미지를 움직이게 하세요\",\"image_url\":\"https://example.com/reference.jpg\",\"aspect_ratio\":\"16:9\"}}";
+          var payload = "{\"model\":\"veo3_1\",\"params\":{\"prompt\":\"이 이미지를 움직이게 해주세요\",\"image_url\":\"https://example.com/reference.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
 
           using (var client = new HttpClient())
           {
@@ -369,7 +390,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           headers = curl_slist_append(headers, "Content-Type: application/json");
           curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-          const char *data = "{\"model\":\"veo3_1\",\"params\":{\"prompt\":\"이 이미지를 움직이게 하세요\",\"image_url\":\"https://example.com/reference.jpg\",\"aspect_ratio\":\"16:9\"}}";
+          const char *data = "{\"model\":\"veo3_1\",\"params\":{\"prompt\":\"이 이미지를 움직이게 해주세요\",\"image_url\":\"https://example.com/reference.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
           curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
 
           res = curl_easy_perform(curl);
@@ -395,10 +416,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           NSDictionary *payload = @{
               @"model": @"veo3_1",
               @"params": @{
-                  @"prompt": @"이 이미지를 움직이게 하세요",
+                  @"prompt": @"이 이미지를 움직이게 해주세요",
                   @"image_url": @"https://example.com/reference.jpg",
                   @"aspect_ratio": @"16:9"
-              }
+              },
+              @"out_task_id": @"my_task_123456"
           };
 
           NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload options:0 error:nil];
@@ -425,7 +447,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 
   let url = "https://pxz-api.xinsulv.com/api/openapi/submit"
 
-  let payload = {|{"model":"veo3_1","params":{"prompt":"이 이미지를 움직이게 하세요","image_url":"https://example.com/reference.jpg","aspect_ratio":"16:9"}}|}
+  let payload = {|{"model":"veo3_1","params":{"prompt":"이 이미지를 움직이게 해주세요","image_url":"https://example.com/reference.jpg","aspect_ratio":"16:9"},"out_task_id":"my_task_123456"}|}
 
   let () =
     let headers = Header.init ()
@@ -450,10 +472,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     var payload = {
       'model': 'veo3_1',
       'params': {
-        'prompt': '이 이미지를 움직이게 하세요',
+        'prompt': '이 이미지를 움직이게 해주세요',
         'image_url': 'https://example.com/reference.jpg',
         'aspect_ratio': '16:9'
-      }
+      },
+      'out_task_id': 'my_task_123456'
     };
 
     var response = await http.post(
@@ -478,10 +501,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   payload <- list(
     model = "veo3_1",
     params = list(
-      prompt = "이 이미지를 움직이게 하세요",
+      prompt = "이 이미지를 움직이게 해주세요",
       image_url = "https://example.com/reference.jpg",
       aspect_ratio = "16:9"
-    )
+    ),
+    out_task_id = "my_task_123456"
   )
 
   response <- POST(
@@ -505,6 +529,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     "message": "",
     "data": {
         "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
+        "out_task_id": "my_task_123456",
+        "out_task_id": "my_task_123456",
         "status": "pending",
         "estimated_credits": 100,
         "created_at": "2025-12-22T06:03:28.242Z"
@@ -515,7 +541,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   ```json 400
     {
         "statusCode": 400,
-        "message": "요청 파라미터가 유효하지 않습니다",
+        "message": "잘못된 요청 파라미터",
         "ok": false
     }
   ```
@@ -523,7 +549,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   {
     "error": {
       "code": 401,
-      "message": "인증 실패, API 키를 확인해주세요"
+      "message": "인증 실패, API 키를 확인하세요"
     }
   }
   ```
@@ -531,7 +557,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   {
     "error": {
       "code": 433,
-      "message": "계정 잔액이 부족합니다. 충전 후 다시 시도해주세요"
+      "message": "계정 잔액 부족, 충전 후 다시 시도하세요"
     }
   }
   ```
@@ -540,7 +566,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   {
     "error": {
       "code": 500,
-      "message": "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요"
+      "message": "서버 내부 오류, 나중에 다시 시도하세요"
     }
   }
   ```

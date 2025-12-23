@@ -7,6 +7,8 @@ description: |
 api: 'POST https://pxz-api.xinsulv.com/api/openapi/query'
 ---
 
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
@@ -14,7 +16,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/query'
 
   获取 API Key：
 
-  访问 [API Key 管理页面](https://apimart.ai/console/token) 获取您的 API Key
+  访问 <a href={apiKeyUrl} target="_blank">API Key 管理页面</a> 获取您的 API Key
 
   使用时在请求头中添加：
 
@@ -25,8 +27,16 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/query'
 
 ## Body
 
-<ParamField body="task_id" type="string" required>
+<ParamField body="task_id" type="string">
   生成API返回的任务ID
+
+  与 out_task_id 二选一，必须提供其中一个
+</ParamField>
+
+<ParamField body="out_task_id" type="string">
+  发起方任务ID
+
+  与 task_id 二选一，必须提供其中一个
 </ParamField>
 
 ## Response
@@ -83,7 +93,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/query'
 </ResponseField>
 
 <RequestExample>
-  ```bash cURL
+  ```bash cURL (使用 task_id)
   curl --request POST \
     --url 'https://pxz-api.xinsulv.com/api/openapi/query' \
     --header 'Authorization: Bearer <token>' \
@@ -93,7 +103,17 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/query'
     }'
   ```
 
-  ```python Python
+  ```bash cURL (使用 out_task_id)
+  curl --request POST \
+    --url 'https://pxz-api.xinsulv.com/api/openapi/query' \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data-raw '{
+      "out_task_id": "my_task_123456"
+    }'
+  ```
+
+  ```python Python (使用 task_id)
   import requests
 
   url = "https://pxz-api.xinsulv.com/api/openapi/query"
@@ -105,6 +125,25 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/query'
 
   payload = {
       "task_id": "order_lwU2d-VkUq9-tlCCmrdYu"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```python Python (使用 out_task_id)
+  import requests
+
+  url = "https://pxz-api.xinsulv.com/api/openapi/query"
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  payload = {
+      "out_task_id": "my_task_123456"
   }
 
   response = requests.post(url, json=payload, headers=headers)

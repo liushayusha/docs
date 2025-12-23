@@ -1,22 +1,24 @@
 ---
 title: 'VEO3.1 Fast Video Generation'
 description: |
-    - Asynchronous processing mode, returns a task ID for subsequent queries
+    - Asynchronous processing mode, returns task ID for subsequent query
     - Supports text-to-video, image-to-video and other generation modes
     - Fast version optimized for speed
-    - Supports reference images for the first and last frames
+    - Supports first frame and last frame reference images
 api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 ---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  All endpoints require authentication using a Bearer Token.
+  All endpoints require authentication using a Bearer Token
 
   Get the API Key:
 
-  Visit the [API Key Management Page](https://apimart.ai/console/token) to get your API Key.
+  Visit the <a href={apiKeyUrl} target="_blank">API Key Management Page</a> to obtain your API Key
 
-  Add the following to the request headers when using:
+  Add the following in the request header:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -34,7 +36,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 <ParamField body="params" type="object" required>
   Model parameters object
 
-  <Expandable title="params object properties">
+  <Expandable title="params Object Properties">
     <ParamField body="prompt" type="string" required>
       Text description for video generation
 
@@ -42,14 +44,14 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      Reference image URL for image-to-video (first frame)
+      URL of the reference image for image-to-video (first frame)
 
       * Only a single image is supported
       * Supports publicly accessible URLs
     </ParamField>
 
     <ParamField body="end_image_url" type="string">
-      Reference image URL for the end frame
+      URL of the reference image for the last frame
 
       * Only a single image is supported
       * Supports publicly accessible URLs
@@ -66,8 +68,13 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   </Expandable>
 </ParamField>
 
+<ParamField body="out_task_id" type="string" required>
+  Initiator's task ID
+
+  User-defined task identifier, required
+</ParamField>
 <ParamField body="callback_url" type="string">
-  Callback notification URL after task completion
+  Callback URL after task completion
 
   After the task is completed, the system will send a POST request to this URL to notify the result
 </ParamField>
@@ -75,15 +82,18 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 <ParamField body="metadata" type="object">
   Custom metadata
 
-  Returned as-is when querying results; can be used for business identification
+  Returned as-is in query results, can be used for business identification
 </ParamField>
 
 ## Response
 
 <ResponseField name="task_id" type="string">
-  Task ID, used to query results
+  Task ID for querying results
 </ResponseField>
 
+<ResponseField name="out_task_id" type="string">
+  Initiator's task ID, which can be used to query results
+</ResponseField>
 <ResponseField name="status" type="string">
   Initial status, fixed as `"pending"`
 </ResponseField>
@@ -105,11 +115,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     --data '{
       "model": "veo3_1_fast",
       "params": {
-        "prompt": "The mist slowly flows in the mountains",
+        "prompt": "Mist slowly flowing in the mountains",
         "image_url": "https://example.com/start.jpg",
         "end_image_url": "https://example.com/end.jpg",
         "aspect_ratio": "16:9"
-      }
+      },
+      "out_task_id": "my_task_123456"
     }'
   ```
 
@@ -121,11 +132,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   payload = {
       "model": "veo3_1_fast",
       "params": {
-          "prompt": "The mist slowly flows in the mountains",
+          "prompt": "Mist slowly flowing in the mountains",
           "image_url": "https://example.com/start.jpg",
           "end_image_url": "https://example.com/end.jpg",
           "aspect_ratio": "16:9"
-      }
+      },
+      "out_task_id": "my_task_123456"
   }
 
   headers = {
@@ -144,11 +156,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   const payload = {
     model: "veo3_1_fast",
     params: {
-      prompt: "The mist slowly flows in the mountains",
+      prompt: "Mist slowly flowing in the mountains",
       image_url: "https://example.com/start.jpg",
       end_image_url: "https://example.com/end.jpg",
       aspect_ratio: "16:9"
-    }
+    },
+    out_task_id: "my_task_123456"
   };
 
   const headers = {
@@ -183,11 +196,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       payload := map[string]interface{}{
           "model": "veo3_1_fast",
           "params": map[string]interface{}{
-              "prompt":        "The mist slowly flows in the mountains",
+              "prompt":        "Mist slowly flowing in the mountains",
               "image_url":     "https://example.com/start.jpg",
               "end_image_url": "https://example.com/end.jpg",
               "aspect_ratio":  "16:9",
           },
+          "out_task_id": "my_task_123456",
       }
 
       jsonData, _ := json.Marshal(payload)
@@ -225,7 +239,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
               conn.setRequestProperty("Content-Type", "application/json");
               conn.setDoOutput(true);
 
-              String jsonPayload = "{\"model\":\"veo3_1_fast\",\"params\":{\"prompt\":\"The mist slowly flows in the mountains\",\"image_url\":\"https://example.com/start.jpg\",\"end_image_url\":\"https://example.com/end.jpg\",\"aspect_ratio\":\"16:9\"}}";
+              String jsonPayload = "{\"model\":\"veo3_1_fast\",\"params\":{\"prompt\":\"Mist slowly flowing in the mountains\",\"image_url\":\"https://example.com/start.jpg\",\"end_image_url\":\"https://example.com/end.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
 
               OutputStream os = conn.getOutputStream();
               os.write(jsonPayload.getBytes());
@@ -255,11 +269,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   $payload = array(
       "model" => "veo3_1_fast",
       "params" => array(
-          "prompt" => "The mist slowly flows in the mountains",
+          "prompt" => "Mist slowly flowing in the mountains",
           "image_url" => "https://example.com/start.jpg",
           "end_image_url" => "https://example.com/end.jpg",
           "aspect_ratio" => "16:9"
-      )
+      ),
+      "out_task_id" => "my_task_123456"
   );
 
   $ch = curl_init($url);
@@ -288,11 +303,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   payload = {
     model: "veo3_1_fast",
     params: {
-      prompt: "The mist slowly flows in the mountains",
+      prompt: "Mist slowly flowing in the mountains",
       image_url: "https://example.com/start.jpg",
       end_image_url: "https://example.com/end.jpg",
       aspect_ratio: "16:9"
-    }
+    },
+    out_task_id: "my_task_123456"
   }
 
   http = Net::HTTP.new(url.host, url.port)
@@ -317,11 +333,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   let payload: [String: Any] = [
       "model": "veo3_1_fast",
       "params": [
-          "prompt": "The mist slowly flows in the mountains",
+          "prompt": "Mist slowly flowing in the mountains",
           "image_url": "https://example.com/start.jpg",
           "end_image_url": "https://example.com/end.jpg",
           "aspect_ratio": "16:9"
-      ]
+      ],
+      "out_task_id": "my_task_123456"
   ]
 
   request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
@@ -345,7 +362,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       static async Task Main(string[] args)
       {
           var url = "https://pxz-api.xinsulv.com/api/openapi/submit";
-          var payload = "{\"model\":\"veo3_1_fast\",\"params\":{\"prompt\":\"The mist slowly flows in the mountains\",\"image_url\":\"https://example.com/start.jpg\",\"end_image_url\":\"https://example.com/end.jpg\",\"aspect_ratio\":\"16:9\"}}";
+          var payload = "{\"model\":\"veo3_1_fast\",\"params\":{\"prompt\":\"Mist slowly flowing in the mountains\",\"image_url\":\"https://example.com/start.jpg\",\"end_image_url\":\"https://example.com/end.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
 
           using (var client = new HttpClient())
           {
@@ -377,7 +394,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           headers = curl_slist_append(headers, "Content-Type: application/json");
           curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-          const char *data = "{\"model\":\"veo3_1_fast\",\"params\":{\"prompt\":\"The mist slowly flows in the mountains\",\"image_url\":\"https://example.com/start.jpg\",\"end_image_url\":\"https://example.com/end.jpg\",\"aspect_ratio\":\"16:9\"}}";
+          const char *data = "{\"model\":\"veo3_1_fast\",\"params\":{\"prompt\":\"Mist slowly flowing in the mountains\",\"image_url\":\"https://example.com/start.jpg\",\"end_image_url\":\"https://example.com/end.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
           curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
 
           res = curl_easy_perform(curl);
@@ -403,11 +420,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           NSDictionary *payload = @{
               @"model": @"veo3_1_fast",
               @"params": @{
-                  @"prompt": @"The mist slowly flows in the mountains",
+                  @"prompt": @"Mist slowly flowing in the mountains",
                   @"image_url": @"https://example.com/start.jpg",
                   @"end_image_url": @"https://example.com/end.jpg",
                   @"aspect_ratio": @"16:9"
-              }
+              },
+              @"out_task_id": @"my_task_123456"
           };
 
           NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload options:0 error:nil];
@@ -434,7 +452,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 
   let url = "https://pxz-api.xinsulv.com/api/openapi/submit"
 
-  let payload = {|{"model":"veo3_1_fast","params":{"prompt":"The mist slowly flows in the mountains","image_url":"https://example.com/start.jpg","end_image_url":"https://example.com/end.jpg","aspect_ratio":"16:9"}}|}
+  let payload = {|{"model":"veo3_1_fast","params":{"prompt":"Mist slowly flowing in the mountains","image_url":"https://example.com/start.jpg","end_image_url":"https://example.com/end.jpg","aspect_ratio":"16:9"},"out_task_id":"my_task_123456"}|}
 
   let () =
     let headers = Header.init ()
@@ -459,11 +477,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     var payload = {
       'model': 'veo3_1_fast',
       'params': {
-        'prompt': 'The mist slowly flows in the mountains',
+        'prompt': 'Mist slowly flowing in the mountains',
         'image_url': 'https://example.com/start.jpg',
         'end_image_url': 'https://example.com/end.jpg',
         'aspect_ratio': '16:9'
-      }
+      },
+      'out_task_id': 'my_task_123456'
     };
 
     var response = await http.post(
@@ -488,11 +507,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   payload <- list(
     model = "veo3_1_fast",
     params = list(
-      prompt = "The mist slowly flows in the mountains",
+      prompt = "Mist slowly flowing in the mountains",
       image_url = "https://example.com/start.jpg",
       end_image_url = "https://example.com/end.jpg",
       aspect_ratio = "16:9"
-    )
+    ),
+    out_task_id = "my_task_123456"
   )
 
   response <- POST(
@@ -516,6 +536,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     "message": "",
     "data": {
         "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
+        "out_task_id": "my_task_123456",
+        "out_task_id": "my_task_123456",
         "status": "pending",
         "estimated_credits": 100,
         "created_at": "2025-12-22T06:03:28.242Z"

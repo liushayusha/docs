@@ -1,20 +1,22 @@
 ---
 title: 'Nano Banana Pro 画像生成'
 description: |
-    - 非同期処理モード、後続のクエリ用にタスクIDを返す
-    - 高品質画像生成、プロフェッショナルレベルの画像作成
+    - 非同期処理モード、タスクIDを返し、後続のクエリに使用する
+    - 高品質な画像生成、プロフェッショナルレベルの画像作成
 api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 ---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  すべてのエンドポイントで Bearer トークンによる認証が必要です
+  すべてのエンドポイントはBearer Tokenによる認証が必要です
 
-  API キーの取得：
+  APIキーの取得：
 
-  [API キー管理ページ](https://apimart.ai/console/token)にアクセスして、API キーを取得してください
+  <a href={apiKeyUrl} target="_blank">APIキー管理ページ</a>にアクセスしてAPIキーを取得してください
 
-  リクエストヘッダーに以下を追加してください：
+  リクエストヘッダーに以下を追加して使用します：
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -30,17 +32,17 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  モデルパラメータオブジェクト
+  モデルパラメーターオブジェクト
 
   <Expandable title="params オブジェクトのプロパティ">
     <ParamField body="prompt" type="string" required>
-      画像生成のためのテキスト説明
+      画像生成のテキスト説明
 
       制限なし
     </ParamField>
 
     <ParamField body="image_url" type="array">
-      画像から画像への変換のための参照画像のURLリスト
+      画像生成の参考用URLリスト
 
       * 最大8枚の画像
       * 公開アクセス可能なURLをサポート
@@ -53,14 +55,14 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 
       * `auto` - 自動
       * `1:1` - 正方形（デフォルト）
-      * `3:2` - 横長 3:2
-      * `2:3` - 縦長 2:3
-      * `4:3` - 横長 4:3
-      * `3:4` - 縦長 3:4
-      * `5:4` - 横長 5:4
-      * `4:5` - 縦長 4:5
-      * `16:9` - 横長ワイドスクリーン
-      * `9:16` - 縦長スクリーン
+      * `3:2` - 横向き3:2
+      * `2:3` - 縦向き2:3
+      * `4:3` - 横向き4:3
+      * `3:4` - 縦向き3:4
+      * `5:4` - 横向き5:4
+      * `4:5` - 縦向き4:5
+      * `16:9` - 横向きワイドスクリーン
+      * `9:16` - 縦向きスクリーン
       * `21:9` - 超ワイドスクリーン
     </ParamField>
 
@@ -69,8 +71,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 
       サポートされている解像度：
 
-      * `1K` - 基本解像度（デフォルト）
-      * `2K` - 標準解像度
+      * `1K` - ベーシック解像度（デフォルト）
+      * `2K` - スタンダード解像度
       * `4K` - 高精細解像度
     </ParamField>
 
@@ -85,30 +87,40 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   </Expandable>
 </ParamField>
 
+<ParamField body="out_task_id" type="string" required>
+  発起者タスクID
+
+  ユーザー定義のタスク識別子、必須
+</ParamField>
+
 <ParamField body="callback_url" type="string">
   タスク完了後のコールバック通知先URL
 
-  タスク完了後、システムはこのURLにPOSTリクエストで結果を通知します
+  タスク完了時に、システムはこのURLへPOSTリクエストで結果を通知します
 </ParamField>
 
 <ParamField body="metadata" type="object">
   カスタムメタデータ
 
-  クエリ結果時にそのまま返され、ビジネス識別に使用できます
+  クエリ結果時にそのまま返され、ビジネス識別に利用できます
 </ParamField>
 
 ## Response
 
 <ResponseField name="task_id" type="string">
-  タスクID、結果の照会に使用されます
+  タスクID。結果の照会に使用されます
+</ResponseField>
+
+<ResponseField name="out_task_id" type="string">
+  発注側タスクID。結果の照会に使用できます
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  初期状態、固定で `"pending"`
+  初期状態。固定で `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  推定クレジット消費量
+  推定消費クレジット
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
@@ -124,11 +136,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     --data '{
       "model": "nano_banana_pro",
       "params": {
-        "prompt": "プロフェッショナルクラスの都市夜景",
+        "prompt": "プロフェッショナルな都市の夜景",
         "aspect_ratio": "16:9",
         "resolution": "2K",
         "format": "png"
-      }
+      },
+      "out_task_id": "my_task_123456"
     }'
   ```
 
@@ -140,11 +153,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   payload = {
       "model": "nano_banana_pro",
       "params": {
-          "prompt": "プロフェッショナルクラスの都市夜景",
+          "prompt": "プロフェッショナルな都市の夜景",
           "aspect_ratio": "16:9",
           "resolution": "2K",
           "format": "png"
-      }
+      },
+      "out_task_id": "my_task_123456"
   }
 
   headers = {
@@ -163,11 +177,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   const payload = {
     model: "nano_banana_pro",
     params: {
-      prompt: "プロフェッショナルクラスの都市夜景",
+      prompt: "プロフェッショナルな都市の夜景",
       aspect_ratio: "16:9",
       resolution: "2K",
       format: "png"
-    }
+    },
+    out_task_id: "my_task_123456"
   };
 
   const headers = {
@@ -202,11 +217,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       payload := map[string]interface{}{
           "model": "nano_banana_pro",
           "params": map[string]interface{}{
-              "prompt":       "プロフェッショナルクラスの都市夜景",
+              "prompt":       "プロフェッショナルな都市の夜景",
               "aspect_ratio": "16:9",
               "resolution":   "2K",
               "format":       "png",
           },
+          "out_task_id": "my_task_123456",
       }
 
       jsonData, _ := json.Marshal(payload)
@@ -241,11 +257,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           {
             "model": "nano_banana_pro",
             "params": {
-              "prompt": "プロフェッショナルクラスの都市夜景",
+              "prompt": "プロフェッショナルな都市の夜景",
               "aspect_ratio": "16:9",
               "resolution": "2K",
               "format": "png"
-            }
+            },
+            "out_task_id": "my_task_123456"
           }
           """;
 
@@ -273,11 +290,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   $payload = [
       "model" => "nano_banana_pro",
       "params" => [
-          "prompt" => "プロフェッショナルクラスの都市夜景",
+          "prompt" => "プロフェッショナルな都市の夜景",
           "aspect_ratio" => "16:9",
           "resolution" => "2K",
           "format" => "png"
-      ]
+      ],
+      "out_task_id" => "my_task_123456"
   ];
 
   $ch = curl_init($url);
@@ -306,11 +324,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   payload = {
     model: "nano_banana_pro",
     params: {
-      prompt: "プロフェッショナルクラスの都市夜景",
+      prompt: "プロフェッショナルな都市の夜景",
       aspect_ratio: "16:9",
       resolution: "2K",
       format: "png"
-    }
+    },
+    out_task_id: "my_task_123456"
   }
 
   http = Net::HTTP.new(url.host, url.port)
@@ -332,11 +351,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   let payload: [String: Any] = [
       "model": "nano_banana_pro",
       "params": [
-          "prompt": "プロフェッショナルクラスの都市夜景",
+          "prompt": "プロフェッショナルな都市の夜景",
           "aspect_ratio": "16:9",
           "resolution": "2K",
           "format": "png"
-      ]
+      ],
+      "out_task_id": "my_task_123456"
   ]
 
   var request = URLRequest(url: url)
@@ -374,11 +394,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           var payload = @"{
               ""model"": ""nano_banana_pro"",
               ""params"": {
-                  ""prompt"": ""プロフェッショナルクラスの都市夜景"",
+                  ""prompt"": ""プロフェッショナルな都市の夜景"",
                   ""aspect_ratio"": ""16:9"",
                   ""resolution"": ""2K"",
                   ""format"": ""png""
-              }
+              },
+              ""out_task_id"": ""my_task_123456""
           }";
 
           using var client = new HttpClient();
@@ -409,11 +430,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           const char *payload = "{"
               "\"model\":\"nano_banana_pro\","
               "\"params\":{"
-                  "\"prompt\":\"プロフェッショナルクラスの都市夜景\","
+                  "\"prompt\":\"プロフェッショナルな都市の夜景\","
                   "\"aspect_ratio\":\"16:9\","
                   "\"resolution\":\"2K\","
                   "\"format\":\"png\""
-              "}"
+              "},"
+              "\"out_task_id\":\"my_task_123456\""
           "}";
 
           struct curl_slist *headers = NULL;
@@ -450,11 +472,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           NSDictionary *payload = @{
               @"model": @"nano_banana_pro",
               @"params": @{
-                  @"prompt": @"プロフェッショナルクラスの都市夜景",
+                  @"prompt": @"プロフェッショナルな都市の夜景",
                   @"aspect_ratio": @"16:9",
                   @"resolution": @"2K",
                   @"format": @"png"
-              }
+              },
+              @"out_task_id": @"my_task_123456"
           };
 
           NSError *error;
@@ -498,11 +521,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   let payload = {|{
     "model": "nano_banana_pro",
     "params": {
-      "prompt": "プロフェッショナルクラスの都市夜景",
+      "prompt": "プロフェッショナルな都市の夜景",
       "aspect_ratio": "16:9",
       "resolution": "2K",
       "format": "png"
-    }
+    },
+    "out_task_id": "my_task_123456"
   }|}
 
   let () =
@@ -529,11 +553,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     final payload = {
       'model': 'nano_banana_pro',
       'params': {
-        'prompt': 'プロフェッショナルクラスの都市夜景',
+        'prompt': 'プロフェッショナルな都市の夜景',
         'aspect_ratio': '16:9',
         'resolution': '2K',
         'format': 'png'
-      }
+      },
+      'out_task_id': 'my_task_123456'
     };
 
     final response = await http.post(
@@ -558,11 +583,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   payload <- list(
     model = "nano_banana_pro",
     params = list(
-      prompt = "プロフェッショナルクラスの都市夜景",
+      prompt = "プロフェッショナルな都市の夜景",
       aspect_ratio = "16:9",
       resolution = "2K",
       format = "png"
-    )
+    ),
+    out_task_id = "my_task_123456"
   )
 
   response <- POST(
@@ -586,6 +612,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     "message": "",
     "data": {
         "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
+        "out_task_id": "my_task_123456",
         "status": "pending",
         "estimated_credits": 100,
         "created_at": "2025-12-22T06:03:28.242Z"
@@ -612,7 +639,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   {
     "error": {
       "code": 433,
-      "message": "アカウント残高不足です。チャージ後に再試行してください",
+      "message": "アカウント残高が不足しています。チャージ後に再試行してください",
     }
   }
   ```
@@ -621,7 +648,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   {
     "error": {
       "code": 500,
-      "message": "サーバ内部エラーです。しばらくしてから再試行してください"
+      "message": "サーバー内部エラーです。後でもう一度お試しください"
     }
   }
   ```

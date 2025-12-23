@@ -1,10 +1,12 @@
 ---
 title: 'Seedream V4.5 画像生成'
 description: |
-    - 非同期処理モードで、後続のクエリに使用するタスクIDを返します
+    - 非同期処理モード、後続のクエリ用にタスクIDを返す
     - より高品質な画像生成
 api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 ---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
@@ -12,9 +14,9 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 
   APIキーの取得：
 
-  [API Key 管理ページ](https://apimart.ai/console/token) にアクセスしてAPIキーを取得してください
+  <a href={apiKeyUrl} target="_blank">API Key管理ページ</a>にアクセスしてAPIキーを取得してください
 
-  使用時はリクエストヘッダーに以下を追加します：
+  リクエストヘッダーに以下を追加して使用します：
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -30,7 +32,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  モデルのパラメーターオブジェクト
+  モデルパラメータオブジェクト
 
   <Expandable title="params オブジェクトのプロパティ">
     <ParamField body="prompt" type="string" required>
@@ -40,7 +42,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     </ParamField>
 
     <ParamField body="image_url" type="array">
-      画像生成用の参照画像のURLリスト
+      参考画像のURLリスト、画像から画像への生成用
 
       * 最大9枚の画像
       * 公開アクセス可能なURLをサポート
@@ -59,12 +61,12 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       * `5:4` - 横長5:4
       * `4:5` - 縦長4:5
       * `16:9` - 横長ワイドスクリーン
-      * `9:16` - 縦長縦スクリーン
+      * `9:16` - 縦長ポートレート
       * `21:9` - 超ワイドスクリーン
     </ParamField>
 
     <ParamField body="resolution" type="string" default="basic">
-      画像の解像度
+      画像解像度
 
       サポートされている解像度：
 
@@ -74,24 +76,32 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   </Expandable>
 </ParamField>
 
-<ParamField body="callback_url" type="string">
-  タスク完了後のコールバック通知先URL
+<ParamField body="out_task_id" type="string" required>
+  発信元タスクID
 
-  タスク完了後、システムはこのURLにPOSTリクエストで結果を通知します
+  ユーザー定義のタスク識別子で必須
+</ParamField>
+<ParamField body="callback_url" type="string">
+  タスク完了後のコールバック通知URL
+
+  タスク完了時にシステムがこのURLにPOSTリクエストで結果を通知します
 </ParamField>
 
 <ParamField body="metadata" type="object">
   カスタムメタデータ
 
-  クエリ結果時にそのまま返され、ビジネス識別に利用可能
+  クエリ結果時にそのまま返され、ビジネス識別に使用可能
 </ParamField>
 
 ## Response
 
 <ResponseField name="task_id" type="string">
-  タスクID、結果のクエリに使用
+  タスクID、結果の照会に使用
 </ResponseField>
 
+<ResponseField name="out_task_id" type="string">
+  発行元タスクID、結果の照会に使用可能
+</ResponseField>
 <ResponseField name="status" type="string">
   初期状態、固定で `"pending"`
 </ResponseField>
@@ -113,10 +123,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     --data '{
       "model": "seedream_v4_5",
       "params": {
-        "prompt": "夢幻的な森の夜景",
+        "prompt": "幻想的な森の夜景",
         "aspect_ratio": "16:9",
         "resolution": "high"
-      }
+      },
+      "out_task_id": "my_task_123456"
     }'
   ```
 
@@ -128,10 +139,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   payload = {
       "model": "seedream_v4_5",
       "params": {
-          "prompt": "夢幻的な森の夜景",
+          "prompt": "幻想的な森の夜景",
           "aspect_ratio": "16:9",
           "resolution": "high"
-      }
+      },
+      "out_task_id": "my_task_123456"
   }
 
   headers = {
@@ -150,7 +162,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   const payload = {
     model: "seedream_v4_5",
     params: {
-      prompt: "夢幻的な森の夜景",
+      prompt: "幻想的な森の夜景",
       aspect_ratio: "16:9",
       resolution: "high"
     }
@@ -188,10 +200,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       payload := map[string]interface{}{
           "model": "seedream_v4_5",
           "params": map[string]interface{}{
-              "prompt":       "夢幻的な森の夜景",
+              "prompt":       "幻想的な森の夜景",
               "aspect_ratio": "16:9",
               "resolution":   "high",
           },
+          "out_task_id": "my_task_123456",
       }
 
       jsonData, _ := json.Marshal(payload)
@@ -226,10 +239,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           {
             "model": "seedream_v4_5",
             "params": {
-              "prompt": "夢幻的な森の夜景",
+              "prompt": "幻想的な森の夜景",
               "aspect_ratio": "16:9",
               "resolution": "high"
-            }
+            },
+            "out_task_id": "my_task_123456"
           }
           """;
 
@@ -257,10 +271,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   $payload = [
       "model" => "seedream_v4_5",
       "params" => [
-          "prompt" => "夢幻的な森の夜景",
+          "prompt" => "幻想的な森の夜景",
           "aspect_ratio" => "16:9",
           "resolution" => "high"
-      ]
+      ],
+      "out_task_id" => "my_task_123456"
   ];
 
   $ch = curl_init($url);
@@ -289,10 +304,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   payload = {
     model: "seedream_v4_5",
     params: {
-      prompt: "夢幻的な森の夜景",
+      prompt: "幻想的な森の夜景",
       aspect_ratio: "16:9",
       resolution: "high"
-    }
+    },
+    out_task_id: "my_task_123456"
   }
 
   http = Net::HTTP.new(url.host, url.port)
@@ -314,10 +330,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   let payload: [String: Any] = [
       "model": "seedream_v4_5",
       "params": [
-          "prompt": "夢幻的な森の夜景",
+          "prompt": "幻想的な森の夜景",
           "aspect_ratio": "16:9",
           "resolution": "high"
-      ]
+      ],
+      "out_task_id": "my_task_123456"
   ]
 
   var request = URLRequest(url: url)
@@ -353,12 +370,13 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           var url = "https://pxz-api.xinsulv.com/api/openapi/submit";
 
           var payload = @"{
-              ""model"": ""seedream_v4_5"",
-              ""params"": {
-                  ""prompt"": ""夢幻的な森の夜景"",
-                  ""aspect_ratio"": ""16:9"",
-                  ""resolution"": ""high""
-              }
+              \"model\": \"seedream_v4_5\",
+              \"params\": {
+                  \"prompt\": \"幻想的な森の夜景\",
+                  \"aspect_ratio\": \"16:9\",
+                  \"resolution\": \"high\"
+              },
+              \"out_task_id\": \"my_task_123456\"
           }";
 
           using var client = new HttpClient();
@@ -389,10 +407,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           const char *payload = "{"
               "\"model\":\"seedream_v4_5\","
               "\"params\":{"
-                  "\"prompt\":\"夢幻的な森の夜景\","
+                  "\"prompt\":\"幻想的な森の夜景\","
                   "\"aspect_ratio\":\"16:9\","
                   "\"resolution\":\"high\""
-              "}"
+              "},"
+              "\"out_task_id\":\"my_task_123456\""
           "}";
 
           struct curl_slist *headers = NULL;
@@ -429,10 +448,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           NSDictionary *payload = @{
               @"model": @"seedream_v4_5",
               @"params": @{
-                  @"prompt": @"夢幻的な森の夜景",
+                  @"prompt": @"幻想的な森の夜景",
                   @"aspect_ratio": @"16:9",
                   @"resolution": @"high"
-              }
+              },
+              @"out_task_id": @"my_task_123456"
           };
 
           NSError *error;
@@ -476,9 +496,10 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   let payload = {|{
     "model": "seedream_v4_5",
     "params": {
-      "prompt": "夢幻的な森の夜景",
+      "prompt": "幻想的な森の夜景",
       "aspect_ratio": "16:9",
-      "resolution": "high"
+      "resolution": "high",
+      "out_task_id": "my_task_123456"
     }
   }|}
 
@@ -506,10 +527,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     final payload = {
       'model': 'seedream_v4_5',
       'params': {
-        'prompt': '夢幻的な森の夜景',
+        'prompt': '幻想的な森の夜景',
         'aspect_ratio': '16:9',
         'resolution': 'high'
-      }
+      },
+      'out_task_id': 'my_task_123456'
     };
 
     final response = await http.post(
@@ -534,10 +556,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   payload <- list(
     model = "seedream_v4_5",
     params = list(
-      prompt = "夢幻的な森の夜景",
+      prompt = "幻想的な森の夜景",
       aspect_ratio = "16:9",
       resolution = "high"
-    )
+    ),
+    out_task_id = "my_task_123456"
   )
 
   response <- POST(
@@ -561,6 +584,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     "message": "",
     "data": {
         "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
+        "out_task_id": "my_task_123456",
         "status": "pending",
         "estimated_credits": 100,
         "created_at": "2025-12-22T06:03:28.242Z"
@@ -579,7 +603,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   {
     "error": {
       "code": 401,
-      "message": "認証失敗、APIキーを確認してください"
+      "message": "認証に失敗しました。APIキーを確認してください"
     }
   }
   ```
@@ -587,7 +611,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   {
     "error": {
       "code": 433,
-      "message": "アカウント残高不足です、チャージ後に再試行してください"
+      "message": "アカウント残高が不足しています。チャージしてから再試行してください"
     }
   }
   ```
@@ -596,7 +620,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   {
     "error": {
       "code": 500,
-      "message": "サーバ内部エラーが発生しました、後でもう一度お試しください"
+      "message": "サーバー内部エラーです。しばらくしてから再試行してください"
     }
   }
   ```

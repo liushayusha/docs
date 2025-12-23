@@ -1,22 +1,27 @@
 [
   {
     "id": "__frontmatter__",
-    "hash": "42ce250c",
+    "hash": "555eb7e5",
     "index": 0
   },
   {
-    "id": "section-0-authorizations",
-    "hash": "deed641c",
+    "id": "__prologue__",
+    "hash": "5c3ee9f8",
     "index": 1
   },
   {
-    "id": "section-1-body",
-    "hash": "7a3570b3",
+    "id": "section-0-authorizations",
+    "hash": "83d46ba4",
     "index": 2
   },
   {
-    "id": "section-2-response",
-    "hash": "79364bec",
+    "id": "section-1-body",
+    "hash": "86c8efbb",
     "index": 3
+  },
+  {
+    "id": "section-2-response",
+    "hash": "dc4882c1",
+    "index": 4
   }
 ]

@@ -5,16 +5,18 @@ description: |
     - Fast generation speed, optimized for rapid image creation
 api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 ---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  All endpoints require Bearer Token authentication.
+  All endpoints require authentication using a Bearer Token.
 
   Get the API Key:
 
-  Visit the [API Key Management Page](https://apimart.ai/console/token) to obtain your API Key.
+  Visit the <a href={apiKeyUrl} target="_blank">API Key management page</a> to obtain your API Key.
 
-  Include in your request headers:
+  Add the following to the request headers when using it:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -24,15 +26,15 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 ## Body
 
 <ParamField body="model" type="string" required>
-  Model name
+  Model Name
 
   Fixed value: `"nano_banana"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  Model parameters object
+  Model Parameters Object
 
-  <Expandable title="params object properties">
+  <Expandable title="params Object Properties">
     <ParamField body="prompt" type="string" required>
       Text description for image generation
 
@@ -49,19 +51,19 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     <ParamField body="aspect_ratio" type="string" default="auto">
       Aspect ratio for image generation
 
-      Supported ratios:
+      Supported aspect ratios:
 
       * `auto` - Automatic (default)
       * `1:1` - Square
-      * `3:2` - Landscape 3:2
-      * `2:3` - Portrait 2:3
-      * `4:3` - Landscape 4:3
-      * `3:4` - Portrait 3:4
-      * `5:4` - Landscape 5:4
-      * `4:5` - Portrait 4:5
-      * `16:9` - Widescreen landscape
-      * `9:16` - Portrait vertical screen
-      * `21:9` - Ultra-wide screen
+      * `3:2` - Horizontal 3:2
+      * `2:3` - Vertical 2:3
+      * `4:3` - Horizontal 4:3
+      * `3:4` - Vertical 3:4
+      * `5:4` - Horizontal 5:4
+      * `4:5` - Vertical 4:5
+      * `16:9` - Horizontal widescreen
+      * `9:16` - Vertical portrait
+      * `21:9` - Ultra widescreen
     </ParamField>
 
     <ParamField body="format" type="string" default="png">
@@ -75,10 +77,16 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   </Expandable>
 </ParamField>
 
-<ParamField body="callback_url" type="string">
-  Callback notification URL after task completion
+<ParamField body="out_task_id" type="string" required>
+  Initiator Task ID
 
-  After the task is completed, the system sends a POST request to this URL to notify the result
+  User-defined task identifier, required
+</ParamField>
+
+<ParamField body="callback_url" type="string">
+  Callback URL after task completion
+
+  After the task is completed, the system will send a POST request to this address to notify the result
 </ParamField>
 
 <ParamField body="metadata" type="object">
@@ -90,7 +98,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 ## Response
 
 <ResponseField name="task_id" type="string">
-  Task ID, used to query the result
+  Task ID, used for querying results
+</ResponseField>
+
+<ResponseField name="out_task_id" type="string">
+  Initiator's task ID, can be used to query results
 </ResponseField>
 
 <ResponseField name="status" type="string">
@@ -117,7 +129,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
         "prompt": "A bamboo path under the moonlight",
         "aspect_ratio": "16:9",
         "format": "png"
-      }
+      },
+      "out_task_id": "my_task_123456"
     }'
   ```
 
@@ -132,7 +145,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           "prompt": "A bamboo path under the moonlight",
           "aspect_ratio": "16:9",
           "format": "png"
-      }
+      },
+      "out_task_id": "my_task_123456"
   }
 
   headers = {
@@ -154,7 +168,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       prompt: "A bamboo path under the moonlight",
       aspect_ratio: "16:9",
       format: "png"
-    }
+    },
+    out_task_id: "my_task_123456"
   };
 
   const headers = {
@@ -193,6 +208,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
               "aspect_ratio": "16:9",
               "format":       "png",
           },
+          "out_task_id": "my_task_123456",
       }
 
       jsonData, _ := json.Marshal(payload)
@@ -230,7 +246,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
               "prompt": "A bamboo path under the moonlight",
               "aspect_ratio": "16:9",
               "format": "png"
-            }
+            },
+            "out_task_id": "my_task_123456"
           }
           """;
 
@@ -261,7 +278,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
           "prompt" => "A bamboo path under the moonlight",
           "aspect_ratio" => "16:9",
           "format" => "png"
-      ]
+      ],
+      "out_task_id" => "my_task_123456"
   ];
 
   $ch = curl_init($url);
@@ -293,7 +311,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       prompt: "A bamboo path under the moonlight",
       aspect_ratio: "16:9",
       format: "png"
-    }
+    },
+    out_task_id: "my_task_123456"
   }
 
   http = Net::HTTP.new(url.host, url.port)
@@ -562,6 +581,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     "message": "",
     "data": {
         "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
+        "out_task_id": "my_task_123456",
         "status": "pending",
         "estimated_credits": 100,
         "created_at": "2025-12-22T06:03:28.242Z"

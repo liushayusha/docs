@@ -1,20 +1,22 @@
 ---
 title: 'GPT-4o 画像生成'
 description: |
-    - 非同期処理モードで、タスクIDを返し後続のクエリに使用可能
+    - 非同期処理モード、後続のクエリ用にタスクIDを返す
     - テキストから画像、画像から画像などの生成モードに対応
 api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 ---
-## Authorizations
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorization
 
 <ParamField header="Authorization" type="string" required>
-  すべてのエンドポイントはBearer Tokenによる認証が必要です
+  すべてのAPIはBearer Tokenを使用した認証が必要です
 
-  APIキーの取得：
+  APIキーの取得:
 
-  [API Key 管理ページ](https://apimart.ai/console/token)にアクセスして、APIキーを取得してください
+  <a href={apiKeyUrl} target="_blank">API Key管理ページ</a>にアクセスしてAPIキーを取得してください
 
-  使用時にはリクエストヘッダーに以下を追加してください：
+  使用時はリクエストヘッダーに以下を追加します:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -30,7 +32,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  モデルのパラメータオブジェクト
+  モデルパラメータオブジェクト
 
   <Expandable title="params オブジェクトのプロパティ">
     <ParamField body="prompt" type="string" required>
@@ -40,22 +42,28 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      参考画像のURL（画像から画像への生成に使用）
+      画像生成の参考画像のURL
 
       * 単一画像のみ対応
-      * 公開されているアクセス可能なURLをサポート
+      * 公開アクセス可能なURLをサポート
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="1:1">
       画像生成のアスペクト比
 
-      サポートされているアスペクト比：
+      対応アスペクト比：
 
       * `1:1` - 正方形（デフォルト）
       * `3:2` - 横向き 3:2
       * `2:3` - 縦向き 2:3
     </ParamField>
   </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  発注側タスクID
+
+  ユーザー定義のタスク識別子、必須
 </ParamField>
 
 <ParamField body="callback_url" type="string">
@@ -67,17 +75,21 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 <ParamField body="metadata" type="object">
   カスタムメタデータ
 
-  クエリ結果時にそのまま返され、業務識別に使用可能です
+  クエリ結果取得時にそのまま返され、業務識別に利用可能
 </ParamField>
 
 ## Response
 
 <ResponseField name="task_id" type="string">
-  タスクID、結果の問い合わせに使用
+  タスクID。結果の照会に使用されます
+</ResponseField>
+
+<ResponseField name="out_task_id" type="string">
+  発起元のタスクID。結果の照会に使用可能です
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  初期状態、固定で `"pending"`
+  初期状態。固定値 `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
@@ -99,7 +111,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       "params": {
         "prompt": "星空の下の古い城",
         "aspect_ratio": "1:1"
-      }
+      },
+      "out_task_id": "my_task_123456"
     }'
   ```
 
@@ -113,7 +126,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       "params": {
           "prompt": "星空の下の古い城",
           "aspect_ratio": "1:1"
-      }
+      },
+      "out_task_id": "my_task_123456"
   }
 
   headers = {
@@ -134,7 +148,9 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     params: {
       prompt: "星空の下の古い城",
       aspect_ratio: "1:1"
-    }
+    },
+    out_task_id: "my_task_123456",
+    out_task_id: "my_task_123456"
   };
 
   const headers = {
@@ -172,6 +188,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
               "prompt":       "星空の下の古い城",
               "aspect_ratio": "1:1",
           },
+          "out_task_id": "my_task_123456",
       }
 
       jsonData, _ := json.Marshal(payload)
@@ -208,7 +225,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
             "params": {
               "prompt": "星空の下の古い城",
               "aspect_ratio": "1:1"
-            }
+            },
+            "out_task_id": "my_task_123456"
           }
           """;
 
@@ -238,7 +256,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       "params" => [
           "prompt" => "星空の下の古い城",
           "aspect_ratio" => "1:1"
-      ]
+      ],
+      "out_task_id" => "my_task_123456"
   ];
 
   $ch = curl_init($url);
@@ -269,7 +288,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     params: {
       prompt: "星空の下の古い城",
       aspect_ratio: "1:1"
-    }
+    },
+    out_task_id: "my_task_123456"
   }
 
   http = Net::HTTP.new(url.host, url.port)
@@ -293,7 +313,8 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
       "params": [
           "prompt": "星空の下の古い城",
           "aspect_ratio": "1:1"
-      ]
+      ],
+      "out_task_id": "my_task_123456"
   ]
 
   var request = URLRequest(url: url)
@@ -531,6 +552,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     "message": "",
     "data": {
         "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
+        "out_task_id": "my_task_123456",
         "status": "pending",
         "estimated_credits": 100,
         "created_at": "2025-12-22T06:03:28.242Z"
@@ -549,7 +571,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   {
     "error": {
       "code": 401,
-      "message": "認証に失敗しました。APIキーを確認してください"
+      "message": "認証失敗。APIキーを確認してください"
     }
   }
   ```
@@ -557,7 +579,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   {
     "error": {
       "code": 433,
-      "message": "アカウント残高が不足しています。チャージしてください"
+      "message": "アカウント残高不足。チャージ後に再試行してください"
     }
   }
   ```
@@ -566,7 +588,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   {
     "error": {
       "code": 500,
-      "message": "サーバ内部エラーが発生しました。後でもう一度お試しください"
+      "message": "サーバ内部エラー。しばらくしてから再試行してください"
     }
   }
   ```

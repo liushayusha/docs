@@ -2,19 +2,21 @@
 title: 'Seedream V4 画像生成'
 description: |
     - 非同期処理モードで、後続のクエリに使用するタスクIDを返します
-    - テキストから画像、画像から画像への多様な生成モードに対応
+    - テキストから画像、画像から画像への多様な生成モードをサポート
 api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 ---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  すべてのエンドポイントはBearerトークンによる認証が必要です
+  すべてのエンドポイントはBearer Tokenによる認証が必要です。
 
-  APIキーの取得方法：
+  API Keyの取得：
 
-  [APIキー管理ページ](https://apimart.ai/console/token) にアクセスしてAPIキーを取得してください
+  <a href={apiKeyUrl} target="_blank">API Key管理ページ</a>にアクセスしてAPI Keyを取得してください。
 
-  使用時はリクエストヘッダーに以下を追加してください：
+  使用時はリクエストヘッダーに以下を追加します：
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -40,7 +42,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     </ParamField>
 
     <ParamField body="image_url" type="array">
-      参考画像のURLリスト、画像から画像への生成に使用
+      画像生成の参考用画像のURLリスト
 
       * 最大9枚の画像
       * 公開アクセス可能なURLをサポート
@@ -49,11 +51,11 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     <ParamField body="aspect_ratio" type="string" default="1:1">
       画像生成のアスペクト比
 
-      対応アスペクト比：
+      サポートされるアスペクト比：
 
       * `1:1` - 正方形（デフォルト）
       * `16:9` - 横長ワイドスクリーン
-      * `9:16` - 縦長ポートレート
+      * `9:16` - 縦長スクリーン
       * `4:3` - 横長4:3
       * `3:4` - 縦長3:4
     </ParamField>
@@ -61,7 +63,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     <ParamField body="resolution" type="string" default="1K">
       画像解像度
 
-      対応解像度：
+      サポートされる解像度：
 
       * `1K` - ベース解像度（デフォルト）
       * `2K` - 標準解像度
@@ -71,7 +73,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     <ParamField body="output_n" type="string" default="1">
       生成する画像の枚数
 
-      対応値：
+      サポートされる値：
 
       * `1` - 1枚生成（デフォルト）
       * `2` - 2枚生成
@@ -80,26 +82,34 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   </Expandable>
 </ParamField>
 
-<ParamField body="callback_url" type="string">
-  タスク完了後のコールバック通知URL
+<ParamField body="out_task_id" type="string" required>
+  発起者タスクID
 
-  タスク完了時にシステムがこのURLにPOSTリクエストで結果通知を送信
+  ユーザーが定義するタスク識別子、必須
+</ParamField>
+<ParamField body="callback_url" type="string">
+  タスク完了後のコールバック通知先URL
+
+  タスク完了後、システムはこのURLにPOSTリクエストで結果を通知します
 </ParamField>
 
 <ParamField body="metadata" type="object">
   カスタムメタデータ
 
-  クエリ結果でそのまま返され、ビジネス識別に利用可能
+  クエリ結果時にそのまま返され、ビジネス識別に利用可能
 </ParamField>
 
 ## Response
 
 <ResponseField name="task_id" type="string">
-  タスクID。結果の照会に使用
+  タスクID、結果の照会に使用します
 </ResponseField>
 
+<ResponseField name="out_task_id" type="string">
+  発信者側のタスクID、結果の照会に使用できます
+</ResponseField>
 <ResponseField name="status" type="string">
-  初期状態。固定値は `"pending"`
+  初期状態、固定で `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
@@ -581,6 +591,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
     "message": "",
     "data": {
         "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
+        "out_task_id": "my_task_123456",
         "status": "pending",
         "estimated_credits": 100,
         "created_at": "2025-12-22T06:03:28.242Z"
@@ -616,7 +627,7 @@ api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
   {
     "error": {
       "code": 500,
-      "message": "サーバー内部エラーが発生しました。後ほど再試行してください"
+      "message": "サーバー内部エラーです。後で再試行してください"
     }
   }
   ```
