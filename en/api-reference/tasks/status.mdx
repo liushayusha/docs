@@ -1,9 +1,9 @@
 ---
 title: 'Get Task Status'
 description: |
-    - Query the execution status and result of asynchronous tasks
+    - Query the execution status and results of asynchronous tasks
     - Real-time status updates and progress tracking
-    - Retrieve generated results when tasks are completed
+    - Retrieve generated results upon task completion
 api: 'POST https://test.aireiter.com/api/openapi/query'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -11,13 +11,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  All endpoints require authentication using a Bearer Token.
+  All endpoints require Bearer Token authentication
 
   Get the API Key:
 
-  Visit the <a href={apiKeyUrl} target="_blank">API Key Management Page</a> to get your API Key.
+  Visit the <a href={apiKeyUrl} target="_blank">API Key management page</a> to obtain your API Key
 
-  Add to the request headers as:
+  Add the following to the request headers when using:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -45,24 +45,24 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  Task status:
+  Task Status:
 
-  * `pending` - queued for processing
-  * `processing` - processing
-  * `completed` - successfully completed
-  * `failed` - failed
+  * `pending` - Waiting in queue
+  * `processing` - Processing
+  * `completed` - Successfully completed
+  * `failed` - Failed
 </ResponseField>
 
 <ResponseField name="input" type="object">
-  Task input (optional, returned only in some cases)
+  Task input (optional, returned only in certain cases)
 
-  Contains complete parameter information submitted with the task
+  Contains the complete parameter information submitted with the task
 </ResponseField>
 
 <ResponseField name="output" type="array">
   Task output (returned after task completion)
 
-  Contains an array of generated results, each element includes a `url` field pointing to the generated resource
+  An array containing the generation results, each element includes a `url` field pointing to the generated resource
 </ResponseField>
 
 <ResponseField name="error" type="object">
@@ -80,7 +80,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <ResponseField name="credits_used" type="number">
-  Credits consumed
+  Credits used
 </ResponseField>
 
 <ResponseField name="created_at" type="string">

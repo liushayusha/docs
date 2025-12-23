@@ -1,8 +1,8 @@
 ---
 title: 'Nano Banana Pro 이미지 생성'
 description: |
-    - 비동기 처리 모드, 후속 조회를 위한 작업 ID 반환
-    - 고품질 이미지 생성, 전문가급 이미지 제작
+    - 비동기 처리 모드, 이후 조회를 위한 작업 ID 반환
+    - 고품질 이미지 생성, 전문 수준의 이미지 제작
 api: 'POST https://test.aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -10,13 +10,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  모든 엔드포인트는 Bearer Token 인증을 필요로 합니다.
+  모든 엔드포인트는 Bearer Token 인증이 필요합니다.
 
   API Key 받기:
 
-  <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a>에 접속하여 API Key를 받으세요.
+  <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a>에 접속하여 API Key를 받으십시오.
 
-  요청 헤더에 다음과 같이 추가합니다:
+  요청 헤더에 다음을 추가하여 사용하세요:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -36,20 +36,20 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   <Expandable title="params 객체 속성">
     <ParamField body="prompt" type="string" required>
-      이미지 생성을 위한 텍스트 설명
+      이미지 생성용 텍스트 설명
 
       제한 없음
     </ParamField>
 
     <ParamField body="image_url" type="array">
-      참조 이미지 URL 목록, 이미지 변환용
+      참조 이미지 URL 목록, 이미지 생성 시 사용
 
-      * 최대 8장 이미지
+      * 최대 8개 이미지
       * 공개 접근 가능한 URL 지원
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="1:1">
-      이미지 생성 가로세로 비율
+      이미지 생성 가로 세로 비율
 
       지원하는 비율:
 
@@ -63,7 +63,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       * `4:5` - 세로 4:5
       * `16:9` - 가로 와이드스크린
       * `9:16` - 세로 와이드스크린
-      * `21:9` - 울트라 와이드스크린
+      * `21:9` - 초광폭 스크린
     </ParamField>
 
     <ParamField body="resolution" type="string" default="1K">
@@ -90,19 +90,19 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="out_task_id" type="string" required>
   요청자 작업 ID
 
-  사용자가 정의하는 작업 식별자, 필수 입력
+  사용자 지정 작업 식별자, 필수
 </ParamField>
 
 <ParamField body="callback_url" type="string">
   작업 완료 후 콜백 알림 주소
 
-  작업 완료 시 시스템이 해당 주소로 POST 요청을 보내 결과를 알림
+  작업 완료 시 시스템이 이 주소로 POST 요청을 보내 결과를 알림
 </ParamField>
 
 <ParamField body="metadata" type="object">
   사용자 정의 메타데이터
 
-  조회 시 원본 그대로 반환되며, 비즈니스 식별에 사용 가능
+  조회 결과 시 그대로 반환되며, 비즈니스 식별에 사용 가능
 </ParamField>
 
 ## Response
@@ -112,19 +112,19 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <ResponseField name="out_task_id" type="string">
-  요청자 작업 ID, 결과 조회에 사용 가능
+  발신자 작업 ID, 결과 조회에 사용 가능
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  초기 상태, 고정값 `"pending"`
+  초기 상태, 고정 값 `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  예상 사용 크레딧
+  예상 소비 크레딧
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  생성 시간 (ISO 형식)
+  생성 시각(ISO 포맷)
 </ResponseField>
 
 <RequestExample>
@@ -136,7 +136,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     --data '{
       "model": "nano_banana_pro",
       "params": {
-        "prompt": "전문가급 도시 야경",
+        "prompt": "전문가 수준의 도시 야경",
         "aspect_ratio": "16:9",
         "resolution": "2K",
         "format": "png"
@@ -153,7 +153,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
       "model": "nano_banana_pro",
       "params": {
-          "prompt": "전문가급 도시 야경",
+          "prompt": "전문가 수준의 도시 야경",
           "aspect_ratio": "16:9",
           "resolution": "2K",
           "format": "png"
@@ -177,7 +177,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   const payload = {
     model: "nano_banana_pro",
     params: {
-      prompt: "전문가급 도시 야경",
+      prompt: "전문가 수준의 도시 야경",
       aspect_ratio: "16:9",
       resolution: "2K",
       format: "png"
@@ -217,7 +217,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       payload := map[string]interface{}{
           "model": "nano_banana_pro",
           "params": map[string]interface{}{
-              "prompt":       "전문가급 도시 야경",
+              "prompt":       "전문가 수준의 도시 야경",
               "aspect_ratio": "16:9",
               "resolution":   "2K",
               "format":       "png",
@@ -257,7 +257,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           {
             "model": "nano_banana_pro",
             "params": {
-              "prompt": "전문가급 도시 야경",
+              "prompt": "전문가 수준의 도시 야경",
               "aspect_ratio": "16:9",
               "resolution": "2K",
               "format": "png"
@@ -290,7 +290,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   $payload = [
       "model" => "nano_banana_pro",
       "params" => [
-          "prompt" => "전문가급 도시 야경",
+          "prompt" => "전문가 수준의 도시 야경",
           "aspect_ratio" => "16:9",
           "resolution" => "2K",
           "format" => "png"
@@ -324,7 +324,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
     model: "nano_banana_pro",
     params: {
-      prompt: "전문가급 도시 야경",
+      prompt: "전문가 수준의 도시 야경",
       aspect_ratio: "16:9",
       resolution: "2K",
       format: "png"
@@ -351,7 +351,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload: [String: Any] = [
       "model": "nano_banana_pro",
       "params": [
-          "prompt": "전문가급 도시 야경",
+          "prompt": "전문가 수준의 도시 야경",
           "aspect_ratio": "16:9",
           "resolution": "2K",
           "format": "png"
@@ -394,7 +394,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           var payload = @"{
               ""model"": ""nano_banana_pro"",
               ""params"": {
-                  ""prompt"": ""전문가급 도시 야경"",
+                  ""prompt"": ""전문가 수준의 도시 야경"",
                   ""aspect_ratio"": ""16:9"",
                   ""resolution"": ""2K"",
                   ""format"": ""png""
@@ -430,7 +430,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           const char *payload = "{"
               "\"model\":\"nano_banana_pro\","
               "\"params\":{"
-                  "\"prompt\":\"전문가급 도시 야경\","
+                  "\"prompt\":\"전문가 수준의 도시 야경\","
                   "\"aspect_ratio\":\"16:9\","
                   "\"resolution\":\"2K\","
                   "\"format\":\"png\""
@@ -472,7 +472,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           NSDictionary *payload = @{
               @"model": @"nano_banana_pro",
               @"params": @{
-                  @"prompt": @"전문가급 도시 야경",
+                  @"prompt": @"전문가 수준의 도시 야경",
                   @"aspect_ratio": @"16:9",
                   @"resolution": @"2K",
                   @"format": @"png"
@@ -521,7 +521,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload = {|{
     "model": "nano_banana_pro",
     "params": {
-      "prompt": "전문가급 도시 야경",
+      "prompt": "전문가 수준의 도시 야경",
       "aspect_ratio": "16:9",
       "resolution": "2K",
       "format": "png"
@@ -553,7 +553,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     final payload = {
       'model': 'nano_banana_pro',
       'params': {
-        'prompt': '전문가급 도시 야경',
+        'prompt': '전문가 수준의 도시 야경',
         'aspect_ratio': '16:9',
         'resolution': '2K',
         'format': 'png'
@@ -583,7 +583,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload <- list(
     model = "nano_banana_pro",
     params = list(
-      prompt = "전문가급 도시 야경",
+      prompt = "전문가 수준의 도시 야경",
       aspect_ratio = "16:9",
       resolution = "2K",
       format = "png"
@@ -648,7 +648,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 500,
-      "message": "서버 내부 오류, 잠시 후 다시 시도하세요"
+      "message": "서버 내부 오류, 나중에 다시 시도하세요"
     }
   }
   ```

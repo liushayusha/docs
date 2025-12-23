@@ -1,33 +1,33 @@
 ---
 title: 'AIReiter — AI Image and Video Generation API Platform'
-description: 'A unified AI image and video generation API platform. Supports various mainstream models including GPT-4o Image, Gemini, Sora2, VEO3, and more. Asynchronous task processing, transparent pricing, and easy to use.'
+description: 'Unified AI image and video generation API platform. Supports multiple mainstream models including GPT-4o Image, Gemini, Sora2, VEO3, and more. Asynchronous task processing, transparent pricing, simple and easy to use.'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
-AIReiter is a unified AI content generation API platform that offers image and video generation services. By making simple REST API calls, you can use various mainstream AI models such as GPT-4o, Gemini, Sora2, and VEO3 to generate high-quality image and video content.
+AIReiter is a unified AI content generation API platform that provides image and video generation services. With simple REST API calls, you can use multiple mainstream AI models such as GPT-4o, Gemini, Sora2, and VEO3 to generate high-quality image and video content.
 
 ## Quick Start
 
 <CardGroup cols={2}>
   <Card title="Image Generation" icon="image" href="/en/api-reference/images/gpt-4o/generation">
-    Generate images using models such as GPT-4o, Gemini, and Seedream
+    Generate images using models like GPT-4o, Gemini, Seedream
   </Card>
   <Card title="Video Generation" icon="video" href="/en/api-reference/videos/sora2/generation">
-    Generate video content using models such as Sora2 and VEO3
+    Generate video content using models like Sora2, VEO3
   </Card>
   <Card title="Task Status Query" icon="list-check" href="/en/api-reference/tasks/status">
-    Query the execution status and results of asynchronous tasks
+    Retrieve the execution status and results of asynchronous tasks
   </Card>
   <Card title="Get API Key" icon="key" href={apiKeyUrl}>
-    Access the console to get your API key
+    Access the console to get your API Key
   </Card>
 </CardGroup>
 
 ## API Workflow
 
-### 1. Submit a Generate Task
+### 1. Submit Generate Task
 
-All image and video generation use an asynchronous processing mode. When submitting a task, you need to pass `out_task_id` (initiator task ID). The system will return `task_id` and `out_task_id`:
+All image and video generation processes are handled asynchronously. When submitting a task, you need to provide `out_task_id` (initiator's task ID). The system will return both `task_id` and `out_task_id`:
 
 ```bash
 curl --request POST \
@@ -37,7 +37,7 @@ curl --request POST \
   --data '{
     "model": "gpt_4o",
     "params": {
-      "prompt": "A cute cat in the garden",
+      "prompt": "a cute cat in the garden",
       "aspect_ratio": "1:1"
     },
     "out_task_id": "my_task_123456"
@@ -46,10 +46,10 @@ curl --request POST \
 
 ### 2. Query Task Status
 
-Use the returned `task_id` or the `out_task_id` you submitted to check the task progress and result (either one):
+Use the returned `task_id` or your submitted `out_task_id` to query the task progress and result (either one):
 
 ```bash
-# Query by task_id
+# Query using task_id
 curl --request POST \
   --url https://test.aireiter.com/api/openapi/query \
   --header 'Authorization: Bearer YOUR_API_KEY' \
@@ -58,7 +58,7 @@ curl --request POST \
     "task_id": "order_xxxxxxxxxxxx"
   }'
 
-# Or query by out_task_id
+# Or query using out_task_id
 curl --request POST \
   --url https://test.aireiter.com/api/openapi/query \
   --header 'Authorization: Bearer YOUR_API_KEY' \
@@ -68,9 +68,9 @@ curl --request POST \
   }'
 ```
 
-### 3. Get Generate Result
+### 3. Get the Generated Result
 
-After the task is completed, the response will include the generated image or video URL:
+After the task is completed, the response will contain the generated image or video URL:
 
 ```json
 {
@@ -93,7 +93,7 @@ After the task is completed, the response will include the generated image or vi
 
 ### Image Generation Series
 
-AIReiter offers a variety of image generation models, supporting text-to-image and image-to-image capabilities:
+AIReiter offers a variety of image generation models, supporting both text-to-image and image-to-image capabilities:
 
 <CardGroup cols={2}>
   <Card title="GPT-4o Image" icon="image" href="/en/api-reference/images/gpt-4o/generation">
@@ -115,7 +115,7 @@ AIReiter offers a variety of image generation models, supporting text-to-image a
 
 ### Video Generation Series
 
-Supports text-to-video and image-to-video, offering multiple resolution and duration options:
+Supports text-to-video and image-to-video, offering various resolution and duration options:
 
 <CardGroup cols={2}>
   <Card title="Sora2" icon="video" href="/en/api-reference/videos/sora2/generation">
@@ -136,17 +136,17 @@ Supports text-to-video and image-to-video, offering multiple resolution and dura
 
 ### Asynchronous Task Processing
 
-All generation requests use an asynchronous processing model to avoid long waiting times:
+All generate requests use an asynchronous processing mode to avoid long waits:
 
-- When submitting a task, provide `out_task_id` (initiator's task ID, used for business identification)
-- Immediately return the system-generated `task_id` and your submitted `out_task_id`
-- You can query the task status using either `task_id` or `out_task_id`
-- Supports webhook callback notifications (optional)
+- When submitting a task, you need to provide `out_task_id` (initiator's task ID for business identification)
+- Immediately returns the system-generated `task_id` along with your submitted `out_task_id`
+- You can query task status using either `task_id` or `out_task_id` (choose one)
+- Supports optional webhook callback notifications
 - Task status updates in real time: `pending` → `processing` → `completed`
 
 ### Multi-Model Support
 
-A unified API endpoint supports various image and video generation models:
+A unified API endpoint supporting various image and video generation models:
 
 - **Image Generation**: 5 models including GPT-4o, Gemini, Seedream
 - **Video Generation**: 4 models including Sora2, VEO3
@@ -155,10 +155,10 @@ A unified API endpoint supports various image and video generation models:
 
 ### Transparent Pricing
 
-Charged by credits, clear and transparent:
+Charged by points, clear and transparent:
 
-- Each task returns an estimated credit consumption
-- Actual credit consumption shown after task completion
+- Each task returns an estimated point consumption
+- Actual point consumption is shown after task completion
 - Pay only for successfully generated content
 - No hidden fees
 
@@ -181,21 +181,21 @@ Authorization: Bearer YOUR_API_KEY
 
 **Get API Key:**
 
-Visit the <a href={apiKeyUrl} target="_blank">API Key Management Page</a> to get your API Key.
+Visit the <a href={apiKeyUrl} target="_blank">API Key Management Page</a> to obtain your API key.
 
 ## FAQ
 
 <AccordionGroup>
   <Accordion title="How to get the API Key?">
-    Visit the <a href={apiKeyUrl} target="_blank">API Key management page</a>, log in to create and manage your API Keys.
+    Visit the <a href={apiKeyUrl} target="_blank">API Key Management page</a>, where you can create and manage your API Key after logging in.
   </Accordion>
 
-  <Accordion title="How long does it take to generate images and videos?">
-    All generation tasks are processed asynchronously. Image generation usually takes a few seconds to tens of seconds. Video generation typically takes 1-5 minutes depending on duration and resolution. After submitting a task, a task_id is returned immediately, and you can track progress through the status query API.
+  <Accordion title="How long does image and video generation take?">
+    All generation tasks are processed asynchronously. Image generation usually takes a few seconds to tens of seconds, while video generation typically takes 1-5 minutes depending on duration and resolution. After submitting a task, a task_id is returned immediately. You can track progress through the status query API.
   </Accordion>
 
   <Accordion title="How to query the task status?">
-    Use the task status query API by passing the `task_id` returned when submitting the task, or your own set `out_task_id` (either one):
+    Use the task status query API by passing the task_id returned when the task was submitted, or your own out_task_id (either one):
 
     ```bash
     POST https://test.aireiter.com/api/openapi/query
@@ -205,31 +205,31 @@ Visit the <a href={apiKeyUrl} target="_blank">API Key Management Page</a> to get
   </Accordion>
 
   <Accordion title="What is out_task_id?">
-    `out_task_id` is the initiator’s task ID, which you customize when submitting the task:
+    The out_task_id is the initiator's task ID, custom set by you when submitting the task:
 
-    - **Required parameter**: must include `out_task_id` when submitting the task
-    - **Business identifier**: can use your system’s order number, business ID, etc. as the identifier
-    - **Flexible querying**: you can use `out_task_id` directly to query task status without saving the system returned `task_id`
-    - **Result association**: both `task_id` and `out_task_id` are returned in the query result to help link your business data
+    - **Required Parameter**: You must provide out_task_id when submitting a task
+    - **Business Identifier**: You can use your system’s order number, business ID, or other identifiers
+    - **Flexible Querying**: You can query the task status directly using out_task_id without saving the system returned task_id
+    - **Result Association**: The query results will include both task_id and out_task_id for convenient business data association
   </Accordion>
 
   <Accordion title="Is webhook callback supported?">
-    Yes, you can pass the `callback_url` parameter when submitting the task. After completion, the system will send a POST request to that URL containing the full task result.
+    Yes. You can provide a callback_url parameter when submitting a task. After the task completes, the system will send a POST request to this address containing the full task result.
   </Accordion>
 
-  <Accordion title="How is billing handled?">
+  <Accordion title="How is billing done?">
     AIReiter uses a credit-based billing system:
 
-    - The estimated credit consumption (`estimated_credits`) is returned when submitting a task
-    - The actual credits used (`credits_used`) are returned after task completion
-    - You only pay for successfully generated content; failed tasks are free
+    - An estimated credit consumption (estimated_credits) is returned when submitting the task
+    - The actual consumed credits (credits_used) are returned after task completion
+    - Only successful generation content is charged; failed tasks are free
     - Credit consumption varies by model
   </Accordion>
 
   <Accordion title="Which image and video formats are supported?">
-    - **Images**: supports common formats such as JPEG and PNG
-    - **Videos**: outputs in MP4 format
-    - **Reference images**: input supports publicly accessible image URLs
+    - **Images**: Supports common formats such as JPEG, PNG
+    - **Videos**: Outputs in MP4 format
+    - **Reference Images**: Input supports publicly accessible image URLs
   </Accordion>
 </AccordionGroup>
 
@@ -243,7 +243,7 @@ Visit the <a href={apiKeyUrl} target="_blank">API Key Management Page</a> to get
     Learn how to generate video content
   </Card>
   <Card title="Task Management" icon="list-check" href="/en/api-reference/tasks/status">
-    Learn how to manage and query task status
+    Learn how to manage and query task statuses
   </Card>
   <Card title="Get API Key" icon="key" href={apiKeyUrl}>
     Start using AIReiter now

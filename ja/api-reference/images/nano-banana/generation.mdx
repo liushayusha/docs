@@ -1,8 +1,8 @@
 ---
 title: 'Nano Banana 画像生成'
 description: |
-    - 非同期処理モード、後続のクエリに使用するタスクIDを返します
-    - 高速生成速度、迅速な画像作成に最適化されています
+    - 非同期処理モード、タスクIDを返して後続の照会に使用可能
+    - 高速生成スピード、迅速な画像作成に最適化
 api: 'POST https://test.aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -10,13 +10,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  すべてのエンドポイントはBearer Tokenによる認証が必要です
+  すべてのエンドポイントではBearer Tokenを使用した認証が必要です。
 
   APIキーの取得：
 
-  <a href={apiKeyUrl} target="_blank">API Key 管理ページ</a>にアクセスしてAPIキーを取得してください
+  <a href={apiKeyUrl} target="_blank">APIキー管理ページ</a>にアクセスしてAPIキーを取得してください。
 
-  リクエストヘッダーに以下を追加してください：
+  使用時はリクエストヘッダーに以下を追加します：
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -42,7 +42,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="image_url" type="array">
-      参考画像のURLリスト。画像から画像への生成に使用
+      画像生成に使用する参照画像のURLリスト
 
       * 最大9枚の画像
       * 公開アクセス可能なURLをサポート
@@ -51,25 +51,25 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     <ParamField body="aspect_ratio" type="string" default="auto">
       画像生成のアスペクト比
 
-      サポートされるアスペクト比：
+      サポートされているアスペクト比：
 
       * `auto` - 自動（デフォルト）
       * `1:1` - 正方形
-      * `3:2` - 横向き3:2
-      * `2:3` - 縦向き2:3
-      * `4:3` - 横向き4:3
-      * `3:4` - 縦向き3:4
-      * `5:4` - 横向き5:4
-      * `4:5` - 縦向き4:5
+      * `3:2` - 横向き 3:2
+      * `2:3` - 縦向き 2:3
+      * `4:3` - 横向き 4:3
+      * `3:4` - 縦向き 3:4
+      * `5:4` - 横向き 5:4
+      * `4:5` - 縦向き 4:5
       * `16:9` - 横向きワイドスクリーン
-      * `9:16` - 縦向きスクリーン
+      * `9:16` - 縦向き縦長画面
       * `21:9` - 超ワイドスクリーン
     </ParamField>
 
     <ParamField body="format" type="string" default="png">
       画像出力フォーマット
 
-      サポートされるフォーマット：
+      サポートされているフォーマット：
 
       * `png` - PNGフォーマット（デフォルト）
       * `jpeg` - JPEGフォーマット
@@ -78,15 +78,15 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発行者タスクID
+  発信者タスクID
 
   ユーザー定義のタスク識別子、必須
 </ParamField>
 
 <ParamField body="callback_url" type="string">
-  タスク完了後のコールバック通知先URL
+  タスク完了後のコールバック通知URL
 
-  タスク完了時、システムがこのURLにPOSTリクエストで結果を通知します
+  タスク完了後、システムはこのURLにPOSTリクエストを送信して結果を通知します
 </ParamField>
 
 <ParamField body="metadata" type="object">
@@ -98,23 +98,23 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Response
 
 <ResponseField name="task_id" type="string">
-  タスクID。結果の照会に使用します。
+  タスクID。結果のクエリに使用されます
 </ResponseField>
 
 <ResponseField name="out_task_id" type="string">
-  発信者のタスクID。結果の照会に使用可能です。
+  発行側のタスクID。結果のクエリに使用可能です
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  初期状態で、固定値は `"pending"` です。
+  初期状態で、固定値は `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  推定消費クレジット数
+  予測される消費クレジット
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  作成日時（ISO 形式）
+  作成日時（ISOフォーマット）
 </ResponseField>
 
 <RequestExample>
@@ -600,7 +600,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 401,
-      "message": "認証に失敗しました。APIキーを確認してください"
+      "message": "認証に失敗しました。APIキーをご確認ください"
     }
   }
   ```
@@ -608,7 +608,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 433,
-      "message": "アカウント残高不足です。チャージ後に再試行してください"
+      "message": "アカウント残高不足です。チャージ後に再度お試しください"
     }
   }
   ```

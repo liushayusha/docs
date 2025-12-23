@@ -1,22 +1,22 @@
 ---
 title: 'GPT-4o 画像生成'
 description: |
-    - 非同期処理モード、後続のクエリ用にタスクIDを返す
-    - テキストから画像、画像から画像などの生成モードに対応
+    - 非同期処理モードで、タスクIDを返し後続のクエリに使用可能
+    - テキストから画像生成、画像から画像生成などの生成モードをサポート
 api: 'POST https://test.aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
-## Authorization
+## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  すべてのAPIはBearer Tokenを使用した認証が必要です
+  すべてのエンドポイントはBearer Tokenによる認証が必要です
 
-  APIキーの取得:
+  API Keyの取得方法：
 
-  <a href={apiKeyUrl} target="_blank">API Key管理ページ</a>にアクセスしてAPIキーを取得してください
+  <a href={apiKeyUrl} target="_blank">API Key管理ページ</a>にアクセスしてAPI Keyを取得してください
 
-  使用時はリクエストヘッダーに以下を追加します:
+  使用時はリクエストヘッダーに以下を追加します：
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -34,7 +34,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="params" type="object" required>
   モデルパラメータオブジェクト
 
-  <Expandable title="params オブジェクトのプロパティ">
+  <Expandable title="params オブジェクトの属性">
     <ParamField body="prompt" type="string" required>
       画像生成のテキスト説明
 
@@ -42,10 +42,10 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      画像生成の参考画像のURL
+      参照画像のURL（画像から画像への生成に使用）
 
-      * 単一画像のみ対応
-      * 公開アクセス可能なURLをサポート
+      * 単一の画像のみ対応
+      * 公開アクセス可能なURL対応
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="1:1">
@@ -54,14 +54,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       対応アスペクト比：
 
       * `1:1` - 正方形（デフォルト）
-      * `3:2` - 横向き 3:2
-      * `2:3` - 縦向き 2:3
+      * `3:2` - 横方向 3:2
+      * `2:3` - 縦方向 2:3
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発注側タスクID
+  発信者タスクID
 
   ユーザー定義のタスク識別子、必須
 </ParamField>
@@ -75,21 +75,21 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="metadata" type="object">
   カスタムメタデータ
 
-  クエリ結果取得時にそのまま返され、業務識別に利用可能
+  クエリ結果時にそのまま返され、ビジネス識別に利用可能
 </ParamField>
 
 ## Response
 
 <ResponseField name="task_id" type="string">
-  タスクID。結果の照会に使用されます
+  タスクID、結果の照会に使用
 </ResponseField>
 
 <ResponseField name="out_task_id" type="string">
-  発起元のタスクID。結果の照会に使用可能です
+  発信側タスクID、結果の照会に利用可能
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  初期状態。固定値 `"pending"`
+  初期状態、固定で `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
@@ -97,7 +97,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  作成日時（ISO形式）
+  作成日時（ISOフォーマット）
 </ResponseField>
 
 <RequestExample>
@@ -571,7 +571,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 401,
-      "message": "認証失敗。APIキーを確認してください"
+      "message": "認証に失敗しました。APIキーを確認してください"
     }
   }
   ```
@@ -579,7 +579,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 433,
-      "message": "アカウント残高不足。チャージ後に再試行してください"
+      "message": "アカウント残高が不足しています。チャージ後に再試行してください"
     }
   }
   ```
@@ -588,7 +588,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 500,
-      "message": "サーバ内部エラー。しばらくしてから再試行してください"
+      "message": "サーバ内部エラーです。しばらくしてから再度お試しください"
     }
   }
   ```

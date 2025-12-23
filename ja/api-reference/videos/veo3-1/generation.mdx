@@ -1,9 +1,9 @@
 ---
 title: 'VEO3.1 ビデオ生成'
 description: |
-    - 非同期処理モードで、タスクIDを返し後続のクエリに使用可能
-    - テキストからビデオ、画像生成ビデオなどの生成モードに対応
-    - 最初と最後のフレームの参照画像をサポート
+    - 非同期処理モード、タスクIDを返し、後続のクエリに使用可能
+    - テキストからビデオ、画像からビデオなどの生成モードに対応
+    - 初フレームおよび最終フレームの参照画像をサポート
 api: 'POST https://test.aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -11,9 +11,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  すべてのエンドポイントはBearerトークン認証が必要です
+  すべてのエンドポイントはBearer Tokenを使用した認証が必要です
 
-  API Keyの取得方法：
+  API Keyの取得：
 
   <a href={apiKeyUrl} target="_blank">API Key管理ページ</a>にアクセスしてAPI Keyを取得してください
 
@@ -33,44 +33,44 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  モデルパラメータオブジェクト
+  モデルパラメーターオブジェクト
 
   <Expandable title="params オブジェクトのプロパティ">
     <ParamField body="prompt" type="string" required>
-      ビデオ生成のテキスト説明
+      動画生成のテキスト説明
 
       制限なし
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      参考画像のURL、ビデオ生成用の画像（最初のフレーム）
+      参考画像のURL（動画生成のための最初のフレーム）
 
       * 単一画像のみ対応
-      * 公開されてアクセス可能なURLをサポート
+      * 公開アクセス可能なURLのみ対応
     </ParamField>
 
     <ParamField body="end_image_url" type="string">
-      最終フレーム参考画像のURL
+      最終フレームの参考画像URL
 
       * 単一画像のみ対応
-      * 公開されてアクセス可能なURLをサポート
+      * 公開アクセス可能なURLのみ対応
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="16:9">
-      ビデオのアスペクト比
+      動画のアスペクト比
 
-      対応可能なアスペクト比：
+      対応アスペクト比：
 
-      * `16:9` - 横（デフォルト）
-      * `9:16` - 縦
+      * `16:9` - 横向き（デフォルト）
+      * `9:16` - 縦向き
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発注者タスクID
+  発注側タスクID
 
-  ユーザー定義のタスク識別子、必須
+  ユーザーが定義するタスク識別子、必須
 </ParamField>
 <ParamField body="callback_url" type="string">
   タスク完了後のコールバック通知先URL
@@ -81,32 +81,32 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="metadata" type="object">
   カスタムメタデータ
 
-  クエリ結果時にそのまま返却され、ビジネス識別に利用可能
+  クエリ結果返却時にそのまま返り、ビジネス識別に利用可能
 </ParamField>
 
 ## Response
 
 <ResponseField name="task_id" type="string">
-  タスクID、結果を照会するために使用
+  タスクID、結果の問い合わせに使用
 </ResponseField>
 
 <ResponseField name="out_task_id" type="string">
-  発信側タスクID、結果を照会するために使用可能
+  発起者のタスクID、結果の問い合わせに使用可能
 </ResponseField>
 
 <ResponseField name="out_task_id" type="string">
-  発信側タスクID、結果を照会するために使用可能
+  発起者のタスクID、結果の問い合わせに使用可能
 </ResponseField>
 <ResponseField name="status" type="string">
   初期状態、固定で `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  予測消費クレジット
+  推定消費クレジット
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  作成日時（ISO形式）
+  作成日時（ISOフォーマット）
 </ResponseField>
 
 <RequestExample>
@@ -549,7 +549,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 401,
-      "message": "認証に失敗しました。APIキーを確認してください"
+      "message": "認証失敗、APIキーを確認してください"
     }
   }
   ```
@@ -557,7 +557,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 433,
-      "message": "アカウント残高が不足しています。チャージ後に再試行してください"
+      "message": "アカウント残高不足、チャージ後に再試行してください"
     }
   }
   ```
@@ -566,7 +566,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 500,
-      "message": "サーバー内部エラーが発生しました。後でもう一度お試しください"
+      "message": "サーバ内部エラー、後で再試行してください"
     }
   }
   ```

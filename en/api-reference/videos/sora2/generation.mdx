@@ -1,8 +1,8 @@
 ---
 title: 'Sora2 Video Generation'
 description: |
-    - Asynchronous processing mode, returns a task ID for subsequent queries
-    - Supports generation modes such as text-to-video and image-to-video
+    - Asynchronous processing mode, returns task ID for subsequent queries
+    - Supports text-to-video, image-to-video and other generation modes
 api: 'POST https://test.aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -14,9 +14,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   Get the API Key:
 
-  Visit the <a href={apiKeyUrl} target="_blank">API Key management page</a> to obtain your API Key
+  Visit the <a href={apiKeyUrl} target="_blank">API Key management page</a> to get your API Key
 
-  Add the following in the request headers:
+  Add to the request headers when using:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -34,7 +34,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="params" type="object" required>
   Model parameters object
 
-  <Expandable title="params Object Properties">
+  <Expandable title="params object properties">
     <ParamField body="prompt" type="string" required>
       Text description for video generation
 
@@ -42,9 +42,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      URL of the reference image for image-to-video (first frame)
+      Reference image URL, used for image-to-video (first frame)
 
-      * Only single image supported
+      * Only a single image is supported
       * Supports publicly accessible URLs
     </ParamField>
 
@@ -74,9 +74,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   User-defined task identifier, required
 </ParamField>
 <ParamField body="callback_url" type="string">
-  Callback notification URL upon task completion
+  Callback URL after task completion
 
-  After task completion, the system will send a POST request to this URL to notify the result
+  The system will send a POST request to this URL to notify the result after the task is completed
 </ParamField>
 
 <ParamField body="metadata" type="object">
@@ -88,18 +88,18 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Response
 
 <ResponseField name="task_id" type="string">
-  Task ID, used to query results
+  Task ID used to query the result
 </ResponseField>
 
 <ResponseField name="out_task_id" type="string">
-  Initiator task ID, can be used to query results
+  Initiator task ID, can be used to query the result
 </ResponseField>
 <ResponseField name="status" type="string">
-  Initial status, fixed as `"pending"`
+  Initial status, fixed to `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  Estimated credits consumed
+  Estimated consumed credits
 </ResponseField>
 
 <ResponseField name="created_at" type="string">

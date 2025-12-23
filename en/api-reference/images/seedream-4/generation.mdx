@@ -1,8 +1,8 @@
 ---
 title: 'Seedream V4 Image Generation'
 description: |
-    - Asynchronous processing mode, returns a task ID for subsequent queries
-    - Supports multiple generation modes such as text-to-image and image-to-image
+    - Asynchronous processing mode, returns task ID for later query
+    - Supports multiple generation modes including text-to-image and image-to-image
 api: 'POST https://test.aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -10,13 +10,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  All endpoints require authentication using a Bearer Token
+  All endpoints require authentication using a Bearer Token.
 
-  Get API Key:
+  Get the API Key:
 
-  Visit the <a href={apiKeyUrl} target="_blank">API Key management page</a> to obtain your API Key
+  Visit the <a href={apiKeyUrl} target="_blank">API Key management page</a> to get your API Key.
 
-  Include in the request headers:
+  Add the following to the request headers when using:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -26,15 +26,15 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  Model name
+  Model Name
 
   Fixed value: `"seedream_v4"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  Model parameters object
+  Model Parameters Object
 
-  <Expandable title="params Object Properties">
+  <Expandable title="params object properties">
     <ParamField body="prompt" type="string" required>
       Text description for image generation
 
@@ -42,22 +42,22 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="image_url" type="array">
-      List of reference image URLs, used for image-to-image
+      List of reference image URLs for image-to-image generation
 
       * Up to 9 images
       * Supports publicly accessible URLs
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="1:1">
-      Aspect ratio for image generation
+      Aspect ratio of the generated image
 
       Supported aspect ratios:
 
       * `1:1` - Square (default)
-      * `16:9` - Horizontal widescreen
-      * `9:16` - Vertical portrait
-      * `4:3` - Horizontal 4:3
-      * `3:4` - Vertical 3:4
+      * `16:9` - Landscape widescreen
+      * `9:16` - Portrait vertical
+      * `4:3` - Landscape 4:3
+      * `3:4` - Portrait 3:4
     </ParamField>
 
     <ParamField body="resolution" type="string" default="1K">
@@ -83,14 +83,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  Initiator task ID
+  Initiator's Task ID
 
   User-defined task identifier, required
 </ParamField>
 <ParamField body="callback_url" type="string">
-  Callback notification URL after task completion
+  Callback notification URL upon task completion
 
-  After task completion, the system will send a POST request to this URL to notify the result
+  After task completion, the system will POST the result notification to this URL
 </ParamField>
 
 <ParamField body="metadata" type="object">
@@ -106,14 +106,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <ResponseField name="out_task_id" type="string">
-  Initiator's task ID, can be used for querying results
+  Initiator's task ID, can be used to query results
 </ResponseField>
 <ResponseField name="status" type="string">
   Initial status, fixed as `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  Estimated credits consumption
+  Estimated credits consumed
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
@@ -129,7 +129,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     --data '{
       "model": "seedream_v4",
       "params": {
-        "prompt": "Beautiful sunset by the sea",
+        "prompt": "Beautiful sunset by the seaside",
         "aspect_ratio": "16:9",
         "resolution": "2K",
         "output_n": "2"
@@ -145,7 +145,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
       "model": "seedream_v4",
       "params": {
-          "prompt": "Beautiful sunset by the sea",
+          "prompt": "Beautiful sunset by the seaside",
           "aspect_ratio": "16:9",
           "resolution": "2K",
           "output_n": "2"
@@ -168,7 +168,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   const payload = {
     model: "seedream_v4",
     params: {
-      prompt: "Beautiful sunset by the sea",
+      prompt: "Beautiful sunset by the seaside",
       aspect_ratio: "16:9",
       resolution: "2K",
       output_n: "2"
@@ -207,7 +207,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       payload := map[string]interface{}{
           "model": "seedream_v4",
           "params": map[string]interface{}{
-              "prompt":       "Beautiful sunset by the sea",
+              "prompt":       "Beautiful sunset by the seaside",
               "aspect_ratio": "16:9",
               "resolution":   "2K",
               "output_n":     "2",
@@ -246,7 +246,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           {
             "model": "seedream_v4",
             "params": {
-              "prompt": "Beautiful sunset by the sea",
+              "prompt": "Beautiful sunset by the seaside",
               "aspect_ratio": "16:9",
               "resolution": "2K",
               "output_n": "2"
@@ -278,7 +278,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   $payload = [
       "model" => "seedream_v4",
       "params" => [
-          "prompt" => "Beautiful sunset by the sea",
+          "prompt" => "Beautiful sunset by the seaside",
           "aspect_ratio" => "16:9",
           "resolution" => "2K",
           "output_n" => "2"
@@ -311,7 +311,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
     model: "seedream_v4",
     params: {
-      prompt: "Beautiful sunset by the sea",
+      prompt: "Beautiful sunset by the seaside",
       aspect_ratio: "16:9",
       resolution: "2K",
       output_n: "2"
@@ -337,7 +337,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload: [String: Any] = [
       "model": "seedream_v4",
       "params": [
-          "prompt": "Beautiful sunset by the sea",
+          "prompt": "Beautiful sunset by the seaside",
           "aspect_ratio": "16:9",
           "resolution": "2K",
           "output_n": "2"
@@ -379,7 +379,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           var payload = @"{
               ""model"": ""seedream_v4"",
               ""params"": {
-                  ""prompt"": ""Beautiful sunset by the sea"",
+                  ""prompt"": ""Beautiful sunset by the seaside"",
                   ""aspect_ratio"": ""16:9"",
                   ""resolution"": ""2K"",
                   ""output_n"": ""2""
@@ -414,7 +414,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           const char *payload = "{"
               "\"model\":\"seedream_v4\","
               "\"params\":{"
-                  "\"prompt\":\"Beautiful sunset by the sea\","
+                  "\"prompt\":\"Beautiful sunset by the seaside\","
                   "\"aspect_ratio\":\"16:9\","
                   "\"resolution\":\"2K\","
                   "\"output_n\":\"2\""
@@ -455,7 +455,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           NSDictionary *payload = @{
               @"model": @"seedream_v4",
               @"params": @{
-                  @"prompt": @"Beautiful sunset by the sea",
+                  @"prompt": @"Beautiful sunset by the seaside",
                   @"aspect_ratio": @"16:9",
                   @"resolution": @"2K",
                   @"output_n": @"2"
@@ -503,7 +503,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload = {|{
     "model": "seedream_v4",
     "params": {
-      "prompt": "Beautiful sunset by the sea",
+      "prompt": "Beautiful sunset by the seaside",
       "aspect_ratio": "16:9",
       "resolution": "2K",
       "output_n": "2"
@@ -534,7 +534,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     final payload = {
       'model': 'seedream_v4',
       'params': {
-        'prompt': 'Beautiful sunset by the sea',
+        'prompt': 'Beautiful sunset by the seaside',
         'aspect_ratio': '16:9',
         'resolution': '2K',
         'output_n': '2'
@@ -563,7 +563,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload <- list(
     model = "seedream_v4",
     params = list(
-      prompt = "Beautiful sunset by the sea",
+      prompt = "Beautiful sunset by the seaside",
       aspect_ratio = "16:9",
       resolution = "2K",
       output_n = "2"
@@ -618,7 +618,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 433,
-      "message": "Insufficient account balance, please top up and try again"
+      "message": "Insufficient account balance, please recharge and try again"
     }
   }
   ```

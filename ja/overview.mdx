@@ -1,33 +1,33 @@
 ---
-title: 'AIReiter — AI画像と動画生成APIプラットフォーム'
-description: '統一されたAI画像および動画生成APIプラットフォーム。GPT-4o Image、Gemini、Sora2、VEO3などの主要なモデルを複数サポート。非同期タスク処理、透明な価格設定、シンプルで使いやすい。'
+title: 'AIReiter — AI 画像と動画生成 API プラットフォーム'
+description: '統一された AI 画像および動画生成 API プラットフォーム。GPT-4o Image、Gemini、Sora2、VEO3 など、複数の主流モデルをサポート。非同期タスク処理、透明な価格設定、シンプルで使いやすい。'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
-AIReiter は統一された AI コンテンツ生成 API プラットフォームであり、画像および動画生成サービスを提供します。シンプルな REST API 呼び出しによって、GPT-4o、Gemini、Sora2、VEO3 などの主要な AI モデルを使用して高品質な画像および動画コンテンツを生成できます。
+AIReiter は統一された AI コンテンツ生成 API プラットフォームであり、画像および動画生成サービスを提供します。シンプルな REST API コールを通じて、GPT-4o、Gemini、Sora2、VEO3 などの主要な AI モデルを使用して高品質な画像や動画コンテンツを生成できます。
 
 ## クイックスタート
 
 <CardGroup cols={2}>
   <Card title="画像生成" icon="image" href="/ja/api-reference/images/gpt-4o/generation">
-    GPT-4o、Gemini、Seedream などのモデルを使用して画像を生成します
+    GPT-4o、Gemini、Seedream などのモデルを使用して画像を生成
   </Card>
   <Card title="動画生成" icon="video" href="/ja/api-reference/videos/sora2/generation">
-    Sora2、VEO3 などのモデルを使って動画コンテンツを生成します
+    Sora2、VEO3 などのモデルを使用して動画コンテンツを生成
   </Card>
-  <Card title="タスクステータスの取得" icon="list-check" href="/ja/api-reference/tasks/status">
-    非同期タスクの実行状況と結果を取得します
+  <Card title="タスク状態の取得" icon="list-check" href="/ja/api-reference/tasks/status">
+    非同期タスクの実行状態と結果を取得
   </Card>
   <Card title="APIキーの取得" icon="key" href={apiKeyUrl}>
-    コンソールにアクセスして API キーを取得します
+    コンソールにアクセスしてあなたのAPIキーを取得
   </Card>
 </CardGroup>
 
 ## API ワークフロー
 
-### 1. 生成タスクの送信
+### 1. 生成タスクの提出
 
-すべての画像および動画の生成は非同期処理モードを採用しています。タスクを送信する際に `out_task_id`（発注者タスクID）を渡す必要があり、システムは `task_id` と `out_task_id` を返します：
+すべての画像と動画の生成は非同期処理モードを採用しています。タスクを提出するときは `out_task_id`（発信側のタスクID）を渡す必要があり、システムは `task_id` と `out_task_id` を返します：
 
 ```bash
 curl --request POST \
@@ -44,12 +44,12 @@ curl --request POST \
   }'
 ```
 
-### 2. タスク状態の照会
+### 2. タスクステータスの照会
 
-返された `task_id` または送信時の `out_task_id` を使って、タスクの進行状況と結果を照会します（どちらか一方で可）：
+返却された `task_id` または提出した際の `out_task_id` を使用してタスクの進捗と結果を照会します（いずれか一方）：
 
 ```bash
-# task_idを使用して照会
+# task_id を使用して照会
 curl --request POST \
   --url https://test.aireiter.com/api/openapi/query \
   --header 'Authorization: Bearer YOUR_API_KEY' \
@@ -58,7 +58,7 @@ curl --request POST \
     "task_id": "order_xxxxxxxxxxxx"
   }'
 
-# またはout_task_idを使用して照会
+# または out_task_id を使用して照会
 curl --request POST \
   --url https://test.aireiter.com/api/openapi/query \
   --header 'Authorization: Bearer YOUR_API_KEY' \
@@ -70,7 +70,7 @@ curl --request POST \
 
 ### 3. 生成結果の取得
 
-タスク完了後、レスポンスに生成された画像または動画のURLが含まれます：
+タスクが完了すると、レスポンスに生成された画像または動画のURLが含まれます：
 
 ```json
 {
@@ -93,42 +93,42 @@ curl --request POST \
 
 ### 画像生成シリーズ
 
-AIReiter は複数の画像生成モデルを提供し、テキストから画像生成および画像から画像生成をサポートしています：
+AIReiter は複数の画像生成モデルを提供しており、テキストから画像生成および画像から画像生成機能をサポートしています：
 
 <CardGroup cols={2}>
-  <Card title="GPT-4o Image" icon="image" href="/ja/api-reference/images/gpt-4o/generation">
+  <Card title="GPT-4o Image" icon="image" href="/zh/api-reference/images/gpt-4o/generation">
     OpenAI の高品質な画像生成モデル
   </Card>
-  <Card title="Gemini-2.5-Flash (Nano banana)" icon="image" href="/ja/api-reference/images/nano-banana/generation">
-    Google の最新の高速画像生成モデル
+  <Card title="Gemini-2.5-Flash (Nano banana)" icon="image" href="/zh/api-reference/images/nano-banana/generation">
+    Google の最新高速画像生成モデル
   </Card>
-  <Card title="Gemini-3-Pro (Nano banana pro)" icon="image" href="/ja/api-reference/images/gemini-3-pro/generation">
-    Google のプロフェッショナル向け画像生成モデル
+  <Card title="Gemini-3-Pro (Nano banana pro)" icon="image" href="/zh/api-reference/images/gemini-3-pro/generation">
+    Google のプロフェッショナルグレード画像生成モデル
   </Card>
-  <Card title="Seedream-4.0" icon="image" href="/ja/api-reference/images/seedream-4/generation">
+  <Card title="Seedream-4.0" icon="image" href="/zh/api-reference/images/seedream-4/generation">
     効率的な画像生成ソリューション
   </Card>
-  <Card title="Seedream-4.5" icon="image" href="/ja/api-reference/images/seedream-4.5/generation">
+  <Card title="Seedream-4.5" icon="image" href="/zh/api-reference/images/seedream-4.5/generation">
     Seedream の最新バージョン
   </Card>
 </CardGroup>
 
 ### 動画生成シリーズ
 
-テキストから動画生成および画像から動画生成をサポートし、複数の解像度と長さの選択肢を提供しています：
+テキストから動画生成および画像から動画生成をサポートし、複数の解像度と長さのオプションを提供します：
 
 <CardGroup cols={2}>
-  <Card title="Sora2" icon="video" href="/ja/api-reference/videos/sora2/generation">
-    OpenAI Sora2 動画生成モデル（10-15秒）
+  <Card title="Sora2" icon="video" href="/zh/api-reference/videos/sora2/generation">
+    OpenAI Sora2 動画生成モデル（10〜15秒）
   </Card>
-  <Card title="Sora2 Pro" icon="video" href="/ja/api-reference/videos/sora2-pro/generation">
-    Sora2 プロフェッショナル版、高解像度対応
+  <Card title="Sora2 Pro" icon="video" href="/zh/api-reference/videos/sora2-pro/generation">
+    Sora2 プロ版、高解像度対応
   </Card>
-  <Card title="VEO3.1" icon="video" href="/ja/api-reference/videos/veo3-1/generation">
+  <Card title="VEO3.1" icon="video" href="/zh/api-reference/videos/veo3-1/generation">
     Google VEO3.1 動画生成モデル
   </Card>
-  <Card title="VEO3.1 Fast" icon="video" href="/ja/api-reference/videos/veo3-1-fast/generation">
-    VEO3.1 の高速版
+  <Card title="VEO3.1 Fast" icon="video" href="/zh/api-reference/videos/veo3-1-fast/generation">
+    VEO3.1 高速版
   </Card>
 </CardGroup>
 
@@ -136,44 +136,44 @@ AIReiter は複数の画像生成モデルを提供し、テキストから画�
 
 ### 非同期タスク処理
 
-すべての生成リクエストは非同期処理モードを採用し、長時間の待機を避けます：
+すべての生成リクエストは非同期処理モードを採用し、長時間の待機を回避します：
 
-- タスクを送信する際に `out_task_id`（発信側タスクID、ビジネス識別用）を渡す必要があります
-- システムが生成した `task_id` と送信した `out_task_id` を即座に返します
-- `task_id` または `out_task_id` でタスクの状態を照会可能（二者択一）
-- webhookによるコールバック通知をサポート（任意）
-- タスク状態はリアルタイムで更新されます：`pending` → `processing` → `completed`
+- タスクを送信する際、`out_task_id`（発行者側のタスクID、ビジネス識別用）を渡す必要があります
+- システムが生成した`task_id`と送信した`out_task_id`を即座に返します
+- タスクの状態は`task_id`または`out_task_id`で照会可能（どちらか一方）
+- webhookコールバック通知をサポート（任意）
+- タスクの状態はリアルタイムで更新：`pending` → `processing` → `completed`
 
-### マルチモデル対応
+### 複数モデル対応
 
-統一されたAPIエンドポイントで、複数の画像・動画生成モデルに対応：
+統一されたAPIエンドポイントで、複数の画像・動画生成モデルをサポート：
 
-- **画像生成**：GPT-4o、Gemini、Seedream など5つのモデル
-- **動画生成**：Sora2、VEO3 など4つのモデル
-- 統一されたリクエストフォーマットとレスポンス構造
+- **画像生成**：GPT-4o、Gemini、Seedreamなど5モデル
+- **動画生成**：Sora2、VEO3など4モデル
+- 統一されたリクエスト形式とレスポンス構造
 - 柔軟なパラメータ設定
 
-### 透明な価格設定
+### 透明な料金設定
 
-ポイント課金制で明確かつ透明：
+ポイント制で課金され、透明かつ明確です：
 
-- 各タスクは消費予測ポイントを返します
-- タスク完了後に実消費ポイントを表示
-- 成功して生成されたコンテンツのみ課金対象
+- 各タスクに対して予想消費ポイントを返却
+- タスク完了後に実際の消費ポイントを表示
+- 成功した生成コンテンツのみ課金
 - 隠れた料金なし
 
 ### 柔軟な設定
 
-多様な生成パラメータの設定をサポート：
+複数の生成パラメータ設定をサポート：
 
-- **画像**：多様なアスペクト比（1:1、3:2、2:3）
-- **動画**：多様なアスペクト比（16:9、9:16）、長さ（10秒、15秒）、解像度
-- 参照画像をサポート（画像から画像、画像から動画）
-- カスタムメタデータ(metadata)
+- **画像**：複数のアスペクト比（1:1、3:2、2:3）
+- **動画**：複数のアスペクト比（16:9、9:16）、長さ（10秒、15秒）、解像度
+- 参照画像のサポート（画像から画像、画像から動画）
+- カスタムメタデータ（metadata）
 
-## 認証方式
+## 認証方法
 
-すべての API リクエストは Bearer Token を使用して認証する必要があります：
+すべての API リクエストは Bearer Token を使用した認証が必要です：
 
 ```
 Authorization: Bearer YOUR_API_KEY
@@ -186,50 +186,50 @@ Authorization: Bearer YOUR_API_KEY
 ## よくある質問
 
 <AccordionGroup>
-  <Accordion title="APIキーはどのように取得しますか？">
-    <a href={apiKeyUrl} target="_blank">APIキー管理ページ</a>にアクセスし、ログイン後にAPIキーの作成および管理が可能です。
+  <Accordion title="APIキーはどうやって取得しますか？">
+    <a href={apiKeyUrl} target="_blank">APIキー管理ページ</a>にアクセスし、ログインするとAPIキーを作成および管理できます。
   </Accordion>
 
-  <Accordion title="画像や動画の生成にはどのくらい時間がかかりますか？">
-    すべての生成タスクは非同期で処理されます。画像生成は通常数秒から数十秒かかり、動画生成は長さや解像度によって異なり、通常1～5分かかります。タスクを提出するとすぐにtask_idが返され、状態照会APIを使って進行状況を追跡できます。
+  <Accordion title="画像および動画の生成にはどれくらい時間がかかりますか？">
+    すべての生成タスクは非同期処理されています。画像生成は通常数秒から数十秒かかり、動画生成は長さと解像度に応じて通常1～5分かかります。タスクを送信するとすぐにtask_idが返され、状態確認APIで進行状況を追跡できます。
   </Accordion>
 
-  <Accordion title="タスクの状態はどのように照会しますか？">
-    タスク状態照会APIを使用すると、提出時に返された`task_id`または自身で設定した`out_task_id`（どちらか一方）を渡して照会できます：
+  <Accordion title="タスクの状態はどうやって確認しますか？">
+    タスク状態確認APIを使用し、送信時に返された`task_id`またはお客様が設定した`out_task_id`（どちらか一方）を渡してください：
 
     ```bash
     POST https://test.aireiter.com/api/openapi/query
     ```
 
-    詳細は[タスク状態照会ドキュメント](/jp/api-reference/tasks/status)をご覧ください。
+    詳細は[タスク状態確認ドキュメント](/en/api-reference/tasks/status)をご覧ください。
   </Accordion>
 
   <Accordion title="out_task_idとは何ですか？">
-    `out_task_id`は発行者側のタスクIDで、タスク提出時にカスタム設定します：
+    `out_task_id`は依頼者が設定するタスクIDで、タスク送信時にカスタム設定します：
 
-    - **必須パラメータ**：タスク提出時に`out_task_id`を必ず渡す必要があります
-    - **業務識別**：自社システムの注文番号や業務IDなどで識別できます
-    - **照会の柔軟性**：`out_task_id`で直接タスク状態を照会でき、システム返却の`task_id`保存は不要です
-    - **結果連携**：照会結果に`task_id`と`out_task_id`の両方が返されるため、業務データの連携が容易です
+    - **必須パラメータ**：タスク送信時に必ず`out_task_id`を渡す必要があります
+    - **ビジネス識別**：注文番号やビジネスIDなど、システム内の識別子として使用できます
+    - **柔軟な検索**：システムから返される`task_id`を保存しなくても、直接`out_task_id`でタスク状態を照会可能です
+    - **結果の紐付け**：照会結果には`task_id`と`out_task_id`が共に返され、ビジネスデータの紐付けに便利です
   </Accordion>
 
-  <Accordion title="Webhookコールバックに対応していますか？">
-    はい、タスク提出時に`callback_url`パラメータを指定できます。タスク完了後、システムがそのURLへPOSTリクエストを送り、完全なタスク結果を含みます。
+  <Accordion title="Webhookコールバックはサポートされていますか？">
+    はい、タスク送信時に`callback_url`パラメータを渡すことができます。タスク完了後、システムは該当URLへPOSTリクエストを送信し、完全なタスク結果を含みます。
   </Accordion>
 
-  <Accordion title="課金はどのように行われますか？">
-    AIReiterはポイント制課金を採用しています：
+  <Accordion title="料金はどのように計算されますか？">
+    AIReiterはポイント制料金を採用しています：
 
-    - タスク提出時に推定消費ポイント（`estimated_credits`）を返します
-    - タスク完了後に実際の消費ポイント（`credits_used`）を返します
-    - 成功した生成内容に対してのみ課金し、失敗タスクは無料です
-    - モデルによってポイント消費は異なります
+    - タスク送信時に見積もりポイント（`estimated_credits`）が返されます
+    - タスク完了後に実消費ポイント（`credits_used`）が返されます
+    - 成功した生成内容にのみ課金し、失敗タスクは課金されません
+    - モデルによりポイント消費量が異なります
   </Accordion>
 
-  <Accordion title="対応している画像フォーマットと動画フォーマットは何ですか？">
-    - **画像**：JPEG、PNGなどの一般的なフォーマットに対応
-    - **動画**：出力はMP4フォーマット
-    - **参照画像**：公開アクセス可能な画像URLを入力としてサポート
+  <Accordion title="どの画像形式と動画形式がサポートされていますか？">
+    - **画像**：JPEG、PNGなど一般的な形式をサポート
+    - **動画**：出力フォーマットはMP4
+    - **参考画像**：入力は公開アクセス可能な画像URLをサポート
   </Accordion>
 </AccordionGroup>
 
@@ -237,15 +237,15 @@ Authorization: Bearer YOUR_API_KEY
 
 <CardGroup cols={2}>
   <Card title="画像生成ドキュメントを見る" icon="image" href="/zh/api-reference/images/gpt-4o/generation">
-    さまざまな画像生成モデルの使い方を学ぶ
+    さまざまな画像生成モデルの使い方を理解する
   </Card>
   <Card title="動画生成ドキュメントを見る" icon="video" href="/zh/api-reference/videos/sora2/generation">
-    動画コンテンツの生成方法を学ぶ
+    動画コンテンツの生成方法を理解する
   </Card>
   <Card title="タスク管理" icon="list-check" href="/zh/api-reference/tasks/status">
-    タスクの管理と状態の確認方法を学ぶ
+    タスクの管理とステータスのクエリ方法を学ぶ
   </Card>
-  <Card title="API キーを取得する" icon="key" href={apiKeyUrl}>
-    今すぐAIReiterの利用を開始する
+  <Card title="APIキーを取得する" icon="key" href={apiKeyUrl}>
+    今すぐAIReiterを使用開始する
   </Card>
 </CardGroup>

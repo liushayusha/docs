@@ -1,7 +1,7 @@
 ---
 title: 'Nano Banana Image Generation'
 description: |
-    - Asynchronous processing mode, returns a task ID for subsequent queries
+    - Asynchronous processing mode, returning task ID for subsequent queries
     - Fast generation speed, optimized for rapid image creation
 api: 'POST https://test.aireiter.com/api/openapi/submit'
 ---
@@ -14,9 +14,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   Get the API Key:
 
-  Visit the <a href={apiKeyUrl} target="_blank">API Key management page</a> to obtain your API Key.
+  Visit the <a href={apiKeyUrl} target="_blank">API Key Management Page</a> to obtain your API Key.
 
-  Add the following to the request headers when using it:
+  Add the following in the request headers when using:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -26,23 +26,23 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  Model Name
+  Model name
 
   Fixed value: `"nano_banana"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  Model Parameters Object
+  Model parameters object
 
-  <Expandable title="params Object Properties">
+  <Expandable title="params object properties">
     <ParamField body="prompt" type="string" required>
       Text description for image generation
 
-      No limits
+      No limit
     </ParamField>
 
     <ParamField body="image_url" type="array">
-      List of reference image URLs for image-to-image generation
+      List of reference image URLs used for image-to-image generation
 
       * Up to 9 images
       * Supports publicly accessible URLs
@@ -63,7 +63,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       * `4:5` - Vertical 4:5
       * `16:9` - Horizontal widescreen
       * `9:16` - Vertical portrait
-      * `21:9` - Ultra widescreen
+      * `21:9` - Ultra-widescreen
     </ParamField>
 
     <ParamField body="format" type="string" default="png">
@@ -78,31 +78,31 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  Initiator Task ID
+  Initiator task ID
 
   User-defined task identifier, required
 </ParamField>
 
 <ParamField body="callback_url" type="string">
-  Callback URL after task completion
+  Callback notification URL after task completion
 
-  After the task is completed, the system will send a POST request to this address to notify the result
+  After the task completes, the system will send a POST request to this URL to notify the result
 </ParamField>
 
 <ParamField body="metadata" type="object">
   Custom metadata
 
-  Returned as-is when querying results, can be used for business identification
+  Returned as is in query results, can be used for business identification
 </ParamField>
 
 ## Response
 
 <ResponseField name="task_id" type="string">
-  Task ID, used for querying results
+  Task ID, used to query the result
 </ResponseField>
 
 <ResponseField name="out_task_id" type="string">
-  Initiator's task ID, can be used to query results
+  Initiator's task ID, can be used to query the result
 </ResponseField>
 
 <ResponseField name="status" type="string">
@@ -110,7 +110,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  Estimated consumed credits
+  Estimated credits consumption
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
@@ -126,7 +126,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     --data '{
       "model": "nano_banana",
       "params": {
-        "prompt": "A bamboo path under the moonlight",
+        "prompt": "Bamboo path under the moonlight",
         "aspect_ratio": "16:9",
         "format": "png"
       },
@@ -142,7 +142,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
       "model": "nano_banana",
       "params": {
-          "prompt": "A bamboo path under the moonlight",
+          "prompt": "Bamboo path under the moonlight",
           "aspect_ratio": "16:9",
           "format": "png"
       },
@@ -165,7 +165,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   const payload = {
     model: "nano_banana",
     params: {
-      prompt: "A bamboo path under the moonlight",
+      prompt: "Bamboo path under the moonlight",
       aspect_ratio: "16:9",
       format: "png"
     },
@@ -204,7 +204,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       payload := map[string]interface{}{
           "model": "nano_banana",
           "params": map[string]interface{}{
-              "prompt":       "A bamboo path under the moonlight",
+              "prompt":       "Bamboo path under the moonlight",
               "aspect_ratio": "16:9",
               "format":       "png",
           },
@@ -243,7 +243,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           {
             "model": "nano_banana",
             "params": {
-              "prompt": "A bamboo path under the moonlight",
+              "prompt": "Bamboo path under the moonlight",
               "aspect_ratio": "16:9",
               "format": "png"
             },
@@ -275,7 +275,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   $payload = [
       "model" => "nano_banana",
       "params" => [
-          "prompt" => "A bamboo path under the moonlight",
+          "prompt" => "Bamboo path under the moonlight",
           "aspect_ratio" => "16:9",
           "format" => "png"
       ],
@@ -308,7 +308,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
     model: "nano_banana",
     params: {
-      prompt: "A bamboo path under the moonlight",
+      prompt: "Bamboo path under the moonlight",
       aspect_ratio: "16:9",
       format: "png"
     },
@@ -334,7 +334,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload: [String: Any] = [
       "model": "nano_banana",
       "params": [
-          "prompt": "A bamboo path under the moonlight",
+          "prompt": "Bamboo path under the moonlight",
           "aspect_ratio": "16:9",
           "format": "png"
       ]
@@ -375,7 +375,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           var payload = @"{
               ""model"": ""nano_banana"",
               ""params"": {
-                  ""prompt"": ""A bamboo path under the moonlight"",
+                  ""prompt"": ""Bamboo path under the moonlight"",
                   ""aspect_ratio"": ""16:9"",
                   ""format"": ""png""
               }
@@ -409,7 +409,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           const char *payload = "{"
               "\"model\":\"nano_banana\","
               "\"params\":{"
-                  "\"prompt\":\"A bamboo path under the moonlight\","
+                  "\"prompt\":\"Bamboo path under the moonlight\","
                   "\"aspect_ratio\":\"16:9\","
                   "\"format\":\"png\""
               "}"
@@ -449,7 +449,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           NSDictionary *payload = @{
               @"model": @"nano_banana",
               @"params": @{
-                  @"prompt": @"A bamboo path under the moonlight",
+                  @"prompt": @"Bamboo path under the moonlight",
                   @"aspect_ratio": @"16:9",
                   @"format": @"png"
               }
@@ -496,7 +496,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload = {|{
     "model": "nano_banana",
     "params": {
-      "prompt": "A bamboo path under the moonlight",
+      "prompt": "Bamboo path under the moonlight",
       "aspect_ratio": "16:9",
       "format": "png"
     }
@@ -526,7 +526,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     final payload = {
       'model': 'nano_banana',
       'params': {
-        'prompt': 'A bamboo path under the moonlight',
+        'prompt': 'Bamboo path under the moonlight',
         'aspect_ratio': '16:9',
         'format': 'png'
       }
@@ -554,7 +554,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload <- list(
     model = "nano_banana",
     params = list(
-      prompt = "A bamboo path under the moonlight",
+      prompt = "Bamboo path under the moonlight",
       aspect_ratio = "16:9",
       format = "png"
     )

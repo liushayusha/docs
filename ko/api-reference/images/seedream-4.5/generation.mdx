@@ -1,7 +1,7 @@
 ---
 title: 'Seedream V4.5 이미지 생성'
 description: |
-    - 비동기 처리 방식, 후속 쿼리를 위한 작업 ID 반환
+    - 비동기 처리 모드, 후속 조회를 위한 작업 ID 반환
     - 더 높은 품질의 이미지 생성
 api: 'POST https://test.aireiter.com/api/openapi/submit'
 ---
@@ -10,13 +10,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  모든 엔드포인트는 Bearer Token 인증이 필요합니다.
+  모든 엔드포인트는 Bearer Token 인증이 필요합니다
 
-  API Key 얻기:
+  API Key 받기:
 
-  <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a>에서 API Key를 받으세요.
+  <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a> 에서 API Key를 받으세요
 
-  사용할 때 요청 헤더에 다음을 추가하세요:
+  요청 헤더에 다음과 같이 추가하세요:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -42,14 +42,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="image_url" type="array">
-      참조 이미지 URL 목록, 이미지 생성에 사용
+      참조 이미지의 URL 목록, 이미지에서 이미지 생성용
 
       * 최대 9장 이미지
       * 공개적으로 접근 가능한 URL 지원
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="1:1">
-      이미지 생성 시 가로 세로 비율
+      이미지 생성의 가로 세로 비율
 
       지원하는 가로 세로 비율:
 
@@ -60,15 +60,15 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       * `3:4` - 세로 3:4
       * `5:4` - 가로 5:4
       * `4:5` - 세로 4:5
-      * `16:9` - 와이드 가로
-      * `9:16` - 와이드 세로
-      * `21:9` - 초광폭
+      * `16:9` - 가로 와이드스크린
+      * `9:16` - 세로 세로스크린
+      * `21:9` - 울트라 와이드스크린
     </ParamField>
 
     <ParamField body="resolution" type="string" default="basic">
       이미지 해상도
 
-      지원 해상도:
+      지원하는 해상도:
 
       * `basic` - 기본 해상도 (기본값)
       * `high` - 고해상도
@@ -79,31 +79,31 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="out_task_id" type="string" required>
   요청자 작업 ID
 
-  사용자 정의 작업 식별자, 필수
+  사용자가 정의한 작업 식별자, 필수
 </ParamField>
 <ParamField body="callback_url" type="string">
   작업 완료 후 콜백 알림 주소
 
-  작업 완료 시 시스템이 해당 주소로 POST 요청을 보내 결과를 알림
+  작업 완료 시 시스템이 이 주소로 POST 요청을 보내 결과를 알림
 </ParamField>
 
 <ParamField body="metadata" type="object">
   사용자 정의 메타데이터
 
-  조회 시 원본 그대로 반환, 비즈니스 식별에 사용 가능
+  쿼리 결과 시 그대로 반환되며, 비즈니스 식별에 사용 가능
 </ParamField>
 
 ## Response
 
 <ResponseField name="task_id" type="string">
-  작업 ID, 결과 조회에 사용됩니다
+  작업 ID, 결과 조회에 사용
 </ResponseField>
 
 <ResponseField name="out_task_id" type="string">
-  발신자 작업 ID, 결과 조회에 사용할 수 있습니다
+  요청자 작업 ID, 결과 조회에 사용 가능
 </ResponseField>
 <ResponseField name="status" type="string">
-  초기 상태로, 고정 값 `"pending"`
+  초기 상태, 고정 값 `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
@@ -590,7 +590,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```json 400
     {
         "statusCode": 400,
-        "message": "잘못된 요청 파라미터",
+        "message": "요청 파라미터가 유효하지 않습니다",
         "ok": false
     }
   ```
@@ -598,7 +598,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 401,
-      "message": "인증 실패, API 키를 확인해주세요"
+      "message": "인증 실패, API 키를 확인하세요"
     }
   }
   ```
@@ -606,7 +606,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 433,
-      "message": "계정 잔액 부족, 충전 후 다시 시도해주세요"
+      "message": "계정 잔액 부족, 충전 후 다시 시도하세요"
     }
   }
   ```
@@ -615,7 +615,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 500,
-      "message": "서버 내부 오류, 나중에 다시 시도해주세요"
+      "message": "서버 내부 오류, 잠시 후 다시 시도하세요"
     }
   }
   ```

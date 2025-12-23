@@ -2,7 +2,7 @@
 title: 'Sora2 Pro Video Generation'
 description: |
     - Asynchronous processing mode, returns task ID for subsequent queries
-    - Supports generation modes such as text-to-video and image-to-video
+    - Supports text-to-video, image-to-video and other generation modes
     - Professional version, supports higher resolutions
 api: 'POST https://test.aireiter.com/api/openapi/submit'
 ---
@@ -11,13 +11,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  All endpoints require authentication with a Bearer Token
+  All endpoints require authentication using a Bearer Token.
 
   Get the API Key:
 
-  Visit the <a href={apiKeyUrl} target="_blank">API Key management page</a> to get your API Key
+  Visit the <a href={apiKeyUrl} target="_blank">API Key management page</a> to obtain your API Key.
 
-  Add to the request headers when using:
+  Add the following in the request header:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -43,9 +43,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      URL of the reference image for text-to-video (first frame)
+      Reference image URL for text-to-video (first frame)
 
-      * Only supports a single image
+      * Only supports single image
       * Supports publicly accessible URLs
     </ParamField>
 
@@ -59,9 +59,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="video_length" type="string" default="10">
-      Video length (seconds)
+      Video duration (seconds)
 
-      Supported lengths:
+      Supported durations:
 
       * `10` - 10 seconds (default)
       * `15` - 15 seconds
@@ -79,14 +79,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  Initiator task ID
+  Requester task ID
 
   User-defined task identifier, required
 </ParamField>
 <ParamField body="callback_url" type="string">
   Callback URL after task completion
 
-  After the task is completed, the system will send a POST request to this URL to notify the result
+  After completion, the system will send a POST request to this URL to notify the result
 </ParamField>
 
 <ParamField body="metadata" type="object">

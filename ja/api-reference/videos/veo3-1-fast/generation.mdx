@@ -1,10 +1,10 @@
 ---
 title: 'VEO3.1 Fast ビデオ生成'
 description: |
-    - 非同期処理モードで、後続のクエリ用にタスクIDを返す
-    - テキストからビデオ、画像生成ビデオなどの生成モードをサポート
-    - 速度に特化した高速バージョン
-    - 最初のフレームと最後のフレームの参照画像をサポート
+    - 非同期処理モードで、タスクIDを返し後続のクエリに使用
+    - テキストからビデオ、画像からビデオなど生成モードをサポート
+    - 高速版で速度最適化済み
+    - 初期フレームと末尾フレームの参照画像をサポート
 api: 'POST https://test.aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -16,9 +16,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   APIキーの取得：
 
-  <a href={apiKeyUrl} target="_blank">API Key 管理ページ</a>にアクセスしてAPIキーを取得してください
+  <a href={apiKeyUrl} target="_blank">APIキー管理ページ</a> にアクセスしてAPIキーを取得してください
 
-  使用時はリクエストヘッダーに以下を追加します：
+  使用時はリクエストヘッダーに以下を追加してください：
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -34,9 +34,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  モデルのパラメータオブジェクト
+  モデルのパラメーターオブジェクト
 
-  <Expandable title="params オブジェクトのプロパティ">
+  <Expandable title="params オブジェクトの属性">
     <ParamField body="prompt" type="string" required>
       動画生成のテキスト説明
 
@@ -44,39 +44,39 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      参照画像の URL、動画生成のための参照画像（最初のフレーム）
+      参照画像の URL、動画像生成のための（最初のフレーム）
 
       * 単一画像のみ対応
-      * 公開アクセス可能な URL をサポート
+      * 公開アクセス可能な URL に対応
     </ParamField>
 
     <ParamField body="end_image_url" type="string">
-      終了フレーム参照画像の URL
+      最終フレームの参照画像の URL
 
       * 単一画像のみ対応
-      * 公開アクセス可能な URL をサポート
+      * 公開アクセス可能な URL に対応
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="16:9">
       動画のアスペクト比
 
-      対応アスペクト比：
+      対応するアスペクト比：
 
-      * `16:9` - 横向き（デフォルト）
-      * `9:16` - 縦向き
+      * `16:9` - 横長（デフォルト）
+      * `9:16` - 縦長
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発行者タスクID
+  発信者タスクID
 
   ユーザー定義のタスク識別子、必須
 </ParamField>
 <ParamField body="callback_url" type="string">
-  タスク完了後のコールバック通知アドレス
+  タスク完了後のコールバック通知先URL
 
-  タスク完了後、システムがこのアドレスに POST リクエストを送り結果を通知します
+  タスク完了後、システムはこのURLにPOSTリクエストで結果を通知します
 </ParamField>
 
 <ParamField body="metadata" type="object">
@@ -88,22 +88,22 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Response
 
 <ResponseField name="task_id" type="string">
-  タスクID、結果の照会に使用します
+  タスクID。結果を照会するために使用します
 </ResponseField>
 
 <ResponseField name="out_task_id" type="string">
-  発注側のタスクID、結果の照会に利用可能です
+  発信者のタスクID。結果を照会するために使用可能です
 </ResponseField>
 <ResponseField name="status" type="string">
-  初期状態、固定で `"pending"`
+  初期状態。固定値は `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  予測消費クレジット
+  推定消費クレジット
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  作成日時（ISO形式）
+  作成日時（ISOフォーマット）
 </ResponseField>
 
 <RequestExample>
@@ -573,7 +573,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 500,
-      "message": "サーバー内部エラーが発生しました。後で再度お試しください"
+      "message": "サーバー内部エラー。しばらくしてから再試行してください"
     }
   }
   ```

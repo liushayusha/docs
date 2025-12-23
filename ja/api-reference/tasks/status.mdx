@@ -1,8 +1,8 @@
 ---
-title: 'タスクのステータス取得'
+title: 'タスクのステータスを取得する'
 description: |
-    - 非同期タスクの実行ステータスと結果を照会する
-    - リアルタイムのステータス更新と進捗追跡
+    - 非同期タスクの実行ステータスと結果をクエリする
+    - リアルタイムステータス更新と進捗追跡
     - タスク完了時に生成結果を取得する
 api: 'POST https://test.aireiter.com/api/openapi/query'
 ---
@@ -11,11 +11,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  すべてのエンドポイントはBearer Tokenによる認証が必要です
+  すべてのエンドポイントはBearer Tokenを使った認証が必要です
 
-  API Keyの取得方法：
+  APIキーの取得：
 
-  <a href={apiKeyUrl} target="_blank">API Key管理ページ</a>にアクセスしてAPI Keyを取得してください
+  <a href={apiKeyUrl} target="_blank">APIキー管理ページ</a>にアクセスしてAPIキーを取得してください
 
   利用時はリクエストヘッダーに以下を追加します：
 
@@ -29,13 +29,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="task_id" type="string">
   生成APIが返すタスクID
 
-  out_task_idとどちらか一方を選択し、いずれかを必ず提供してください
+  out_task_idと二者択一で、いずれか一方の提供が必須
 </ParamField>
 
 <ParamField body="out_task_id" type="string">
-  発信者のタスクID
+  発信側タスクID
 
-  task_idとどちらか一方を選択し、いずれかを必ず提供してください
+  task_idと二者択一で、いずれか一方の提供が必須
 </ParamField>
 
 ## Response
@@ -47,28 +47,28 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ResponseField name="status" type="string">
   タスクステータス：
 
-  * `pending` - 処理待ち
+  * `pending` - キューで処理待ち
   * `processing` - 処理中
-  * `completed` - 完了
+  * `completed` - 成功完了
   * `failed` - 失敗
 </ResponseField>
 
 <ResponseField name="input" type="object">
-  タスクの入力（オプション、一部の場合にのみ返される）
+  タスク入力（オプション、一部の場合のみ返されます）
 
-  タスクの提出時の完全なパラメータ情報を含む
+  タスク提出時の完全なパラメータ情報を含みます
 </ResponseField>
 
 <ResponseField name="output" type="array">
-  タスク出力（タスク完了後に返される）
+  タスク出力（タスク完了後に返されます）
 
-  生成結果の配列で、各要素に生成されたリソースを指す `url` フィールドを含む
+  生成結果の配列を含み、各要素は生成されたリソースを指す `url` フィールドを持っています
 </ResponseField>
 
 <ResponseField name="error" type="object">
-  エラー情報（タスク失敗時に返される）
+  エラー情報（タスク失敗時に返されます）
 
-  <Expandable title="プロパティ">
+  <Expandable title="Properties">
     <ResponseField name="code" type="string">
       エラーコード
     </ResponseField>
@@ -80,7 +80,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <ResponseField name="credits_used" type="number">
-  使用クレジット
+  消費したクレジット
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
@@ -88,7 +88,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <ResponseField name="completed_at" type="string">
-  完了日時（タスク完了後に返される、ISO 8601形式）
+  完了日時（タスク完了後に返されます、ISO 8601形式）
 </ResponseField>
 
 <RequestExample>
@@ -543,7 +543,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 500,
-      "message": "サーバー内部エラーが発生しました。後でもう一度お試しください。"
+      "message": "サーバー内部エラーが発生しました。後でもう一度お試しください"
     }
   }
   ```

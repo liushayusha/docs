@@ -1,25 +1,25 @@
 ---
-title: 'AIReiter — AI 이미지 및 비디오 생성 API 플랫폼'
-description: '통합 AI 이미지 및 비디오 생성 API 플랫폼입니다. GPT-4o Image, Gemini, Sora2, VEO3 등 다양한 주류 모델을 지원합니다. 비동기 작업 처리, 투명한 가격 정책, 간편한 사용을 제공합니다.'
+title: 'AIReiter — AI 이미지 및 영상 생성 API 플랫폼'
+description: '통합 AI 이미지 및 영상 생성 API 플랫폼입니다. GPT-4o Image, Gemini, Sora2, VEO3 등 다양한 주류 모델을 지원합니다. 비동기 작업 처리, 투명한 가격 정책, 간단하고 사용하기 쉽습니다.'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
-AIReiter는 통합 AI 콘텐츠 생성 API 플랫폼으로, 이미지와 비디오 생성 서비스를 제공합니다. 간단한 REST API 호출을 통해 GPT-4o, Gemini, Sora2, VEO3 등 다양한 주요 AI 모델을 사용하여 고품질의 이미지와 비디오 콘텐츠를 생성할 수 있습니다.
+AIReiter는 이미지와 비디오 생성 서비스를 제공하는 통합 AI 콘텐츠 생성 API 플랫폼입니다. 간단한 REST API 호출을 통해 GPT-4o, Gemini, Sora2, VEO3 등 다양한 주류 AI 모델을 사용하여 고품질 이미지와 비디오 콘텐츠를 생성할 수 있습니다.
 
 ## 빠른 시작
 
 <CardGroup cols={2}>
   <Card title="이미지 생성" icon="image" href="/ko/api-reference/images/gpt-4o/generation">
-    GPT-4o, Gemini, Seedream 등의 모델을 사용하여 이미지 생성
+    GPT-4o, Gemini, Seedream 등의 모델을 사용하여 이미지를 생성합니다
   </Card>
   <Card title="비디오 생성" icon="video" href="/ko/api-reference/videos/sora2/generation">
-    Sora2, VEO3 등의 모델을 사용하여 비디오 콘텐츠 생성
+    Sora2, VEO3 등의 모델을 사용하여 비디오 콘텐츠를 생성합니다
   </Card>
   <Card title="작업 상태 조회" icon="list-check" href="/ko/api-reference/tasks/status">
-    비동기 작업의 실행 상태 및 결과 조회
+    비동기 작업의 실행 상태와 결과를 조회합니다
   </Card>
-  <Card title="API 키 받기" icon="key" href={apiKeyUrl}>
-    콘솔에 접속하여 API 키 받기
+  <Card title="API Key 받기" icon="key" href={apiKeyUrl}>
+    콘솔에 접속하여 API Key를 받으세요
   </Card>
 </CardGroup>
 
@@ -27,7 +27,7 @@ AIReiter는 통합 AI 콘텐츠 생성 API 플랫폼으로, 이미지와 비디�
 
 ### 1. 생성 작업 제출
 
-모든 이미지 및 비디오 생성은 비동기 처리 방식을 사용합니다. 작업을 제출할 때 `out_task_id`(발신자 작업 ID)를 전달해야 하며, 시스템은 `task_id`와 `out_task_id`를 반환합니다:
+모든 이미지 및 비디오 생성은 비동기 처리 방식을 사용합니다. 작업 제출 시 `out_task_id`(발신자 작업 ID)를 전달해야 하며, 시스템은 `task_id`와 `out_task_id`를 반환합니다:
 
 ```bash
 curl --request POST \
@@ -37,7 +37,7 @@ curl --request POST \
   --data '{
     "model": "gpt_4o",
     "params": {
-      "prompt": "정원에서 귀여운 고양이 한 마리",
+      "prompt": "정원에 있는 귀여운 고양이",
       "aspect_ratio": "1:1"
     },
     "out_task_id": "my_task_123456"
@@ -46,7 +46,7 @@ curl --request POST \
 
 ### 2. 작업 상태 조회
 
-반환된 `task_id` 또는 제출 시의 `out_task_id`를 사용하여 작업 진행 상황과 결과를 조회합니다(둘 중 하나 선택):
+반환된 `task_id` 또는 제출한 `out_task_id`로 작업 진행 상황과 결과를 조회할 수 있습니다(둘 중 하나 선택):
 
 ```bash
 # task_id 사용 조회
@@ -68,9 +68,9 @@ curl --request POST \
   }'
 ```
 
-### 3. 생성 결과 받기
+### 3. 생성 결과 획득
 
-작업 완료 후, 응답에는 생성된 이미지 또는 비디오 URL이 포함됩니다:
+작업 완료 후, 응답에 생성된 이미지 또는 비디오 URL이 포함됩니다:
 
 ```json
 {
@@ -89,11 +89,11 @@ curl --request POST \
 }
 ```
 
-## 지원하는 모델
+## 지원 모델
 
 ### 이미지 생성 시리즈
 
-AIReiter는 다양한 이미지 생성 모델을 제공하며, 텍스트에서 이미지 생성과 이미지 변환 기능을 지원합니다:
+AIReiter는 다양한 이미지 생성 모델을 제공하며, 텍스트로부터 이미지 생성과 이미지로부터 이미지 생성 기능을 지원합니다:
 
 <CardGroup cols={2}>
   <Card title="GPT-4o Image" icon="image" href="/zh/api-reference/images/gpt-4o/generation">
@@ -103,7 +103,7 @@ AIReiter는 다양한 이미지 생성 모델을 제공하며, 텍스트에서 �
     Google의 최신 고속 이미지 생성 모델
   </Card>
   <Card title="Gemini-3-Pro (Nano banana pro)" icon="image" href="/zh/api-reference/images/gemini-3-pro/generation">
-    Google의 전문급 이미지 생성 모델
+    Google의 전문가용 이미지 생성 모델
   </Card>
   <Card title="Seedream-4.0" icon="image" href="/zh/api-reference/images/seedream-4/generation">
     효율적인 이미지 생성 솔루션
@@ -115,7 +115,7 @@ AIReiter는 다양한 이미지 생성 모델을 제공하며, 텍스트에서 �
 
 ### 비디오 생성 시리즈
 
-텍스트에서 비디오 생성과 이미지에서 비디오 생성 기능을 지원하며, 다양한 해상도와 길이 옵션을 제공합니다:
+텍스트로부터 비디오 생성과 이미지로부터 비디오 생성 기능을 지원하며, 다양한 해상도와 길이 옵션을 제공합니다:
 
 <CardGroup cols={2}>
   <Card title="Sora2" icon="video" href="/zh/api-reference/videos/sora2/generation">
@@ -136,100 +136,100 @@ AIReiter는 다양한 이미지 생성 모델을 제공하며, 텍스트에서 �
 
 ### 비동기 작업 처리
 
-모든 생성 요청은 비동기 처리 방식을 사용하여 장시간 대기를 피합니다:
+모든 생성 요청은 비동기 처리 방식을 채택하여 긴 대기 시간을 피합니다:
 
 - 작업 제출 시 `out_task_id`(발신자 작업 ID, 비즈니스 식별용)를 전달해야 합니다
-- 시스템에서 생성한 `task_id`와 제출한 `out_task_id`를 즉시 반환합니다
+- 시스템에서 생성된 `task_id`와 제출한 `out_task_id`를 즉시 반환합니다
 - `task_id` 또는 `out_task_id`로 작업 상태를 조회할 수 있습니다(둘 중 하나 선택)
-- webhook 콜백 알림 지원(선택 사항)
+- 웹훅 콜백 알림 지원(선택 사항)
 - 작업 상태 실시간 업데이트: `pending` → `processing` → `completed`
 
 ### 다중 모델 지원
 
-단일 API 엔드포인트에서 다양한 이미지 및 비디오 생성 모델 지원:
+하나의 통합 API 엔드포인트에서 다양한 이미지 및 영상 생성 모델을 지원합니다:
 
 - **이미지 생성**: GPT-4o, Gemini, Seedream 등 5개 모델
-- **비디오 생성**: Sora2, VEO3 등 4개 모델
-- 통합된 요청 형식과 응답 구조
-- 유연한 파라미터 구성
+- **영상 생성**: Sora2, VEO3 등 4개 모델
+- 일관된 요청 형식과 응답 구조
+- 유연한 매개변수 설정
 
 ### 투명한 가격 정책
 
-포인트 기반 과금으로 명확하고 투명합니다:
+포인트 기반 과금으로 투명하고 명확합니다:
 
-- 각 작업에 예상 소모 포인트를 반환
-- 작업 완료 후 실제 사용 포인트를 표시
-- 성공적으로 생성된 콘텐츠에 대해서만 요금 부과
+- 각 작업별 예상 소모 포인트 제공
+- 작업 완료 후 실제 소모 포인트 표시
+- 성공적으로 생성된 콘텐츠에 대해서만 비용 청구
 - 숨겨진 비용 없음
 
-### 유연한 설정
+### 유연한 구성
 
-다양한 생성 파라미터 구성을 지원합니다:
+다양한 생성 매개변수 구성을 지원합니다:
 
-- **이미지**: 여러 가로세로 비율(1:1, 3:2, 2:3)
-- **비디오**: 여러 가로세로 비율(16:9, 9:16), 길이(10초, 15초), 해상도
-- 참조 이미지 지원(이미지 생성, 이미지로 비디오 생성)
+- **이미지**: 여러 가로세로비(1:1, 3:2, 2:3)
+- **영상**: 여러 가로세로비(16:9, 9:16), 길이(10초, 15초), 해상도
+- 참조 이미지 지원(이미지 생성 이미지, 이미지 생성 영상)
 - 사용자 정의 메타데이터(metadata)
 
-## 인증 방식
+## 인증 방법
 
-모든 API 요청은 Bearer Token 인증을 사용해야 합니다:
+모든 API 요청은 Bearer Token을 사용하여 인증해야 합니다:
 
 ```
 Authorization: Bearer YOUR_API_KEY
 ```
 
-**API 키 받기：**
+**API Key 얻기:**
 
-<a href={apiKeyUrl} target="_blank">API 키 관리 페이지</a> 에서 API 키를 받으세요.
+<a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a>에 접속하여 API Key를 얻으세요.
 
 ## 자주 묻는 질문
 
 <AccordionGroup>
-  <Accordion title="API Key를 어떻게 얻나요?">
-    <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a>에 접속하여 로그인하면 API Key를 생성 및 관리할 수 있습니다.
+  <Accordion title="API Key는 어떻게 얻나요?">
+    <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a>에 접속하여 로그인하면 API Key를 생성하고 관리할 수 있습니다.
   </Accordion>
 
-  <Accordion title="이미지와 비디오 생성에 얼마나 걸리나요?">
-    모든 생성 작업은 비동기로 처리됩니다. 이미지 생성은 보통 몇 초에서 수십 초가 소요되며, 비디오 생성은 길이와 해상도에 따라 보통 1-5분이 소요됩니다. 작업을 제출하면 즉시 task_id가 반환되며, 상태 조회 API를 통해 진행 상황을 확인할 수 있습니다.
+  <Accordion title="이미지와 비디오 생성에는 얼마나 걸리나요?">
+    모든 생성 작업은 비동기 처리됩니다. 이미지 생성은 보통 몇 초에서 수십 초가 소요되며, 비디오 생성은 길이와 해상도에 따라 보통 1~5분이 걸립니다. 작업을 제출하면 즉시 task_id가 반환되며, 상태 조회 API로 진행 상황을 추적할 수 있습니다.
   </Accordion>
 
   <Accordion title="작업 상태는 어떻게 조회하나요?">
-    작업 상태 조회 API를 사용하여, 작업 제출 시 반환된 `task_id` 또는 직접 설정한 `out_task_id`(둘 중 하나)를 전달할 수 있습니다:
+    작업 상태 조회 API를 사용하여 제출 시 반환된 `task_id` 또는 직접 설정한 `out_task_id` 중 하나를 전달할 수 있습니다:
 
     ```bash
     POST https://test.aireiter.com/api/openapi/query
     ```
 
-    자세한 내용은 [작업 상태 조회 문서](/zh/api-reference/tasks/status)에서 확인하세요.
+    자세한 내용은 [작업 상태 조회 문서](/zh/api-reference/tasks/status)를 참고하세요.
   </Accordion>
 
   <Accordion title="out_task_id란 무엇인가요?">
-    `out_task_id`는 발신 측 작업 ID로, 작업 제출 시 직접 설정하는 값입니다:
+    `out_task_id`는 작업 발신자의 작업 ID이며, 작업 제출 시 직접 설정하는 값입니다:
 
-    - **필수 파라미터**: 작업 제출 시 반드시 `out_task_id`를 전달해야 합니다
-    - **업무 식별자**: 시스템 내 주문 번호, 업무 ID 등으로 활용 가능
-    - **유연한 조회**: 반환된 `task_id`를 저장하지 않고도 `out_task_id`만으로 작업 상태를 조회할 수 있습니다
-    - **결과 연동**: 조회 시 결과에 `task_id`와 `out_task_id`가 함께 반환되어 업무 데이터 연동이 쉽습니다
+    - **필수 파라미터**: 작업 제출 시 반드시 `out_task_id`를 전달해야 합니다.
+    - **비즈니스 식별**: 시스템 내 주문 번호, 비즈니스 ID 등으로 사용할 수 있습니다.
+    - **유연한 조회**: 시스템이 반환하는 `task_id`를 저장하지 않아도 `out_task_id`로 작업 상태를 바로 조회할 수 있습니다.
+    - **결과 연동**: 조회 결과에 `task_id`와 `out_task_id`가 함께 반환되어 비즈니스 데이터와 연동하기 편리합니다.
   </Accordion>
 
-  <Accordion title="웹훅 콜백을 지원하나요?">
-    네, 작업 제출 시 `callback_url` 파라미터를 전달할 수 있습니다. 작업 완료 후 시스템이 해당 주소로 POST 요청을 보내 작업 결과를 전달합니다.
+  <Accordion title="Webhook 콜백을 지원하나요?">
+    네, 작업 제출 시 `callback_url` 파라미터를 전달할 수 있습니다. 작업 완료 후 시스템이 해당 주소로 POST 요청을 보내며, 완전한 작업 결과를 포함합니다.
   </Accordion>
 
-  <Accordion title="요금은 어떻게 부과되나요?">
-    AIReiter는 포인트 기반 요금제를 사용합니다:
+  <Accordion title="과금 방식은 어떻게 되나요?">
+    AIReiter는 포인트 기반 과금을 채택하고 있습니다:
 
-    - 작업 제출 시 예상 소모 포인트(`estimated_credits`)를 반환합니다
-    - 작업 완료 후 실제 소모 포인트(`credits_used`)를 반환합니다
-    - 성공적으로 생성된 콘텐츠에 대해서만 요금이 부과되며, 실패한 작업은 무료입니다
-    - 모델별 포인트 소모가 다릅니다
+    - 작업 제출 시 예상 소비 포인트(`estimated_credits`)를 반환합니다.
+    - 작업 완료 시 실제 소비 포인트(`credits_used`)를 반환합니다.
+    - 성공적으로 생성된 콘텐츠에 대해서만 요금이 청구되며, 실패한 작업은 요금이 없습니다.
+    - 모델별로 포인트 소비가 다릅니다.
   </Accordion>
 
   <Accordion title="지원하는 이미지 및 비디오 포맷은 무엇인가요?">
     - **이미지**: JPEG, PNG 등 일반적인 포맷 지원
     - **비디오**: MP4 포맷 출력
-    - **참조 이미지**: 공개적으로 접근 가능한 이미지 URL 입력 지원
+    - **참조 이미지**: 공개 접근 가능한 이미지 URL 입력 지원
   </Accordion>
 </AccordionGroup>
 
@@ -237,15 +237,15 @@ Authorization: Bearer YOUR_API_KEY
 
 <CardGroup cols={2}>
   <Card title="이미지 생성 문서 보기" icon="image" href="/ko/api-reference/images/gpt-4o/generation">
-    다양한 이미지 생성 모델 사용 방법을 알아보세요
+    다양한 이미지 생성 모델 사용하는 방법을 알아보세요
   </Card>
   <Card title="비디오 생성 문서 보기" icon="video" href="/ko/api-reference/videos/sora2/generation">
     비디오 콘텐츠 생성 방법을 알아보세요
   </Card>
   <Card title="작업 관리" icon="list-check" href="/ko/api-reference/tasks/status">
-    작업 상태 관리 및 조회 방법을 배우세요
+    작업 상태를 관리하고 조회하는 방법을 배우세요
   </Card>
   <Card title="API Key 받기" icon="key" href={apiKeyUrl}>
-    지금 바로 AIReiter 사용을 시작하세요
+    AIReiter를 즉시 시작하세요
   </Card>
 </CardGroup>

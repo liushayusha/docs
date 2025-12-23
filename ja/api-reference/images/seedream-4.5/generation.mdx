@@ -1,7 +1,7 @@
 ---
 title: 'Seedream V4.5 画像生成'
 description: |
-    - 非同期処理モードで、後続のクエリ用にタスクIDを返します
+    - 非同期処理モード、後続のクエリに使用するタスクIDを返却
     - より高品質な画像生成
 api: 'POST https://test.aireiter.com/api/openapi/submit'
 ---
@@ -12,11 +12,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField header="Authorization" type="string" required>
   すべてのエンドポイントはBearer Tokenによる認証が必要です
 
-  API Keyの取得方法：
+  APIキーの取得：
 
-  <a href={apiKeyUrl} target="_blank">API Key管理ページ</a>にアクセスしてAPI Keyを取得してください
+  <a href={apiKeyUrl} target="_blank">API Key管理ページ</a>にアクセスしてAPIキーを取得してください
 
-  使用時にはリクエストヘッダーに以下を追加してください：
+  使用時はリクエストヘッダーに以下を追加します：
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -32,7 +32,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  モデルパラメーターオブジェクト
+  モデルパラメータオブジェクト
 
   <Expandable title="params オブジェクトのプロパティ">
     <ParamField body="prompt" type="string" required>
@@ -42,7 +42,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="image_url" type="array">
-      参考画像のURLリスト（画像から画像への変換用）
+      参照画像のURLリスト、画像から画像へ生成に使用
 
       * 最大9枚の画像
       * 公開アクセス可能なURLをサポート
@@ -54,19 +54,19 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       サポートされているアスペクト比：
 
       * `1:1` - 正方形（デフォルト）
-      * `3:2` - 横向き3:2
-      * `2:3` - 縦向き2:3
-      * `4:3` - 横向き4:3
-      * `3:4` - 縦向き3:4
-      * `5:4` - 横向き5:4
-      * `4:5` - 縦向き4:5
+      * `3:2` - 横長3:2
+      * `2:3` - 縦長2:3
+      * `4:3` - 横長4:3
+      * `3:4` - 縦長3:4
+      * `5:4` - 横長5:4
+      * `4:5` - 縦長4:5
       * `16:9` - 横長ワイドスクリーン
-      * `9:16` - 縦長スクリーン
+      * `9:16` - 縦長縦スクリーン
       * `21:9` - 超ワイドスクリーン
     </ParamField>
 
     <ParamField body="resolution" type="string" default="basic">
-      画像解像度
+      画像の解像度
 
       サポートされている解像度：
 
@@ -77,37 +77,37 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発注側タスクID
+  発注者のタスクID
 
-  ユーザー定義のタスク識別子、必須
+  ユーザーが定義するタスク識別子、必須
 </ParamField>
 <ParamField body="callback_url" type="string">
   タスク完了後のコールバック通知URL
 
-  タスク完了後にシステムがこのURLにPOSTリクエストで結果を通知します
+  タスク完了後、システムはこのURLにPOSTリクエストを送信して結果を通知します
 </ParamField>
 
 <ParamField body="metadata" type="object">
   カスタムメタデータ
 
-  クエリ結果時にそのまま返却、業務識別に利用可能
+  クエリ結果時にそのまま返され、ビジネス識別に使用可能
 </ParamField>
 
 ## Response
 
 <ResponseField name="task_id" type="string">
-  タスクID。結果の照会に使用
+  タスクID。結果を照会するために使用されます
 </ResponseField>
 
 <ResponseField name="out_task_id" type="string">
-  発注元のタスクID。結果の照会に使用可能
+  発信者のタスクID。結果を照会するために使用できます
 </ResponseField>
 <ResponseField name="status" type="string">
-  初期状態。固定で`"pending"`
+  初期状態で固定値は `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  予測消費ポイント
+  推定消費クレジット
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
@@ -123,7 +123,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     --data '{
       "model": "seedream_v4_5",
       "params": {
-        "prompt": "幻想的な森の夜景",
+        "prompt": "夢のような森の夜景",
         "aspect_ratio": "16:9",
         "resolution": "high"
       },
@@ -139,7 +139,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
       "model": "seedream_v4_5",
       "params": {
-          "prompt": "幻想的な森の夜景",
+          "prompt": "夢のような森の夜景",
           "aspect_ratio": "16:9",
           "resolution": "high"
       },
@@ -162,7 +162,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   const payload = {
     model: "seedream_v4_5",
     params: {
-      prompt: "幻想的な森の夜景",
+      prompt: "夢のような森の夜景",
       aspect_ratio: "16:9",
       resolution: "high"
     }
@@ -200,7 +200,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       payload := map[string]interface{}{
           "model": "seedream_v4_5",
           "params": map[string]interface{}{
-              "prompt":       "幻想的な森の夜景",
+              "prompt":       "夢のような森の夜景",
               "aspect_ratio": "16:9",
               "resolution":   "high",
     
@@ -238,7 +238,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           {
             "model": "seedream_v4_5",
             "params": {
-              "prompt": "幻想的な森の夜景",
+              "prompt": "夢のような森の夜景",
               "aspect_ratio": "16:9",
               "resolution": "high"
 
@@ -271,7 +271,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   $payload = [
       "model" => "seedream_v4_5",
       "params" => [
-          "prompt" => "幻想的な森の夜景",
+          "prompt" => "夢のような森の夜景",
           "aspect_ratio" => "16:9",
           "resolution" => "high"
       ]
@@ -303,7 +303,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
     model: "seedream_v4_5",
     params: {
-      prompt: "幻想的な森の夜景",
+      prompt: "夢のような森の夜景",
       aspect_ratio: "16:9",
       resolution: "high"
     }
@@ -328,7 +328,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload: [String: Any] = [
       "model": "seedream_v4_5",
       "params": [
-          "prompt": "幻想的な森の夜景",
+          "prompt": "夢のような森の夜景",
           "aspect_ratio": "16:9",
           "resolution": "high"
 
@@ -371,7 +371,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           var payload = @"{
               ""model"": ""seedream_v4_5"",
               ""params"": {
-                  ""prompt"": ""幻想的な森の夜景"",
+                  ""prompt"": ""夢のような森の夜景"",
                   ""aspect_ratio"": ""16:9"",
                   ""resolution"": ""high""
               }
@@ -405,7 +405,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           const char *payload = "{"
               "\"model\":\"seedream_v4_5\","
               "\"params\":{"
-                  "\"prompt\":\"幻想的な森の夜景\","
+                  "\"prompt\":\"夢のような森の夜景\","
                   "\"aspect_ratio\":\"16:9\","
                   "\"resolution\":\"high\""
               "}"
@@ -445,7 +445,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           NSDictionary *payload = @{
               @"model": @"seedream_v4_5",
               @"params": @{
-                  @"prompt": @"幻想的な森の夜景",
+                  @"prompt": @"夢のような森の夜景",
                   @"aspect_ratio": @"16:9",
                   @"resolution": @"high"
               }
@@ -492,7 +492,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload = {|{
     "model": "seedream_v4_5",
     "params": {
-      "prompt": "幻想的な森の夜景",
+      "prompt": "夢のような森の夜景",
       "aspect_ratio": "16:9",
       "resolution": "high"
 
@@ -524,7 +524,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     final payload = {
       'model': 'seedream_v4_5',
       'params': {
-        'prompt': '幻想的な森の夜景',
+        'prompt': '夢のような森の夜景',
         'aspect_ratio': '16:9',
         'resolution': 'high'
       }
@@ -552,7 +552,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload <- list(
     model = "seedream_v4_5",
     params = list(
-      prompt = "幻想的な森の夜景",
+      prompt = "夢のような森の夜景",
       aspect_ratio = "16:9",
       resolution = "high"
     )
@@ -590,7 +590,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```json 400
     {
         "statusCode": 400,
-        "message": "リクエストパラメーターが無効です",
+        "message": "リクエストパラメータが無効です",
         "ok": false
     }
   ```
@@ -598,7 +598,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 401,
-      "message": "認証に失敗しました。APIキーを確認してください"
+      "message": "認証に失敗しました。APIキーをご確認ください"
     }
   }
   ```
@@ -606,7 +606,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 433,
-      "message": "アカウント残高不足です。チャージしてから再試行してください"
+      "message": "アカウント残高不足です。チャージ後に再度お試しください"
     }
   }
   ```

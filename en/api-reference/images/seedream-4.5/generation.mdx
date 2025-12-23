@@ -10,13 +10,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  All endpoints require authentication using a Bearer Token
+  All endpoints require authentication using a Bearer Token.
 
-  Get your API Key:
+  Get the API Key:
 
-  Visit the <a href={apiKeyUrl} target="_blank">API Key Management Page</a> to retrieve your API Key
+  Visit the <a href={apiKeyUrl} target="_blank">API Key Management Page</a> to obtain your API Key.
 
-  Include the following in the request header:
+  Include in the request header:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -38,7 +38,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     <ParamField body="prompt" type="string" required>
       Text description for image generation
 
-      No limits
+      Unlimited
     </ParamField>
 
     <ParamField body="image_url" type="array">
@@ -60,9 +60,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       * `3:4` - Portrait 3:4
       * `5:4` - Landscape 5:4
       * `4:5` - Portrait 4:5
-      * `16:9` - Wide landscape
-      * `9:16` - Tall portrait
-      * `21:9` - Ultra-wide
+      * `16:9` - Landscape widescreen
+      * `9:16` - Portrait vertical screen
+      * `21:9` - Ultra widescreen
     </ParamField>
 
     <ParamField body="resolution" type="string" default="basic">
@@ -77,14 +77,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  Initiator task ID
+  Client task ID
 
   User-defined task identifier, required
 </ParamField>
 <ParamField body="callback_url" type="string">
-  Callback notification URL after task completion
+  Callback URL after task completion
 
-  After task completion, the system will send a POST request to this URL to notify the results
+  After the task is completed, the system will send a POST request to this URL to notify the result
 </ParamField>
 
 <ParamField body="metadata" type="object">
@@ -96,11 +96,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Response
 
 <ResponseField name="task_id" type="string">
-  Task ID, used to query the result
+  Task ID, used for querying results
 </ResponseField>
 
 <ResponseField name="out_task_id" type="string">
-  Initiator task ID, can be used to query the result
+  Initiator's task ID, can be used to query results
 </ResponseField>
 <ResponseField name="status" type="string">
   Initial status, fixed as `"pending"`
@@ -123,7 +123,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     --data '{
       "model": "seedream_v4_5",
       "params": {
-        "prompt": "Dreamlike forest night scene",
+        "prompt": "A dreamy forest night scene",
         "aspect_ratio": "16:9",
         "resolution": "high"
       },
@@ -139,7 +139,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
       "model": "seedream_v4_5",
       "params": {
-          "prompt": "Dreamlike forest night scene",
+          "prompt": "A dreamy forest night scene",
           "aspect_ratio": "16:9",
           "resolution": "high"
       },
@@ -162,7 +162,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   const payload = {
     model: "seedream_v4_5",
     params: {
-      prompt: "Dreamlike forest night scene",
+      prompt: "A dreamy forest night scene",
       aspect_ratio: "16:9",
       resolution: "high"
     }
@@ -200,7 +200,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       payload := map[string]interface{}{
           "model": "seedream_v4_5",
           "params": map[string]interface{}{
-              "prompt":       "Dreamlike forest night scene",
+              "prompt":       "A dreamy forest night scene",
               "aspect_ratio": "16:9",
               "resolution":   "high",
     
@@ -238,7 +238,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           {
             "model": "seedream_v4_5",
             "params": {
-              "prompt": "Dreamlike forest night scene",
+              "prompt": "A dreamy forest night scene",
               "aspect_ratio": "16:9",
               "resolution": "high"
 
@@ -271,7 +271,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   $payload = [
       "model" => "seedream_v4_5",
       "params" => [
-          "prompt" => "Dreamlike forest night scene",
+          "prompt" => "A dreamy forest night scene",
           "aspect_ratio" => "16:9",
           "resolution" => "high"
       ]
@@ -303,7 +303,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
     model: "seedream_v4_5",
     params: {
-      prompt: "Dreamlike forest night scene",
+      prompt: "A dreamy forest night scene",
       aspect_ratio: "16:9",
       resolution: "high"
     }
@@ -328,7 +328,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload: [String: Any] = [
       "model": "seedream_v4_5",
       "params": [
-          "prompt": "Dreamlike forest night scene",
+          "prompt": "A dreamy forest night scene",
           "aspect_ratio": "16:9",
           "resolution": "high"
 
@@ -371,7 +371,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           var payload = @"{
               ""model"": ""seedream_v4_5"",
               ""params"": {
-                  ""prompt"": ""Dreamlike forest night scene"",
+                  ""prompt"": ""A dreamy forest night scene"",
                   ""aspect_ratio"": ""16:9"",
                   ""resolution"": ""high""
               }
@@ -405,7 +405,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           const char *payload = "{"
               "\"model\":\"seedream_v4_5\","
               "\"params\":{"
-                  "\"prompt\":\"Dreamlike forest night scene\","
+                  "\"prompt\":\"A dreamy forest night scene\","
                   "\"aspect_ratio\":\"16:9\","
                   "\"resolution\":\"high\""
               "}"
@@ -445,7 +445,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           NSDictionary *payload = @{
               @"model": @"seedream_v4_5",
               @"params": @{
-                  @"prompt": @"Dreamlike forest night scene",
+                  @"prompt": @"A dreamy forest night scene",
                   @"aspect_ratio": @"16:9",
                   @"resolution": @"high"
               }
@@ -492,7 +492,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload = {|{
     "model": "seedream_v4_5",
     "params": {
-      "prompt": "Dreamlike forest night scene",
+      "prompt": "A dreamy forest night scene",
       "aspect_ratio": "16:9",
       "resolution": "high"
 
@@ -524,7 +524,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     final payload = {
       'model': 'seedream_v4_5',
       'params': {
-        'prompt': 'Dreamlike forest night scene',
+        'prompt': 'A dreamy forest night scene',
         'aspect_ratio': '16:9',
         'resolution': 'high'
       }
@@ -552,7 +552,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload <- list(
     model = "seedream_v4_5",
     params = list(
-      prompt = "Dreamlike forest night scene",
+      prompt = "A dreamy forest night scene",
       aspect_ratio = "16:9",
       resolution = "high"
     )
