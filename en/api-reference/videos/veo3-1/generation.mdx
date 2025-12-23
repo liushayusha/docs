@@ -2,8 +2,8 @@
 title: 'VEO3.1 Video Generation'
 description: |
     - Asynchronous processing mode, returns task ID for subsequent queries
-    - Supports text-to-video, image-to-video generation modes
-    - Supports first frame and last frame reference images
+    - Supports generation modes such as text-to-video and image-to-video
+    - Supports reference images for the first and last frames
 api: 'POST https://test.aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -15,9 +15,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   Get the API Key:
 
-  Visit the <a href={apiKeyUrl} target="_blank">API Key Management page</a> to obtain your API Key.
+  Visit the <a href={apiKeyUrl} target="_blank">API Key management page</a> to get your API Key.
 
-  Include the following in the request headers:
+  Add the following to the request header when using:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -27,39 +27,39 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  Model Name
+  Model name
 
   Fixed value: `"veo3_1"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  Model Parameters Object
+  Model parameters object
 
-  <Expandable title="params Object Properties">
+  <Expandable title="params object properties">
     <ParamField body="prompt" type="string" required>
       Text description for video generation
 
-      No limitations
+      No limit
     </ParamField>
 
     <ParamField body="image_url" type="string">
       Reference image URL for image-to-video (first frame)
 
-      * Only single images supported
+      * Only single image supported
       * Supports publicly accessible URLs
     </ParamField>
 
     <ParamField body="end_image_url" type="string">
-      Reference image URL for the last frame
+      Reference image URL for the end frame
 
-      * Only single images supported
+      * Only single image supported
       * Supports publicly accessible URLs
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="16:9">
       Video aspect ratio
 
-      Supported ratios:
+      Supported aspect ratios:
 
       * `16:9` - Landscape (default)
       * `9:16` - Portrait
@@ -68,14 +68,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  Client Task ID
+  Client task ID
 
   User-defined task identifier, required
 </ParamField>
 <ParamField body="callback_url" type="string">
-  Callback URL after task completion
+  Callback notification URL after task completion
 
-  After the task is completed, the system will send a POST request to this URL to notify the result
+  After the task is finished, the system will send a POST request to this URL to notify the result
 </ParamField>
 
 <ParamField body="metadata" type="object">
@@ -98,11 +98,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   Initiator's task ID, can be used to query the result
 </ResponseField>
 <ResponseField name="status" type="string">
-  Initial status, fixed as `"pending"`
+  Initial status, fixed to `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  Estimated credit consumption
+  Estimated credits consumed
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
@@ -118,7 +118,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     --data '{
       "model": "veo3_1",
       "params": {
-        "prompt": "Animate this image",
+        "prompt": "Make this image move",
         "image_url": "https://example.com/reference.jpg",
         "aspect_ratio": "16:9"
       },
@@ -134,7 +134,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
       "model": "veo3_1",
       "params": {
-          "prompt": "Animate this image",
+          "prompt": "Make this image move",
           "image_url": "https://example.com/reference.jpg",
           "aspect_ratio": "16:9"
       },
@@ -157,7 +157,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   const payload = {
     model: "veo3_1",
     params: {
-      prompt: "Animate this image",
+      prompt: "Make this image move",
       image_url: "https://example.com/reference.jpg",
       aspect_ratio: "16:9"
     },
@@ -196,7 +196,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       payload := map[string]interface{}{
           "model": "veo3_1",
           "params": map[string]interface{}{
-              "prompt":       "Animate this image",
+              "prompt":       "Make this image move",
               "image_url":    "https://example.com/reference.jpg",
               "aspect_ratio": "16:9",
           },
@@ -238,7 +238,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
               conn.setRequestProperty("Content-Type", "application/json");
               conn.setDoOutput(true);
 
-              String jsonPayload = "{\"model\":\"veo3_1\",\"params\":{\"prompt\":\"Animate this image\",\"image_url\":\"https://example.com/reference.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
+              String jsonPayload = "{\"model\":\"veo3_1\",\"params\":{\"prompt\":\"Make this image move\",\"image_url\":\"https://example.com/reference.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
 
               OutputStream os = conn.getOutputStream();
               os.write(jsonPayload.getBytes());
@@ -268,7 +268,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   $payload = array(
       "model" => "veo3_1",
       "params" => array(
-          "prompt" => "Animate this image",
+          "prompt" => "Make this image move",
           "image_url" => "https://example.com/reference.jpg",
           "aspect_ratio" => "16:9"
       ),
@@ -301,7 +301,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
     model: "veo3_1",
     params: {
-      prompt: "Animate this image",
+      prompt: "Make this image move",
       image_url: "https://example.com/reference.jpg",
       aspect_ratio: "16:9"
     },
@@ -330,7 +330,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload: [String: Any] = [
       "model": "veo3_1",
       "params": [
-          "prompt": "Animate this image",
+          "prompt": "Make this image move",
           "image_url": "https://example.com/reference.jpg",
           "aspect_ratio": "16:9"
       ],
@@ -358,7 +358,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       static async Task Main(string[] args)
       {
           var url = "https://test.aireiter.com/api/openapi/submit";
-          var payload = "{\"model\":\"veo3_1\",\"params\":{\"prompt\":\"Animate this image\",\"image_url\":\"https://example.com/reference.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
+          var payload = "{\"model\":\"veo3_1\",\"params\":{\"prompt\":\"Make this image move\",\"image_url\":\"https://example.com/reference.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
 
           using (var client = new HttpClient())
           {
@@ -390,7 +390,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           headers = curl_slist_append(headers, "Content-Type: application/json");
           curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-          const char *data = "{\"model\":\"veo3_1\",\"params\":{\"prompt\":\"Animate this image\",\"image_url\":\"https://example.com/reference.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
+          const char *data = "{\"model\":\"veo3_1\",\"params\":{\"prompt\":\"Make this image move\",\"image_url\":\"https://example.com/reference.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
           curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
 
           res = curl_easy_perform(curl);
@@ -416,7 +416,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           NSDictionary *payload = @{
               @"model": @"veo3_1",
               @"params": @{
-                  @"prompt": @"Animate this image",
+                  @"prompt": @"Make this image move",
                   @"image_url": @"https://example.com/reference.jpg",
                   @"aspect_ratio": @"16:9"
               },
@@ -447,7 +447,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   let url = "https://test.aireiter.com/api/openapi/submit"
 
-  let payload = {|{"model":"veo3_1","params":{"prompt":"Animate this image","image_url":"https://example.com/reference.jpg","aspect_ratio":"16:9"},"out_task_id":"my_task_123456"}|}
+  let payload = {|{"model":"veo3_1","params":{"prompt":"Make this image move","image_url":"https://example.com/reference.jpg","aspect_ratio":"16:9"},"out_task_id":"my_task_123456"}|}
 
   let () =
     let headers = Header.init ()
@@ -472,7 +472,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     var payload = {
       'model': 'veo3_1',
       'params': {
-        'prompt': 'Animate this image',
+        'prompt': 'Make this image move',
         'image_url': 'https://example.com/reference.jpg',
         'aspect_ratio': '16:9'
       },
@@ -501,7 +501,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload <- list(
     model = "veo3_1",
     params = list(
-      prompt = "Animate this image",
+      prompt = "Make this image move",
       image_url = "https://example.com/reference.jpg",
       aspect_ratio = "16:9"
     ),
