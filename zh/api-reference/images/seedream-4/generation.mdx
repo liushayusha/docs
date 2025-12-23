@@ -3,7 +3,7 @@ title: 'Seedream V4 图片生成'
 description: |
     - 异步处理模式，返回任务ID用于后续查询
     - 支持文本转图片、图生图等多种生成模式
-api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
+api: 'POST https://test.aireiter.com/api/openapi/submit'
 ---
 
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -124,7 +124,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <RequestExample>
   ```bash cURL
   curl --request POST \
-    --url https://pxz-api.xinsulv.com/api/openapi/submit \
+    --url https://test.aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
@@ -141,7 +141,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```python Python
   import requests
 
-  url = "https://pxz-api.xinsulv.com/api/openapi/submit"
+  url = "https://test.aireiter.com/api/openapi/submit"
 
   payload = {
       "model": "seedream_v4",
@@ -164,7 +164,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```
 
   ```javascript JavaScript
-  const url = "https://pxz-api.xinsulv.com/api/openapi/submit";
+  const url = "https://test.aireiter.com/api/openapi/submit";
 
   const payload = {
     model: "seedream_v4",
@@ -203,7 +203,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   )
 
   func main() {
-      url := "https://pxz-api.xinsulv.com/api/openapi/submit"
+      url := "https://test.aireiter.com/api/openapi/submit"
 
       payload := map[string]interface{}{
           "model": "seedream_v4",
@@ -241,7 +241,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   public class Main {
       public static void main(String[] args) throws Exception {
-          String url = "https://pxz-api.xinsulv.com/api/openapi/submit";
+          String url = "https://test.aireiter.com/api/openapi/submit";
 
           String payload = """
           {
@@ -274,7 +274,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```php PHP
   <?php
 
-  $url = "https://pxz-api.xinsulv.com/api/openapi/submit";
+  $url = "https://test.aireiter.com/api/openapi/submit";
 
   $payload = [
       "model" => "seedream_v4",
@@ -307,7 +307,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   require 'json'
   require 'uri'
 
-  url = URI("https://pxz-api.xinsulv.com/api/openapi/submit")
+  url = URI("https://test.aireiter.com/api/openapi/submit")
 
   payload = {
     model: "seedream_v4",
@@ -333,7 +333,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "https://pxz-api.xinsulv.com/api/openapi/submit")!
+  let url = URL(string: "https://test.aireiter.com/api/openapi/submit")!
 
   let payload: [String: Any] = [
       "model": "seedream_v4",
@@ -375,7 +375,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
       static async Task Main(string[] args)
       {
-          var url = "https://pxz-api.xinsulv.com/api/openapi/submit";
+          var url = "https://test.aireiter.com/api/openapi/submit";
 
           var payload = @"{
               ""model"": ""seedream_v4"",
@@ -411,7 +411,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       curl = curl_easy_init();
 
       if(curl) {
-          const char *url = "https://pxz-api.xinsulv.com/api/openapi/submit";
+          const char *url = "https://test.aireiter.com/api/openapi/submit";
           const char *payload = "{"
               "\"model\":\"seedream_v4\","
               "\"params\":{"
@@ -451,7 +451,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
-          NSURL *url = [NSURL URLWithString:@"https://pxz-api.xinsulv.com/api/openapi/submit"];
+          NSURL *url = [NSURL URLWithString:@"https://test.aireiter.com/api/openapi/submit"];
 
           NSDictionary *payload = @{
               @"model": @"seedream_v4",
@@ -499,7 +499,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   open Cohttp
   open Cohttp_lwt_unix
 
-  let url = "https://pxz-api.xinsulv.com/api/openapi/submit"
+  let url = "https://test.aireiter.com/api/openapi/submit"
 
   let payload = {|{
     "model": "seedream_v4",
@@ -530,7 +530,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   import 'package:http/http.dart' as http;
 
   void main() async {
-    final url = Uri.parse('https://pxz-api.xinsulv.com/api/openapi/submit');
+    final url = Uri.parse('https://test.aireiter.com/api/openapi/submit');
 
     final payload = {
       'model': 'seedream_v4',
@@ -559,7 +559,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   library(httr)
   library(jsonlite)
 
-  url <- "https://pxz-api.xinsulv.com/api/openapi/submit"
+  url <- "https://test.aireiter.com/api/openapi/submit"
 
   payload <- list(
     model = "seedream_v4",

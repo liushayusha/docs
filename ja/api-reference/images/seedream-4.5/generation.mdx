@@ -1,9 +1,9 @@
 ---
 title: 'Seedream V4.5 画像生成'
 description: |
-    - 非同期処理モード、後続のクエリ用にタスクIDを返す
+    - 非同期処理モードで、後続のクエリ用にタスクIDを返します
     - より高品質な画像生成
-api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
+api: 'POST https://test.aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
@@ -12,11 +12,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField header="Authorization" type="string" required>
   すべてのエンドポイントはBearer Tokenによる認証が必要です
 
-  APIキーの取得：
+  API Keyの取得方法：
 
-  <a href={apiKeyUrl} target="_blank">API Key管理ページ</a>にアクセスしてAPIキーを取得してください
+  <a href={apiKeyUrl} target="_blank">API Key管理ページ</a>にアクセスしてAPI Keyを取得してください
 
-  リクエストヘッダーに以下を追加して使用します：
+  使用時にはリクエストヘッダーに以下を追加してください：
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -32,7 +32,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  モデルパラメータオブジェクト
+  モデルパラメーターオブジェクト
 
   <Expandable title="params オブジェクトのプロパティ">
     <ParamField body="prompt" type="string" required>
@@ -42,7 +42,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="image_url" type="array">
-      参考画像のURLリスト、画像から画像への生成用
+      参考画像のURLリスト（画像から画像への変換用）
 
       * 最大9枚の画像
       * 公開アクセス可能なURLをサポート
@@ -54,14 +54,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       サポートされているアスペクト比：
 
       * `1:1` - 正方形（デフォルト）
-      * `3:2` - 横長3:2
-      * `2:3` - 縦長2:3
-      * `4:3` - 横長4:3
-      * `3:4` - 縦長3:4
-      * `5:4` - 横長5:4
-      * `4:5` - 縦長4:5
+      * `3:2` - 横向き3:2
+      * `2:3` - 縦向き2:3
+      * `4:3` - 横向き4:3
+      * `3:4` - 縦向き3:4
+      * `5:4` - 横向き5:4
+      * `4:5` - 縦向き4:5
       * `16:9` - 横長ワイドスクリーン
-      * `9:16` - 縦長ポートレート
+      * `9:16` - 縦長スクリーン
       * `21:9` - 超ワイドスクリーン
     </ParamField>
 
@@ -77,47 +77,47 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発信元タスクID
+  発注側タスクID
 
-  ユーザー定義のタスク識別子で必須
+  ユーザー定義のタスク識別子、必須
 </ParamField>
 <ParamField body="callback_url" type="string">
   タスク完了後のコールバック通知URL
 
-  タスク完了時にシステムがこのURLにPOSTリクエストで結果を通知します
+  タスク完了後にシステムがこのURLにPOSTリクエストで結果を通知します
 </ParamField>
 
 <ParamField body="metadata" type="object">
   カスタムメタデータ
 
-  クエリ結果時にそのまま返され、ビジネス識別に使用可能
+  クエリ結果時にそのまま返却、業務識別に利用可能
 </ParamField>
 
 ## Response
 
 <ResponseField name="task_id" type="string">
-  タスクID、結果の照会に使用
+  タスクID。結果の照会に使用
 </ResponseField>
 
 <ResponseField name="out_task_id" type="string">
-  発行元タスクID、結果の照会に使用可能
+  発注元のタスクID。結果の照会に使用可能
 </ResponseField>
 <ResponseField name="status" type="string">
-  初期状態、固定で `"pending"`
+  初期状態。固定で`"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  推定消費クレジット
+  予測消費ポイント
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  作成日時（ISOフォーマット）
+  作成日時（ISO形式）
 </ResponseField>
 
 <RequestExample>
   ```bash cURL
   curl --request POST \
-    --url https://pxz-api.xinsulv.com/api/openapi/submit \
+    --url https://test.aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
@@ -134,7 +134,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```python Python
   import requests
 
-  url = "https://pxz-api.xinsulv.com/api/openapi/submit"
+  url = "https://test.aireiter.com/api/openapi/submit"
 
   payload = {
       "model": "seedream_v4_5",
@@ -157,7 +157,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```
 
   ```javascript JavaScript
-  const url = "https://pxz-api.xinsulv.com/api/openapi/submit";
+  const url = "https://test.aireiter.com/api/openapi/submit";
 
   const payload = {
     model: "seedream_v4_5",
@@ -195,7 +195,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   )
 
   func main() {
-      url := "https://pxz-api.xinsulv.com/api/openapi/submit"
+      url := "https://test.aireiter.com/api/openapi/submit"
 
       payload := map[string]interface{}{
           "model": "seedream_v4_5",
@@ -203,8 +203,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
               "prompt":       "幻想的な森の夜景",
               "aspect_ratio": "16:9",
               "resolution":   "high",
-          },
-          "out_task_id": "my_task_123456",
+    
       }
 
       jsonData, _ := json.Marshal(payload)
@@ -233,7 +232,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   public class Main {
       public static void main(String[] args) throws Exception {
-          String url = "https://pxz-api.xinsulv.com/api/openapi/submit";
+          String url = "https://test.aireiter.com/api/openapi/submit";
 
           String payload = """
           {
@@ -242,8 +241,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
               "prompt": "幻想的な森の夜景",
               "aspect_ratio": "16:9",
               "resolution": "high"
-            },
-            "out_task_id": "my_task_123456"
+
+      "out_task_id": "my_task_123456"
+            }
           }
           """;
 
@@ -266,7 +266,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```php PHP
   <?php
 
-  $url = "https://pxz-api.xinsulv.com/api/openapi/submit";
+  $url = "https://test.aireiter.com/api/openapi/submit";
 
   $payload = [
       "model" => "seedream_v4_5",
@@ -274,8 +274,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           "prompt" => "幻想的な森の夜景",
           "aspect_ratio" => "16:9",
           "resolution" => "high"
-      ],
-      "out_task_id" => "my_task_123456"
+      ]
   ];
 
   $ch = curl_init($url);
@@ -299,7 +298,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   require 'json'
   require 'uri'
 
-  url = URI("https://pxz-api.xinsulv.com/api/openapi/submit")
+  url = URI("https://test.aireiter.com/api/openapi/submit")
 
   payload = {
     model: "seedream_v4_5",
@@ -307,8 +306,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       prompt: "幻想的な森の夜景",
       aspect_ratio: "16:9",
       resolution: "high"
-    },
-    out_task_id: "my_task_123456"
+    }
   }
 
   http = Net::HTTP.new(url.host, url.port)
@@ -325,7 +323,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "https://pxz-api.xinsulv.com/api/openapi/submit")!
+  let url = URL(string: "https://test.aireiter.com/api/openapi/submit")!
 
   let payload: [String: Any] = [
       "model": "seedream_v4_5",
@@ -333,8 +331,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           "prompt": "幻想的な森の夜景",
           "aspect_ratio": "16:9",
           "resolution": "high"
-      ],
+
       "out_task_id": "my_task_123456"
+      ]
   ]
 
   var request = URLRequest(url: url)
@@ -367,16 +366,15 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
       static async Task Main(string[] args)
       {
-          var url = "https://pxz-api.xinsulv.com/api/openapi/submit";
+          var url = "https://test.aireiter.com/api/openapi/submit";
 
           var payload = @"{
-              \"model\": \"seedream_v4_5\",
-              \"params\": {
-                  \"prompt\": \"幻想的な森の夜景\",
-                  \"aspect_ratio\": \"16:9\",
-                  \"resolution\": \"high\"
-              },
-              \"out_task_id\": \"my_task_123456\"
+              ""model"": ""seedream_v4_5"",
+              ""params"": {
+                  ""prompt"": ""幻想的な森の夜景"",
+                  ""aspect_ratio"": ""16:9"",
+                  ""resolution"": ""high""
+              }
           }";
 
           using var client = new HttpClient();
@@ -403,15 +401,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       curl = curl_easy_init();
 
       if(curl) {
-          const char *url = "https://pxz-api.xinsulv.com/api/openapi/submit";
+          const char *url = "https://test.aireiter.com/api/openapi/submit";
           const char *payload = "{"
               "\"model\":\"seedream_v4_5\","
               "\"params\":{"
                   "\"prompt\":\"幻想的な森の夜景\","
                   "\"aspect_ratio\":\"16:9\","
                   "\"resolution\":\"high\""
-              "},"
-              "\"out_task_id\":\"my_task_123456\""
+              "}"
           "}";
 
           struct curl_slist *headers = NULL;
@@ -443,7 +440,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
-          NSURL *url = [NSURL URLWithString:@"https://pxz-api.xinsulv.com/api/openapi/submit"];
+          NSURL *url = [NSURL URLWithString:@"https://test.aireiter.com/api/openapi/submit"];
 
           NSDictionary *payload = @{
               @"model": @"seedream_v4_5",
@@ -451,8 +448,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
                   @"prompt": @"幻想的な森の夜景",
                   @"aspect_ratio": @"16:9",
                   @"resolution": @"high"
-              },
-              @"out_task_id": @"my_task_123456"
+              }
           };
 
           NSError *error;
@@ -491,14 +487,15 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   open Cohttp
   open Cohttp_lwt_unix
 
-  let url = "https://pxz-api.xinsulv.com/api/openapi/submit"
+  let url = "https://test.aireiter.com/api/openapi/submit"
 
   let payload = {|{
     "model": "seedream_v4_5",
     "params": {
       "prompt": "幻想的な森の夜景",
       "aspect_ratio": "16:9",
-      "resolution": "high",
+      "resolution": "high"
+
       "out_task_id": "my_task_123456"
     }
   }|}
@@ -522,7 +519,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   import 'package:http/http.dart' as http;
 
   void main() async {
-    final url = Uri.parse('https://pxz-api.xinsulv.com/api/openapi/submit');
+    final url = Uri.parse('https://test.aireiter.com/api/openapi/submit');
 
     final payload = {
       'model': 'seedream_v4_5',
@@ -530,8 +527,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
         'prompt': '幻想的な森の夜景',
         'aspect_ratio': '16:9',
         'resolution': 'high'
-      },
-      'out_task_id': 'my_task_123456'
+      }
     };
 
     final response = await http.post(
@@ -539,7 +535,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       headers: {
         'Authorization': 'Bearer <token>',
         'Content-Type': 'application/json'
-      },
+
       body: jsonEncode(payload),
     );
 
@@ -551,7 +547,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   library(httr)
   library(jsonlite)
 
-  url <- "https://pxz-api.xinsulv.com/api/openapi/submit"
+  url <- "https://test.aireiter.com/api/openapi/submit"
 
   payload <- list(
     model = "seedream_v4_5",
@@ -559,8 +555,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       prompt = "幻想的な森の夜景",
       aspect_ratio = "16:9",
       resolution = "high"
-    ),
-    out_task_id = "my_task_123456"
+    )
   )
 
   response <- POST(
@@ -595,7 +590,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```json 400
     {
         "statusCode": 400,
-        "message": "リクエストパラメータが無効です",
+        "message": "リクエストパラメーターが無効です",
         "ok": false
     }
   ```
@@ -611,7 +606,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 433,
-      "message": "アカウント残高が不足しています。チャージしてから再試行してください"
+      "message": "アカウント残高不足です。チャージしてから再試行してください"
     }
   }
   ```
@@ -620,7 +615,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 500,
-      "message": "サーバー内部エラーです。しばらくしてから再試行してください"
+      "message": "サーバー内部エラーです。後ほど再試行してください"
     }
   }
   ```

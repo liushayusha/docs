@@ -1,20 +1,20 @@
 ---
 title: 'Seedream V4 画像生成'
 description: |
-    - 非同期処理モードで、後続のクエリに使用するタスクIDを返します
-    - テキストから画像、画像から画像への多様な生成モードをサポート
-api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
+    - 非同期処理モード、後続クエリのためのタスクIDを返す
+    - テキストから画像、画像から画像への変換など多様な生成モードをサポート
+api: 'POST /api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  すべてのエンドポイントはBearer Tokenによる認証が必要です。
+  すべてのエンドポイントはBearer Tokenを使った認証が必要です
 
-  API Keyの取得：
+  APIキーの取得：
 
-  <a href={apiKeyUrl} target="_blank">API Key管理ページ</a>にアクセスしてAPI Keyを取得してください。
+  <a href={apiKeyUrl} target="_blank">APIキー管理ページ</a>にアクセスしてAPIキーを取得してください
 
   使用時はリクエストヘッダーに以下を追加します：
 
@@ -32,9 +32,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  モデルパラメーターオブジェクト
+  モデルパラメータオブジェクト
 
-  <Expandable title="params オブジェクトのプロパティ">
+  <Expandable title="params オブジェクトの属性">
     <ParamField body="prompt" type="string" required>
       画像生成のテキスト説明
 
@@ -42,16 +42,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="image_url" type="array">
-      画像生成の参考用画像のURLリスト
+      画像生成の参考画像のURLリスト
 
       * 最大9枚の画像
-      * 公開アクセス可能なURLをサポート
+      * 公開されてアクセス可能なURLをサポート
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="1:1">
       画像生成のアスペクト比
 
-      サポートされるアスペクト比：
+      対応アスペクト比：
 
       * `1:1` - 正方形（デフォルト）
       * `16:9` - 横長ワイドスクリーン
@@ -63,9 +63,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     <ParamField body="resolution" type="string" default="1K">
       画像解像度
 
-      サポートされる解像度：
+      対応解像度：
 
-      * `1K` - ベース解像度（デフォルト）
+      * `1K` - 基本解像度（デフォルト）
       * `2K` - 標準解像度
       * `4K` - 高解像度
     </ParamField>
@@ -73,7 +73,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     <ParamField body="output_n" type="string" default="1">
       生成する画像の枚数
 
-      サポートされる値：
+      対応値：
 
       * `1` - 1枚生成（デフォルト）
       * `2` - 2枚生成
@@ -83,33 +83,33 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発起者タスクID
+  発注者タスクID
 
   ユーザーが定義するタスク識別子、必須
 </ParamField>
 <ParamField body="callback_url" type="string">
-  タスク完了後のコールバック通知先URL
+  タスク完了後のコールバック通知URL
 
-  タスク完了後、システムはこのURLにPOSTリクエストで結果を通知します
+  タスク完了後、システムがこのURLにPOSTリクエストを送信して結果を通知
 </ParamField>
 
 <ParamField body="metadata" type="object">
   カスタムメタデータ
 
-  クエリ結果時にそのまま返され、ビジネス識別に利用可能
+  クエリ結果時にそのまま返され、業務識別に利用可能
 </ParamField>
 
 ## Response
 
 <ResponseField name="task_id" type="string">
-  タスクID、結果の照会に使用します
+  タスクID、結果のクエリに使用
 </ResponseField>
 
 <ResponseField name="out_task_id" type="string">
-  発信者側のタスクID、結果の照会に使用できます
+  発注者側のタスクID、結果のクエリに使用可能
 </ResponseField>
 <ResponseField name="status" type="string">
-  初期状態、固定で `"pending"`
+  初期状態、固定で`"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
@@ -123,7 +123,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <RequestExample>
   ```bash cURL
   curl --request POST \
-    --url https://pxz-api.xinsulv.com/api/openapi/submit \
+    --url https://test.aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
@@ -140,7 +140,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```python Python
   import requests
 
-  url = "https://pxz-api.xinsulv.com/api/openapi/submit"
+  url = "https://test.aireiter.com/api/openapi/submit"
 
   payload = {
       "model": "seedream_v4",
@@ -163,7 +163,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```
 
   ```javascript JavaScript
-  const url = "https://pxz-api.xinsulv.com/api/openapi/submit";
+  const url = "https://test.aireiter.com/api/openapi/submit";
 
   const payload = {
     model: "seedream_v4",
@@ -202,7 +202,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   )
 
   func main() {
-      url := "https://pxz-api.xinsulv.com/api/openapi/submit"
+      url := "https://test.aireiter.com/api/openapi/submit"
 
       payload := map[string]interface{}{
           "model": "seedream_v4",
@@ -240,7 +240,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   public class Main {
       public static void main(String[] args) throws Exception {
-          String url = "https://pxz-api.xinsulv.com/api/openapi/submit";
+          String url = "https://test.aireiter.com/api/openapi/submit";
 
           String payload = """
           {
@@ -273,7 +273,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```php PHP
   <?php
 
-  $url = "https://pxz-api.xinsulv.com/api/openapi/submit";
+  $url = "https://test.aireiter.com/api/openapi/submit";
 
   $payload = [
       "model" => "seedream_v4",
@@ -306,7 +306,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   require 'json'
   require 'uri'
 
-  url = URI("https://pxz-api.xinsulv.com/api/openapi/submit")
+  url = URI("https://test.aireiter.com/api/openapi/submit")
 
   payload = {
     model: "seedream_v4",
@@ -332,7 +332,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "https://pxz-api.xinsulv.com/api/openapi/submit")!
+  let url = URL(string: "https://test.aireiter.com/api/openapi/submit")!
 
   let payload: [String: Any] = [
       "model": "seedream_v4",
@@ -374,7 +374,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
       static async Task Main(string[] args)
       {
-          var url = "https://pxz-api.xinsulv.com/api/openapi/submit";
+          var url = "https://test.aireiter.com/api/openapi/submit";
 
           var payload = @"{
               ""model"": ""seedream_v4"",
@@ -410,7 +410,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       curl = curl_easy_init();
 
       if(curl) {
-          const char *url = "https://pxz-api.xinsulv.com/api/openapi/submit";
+          const char *url = "https://test.aireiter.com/api/openapi/submit";
           const char *payload = "{"
               "\"model\":\"seedream_v4\","
               "\"params\":{"
@@ -450,7 +450,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
-          NSURL *url = [NSURL URLWithString:@"https://pxz-api.xinsulv.com/api/openapi/submit"];
+          NSURL *url = [NSURL URLWithString:@"https://test.aireiter.com/api/openapi/submit"];
 
           NSDictionary *payload = @{
               @"model": @"seedream_v4",
@@ -498,7 +498,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   open Cohttp
   open Cohttp_lwt_unix
 
-  let url = "https://pxz-api.xinsulv.com/api/openapi/submit"
+  let url = "https://test.aireiter.com/api/openapi/submit"
 
   let payload = {|{
     "model": "seedream_v4",
@@ -529,7 +529,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   import 'package:http/http.dart' as http;
 
   void main() async {
-    final url = Uri.parse('https://pxz-api.xinsulv.com/api/openapi/submit');
+    final url = Uri.parse('https://test.aireiter.com/api/openapi/submit');
 
     final payload = {
       'model': 'seedream_v4',
@@ -558,7 +558,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   library(httr)
   library(jsonlite)
 
-  url <- "https://pxz-api.xinsulv.com/api/openapi/submit"
+  url <- "https://test.aireiter.com/api/openapi/submit"
 
   payload <- list(
     model = "seedream_v4",
@@ -618,7 +618,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 433,
-      "message": "アカウント残高が不足しています。チャージ後に再試行してください"
+      "message": "アカウント残高不足です。チャージ後に再試行してください"
     }
   }
   ```
@@ -627,7 +627,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 500,
-      "message": "サーバー内部エラーです。後で再試行してください"
+      "message": "サーバー内部エラーです。後でもう一度お試しください"
     }
   }
   ```

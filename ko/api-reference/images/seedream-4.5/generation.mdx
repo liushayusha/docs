@@ -1,22 +1,22 @@
 ---
 title: 'Seedream V4.5 이미지 생성'
 description: |
-    - 비동기 처리 모드, 작업 ID를 반환하여 후속 조회에 사용
+    - 비동기 처리 방식, 후속 쿼리를 위한 작업 ID 반환
     - 더 높은 품질의 이미지 생성
-api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
+api: 'POST https://test.aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  모든 API는 Bearer Token 인증이 필요합니다.
+  모든 엔드포인트는 Bearer Token 인증이 필요합니다.
 
-  API Key 받기:
+  API Key 얻기:
 
-  <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a>에 접속하여 API Key를 받으세요.
+  <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a>에서 API Key를 받으세요.
 
-  사용할 때는 요청 헤더에 다음을 추가하세요:
+  사용할 때 요청 헤더에 다음을 추가하세요:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -32,7 +32,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  모델 파라미터 객체
+  모델 매개변수 객체
 
   <Expandable title="params 객체 속성">
     <ParamField body="prompt" type="string" required>
@@ -42,16 +42,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="image_url" type="array">
-      참조 이미지의 URL 목록, 이미지 생성에 사용
+      참조 이미지 URL 목록, 이미지 생성에 사용
 
       * 최대 9장 이미지
       * 공개적으로 접근 가능한 URL 지원
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="1:1">
-      이미지 생성의 가로 세로 비율
+      이미지 생성 시 가로 세로 비율
 
-      지원 가로 세로 비율:
+      지원하는 가로 세로 비율:
 
       * `1:1` - 정사각형 (기본값)
       * `3:2` - 가로 3:2
@@ -60,9 +60,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       * `3:4` - 세로 3:4
       * `5:4` - 가로 5:4
       * `4:5` - 세로 4:5
-      * `16:9` - 와이드스크린 가로
-      * `9:16` - 와이드스크린 세로
-      * `21:9` - 초와이드스크린
+      * `16:9` - 와이드 가로
+      * `9:16` - 와이드 세로
+      * `21:9` - 초광폭
     </ParamField>
 
     <ParamField body="resolution" type="string" default="basic">
@@ -79,31 +79,31 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="out_task_id" type="string" required>
   요청자 작업 ID
 
-  사용자 지정 작업 식별자, 필수
+  사용자 정의 작업 식별자, 필수
 </ParamField>
 <ParamField body="callback_url" type="string">
-  작업 완료 후 콜백 통지 주소
+  작업 완료 후 콜백 알림 주소
 
-  작업 완료 시 시스템이 이 주소로 POST 요청을 보내 결과를 통지함
+  작업 완료 시 시스템이 해당 주소로 POST 요청을 보내 결과를 알림
 </ParamField>
 
 <ParamField body="metadata" type="object">
   사용자 정의 메타데이터
 
-  쿼리 결과 시 그대로 반환되며, 비즈니스 식별에 사용 가능
+  조회 시 원본 그대로 반환, 비즈니스 식별에 사용 가능
 </ParamField>
 
 ## Response
 
 <ResponseField name="task_id" type="string">
-  작업 ID, 결과 조회에 사용
+  작업 ID, 결과 조회에 사용됩니다
 </ResponseField>
 
 <ResponseField name="out_task_id" type="string">
-  요청자 작업 ID, 결과 조회에 사용 가능
+  발신자 작업 ID, 결과 조회에 사용할 수 있습니다
 </ResponseField>
 <ResponseField name="status" type="string">
-  초기 상태, 고정값 `"pending"`
+  초기 상태로, 고정 값 `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
@@ -111,19 +111,19 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  생성 시간(ISO 형식)
+  생성 시간 (ISO 형식)
 </ResponseField>
 
 <RequestExample>
   ```bash cURL
   curl --request POST \
-    --url https://pxz-api.xinsulv.com/api/openapi/submit \
+    --url https://test.aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
       "model": "seedream_v4_5",
       "params": {
-        "prompt": "몽환적인 숲의 야경",
+        "prompt": "환상적인 숲의 야경",
         "aspect_ratio": "16:9",
         "resolution": "high"
       },
@@ -134,12 +134,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```python Python
   import requests
 
-  url = "https://pxz-api.xinsulv.com/api/openapi/submit"
+  url = "https://test.aireiter.com/api/openapi/submit"
 
   payload = {
       "model": "seedream_v4_5",
       "params": {
-          "prompt": "몽환적인 숲의 야경",
+          "prompt": "환상적인 숲의 야경",
           "aspect_ratio": "16:9",
           "resolution": "high"
       },
@@ -157,12 +157,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```
 
   ```javascript JavaScript
-  const url = "https://pxz-api.xinsulv.com/api/openapi/submit";
+  const url = "https://test.aireiter.com/api/openapi/submit";
 
   const payload = {
     model: "seedream_v4_5",
     params: {
-      prompt: "몽환적인 숲의 야경",
+      prompt: "환상적인 숲의 야경",
       aspect_ratio: "16:9",
       resolution: "high"
     }
@@ -195,12 +195,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   )
 
   func main() {
-      url := "https://pxz-api.xinsulv.com/api/openapi/submit"
+      url := "https://test.aireiter.com/api/openapi/submit"
 
       payload := map[string]interface{}{
           "model": "seedream_v4_5",
           "params": map[string]interface{}{
-              "prompt":       "몽환적인 숲의 야경",
+              "prompt":       "환상적인 숲의 야경",
               "aspect_ratio": "16:9",
               "resolution":   "high",
     
@@ -232,13 +232,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   public class Main {
       public static void main(String[] args) throws Exception {
-          String url = "https://pxz-api.xinsulv.com/api/openapi/submit";
+          String url = "https://test.aireiter.com/api/openapi/submit";
 
           String payload = """
           {
             "model": "seedream_v4_5",
             "params": {
-              "prompt": "몽환적인 숲의 야경",
+              "prompt": "환상적인 숲의 야경",
               "aspect_ratio": "16:9",
               "resolution": "high"
 
@@ -266,12 +266,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```php PHP
   <?php
 
-  $url = "https://pxz-api.xinsulv.com/api/openapi/submit";
+  $url = "https://test.aireiter.com/api/openapi/submit";
 
   $payload = [
       "model" => "seedream_v4_5",
       "params" => [
-          "prompt" => "몽환적인 숲의 야경",
+          "prompt" => "환상적인 숲의 야경",
           "aspect_ratio" => "16:9",
           "resolution" => "high"
       ]
@@ -298,12 +298,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   require 'json'
   require 'uri'
 
-  url = URI("https://pxz-api.xinsulv.com/api/openapi/submit")
+  url = URI("https://test.aireiter.com/api/openapi/submit")
 
   payload = {
     model: "seedream_v4_5",
     params: {
-      prompt: "몽환적인 숲의 야경",
+      prompt: "환상적인 숲의 야경",
       aspect_ratio: "16:9",
       resolution: "high"
     }
@@ -323,12 +323,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "https://pxz-api.xinsulv.com/api/openapi/submit")!
+  let url = URL(string: "https://test.aireiter.com/api/openapi/submit")!
 
   let payload: [String: Any] = [
       "model": "seedream_v4_5",
       "params": [
-          "prompt": "몽환적인 숲의 야경",
+          "prompt": "환상적인 숲의 야경",
           "aspect_ratio": "16:9",
           "resolution": "high"
 
@@ -366,12 +366,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
       static async Task Main(string[] args)
       {
-          var url = "https://pxz-api.xinsulv.com/api/openapi/submit";
+          var url = "https://test.aireiter.com/api/openapi/submit";
 
           var payload = @"{
               ""model"": ""seedream_v4_5"",
               ""params"": {
-                  ""prompt"": ""몽환적인 숲의 야경"",
+                  ""prompt"": ""환상적인 숲의 야경"",
                   ""aspect_ratio"": ""16:9"",
                   ""resolution"": ""high""
               }
@@ -401,11 +401,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       curl = curl_easy_init();
 
       if(curl) {
-          const char *url = "https://pxz-api.xinsulv.com/api/openapi/submit";
+          const char *url = "https://test.aireiter.com/api/openapi/submit";
           const char *payload = "{"
               "\"model\":\"seedream_v4_5\","
               "\"params\":{"
-                  "\"prompt\":\"몽환적인 숲의 야경\","
+                  "\"prompt\":\"환상적인 숲의 야경\","
                   "\"aspect_ratio\":\"16:9\","
                   "\"resolution\":\"high\""
               "}"
@@ -422,7 +422,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           res = curl_easy_perform(curl);
 
           if(res != CURLE_OK) {
-              fprintf(stderr, "curl_easy_perform() 실패: %s\n",
+              fprintf(stderr, "curl_easy_perform() failed: %s\n",
                       curl_easy_strerror(res));
           }
 
@@ -440,12 +440,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
-          NSURL *url = [NSURL URLWithString:@"https://pxz-api.xinsulv.com/api/openapi/submit"];
+          NSURL *url = [NSURL URLWithString:@"https://test.aireiter.com/api/openapi/submit"];
 
           NSDictionary *payload = @{
               @"model": @"seedream_v4_5",
               @"params": @{
-                  @"prompt": @"몽환적인 숲의 야경",
+                  @"prompt": @"환상적인 숲의 야경",
                   @"aspect_ratio": @"16:9",
                   @"resolution": @"high"
               }
@@ -487,12 +487,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   open Cohttp
   open Cohttp_lwt_unix
 
-  let url = "https://pxz-api.xinsulv.com/api/openapi/submit"
+  let url = "https://test.aireiter.com/api/openapi/submit"
 
   let payload = {|{
     "model": "seedream_v4_5",
     "params": {
-      "prompt": "몽환적인 숲의 야경",
+      "prompt": "환상적인 숲의 야경",
       "aspect_ratio": "16:9",
       "resolution": "high"
 
@@ -519,12 +519,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   import 'package:http/http.dart' as http;
 
   void main() async {
-    final url = Uri.parse('https://pxz-api.xinsulv.com/api/openapi/submit');
+    final url = Uri.parse('https://test.aireiter.com/api/openapi/submit');
 
     final payload = {
       'model': 'seedream_v4_5',
       'params': {
-        'prompt': '몽환적인 숲의 야경',
+        'prompt': '환상적인 숲의 야경',
         'aspect_ratio': '16:9',
         'resolution': 'high'
       }
@@ -547,12 +547,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   library(httr)
   library(jsonlite)
 
-  url <- "https://pxz-api.xinsulv.com/api/openapi/submit"
+  url <- "https://test.aireiter.com/api/openapi/submit"
 
   payload <- list(
     model = "seedream_v4_5",
     params = list(
-      prompt = "몽환적인 숲의 야경",
+      prompt = "환상적인 숲의 야경",
       aspect_ratio = "16:9",
       resolution = "high"
     )
@@ -590,7 +590,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```json 400
     {
         "statusCode": 400,
-        "message": "요청 파라미터가 유효하지 않습니다",
+        "message": "잘못된 요청 파라미터",
         "ok": false
     }
   ```
@@ -598,7 +598,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 401,
-      "message": "인증 실패, API 키를 확인하세요"
+      "message": "인증 실패, API 키를 확인해주세요"
     }
   }
   ```
@@ -606,7 +606,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 433,
-      "message": "계정 잔액 부족, 충전 후 다시 시도하세요"
+      "message": "계정 잔액 부족, 충전 후 다시 시도해주세요"
     }
   }
   ```
@@ -615,7 +615,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 500,
-      "message": "서버 내부 오류, 잠시 후 다시 시도하세요"
+      "message": "서버 내부 오류, 나중에 다시 시도해주세요"
     }
   }
   ```

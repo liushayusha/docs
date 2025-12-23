@@ -4,7 +4,7 @@ description: |
     - 查询异步任务的执行状态和结果
     - 实时状态更新和进度跟踪
     - 任务完成时获取生成结果
-api: 'POST https://pxz-api.xinsulv.com/api/openapi/query'
+api: 'POST https://test.aireiter.com/api/openapi/query'
 ---
 
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -95,7 +95,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <RequestExample>
   ```bash cURL (使用 task_id)
   curl --request POST \
-    --url 'https://pxz-api.xinsulv.com/api/openapi/query' \
+    --url 'https://test.aireiter.com/api/openapi/query' \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data-raw '{
@@ -105,7 +105,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   ```bash cURL (使用 out_task_id)
   curl --request POST \
-    --url 'https://pxz-api.xinsulv.com/api/openapi/query' \
+    --url 'https://test.aireiter.com/api/openapi/query' \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data-raw '{
@@ -116,7 +116,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```python Python (使用 task_id)
   import requests
 
-  url = "https://pxz-api.xinsulv.com/api/openapi/query"
+  url = "https://test.aireiter.com/api/openapi/query"
 
   headers = {
       "Authorization": "Bearer <token>",
@@ -135,7 +135,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```python Python (使用 out_task_id)
   import requests
 
-  url = "https://pxz-api.xinsulv.com/api/openapi/query"
+  url = "https://test.aireiter.com/api/openapi/query"
 
   headers = {
       "Authorization": "Bearer <token>",
@@ -152,7 +152,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```
 
   ```javascript JavaScript
-  const url = "https://pxz-api.xinsulv.com/api/openapi/query";
+  const url = "https://test.aireiter.com/api/openapi/query";
 
   const headers = {
     "Authorization": "Bearer <token>",
@@ -185,7 +185,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   )
 
   func main() {
-      url := "https://pxz-api.xinsulv.com/api/openapi/query"
+      url := "https://test.aireiter.com/api/openapi/query"
 
       payload := map[string]interface{}{
           "task_id": "order_lwU2d-VkUq9-tlCCmrdYu",
@@ -219,7 +219,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   public class Main {
       public static void main(String[] args) {
           try {
-              URL url = new URL("https://pxz-api.xinsulv.com/api/openapi/query");
+              URL url = new URL("https://test.aireiter.com/api/openapi/query");
               HttpURLConnection conn = (HttpURLConnection) url.openConnection();
               conn.setRequestMethod("POST");
               conn.setRequestProperty("Authorization", "Bearer <token>");
@@ -252,7 +252,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```php PHP
   <?php
 
-  $url = "https://pxz-api.xinsulv.com/api/openapi/query";
+  $url = "https://test.aireiter.com/api/openapi/query";
 
   $payload = array(
       "task_id" => "order_lwU2d-VkUq9-tlCCmrdYu"
@@ -279,7 +279,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   require 'json'
   require 'uri'
 
-  url = URI.parse("https://pxz-api.xinsulv.com/api/openapi/query")
+  url = URI.parse("https://test.aireiter.com/api/openapi/query")
 
   payload = {
     task_id: "order_lwU2d-VkUq9-tlCCmrdYu"
@@ -298,7 +298,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "https://pxz-api.xinsulv.com/api/openapi/query")!
+  let url = URL(string: "https://test.aireiter.com/api/openapi/query")!
   var request = URLRequest(url: url)
   request.httpMethod = "POST"
   request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
@@ -334,7 +334,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
       static async Task Main(string[] args)
       {
-          var url = "https://pxz-api.xinsulv.com/api/openapi/query";
+          var url = "https://test.aireiter.com/api/openapi/query";
           var payload = "{\"task_id\":\"order_lwU2d-VkUq9-tlCCmrdYu\"}";
 
           using var client = new HttpClient();
@@ -360,7 +360,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       curl = curl_easy_init();
 
       if(curl) {
-          const char *url = "https://pxz-api.xinsulv.com/api/openapi/query";
+          const char *url = "https://test.aireiter.com/api/openapi/query";
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
@@ -393,7 +393,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
-          NSURL *url = [NSURL URLWithString:@"https://pxz-api.xinsulv.com/api/openapi/query"];
+          NSURL *url = [NSURL URLWithString:@"https://test.aireiter.com/api/openapi/query"];
 
           NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
           [request setHTTPMethod:@"POST"];
@@ -432,7 +432,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   open Cohttp
   open Cohttp_lwt_unix
 
-  let url = "https://pxz-api.xinsulv.com/api/openapi/query"
+  let url = "https://test.aireiter.com/api/openapi/query"
 
   let payload = {|{"task_id":"order_lwU2d-VkUq9-tlCCmrdYu"}|}
 
@@ -455,7 +455,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   import 'package:http/http.dart' as http;
 
   void main() async {
-    final url = Uri.parse('https://pxz-api.xinsulv.com/api/openapi/query');
+    final url = Uri.parse('https://test.aireiter.com/api/openapi/query');
 
     final payload = {
       'task_id': 'order_lwU2d-VkUq9-tlCCmrdYu'
@@ -478,7 +478,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   library(httr)
   library(jsonlite)
 
-  url <- "https://pxz-api.xinsulv.com/api/openapi/query"
+  url <- "https://test.aireiter.com/api/openapi/query"
 
   payload <- list(
     task_id = "order_lwU2d-VkUq9-tlCCmrdYu"

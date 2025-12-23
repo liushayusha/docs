@@ -31,7 +31,7 @@ AIReiter는 통합 AI 콘텐츠 생성 API 플랫폼으로, 이미지와 비디�
 
 ```bash
 curl --request POST \
-  --url https://pxz-api.xinsulv.com/api/openapi/submit \
+  --url https://test.aireiter.com/api/openapi/submit \
   --header 'Authorization: Bearer YOUR_API_KEY' \
   --header 'Content-Type: application/json' \
   --data '{
@@ -51,7 +51,7 @@ curl --request POST \
 ```bash
 # task_id 사용 조회
 curl --request POST \
-  --url https://pxz-api.xinsulv.com/api/openapi/query \
+  --url https://test.aireiter.com/api/openapi/query \
   --header 'Authorization: Bearer YOUR_API_KEY' \
   --header 'Content-Type: application/json' \
   --data-raw '{
@@ -60,7 +60,7 @@ curl --request POST \
 
 # 또는 out_task_id 사용 조회
 curl --request POST \
-  --url https://pxz-api.xinsulv.com/api/openapi/query \
+  --url https://test.aireiter.com/api/openapi/query \
   --header 'Authorization: Bearer YOUR_API_KEY' \
   --header 'Content-Type: application/json' \
   --data-raw '{
@@ -198,7 +198,7 @@ Authorization: Bearer YOUR_API_KEY
     작업 상태 조회 API를 사용하여, 작업 제출 시 반환된 `task_id` 또는 직접 설정한 `out_task_id`(둘 중 하나)를 전달할 수 있습니다:
 
     ```bash
-    POST https://pxz-api.xinsulv.com/api/openapi/query
+    POST https://test.aireiter.com/api/openapi/query
     ```
 
     자세한 내용은 [작업 상태 조회 문서](/zh/api-reference/tasks/status)에서 확인하세요.

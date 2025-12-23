@@ -1,8 +1,8 @@
 ---
 title: 'Sora2 ビデオ生成'
 description: |
-    - 非同期処理モードで、後続のクエリに使用するタスクIDを返します
-    - テキストからビデオへの変換、画像からビデオ生成などのモードをサポート
+    - 非同期処理モード、タスクIDを返して後続の問い合わせに使用可能
+    - テキストからビデオ、画像からビデオへの生成モードをサポート
 api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -10,13 +10,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  すべてのエンドポイントはBearer Tokenによる認証が必要です
+  すべてのエンドポイントでBearer Tokenによる認証が必要です
 
-  APIキーの取得方法：
+  APIキーの取得:
 
-  <a href={apiKeyUrl} target="_blank">APIキー管理ページ</a>にアクセスして、APIキーを取得してください
+  <a href={apiKeyUrl} target="_blank">APIキー管理ページ</a>にアクセスしてAPIキーを取得してください
 
-  利用時はリクエストヘッダーに以下を追加します：
+  利用時はリクエストヘッダーに以下を追加します:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -34,7 +34,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="params" type="object" required>
   モデルパラメータオブジェクト
 
-  <Expandable title="params オブジェクトのプロパティ">
+  <Expandable title="params オブジェクトの属性">
     <ParamField body="prompt" type="string" required>
       動画生成のテキスト説明
 
@@ -42,16 +42,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      参考画像のURL（動画生成の最初のフレーム用）
+      参照画像のURL、動画生成時の参照（最初のフレーム）
 
       * 単一画像のみ対応
-      * 公開アクセス可能なURLのみ対応
+      * 公開かつアクセス可能なURLをサポート
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="16:9">
       動画のアスペクト比
 
-      対応アスペクト比：
+      対応しているアスペクト比：
 
       * `16:9` - 横向き（デフォルト）
       * `9:16` - 縦向き
@@ -60,7 +60,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     <ParamField body="video_length" type="string" default="10">
       動画の長さ（秒）
 
-      対応長さ：
+      対応している長さ：
 
       * `10` - 10秒（デフォルト）
       * `15` - 15秒
@@ -69,41 +69,41 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発注者のタスクID
+  発行者のタスクID
 
-  ユーザー定義のタスク識別子、必須
+  ユーザーが定義するタスク識別子で必須
 </ParamField>
 <ParamField body="callback_url" type="string">
-  タスク完了後のコールバック通知先URL
+  タスク完了後のコールバック通知URL
 
-  タスク完了後、システムはこのURLにPOSTリクエストで結果を通知します
+  タスク完了後、システムはこのURLにPOSTリクエストを送信して結果を通知します
 </ParamField>
 
 <ParamField body="metadata" type="object">
   カスタムメタデータ
 
-  クエリ結果時にそのまま返却され、業務識別に利用可能
+  検索結果時にそのまま返され、ビジネス識別に使用可能
 </ParamField>
 
 ## Response
 
 <ResponseField name="task_id" type="string">
-  タスクID、結果を問い合わせるために使用されます
+  タスクID、結果の照会に使用されます
 </ResponseField>
 
 <ResponseField name="out_task_id" type="string">
-  発起者側のタスクID、結果を問い合わせるために使用できます
+  発信側のタスクID、結果の照会に使用できます
 </ResponseField>
 <ResponseField name="status" type="string">
   初期状態、固定で`"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  予想消費クレジット
+  見積もり消費クレジット
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  作成日時（ISOフォーマット）
+  作成日時（ISO形式）
 </ResponseField>
 
 <RequestExample>
@@ -115,7 +115,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     --data '{
       "model": "sora2",
       "params": {
-        "prompt": "一只猫在花园里散步",
+        "prompt": "猫が庭を散歩している",
         "aspect_ratio": "16:9",
         "video_length": "10"
       },
@@ -131,7 +131,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
       "model": "sora2",
       "params": {
-          "prompt": "一只猫在花园里散步",
+          "prompt": "猫が庭を散歩している",
           "aspect_ratio": "16:9",
           "video_length": "10"
       },
@@ -154,7 +154,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   const payload = {
     model: "sora2",
     params: {
-      prompt: "一只猫在花园里散步",
+      prompt: "猫が庭を散歩している",
       aspect_ratio: "16:9",
       video_length: "10"
     },
@@ -193,7 +193,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       payload := map[string]interface{}{
           "model": "sora2",
           "params": map[string]interface{}{
-              "prompt":       "一只猫在花园里散步",
+              "prompt":       "猫が庭を散歩している",
               "aspect_ratio": "16:9",
               "video_length": "10",
           },
@@ -235,7 +235,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
               conn.setRequestProperty("Content-Type", "application/json");
               conn.setDoOutput(true);
 
-              String jsonPayload = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"一只猫在花园里散步\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"},\"out_task_id\":\"my_task_123456\"}";
+              String jsonPayload = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"猫が庭を散歩している\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"},\"out_task_id\":\"my_task_123456\"}";
 
               OutputStream os = conn.getOutputStream();
               os.write(jsonPayload.getBytes());
@@ -265,7 +265,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   $payload = array(
       "model" => "sora2",
       "params" => array(
-          "prompt" => "一只猫在花园里散歩",
+          "prompt" => "猫が庭を散歩している",
           "aspect_ratio" => "16:9",
           "video_length" => "10"
       ),
@@ -298,7 +298,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
     model: "sora2",
     params: {
-      prompt: "一只猫在花园里散歩",
+      prompt: "猫が庭を散歩している",
       aspect_ratio: "16:9",
       video_length: "10"
     },
@@ -327,7 +327,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload: [String: Any] = [
       "model": "sora2",
       "params": [
-          "prompt": "一只猫在花园里散歩",
+          "prompt": "猫が庭を散歩している",
           "aspect_ratio": "16:9",
           "video_length": "10"
       ],
@@ -355,7 +355,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       static async Task Main(string[] args)
       {
           var url = "https://pxz-api.xinsulv.com/api/openapi/submit";
-          var payload = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"一只猫在花园里散歩\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"},\"out_task_id\":\"my_task_123456\"}";
+          var payload = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"猫が庭を散歩している\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"},\"out_task_id\":\"my_task_123456\"}";
 
           using (var client = new HttpClient())
           {
@@ -387,7 +387,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           headers = curl_slist_append(headers, "Content-Type: application/json");
           curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-          const char *data = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"一只猫在花园里散歩\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"},\"out_task_id\":\"my_task_123456\"}";
+          const char *data = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"猫が庭を散歩している\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"},\"out_task_id\":\"my_task_123456\"}";
           curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
 
           res = curl_easy_perform(curl);
@@ -413,7 +413,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           NSDictionary *payload = @{
               @"model": @"sora2",
               @"params": @{
-                  @"prompt": @"一只猫在花园里散歩",
+                  @"prompt": @"猫が庭を散歩している",
                   @"aspect_ratio": @"16:9",
                   @"video_length": @"10"
               },
@@ -444,7 +444,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   let url = "https://pxz-api.xinsulv.com/api/openapi/submit"
 
-  let payload = {|{"model":"sora2","params":{"prompt":"一只猫在花园里散歩","aspect_ratio":"16:9","video_length":"10"},"out_task_id":"my_task_123456"}|}
+  let payload = {|{"model":"sora2","params":{"prompt":"猫が庭を散歩している","aspect_ratio":"16:9","video_length":"10"},"out_task_id":"my_task_123456"}|}
 
   let () =
     let headers = Header.init ()
@@ -469,7 +469,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     var payload = {
       'model': 'sora2',
       'params': {
-        'prompt': '一只猫在花园里散歩',
+        'prompt': '猫が庭を散歩している',
         'aspect_ratio': '16:9',
         'video_length': '10'
       },
@@ -498,7 +498,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload <- list(
     model = "sora2",
     params = list(
-      prompt = "一只猫在花园里散歩",
+      prompt = "猫が庭を散歩している",
       aspect_ratio = "16:9",
       video_length = "10"
     ),
@@ -527,6 +527,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     "data": {
         "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
         "out_task_id": "my_task_123456",
+        "out_task_id": "my_task_123456",
         "status": "pending",
         "estimated_credits": 100,
         "created_at": "2025-12-22T06:03:28.242Z"
@@ -553,7 +554,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 433,
-      "message": "アカウント残高が不足しています。チャージ後に再試行してください"
+      "message": "アカウント残高が不足しています。チャージしてからもう一度お試しください"
     }
   }
   ```
@@ -562,7 +563,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 500,
-      "message": "サーバー内部エラーです。後でもう一度お試しください"
+      "message": "サーバ内部エラーです。しばらくしてから再試行してください"
     }
   }
   ```

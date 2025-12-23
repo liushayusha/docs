@@ -31,7 +31,7 @@ All image and video generation use an asynchronous processing mode. When submitt
 
 ```bash
 curl --request POST \
-  --url https://pxz-api.xinsulv.com/api/openapi/submit \
+  --url https://test.aireiter.com/api/openapi/submit \
   --header 'Authorization: Bearer YOUR_API_KEY' \
   --header 'Content-Type: application/json' \
   --data '{
@@ -51,7 +51,7 @@ Use the returned `task_id` or the `out_task_id` you submitted to check the task 
 ```bash
 # Query by task_id
 curl --request POST \
-  --url https://pxz-api.xinsulv.com/api/openapi/query \
+  --url https://test.aireiter.com/api/openapi/query \
   --header 'Authorization: Bearer YOUR_API_KEY' \
   --header 'Content-Type: application/json' \
   --data-raw '{
@@ -60,7 +60,7 @@ curl --request POST \
 
 # Or query by out_task_id
 curl --request POST \
-  --url https://pxz-api.xinsulv.com/api/openapi/query \
+  --url https://test.aireiter.com/api/openapi/query \
   --header 'Authorization: Bearer YOUR_API_KEY' \
   --header 'Content-Type: application/json' \
   --data-raw '{
@@ -198,7 +198,7 @@ Visit the <a href={apiKeyUrl} target="_blank">API Key Management Page</a> to get
     Use the task status query API by passing the `task_id` returned when submitting the task, or your own set `out_task_id` (either one):
 
     ```bash
-    POST https://pxz-api.xinsulv.com/api/openapi/query
+    POST https://test.aireiter.com/api/openapi/query
     ```
 
     See the [Task Status Query Documentation](/en/api-reference/tasks/status) for details.

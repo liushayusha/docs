@@ -1,10 +1,10 @@
 ---
 title: 'Get Task Status'
 description: |
-    - Query the execution status and results of asynchronous tasks
+    - Query the execution status and result of asynchronous tasks
     - Real-time status updates and progress tracking
-    - Retrieve generated results upon task completion
-api: 'POST https://pxz-api.xinsulv.com/api/openapi/query'
+    - Retrieve generated results when tasks are completed
+api: 'POST https://test.aireiter.com/api/openapi/query'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
@@ -15,9 +15,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   Get the API Key:
 
-  Visit the <a href={apiKeyUrl} target="_blank">API Key management page</a> to obtain your API Key.
+  Visit the <a href={apiKeyUrl} target="_blank">API Key Management Page</a> to get your API Key.
 
-  Add the following to the request headers:
+  Add to the request headers as:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -27,15 +27,15 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="task_id" type="string">
-  Task ID returned by the Generate API
+  The task ID returned by the Generate API
 
-  Choose one between this and out_task_id, one must be provided
+  Either this or out_task_id must be provided
 </ParamField>
 
 <ParamField body="out_task_id" type="string">
   Initiator's task ID
 
-  Choose one between this and task_id, one must be provided
+  Either this or task_id must be provided
 </ParamField>
 
 ## Response
@@ -47,22 +47,22 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ResponseField name="status" type="string">
   Task status:
 
-  * `pending` - Queued for processing
-  * `processing` - Processing
-  * `completed` - Successfully completed
-  * `failed` - Failed
+  * `pending` - queued for processing
+  * `processing` - processing
+  * `completed` - successfully completed
+  * `failed` - failed
 </ResponseField>
 
 <ResponseField name="input" type="object">
-  Task input (optional, returned only in certain cases)
+  Task input (optional, returned only in some cases)
 
-  Contains the full parameter information submitted with the task
+  Contains complete parameter information submitted with the task
 </ResponseField>
 
 <ResponseField name="output" type="array">
   Task output (returned after task completion)
 
-  An array containing generation results, each element includes a `url` field pointing to the generated resource
+  Contains an array of generated results, each element includes a `url` field pointing to the generated resource
 </ResponseField>
 
 <ResponseField name="error" type="object">
@@ -80,7 +80,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <ResponseField name="credits_used" type="number">
-  Credits used
+  Credits consumed
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
@@ -94,7 +94,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <RequestExample>
   ```bash cURL (using task_id)
   curl --request POST \
-    --url 'https://pxz-api.xinsulv.com/api/openapi/query' \
+    --url 'https://test.aireiter.com/api/openapi/query' \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data-raw '{
@@ -104,7 +104,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   ```bash cURL (using out_task_id)
   curl --request POST \
-    --url 'https://pxz-api.xinsulv.com/api/openapi/query' \
+    --url 'https://test.aireiter.com/api/openapi/query' \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data-raw '{
@@ -115,7 +115,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```python Python (using task_id)
   import requests
 
-  url = "https://pxz-api.xinsulv.com/api/openapi/query"
+  url = "https://test.aireiter.com/api/openapi/query"
 
   headers = {
       "Authorization": "Bearer <token>",
@@ -134,7 +134,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```python Python (using out_task_id)
   import requests
 
-  url = "https://pxz-api.xinsulv.com/api/openapi/query"
+  url = "https://test.aireiter.com/api/openapi/query"
 
   headers = {
       "Authorization": "Bearer <token>",
@@ -151,7 +151,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```
 
   ```javascript JavaScript
-  const url = "https://pxz-api.xinsulv.com/api/openapi/query";
+  const url = "https://test.aireiter.com/api/openapi/query";
 
   const headers = {
     "Authorization": "Bearer <token>",
@@ -184,7 +184,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   )
 
   func main() {
-      url := "https://pxz-api.xinsulv.com/api/openapi/query"
+      url := "https://test.aireiter.com/api/openapi/query"
 
       payload := map[string]interface{}{
           "task_id": "order_lwU2d-VkUq9-tlCCmrdYu",
@@ -218,7 +218,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   public class Main {
       public static void main(String[] args) {
           try {
-              URL url = new URL("https://pxz-api.xinsulv.com/api/openapi/query");
+              URL url = new URL("https://test.aireiter.com/api/openapi/query");
               HttpURLConnection conn = (HttpURLConnection) url.openConnection();
               conn.setRequestMethod("POST");
               conn.setRequestProperty("Authorization", "Bearer <token>");
@@ -251,7 +251,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```php PHP
   <?php
 
-  $url = "https://pxz-api.xinsulv.com/api/openapi/query";
+  $url = "https://test.aireiter.com/api/openapi/query";
 
   $payload = array(
       "task_id" => "order_lwU2d-VkUq9-tlCCmrdYu"
@@ -278,7 +278,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   require 'json'
   require 'uri'
 
-  url = URI.parse("https://pxz-api.xinsulv.com/api/openapi/query")
+  url = URI.parse("https://test.aireiter.com/api/openapi/query")
 
   payload = {
     task_id: "order_lwU2d-VkUq9-tlCCmrdYu"
@@ -297,7 +297,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "https://pxz-api.xinsulv.com/api/openapi/query")!
+  let url = URL(string: "https://test.aireiter.com/api/openapi/query")!
   var request = URLRequest(url: url)
   request.httpMethod = "POST"
   request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
@@ -333,7 +333,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
       static async Task Main(string[] args)
       {
-          var url = "https://pxz-api.xinsulv.com/api/openapi/query";
+          var url = "https://test.aireiter.com/api/openapi/query";
           var payload = "{\"task_id\":\"order_lwU2d-VkUq9-tlCCmrdYu\"}";
 
           using var client = new HttpClient();
@@ -359,7 +359,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       curl = curl_easy_init();
 
       if(curl) {
-          const char *url = "https://pxz-api.xinsulv.com/api/openapi/query";
+          const char *url = "https://test.aireiter.com/api/openapi/query";
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
@@ -392,7 +392,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
-          NSURL *url = [NSURL URLWithString:@"https://pxz-api.xinsulv.com/api/openapi/query"];
+          NSURL *url = [NSURL URLWithString:@"https://test.aireiter.com/api/openapi/query"];
 
           NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
           [request setHTTPMethod:@"POST"];
@@ -431,7 +431,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   open Cohttp
   open Cohttp_lwt_unix
 
-  let url = "https://pxz-api.xinsulv.com/api/openapi/query"
+  let url = "https://test.aireiter.com/api/openapi/query"
 
   let payload = {|{"task_id":"order_lwU2d-VkUq9-tlCCmrdYu"}|}
 
@@ -454,7 +454,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   import 'package:http/http.dart' as http;
 
   void main() async {
-    final url = Uri.parse('https://pxz-api.xinsulv.com/api/openapi/query');
+    final url = Uri.parse('https://test.aireiter.com/api/openapi/query');
 
     final payload = {
       'task_id': 'order_lwU2d-VkUq9-tlCCmrdYu'
@@ -477,7 +477,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   library(httr)
   library(jsonlite)
 
-  url <- "https://pxz-api.xinsulv.com/api/openapi/query"
+  url <- "https://test.aireiter.com/api/openapi/query"
 
   payload <- list(
     task_id = "order_lwU2d-VkUq9-tlCCmrdYu"

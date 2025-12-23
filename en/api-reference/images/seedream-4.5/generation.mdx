@@ -1,22 +1,22 @@
 ---
 title: 'Seedream V4.5 Image Generation'
 description: |
-    - Asynchronous processing mode, returns task ID for subsequent querying
+    - Asynchronous processing mode, returns a task ID for subsequent queries
     - Higher quality image generation
-api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
+api: 'POST https://test.aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  All endpoints require authentication using a Bearer Token.
+  All endpoints require authentication using a Bearer Token
 
   Get your API Key:
 
-  Visit the <a href={apiKeyUrl} target="_blank">API Key Management Page</a> to obtain your API Key.
+  Visit the <a href={apiKeyUrl} target="_blank">API Key Management Page</a> to retrieve your API Key
 
-  Add the following to the request header:
+  Include the following in the request header:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -26,32 +26,32 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  Model Name
+  Model name
 
-  Fixed Value: `"seedream_v4_5"`
+  Fixed value: `"seedream_v4_5"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  Model Parameters Object
+  Model parameters object
 
-  <Expandable title="params Object Properties">
+  <Expandable title="params object properties">
     <ParamField body="prompt" type="string" required>
-      Text Description for Image Generation
+      Text description for image generation
 
-      No Limit
+      No limits
     </ParamField>
 
     <ParamField body="image_url" type="array">
-      List of Reference Image URLs for Image-to-Image
+      List of reference image URLs for image-to-image generation
 
       * Up to 9 images
       * Supports publicly accessible URLs
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="1:1">
-      Aspect Ratio for Image Generation
+      Aspect ratio for image generation
 
-      Supported Aspect Ratios:
+      Supported aspect ratios:
 
       * `1:1` - Square (default)
       * `3:2` - Landscape 3:2
@@ -60,35 +60,35 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       * `3:4` - Portrait 3:4
       * `5:4` - Landscape 5:4
       * `4:5` - Portrait 4:5
-      * `16:9` - Landscape Widescreen
-      * `9:16` - Portrait Vertical Screen
-      * `21:9` - Ultra Widescreen
+      * `16:9` - Wide landscape
+      * `9:16` - Tall portrait
+      * `21:9` - Ultra-wide
     </ParamField>
 
     <ParamField body="resolution" type="string" default="basic">
-      Image Resolution
+      Image resolution
 
-      Supported Resolutions:
+      Supported resolutions:
 
-      * `basic` - Basic Resolution (default)
-      * `high` - High Resolution
+      * `basic` - Basic resolution (default)
+      * `high` - High definition resolution
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  Initiator Task ID
+  Initiator task ID
 
-  User-defined Task Identifier, Required
+  User-defined task identifier, required
 </ParamField>
 <ParamField body="callback_url" type="string">
-  Callback Notification URL after Task Completion
+  Callback notification URL after task completion
 
-  The system will send a POST request to this address to notify the result after task completion
+  After task completion, the system will send a POST request to this URL to notify the results
 </ParamField>
 
 <ParamField body="metadata" type="object">
-  Custom Metadata
+  Custom metadata
 
   Returned as-is when querying results, can be used for business identification
 </ParamField>
@@ -100,14 +100,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <ResponseField name="out_task_id" type="string">
-  Initiator's Task ID, can be used to query the result
+  Initiator task ID, can be used to query the result
 </ResponseField>
 <ResponseField name="status" type="string">
   Initial status, fixed as `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  Estimated credits consumption
+  Estimated consumed credits
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
@@ -117,13 +117,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <RequestExample>
   ```bash cURL
   curl --request POST \
-    --url https://pxz-api.xinsulv.com/api/openapi/submit \
+    --url https://test.aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
       "model": "seedream_v4_5",
       "params": {
-        "prompt": "A dreamlike forest night scene",
+        "prompt": "Dreamlike forest night scene",
         "aspect_ratio": "16:9",
         "resolution": "high"
       },
@@ -134,12 +134,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```python Python
   import requests
 
-  url = "https://pxz-api.xinsulv.com/api/openapi/submit"
+  url = "https://test.aireiter.com/api/openapi/submit"
 
   payload = {
       "model": "seedream_v4_5",
       "params": {
-          "prompt": "A dreamlike forest night scene",
+          "prompt": "Dreamlike forest night scene",
           "aspect_ratio": "16:9",
           "resolution": "high"
       },
@@ -157,12 +157,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```
 
   ```javascript JavaScript
-  const url = "https://pxz-api.xinsulv.com/api/openapi/submit";
+  const url = "https://test.aireiter.com/api/openapi/submit";
 
   const payload = {
     model: "seedream_v4_5",
     params: {
-      prompt: "A dreamlike forest night scene",
+      prompt: "Dreamlike forest night scene",
       aspect_ratio: "16:9",
       resolution: "high"
     }
@@ -195,12 +195,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   )
 
   func main() {
-      url := "https://pxz-api.xinsulv.com/api/openapi/submit"
+      url := "https://test.aireiter.com/api/openapi/submit"
 
       payload := map[string]interface{}{
           "model": "seedream_v4_5",
           "params": map[string]interface{}{
-              "prompt":       "A dreamlike forest night scene",
+              "prompt":       "Dreamlike forest night scene",
               "aspect_ratio": "16:9",
               "resolution":   "high",
     
@@ -232,13 +232,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   public class Main {
       public static void main(String[] args) throws Exception {
-          String url = "https://pxz-api.xinsulv.com/api/openapi/submit";
+          String url = "https://test.aireiter.com/api/openapi/submit";
 
           String payload = """
           {
             "model": "seedream_v4_5",
             "params": {
-              "prompt": "A dreamlike forest night scene",
+              "prompt": "Dreamlike forest night scene",
               "aspect_ratio": "16:9",
               "resolution": "high"
 
@@ -266,12 +266,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```php PHP
   <?php
 
-  $url = "https://pxz-api.xinsulv.com/api/openapi/submit";
+  $url = "https://test.aireiter.com/api/openapi/submit";
 
   $payload = [
       "model" => "seedream_v4_5",
       "params" => [
-          "prompt" => "A dreamlike forest night scene",
+          "prompt" => "Dreamlike forest night scene",
           "aspect_ratio" => "16:9",
           "resolution" => "high"
       ]
@@ -298,12 +298,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   require 'json'
   require 'uri'
 
-  url = URI("https://pxz-api.xinsulv.com/api/openapi/submit")
+  url = URI("https://test.aireiter.com/api/openapi/submit")
 
   payload = {
     model: "seedream_v4_5",
     params: {
-      prompt: "A dreamlike forest night scene",
+      prompt: "Dreamlike forest night scene",
       aspect_ratio: "16:9",
       resolution: "high"
     }
@@ -323,12 +323,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "https://pxz-api.xinsulv.com/api/openapi/submit")!
+  let url = URL(string: "https://test.aireiter.com/api/openapi/submit")!
 
   let payload: [String: Any] = [
       "model": "seedream_v4_5",
       "params": [
-          "prompt": "A dreamlike forest night scene",
+          "prompt": "Dreamlike forest night scene",
           "aspect_ratio": "16:9",
           "resolution": "high"
 
@@ -366,12 +366,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
       static async Task Main(string[] args)
       {
-          var url = "https://pxz-api.xinsulv.com/api/openapi/submit";
+          var url = "https://test.aireiter.com/api/openapi/submit";
 
           var payload = @"{
               ""model"": ""seedream_v4_5"",
               ""params"": {
-                  ""prompt"": ""A dreamlike forest night scene"",
+                  ""prompt"": ""Dreamlike forest night scene"",
                   ""aspect_ratio"": ""16:9"",
                   ""resolution"": ""high""
               }
@@ -401,11 +401,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       curl = curl_easy_init();
 
       if(curl) {
-          const char *url = "https://pxz-api.xinsulv.com/api/openapi/submit";
+          const char *url = "https://test.aireiter.com/api/openapi/submit";
           const char *payload = "{"
               "\"model\":\"seedream_v4_5\","
               "\"params\":{"
-                  "\"prompt\":\"A dreamlike forest night scene\","
+                  "\"prompt\":\"Dreamlike forest night scene\","
                   "\"aspect_ratio\":\"16:9\","
                   "\"resolution\":\"high\""
               "}"
@@ -440,12 +440,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
-          NSURL *url = [NSURL URLWithString:@"https://pxz-api.xinsulv.com/api/openapi/submit"];
+          NSURL *url = [NSURL URLWithString:@"https://test.aireiter.com/api/openapi/submit"];
 
           NSDictionary *payload = @{
               @"model": @"seedream_v4_5",
               @"params": @{
-                  @"prompt": @"A dreamlike forest night scene",
+                  @"prompt": @"Dreamlike forest night scene",
                   @"aspect_ratio": @"16:9",
                   @"resolution": @"high"
               }
@@ -487,12 +487,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   open Cohttp
   open Cohttp_lwt_unix
 
-  let url = "https://pxz-api.xinsulv.com/api/openapi/submit"
+  let url = "https://test.aireiter.com/api/openapi/submit"
 
   let payload = {|{
     "model": "seedream_v4_5",
     "params": {
-      "prompt": "A dreamlike forest night scene",
+      "prompt": "Dreamlike forest night scene",
       "aspect_ratio": "16:9",
       "resolution": "high"
 
@@ -519,12 +519,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   import 'package:http/http.dart' as http;
 
   void main() async {
-    final url = Uri.parse('https://pxz-api.xinsulv.com/api/openapi/submit');
+    final url = Uri.parse('https://test.aireiter.com/api/openapi/submit');
 
     final payload = {
       'model': 'seedream_v4_5',
       'params': {
-        'prompt': 'A dreamlike forest night scene',
+        'prompt': 'Dreamlike forest night scene',
         'aspect_ratio': '16:9',
         'resolution': 'high'
       }
@@ -547,12 +547,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   library(httr)
   library(jsonlite)
 
-  url <- "https://pxz-api.xinsulv.com/api/openapi/submit"
+  url <- "https://test.aireiter.com/api/openapi/submit"
 
   payload <- list(
     model = "seedream_v4_5",
     params = list(
-      prompt = "A dreamlike forest night scene",
+      prompt = "Dreamlike forest night scene",
       aspect_ratio = "16:9",
       resolution = "high"
     )

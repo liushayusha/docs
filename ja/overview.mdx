@@ -31,7 +31,7 @@ AIReiter は統一された AI コンテンツ生成 API プラットフォー�
 
 ```bash
 curl --request POST \
-  --url https://pxz-api.xinsulv.com/api/openapi/submit \
+  --url https://test.aireiter.com/api/openapi/submit \
   --header 'Authorization: Bearer YOUR_API_KEY' \
   --header 'Content-Type: application/json' \
   --data '{
@@ -51,7 +51,7 @@ curl --request POST \
 ```bash
 # task_idを使用して照会
 curl --request POST \
-  --url https://pxz-api.xinsulv.com/api/openapi/query \
+  --url https://test.aireiter.com/api/openapi/query \
   --header 'Authorization: Bearer YOUR_API_KEY' \
   --header 'Content-Type: application/json' \
   --data-raw '{
@@ -60,7 +60,7 @@ curl --request POST \
 
 # またはout_task_idを使用して照会
 curl --request POST \
-  --url https://pxz-api.xinsulv.com/api/openapi/query \
+  --url https://test.aireiter.com/api/openapi/query \
   --header 'Authorization: Bearer YOUR_API_KEY' \
   --header 'Content-Type: application/json' \
   --data-raw '{
@@ -198,7 +198,7 @@ Authorization: Bearer YOUR_API_KEY
     タスク状態照会APIを使用すると、提出時に返された`task_id`または自身で設定した`out_task_id`（どちらか一方）を渡して照会できます：
 
     ```bash
-    POST https://pxz-api.xinsulv.com/api/openapi/query
+    POST https://test.aireiter.com/api/openapi/query
     ```
 
     詳細は[タスク状態照会ドキュメント](/jp/api-reference/tasks/status)をご覧ください。

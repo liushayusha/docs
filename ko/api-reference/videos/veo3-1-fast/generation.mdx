@@ -5,7 +5,7 @@ description: |
     - 텍스트에서 비디오, 이미지에서 비디오 등 생성 모드 지원
     - 속도에 최적화된 빠른 버전
     - 첫 프레임과 마지막 프레임 참조 이미지 지원
-api: 'POST https://pxz-api.xinsulv.com/api/openapi/submit'
+api: 'POST https://test.aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
@@ -109,7 +109,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <RequestExample>
   ```bash cURL
   curl --request POST \
-    --url https://pxz-api.xinsulv.com/api/openapi/submit \
+    --url https://test.aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
@@ -127,7 +127,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```python Python
   import requests
 
-  url = "https://pxz-api.xinsulv.com/api/openapi/submit"
+  url = "https://test.aireiter.com/api/openapi/submit"
 
   payload = {
       "model": "veo3_1_fast",
@@ -151,7 +151,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```
 
   ```javascript JavaScript
-  const url = "https://pxz-api.xinsulv.com/api/openapi/submit";
+  const url = "https://test.aireiter.com/api/openapi/submit";
 
   const payload = {
     model: "veo3_1_fast",
@@ -191,7 +191,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   )
 
   func main() {
-      url := "https://pxz-api.xinsulv.com/api/openapi/submit"
+      url := "https://test.aireiter.com/api/openapi/submit"
 
       payload := map[string]interface{}{
           "model": "veo3_1_fast",
@@ -232,7 +232,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   public class Main {
       public static void main(String[] args) {
           try {
-              URL url = new URL("https://pxz-api.xinsulv.com/api/openapi/submit");
+              URL url = new URL("https://test.aireiter.com/api/openapi/submit");
               HttpURLConnection conn = (HttpURLConnection) url.openConnection();
               conn.setRequestMethod("POST");
               conn.setRequestProperty("Authorization", "Bearer <token>");
@@ -264,7 +264,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   ```php PHP
   <?php
-  $url = "https://pxz-api.xinsulv.com/api/openapi/submit";
+  $url = "https://test.aireiter.com/api/openapi/submit";
 
   $payload = array(
       "model" => "veo3_1_fast",
@@ -298,7 +298,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   require 'json'
   require 'uri'
 
-  url = URI.parse("https://pxz-api.xinsulv.com/api/openapi/submit")
+  url = URI.parse("https://test.aireiter.com/api/openapi/submit")
 
   payload = {
     model: "veo3_1_fast",
@@ -324,7 +324,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "https://pxz-api.xinsulv.com/api/openapi/submit")!
+  let url = URL(string: "https://test.aireiter.com/api/openapi/submit")!
   var request = URLRequest(url: url)
   request.httpMethod = "POST"
   request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
@@ -361,7 +361,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
       static async Task Main(string[] args)
       {
-          var url = "https://pxz-api.xinsulv.com/api/openapi/submit";
+          var url = "https://test.aireiter.com/api/openapi/submit";
           var payload = "{\"model\":\"veo3_1_fast\",\"params\":{\"prompt\":\"산속의 안개가 천천히 흐름\",\"image_url\":\"https://example.com/start.jpg\",\"end_image_url\":\"https://example.com/end.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
 
           using (var client = new HttpClient())
@@ -387,7 +387,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
       curl = curl_easy_init();
       if(curl) {
-          curl_easy_setopt(curl, CURLOPT_URL, "https://pxz-api.xinsulv.com/api/openapi/submit");
+          curl_easy_setopt(curl, CURLOPT_URL, "https://test.aireiter.com/api/openapi/submit");
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
@@ -411,7 +411,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
-          NSURL *url = [NSURL URLWithString:@"https://pxz-api.xinsulv.com/api/openapi/submit"];
+          NSURL *url = [NSURL URLWithString:@"https://test.aireiter.com/api/openapi/submit"];
           NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
           [request setHTTPMethod:@"POST"];
           [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
@@ -450,7 +450,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   open Cohttp
   open Cohttp_lwt_unix
 
-  let url = "https://pxz-api.xinsulv.com/api/openapi/submit"
+  let url = "https://test.aireiter.com/api/openapi/submit"
 
   let payload = {|{"model":"veo3_1_fast","params":{"prompt":"산속의 안개가 천천히 흐름","image_url":"https://example.com/start.jpg","end_image_url":"https://example.com/end.jpg","aspect_ratio":"16:9"},"out_task_id":"my_task_123456"}|}
 
@@ -472,7 +472,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   import 'package:http/http.dart' as http;
 
   void main() async {
-    var url = Uri.parse('https://pxz-api.xinsulv.com/api/openapi/submit');
+    var url = Uri.parse('https://test.aireiter.com/api/openapi/submit');
 
     var payload = {
       'model': 'veo3_1_fast',
@@ -502,7 +502,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   library(httr)
   library(jsonlite)
 
-  url <- "https://pxz-api.xinsulv.com/api/openapi/submit"
+  url <- "https://test.aireiter.com/api/openapi/submit"
 
   payload <- list(
     model = "veo3_1_fast",
