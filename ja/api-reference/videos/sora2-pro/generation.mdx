@@ -1,9 +1,9 @@
 ---
 title: 'Sora2 Pro 動画生成'
 description: |
-    - 非同期処理モード、タスクIDを返却して後続のクエリに使用
-    - テキストから動画、画像から動画などの生成モードをサポート
-    - プロフェッショナルバージョンで、より高い解像度に対応
+    - 非同期処理モード、後続のクエリ用にタスクIDを返す
+    - テキストから動画生成、画像から動画生成などの生成モードをサポート
+    - プロ版、高解像度をサポート
 api: 'POST https://test.aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -11,13 +11,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  すべてのエンドポイントではBearer Tokenによる認証が必要です
+  すべてのエンドポイントは Bearer Token を使った認証が必要です
 
-  APIキーの取得方法：
+  APIキーの取得：
 
-  <a href={apiKeyUrl} target="_blank">APIキー管理ページ</a> にアクセスしてAPIキーを取得してください
+  <a href={apiKeyUrl} target="_blank">API Key管理ページ</a>にアクセスしてAPIキーを取得してください
 
-  利用時はリクエストヘッダーに以下を追加します：
+  利用時にはリクエストヘッダーに以下を追加します：
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -43,14 +43,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      画像生成用の参考画像の URL（初フレーム）
+      参考画像のURL（動画生成のためのキーフレーム）
 
       * 単一画像のみ対応
-      * 公開アクセス可能な URL をサポート
+      * 公にアクセス可能なURLをサポート
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="16:9">
-      動画のアスペクト比
+      動画アスペクト比
 
       対応アスペクト比：
 
@@ -68,7 +68,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="resolution" type="string" default="standard">
-      動画の解像度
+      動画解像度
 
       対応解像度：
 
@@ -79,14 +79,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発注側タスク ID
+  発注者タスクID
 
-  ユーザーが定義するタスク識別子、必須
+  ユーザー定義のタスク識別子、必須
 </ParamField>
 <ParamField body="callback_url" type="string">
-  タスク完了後のコールバック通知先 URL
+  タスク完了後のコールバック通知先URL
 
-  タスク完了後、システムはこの URL に POST リクエストで結果を通知します
+  タスク完了後に、システムはこのURLにPOSTリクエストで結果を通知します
 </ParamField>
 
 <ParamField body="metadata" type="object">
@@ -98,22 +98,22 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Response
 
 <ResponseField name="task_id" type="string">
-  タスクID、結果の照会に使用
+  タスクID。結果を照会するために使用します
 </ResponseField>
 
 <ResponseField name="out_task_id" type="string">
-  発信者側のタスクID、結果の照会に使用可能
+  発行元のタスクID。結果を照会するために使用できます
 </ResponseField>
 <ResponseField name="status" type="string">
-  初期状態、固定値 `"pending"`
+  初期状態で、固定値は `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  予想消費クレジット
+  推定消費クレジット
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  作成日時（ISO形式）
+  作成日時（ISOフォーマット）
 </ResponseField>
 
 <RequestExample>
@@ -125,7 +125,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     --data '{
       "model": "sora2_pro",
       "params": {
-        "prompt": "一只猫在花园里散步",
+        "prompt": "庭で歩いている猫",
         "aspect_ratio": "16:9",
         "video_length": "15",
         "resolution": "high"
@@ -142,7 +142,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
       "model": "sora2_pro",
       "params": {
-          "prompt": "一只猫在花园里散步",
+          "prompt": "庭で歩いている猫",
           "aspect_ratio": "16:9",
           "video_length": "15",
           "resolution": "high"
@@ -166,7 +166,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   const payload = {
     model: "sora2_pro",
     params: {
-      prompt: "一只猫在花园里散步",
+      prompt: "庭で歩いている猫",
       aspect_ratio: "16:9",
       video_length: "15",
       resolution: "high"
@@ -206,7 +206,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       payload := map[string]interface{}{
           "model": "sora2_pro",
           "params": map[string]interface{}{
-              "prompt":       "一只猫在花园里散步",
+              "prompt":       "庭で歩いている猫",
               "aspect_ratio": "16:9",
               "video_length": "15",
               "resolution":   "high",
@@ -249,7 +249,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
               conn.setRequestProperty("Content-Type", "application/json");
               conn.setDoOutput(true);
 
-              String jsonPayload = "{\"model\":\"sora2_pro\",\"params\":{\"prompt\":\"一只猫在花园里散步\",\"aspect_ratio\":\"16:9\",\"video_length\":\"15\",\"resolution\":\"high\"},\"out_task_id\":\"my_task_123456\"}";
+              String jsonPayload = "{\"model\":\"sora2_pro\",\"params\":{\"prompt\":\"庭で歩いている猫\",\"aspect_ratio\":\"16:9\",\"video_length\":\"15\",\"resolution\":\"high\"},\"out_task_id\":\"my_task_123456\"}";
 
               OutputStream os = conn.getOutputStream();
               os.write(jsonPayload.getBytes());
@@ -279,7 +279,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   $payload = array(
       "model" => "sora2_pro",
       "params" => array(
-          "prompt" => "一只猫在花园里散步",
+          "prompt" => "庭で歩いている猫",
           "aspect_ratio" => "16:9",
           "video_length" => "15",
           "resolution" => "high"
@@ -313,7 +313,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
     model: "sora2_pro",
     params: {
-      prompt: "一只猫在花园里散步",
+      prompt: "庭で歩いている猫",
       aspect_ratio: "16:9",
       video_length: "15",
       resolution: "high"
@@ -343,7 +343,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload: [String: Any] = [
       "model": "sora2_pro",
       "params": [
-          "prompt": "一只猫在花园里散歩",
+          "prompt": "庭で歩いている猫",
           "aspect_ratio": "16:9",
           "video_length": "15",
           "resolution": "high"
@@ -372,7 +372,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       static async Task Main(string[] args)
       {
           var url = "https://test.aireiter.com/api/openapi/submit";
-          var payload = "{\"model\":\"sora2_pro\",\"params\":{\"prompt\":\"一只猫在花园里散歩\",\"aspect_ratio\":\"16:9\",\"video_length\":\"15\",\"resolution\":\"high\"},\"out_task_id\":\"my_task_123456\"}";
+          var payload = "{\"model\":\"sora2_pro\",\"params\":{\"prompt\":\"庭で歩いている猫\",\"aspect_ratio\":\"16:9\",\"video_length\":\"15\",\"resolution\":\"high\"},\"out_task_id\":\"my_task_123456\"}";
 
           using (var client = new HttpClient())
           {
@@ -404,7 +404,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           headers = curl_slist_append(headers, "Content-Type: application/json");
           curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-          const char *data = "{\"model\":\"sora2_pro\",\"params\":{\"prompt\":\"一只猫在花园里散歩\",\"aspect_ratio\":\"16:9\",\"video_length\":\"15\",\"resolution\":\"high\"},\"out_task_id\":\"my_task_123456\"}";
+          const char *data = "{\"model\":\"sora2_pro\",\"params\":{\"prompt\":\"庭で歩いている猫\",\"aspect_ratio\":\"16:9\",\"video_length\":\"15\",\"resolution\":\"high\"},\"out_task_id\":\"my_task_123456\"}";
           curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
 
           res = curl_easy_perform(curl);
@@ -430,7 +430,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           NSDictionary *payload = @{
               @"model": @"sora2_pro",
               @"params": @{
-                  @"prompt": @"一只猫在花园里散歩",
+                  @"prompt": @"庭で歩いている猫",
                   @"aspect_ratio": @"16:9",
                   @"video_length": @"15",
                   @"resolution": @"high"
@@ -462,7 +462,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   let url = "https://test.aireiter.com/api/openapi/submit"
 
-  let payload = {|{"model":"sora2_pro","params":{"prompt":"一只猫在花园里散歩","aspect_ratio":"16:9","video_length":"15","resolution":"high"},"out_task_id":"my_task_123456"}|}
+  let payload = {|{"model":"sora2_pro","params":{"prompt":"庭で歩いている猫","aspect_ratio":"16:9","video_length":"15","resolution":"high"},"out_task_id":"my_task_123456"}|}
 
   let () =
     let headers = Header.init ()
@@ -487,7 +487,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     var payload = {
       'model': 'sora2_pro',
       'params': {
-        'prompt': '一只猫在花园里散歩',
+        'prompt': '庭で歩いている猫',
         'aspect_ratio': '16:9',
         'video_length': '15',
         'resolution': 'high'
@@ -517,7 +517,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload <- list(
     model = "sora2_pro",
     params = list(
-      prompt = "一只猫在花园里散歩",
+      prompt = "庭で歩いている猫",
       aspect_ratio = "16:9",
       video_length = "15",
       resolution = "high"
@@ -573,7 +573,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 433,
-      "message": "アカウント残高が不足しています。チャージしてから再試行してください"
+      "message": "アカウント残高が不足しています。チャージ後に再試行してください"
     }
   }
   ```
@@ -582,7 +582,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 500,
-      "message": "サーバー内部エラーが発生しました。後でもう一度お試しください"
+      "message": "サーバー内部エラー。しばらくしてから再試行してください"
     }
   }
   ```
