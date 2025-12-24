@@ -38,11 +38,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     <ParamField body="prompt" type="string" required>
       Text description for image generation
 
-      No limits
+      No limitations
     </ParamField>
 
     <ParamField body="image_url" type="array">
-      List of reference image URLs for image-to-image generation
+      List of URLs for reference images, used for image-to-image
 
       * Up to 8 images
       * Supports publicly accessible URLs
@@ -61,9 +61,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       * `3:4` - Portrait 3:4
       * `5:4` - Landscape 5:4
       * `4:5` - Portrait 4:5
-      * `16:9` - Landscape widescreen
-      * `9:16` - Portrait vertical
-      * `21:9` - Ultra widescreen
+      * `16:9` - Wide landscape
+      * `9:16` - Tall portrait
+      * `21:9` - Ultra wide screen
     </ParamField>
 
     <ParamField body="resolution" type="string" default="1K">
@@ -88,21 +88,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  Originator task ID
+  Initiator task ID
 
   User-defined task identifier, required
-</ParamField>
-
-<ParamField body="callback_url" type="string">
-  Callback URL for task completion notification
-
-  After the task completes, the system will send a POST request to this URL to notify the result
-</ParamField>
-
-<ParamField body="metadata" type="object">
-  Custom metadata
-
-  Returned as-is when querying results, can be used for business identification
 </ParamField>
 
 ## Response

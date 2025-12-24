@@ -42,9 +42,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      Reference image URL, used for image-to-video (first frame)
+      URL of the reference image for video generation (first frame)
 
-      * Only a single image is supported
+      * Supports only a single image
       * Supports publicly accessible URLs
     </ParamField>
 
@@ -72,17 +72,6 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   Initiator task ID
 
   User-defined task identifier, required
-</ParamField>
-<ParamField body="callback_url" type="string">
-  Callback URL after task completion
-
-  The system will send a POST request to this URL to notify the result after the task is completed
-</ParamField>
-
-<ParamField body="metadata" type="object">
-  Custom metadata
-
-  Returned as-is when querying results, can be used for business identification
 </ParamField>
 
 ## Response

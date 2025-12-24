@@ -26,32 +26,32 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  Model name
+  Model Name
 
   Fixed value: `"seedream_v4_5"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  Model parameters object
+  Model Parameters Object
 
-  <Expandable title="params object properties">
+  <Expandable title="params Object Properties">
     <ParamField body="prompt" type="string" required>
-      Text description for image generation
+      Text Description for Image Generation
 
-      Unlimited
+      No limits
     </ParamField>
 
     <ParamField body="image_url" type="array">
-      List of reference image URLs for image-to-image generation
+      List of Reference Image URLs for Image-to-Image
 
       * Up to 9 images
       * Supports publicly accessible URLs
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="1:1">
-      Aspect ratio for image generation
+      Aspect Ratio for Image Generation
 
-      Supported aspect ratios:
+      Supported Aspect Ratios:
 
       * `1:1` - Square (default)
       * `3:2` - Landscape 3:2
@@ -61,14 +61,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       * `5:4` - Landscape 5:4
       * `4:5` - Portrait 4:5
       * `16:9` - Landscape widescreen
-      * `9:16` - Portrait vertical screen
+      * `9:16` - Portrait fullscreen
       * `21:9` - Ultra widescreen
     </ParamField>
 
     <ParamField body="resolution" type="string" default="basic">
-      Image resolution
+      Image Resolution
 
-      Supported resolutions:
+      Supported Resolutions:
 
       * `basic` - Basic resolution (default)
       * `high` - High definition resolution
@@ -77,20 +77,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  Client task ID
+  Initiator Task ID
 
   User-defined task identifier, required
-</ParamField>
-<ParamField body="callback_url" type="string">
-  Callback URL after task completion
-
-  After the task is completed, the system will send a POST request to this URL to notify the result
-</ParamField>
-
-<ParamField body="metadata" type="object">
-  Custom metadata
-
-  Returned as-is when querying results, can be used for business identification
 </ParamField>
 
 ## Response

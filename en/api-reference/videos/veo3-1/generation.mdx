@@ -39,21 +39,21 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     <ParamField body="prompt" type="string" required>
       Text description for video generation
 
-      No limitations
+      No limit
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      Reference image URL for image-to-video (first frame)
+      URL of the reference image for image-to-video (first frame)
 
-      * Supports only a single image
-      * Must be a publicly accessible URL
+      * Only supports a single image
+      * Supports publicly accessible URLs
     </ParamField>
 
     <ParamField body="end_image_url" type="string">
-      Reference image URL for the last frame
+      URL of the reference image for the last frame
 
-      * Supports only a single image
-      * Must be a publicly accessible URL
+      * Only supports a single image
+      * Supports publicly accessible URLs
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="16:9">
@@ -71,17 +71,6 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   Initiator task ID
 
   User-defined task identifier, required
-</ParamField>
-<ParamField body="callback_url" type="string">
-  Callback notification URL upon task completion
-
-  After task completion, the system will send a POST request to this URL to notify the result
-</ParamField>
-
-<ParamField body="metadata" type="object">
-  Custom metadata
-
-  Returned as-is when querying results, can be used for business identification
 </ParamField>
 
 ## Response

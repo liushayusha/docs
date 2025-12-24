@@ -28,30 +28,30 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="model" type="string" required>
   모델 이름
 
-  고정값: `"nano_banana_pro"`
+  고정 값: `"nano_banana_pro"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  모델 파라미터 객체
+  모델 매개변수 객체
 
   <Expandable title="params 객체 속성">
     <ParamField body="prompt" type="string" required>
-      이미지 생성용 텍스트 설명
+      이미지 생성을 위한 텍스트 설명
 
       제한 없음
     </ParamField>
 
     <ParamField body="image_url" type="array">
-      참조 이미지 URL 목록, 이미지 생성 시 사용
+      참조 이미지의 URL 목록, 이미지 변환용
 
-      * 최대 8개 이미지
-      * 공개 접근 가능한 URL 지원
+      * 최대 8개의 이미지
+      * 공개적으로 접근 가능한 URL 지원
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="1:1">
-      이미지 생성 가로 세로 비율
+      이미지 생성 시 가로세로 비율
 
-      지원하는 비율:
+      지원되는 비율:
 
       * `auto` - 자동
       * `1:1` - 정사각형 (기본값)
@@ -62,14 +62,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       * `5:4` - 가로 5:4
       * `4:5` - 세로 4:5
       * `16:9` - 가로 와이드스크린
-      * `9:16` - 세로 와이드스크린
-      * `21:9` - 초광폭 스크린
+      * `9:16` - 세로 스크린
+      * `21:9` - 울트라 와이드스크린
     </ParamField>
 
     <ParamField body="resolution" type="string" default="1K">
       이미지 해상도
 
-      지원 해상도:
+      지원되는 해상도:
 
       * `1K` - 기본 해상도 (기본값)
       * `2K` - 표준 해상도
@@ -77,32 +77,20 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="format" type="string" default="png">
-      이미지 출력 포맷
+      이미지 출력 형식
 
-      지원 포맷:
+      지원 형식:
 
-      * `png` - PNG 포맷 (기본값)
-      * `jpg` - JPEG 포맷
+      * `png` - PNG 형식 (기본값)
+      * `jpg` - JPEG 형식
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  요청자 작업 ID
+  발신자 작업 ID
 
-  사용자 지정 작업 식별자, 필수
-</ParamField>
-
-<ParamField body="callback_url" type="string">
-  작업 완료 후 콜백 알림 주소
-
-  작업 완료 시 시스템이 이 주소로 POST 요청을 보내 결과를 알림
-</ParamField>
-
-<ParamField body="metadata" type="object">
-  사용자 정의 메타데이터
-
-  조회 결과 시 그대로 반환되며, 비즈니스 식별에 사용 가능
+  사용자 정의 작업 식별자, 필수
 </ParamField>
 
 ## Response

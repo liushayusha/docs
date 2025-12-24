@@ -34,34 +34,34 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="params" type="object" required>
   Model Parameters Object
 
-  <Expandable title="params object properties">
+  <Expandable title="params Object Properties">
     <ParamField body="prompt" type="string" required>
-      Text description for image generation
+      Text Description for Image Generation
 
       No limit
     </ParamField>
 
     <ParamField body="image_url" type="array">
-      List of reference image URLs for image-to-image generation
+      List of Reference Image URLs for Image-to-Image
 
       * Up to 9 images
       * Supports publicly accessible URLs
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="1:1">
-      Aspect ratio of the generated image
+      Aspect Ratio of Generated Image
 
-      Supported aspect ratios:
+      Supported ratios:
 
       * `1:1` - Square (default)
-      * `16:9` - Landscape widescreen
-      * `9:16` - Portrait vertical
-      * `4:3` - Landscape 4:3
-      * `3:4` - Portrait 3:4
+      * `16:9` - Horizontal widescreen
+      * `9:16` - Vertical portrait
+      * `4:3` - Horizontal 4:3
+      * `3:4` - Vertical 3:4
     </ParamField>
 
     <ParamField body="resolution" type="string" default="1K">
-      Image resolution
+      Image Resolution
 
       Supported resolutions:
 
@@ -71,7 +71,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="output_n" type="string" default="1">
-      Number of images to generate
+      Number of Images to Generate
 
       Supported values:
 
@@ -83,20 +83,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  Initiator's Task ID
+  Initiator Task ID
 
   User-defined task identifier, required
-</ParamField>
-<ParamField body="callback_url" type="string">
-  Callback notification URL upon task completion
-
-  After task completion, the system will POST the result notification to this URL
-</ParamField>
-
-<ParamField body="metadata" type="object">
-  Custom metadata
-
-  Returned as-is when querying results, can be used for business identification
 </ParamField>
 
 ## Response

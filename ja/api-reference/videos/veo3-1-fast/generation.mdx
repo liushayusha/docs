@@ -34,9 +34,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  モデルのパラメーターオブジェクト
+  モデルパラメーターオブジェクト
 
-  <Expandable title="params オブジェクトの属性">
+  <Expandable title="params オブジェクトのプロパティ">
     <ParamField body="prompt" type="string" required>
       動画生成のテキスト説明
 
@@ -44,45 +44,34 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      参照画像の URL、動画像生成のための（最初のフレーム）
+      参考画像のURL、動画生成のための（最初のフレーム）
 
       * 単一画像のみ対応
-      * 公開アクセス可能な URL に対応
+      * 公開アクセス可能なURLをサポート
     </ParamField>
 
     <ParamField body="end_image_url" type="string">
-      最終フレームの参照画像の URL
+      最終フレームの参考画像のURL
 
       * 単一画像のみ対応
-      * 公開アクセス可能な URL に対応
+      * 公開アクセス可能なURLをサポート
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="16:9">
       動画のアスペクト比
 
-      対応するアスペクト比：
+      対応しているアスペクト比：
 
-      * `16:9` - 横長（デフォルト）
-      * `9:16` - 縦長
+      * `16:9` - 横向き（デフォルト）
+      * `9:16` - 縦向き
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発信者タスクID
+  発起者タスクID
 
   ユーザー定義のタスク識別子、必須
-</ParamField>
-<ParamField body="callback_url" type="string">
-  タスク完了後のコールバック通知先URL
-
-  タスク完了後、システムはこのURLにPOSTリクエストで結果を通知します
-</ParamField>
-
-<ParamField body="metadata" type="object">
-  カスタムメタデータ
-
-  クエリ結果でそのまま返され、ビジネス識別に利用可能
 </ParamField>
 
 ## Response

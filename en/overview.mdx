@@ -136,17 +136,17 @@ Supports text-to-video and image-to-video, offering various resolution and durat
 
 ### Asynchronous Task Processing
 
-All generate requests use an asynchronous processing mode to avoid long waits:
+All generation requests use an asynchronous processing mode to avoid long wait times:
 
-- When submitting a task, you need to provide `out_task_id` (initiator's task ID for business identification)
-- Immediately returns the system-generated `task_id` along with your submitted `out_task_id`
-- You can query task status using either `task_id` or `out_task_id` (choose one)
+- When submitting a task, you must provide `out_task_id` (the initiator’s task ID for business identification)
+- The system immediately returns the generated `task_id` and your submitted `out_task_id`
+- You can query the task status using either `task_id` or `out_task_id` (choose one)
 - Supports optional webhook callback notifications
-- Task status updates in real time: `pending` → `processing` → `completed`
+- Task status updates in real-time: `pending` → `processing` → `completed`
 
 ### Multi-Model Support
 
-A unified API endpoint supporting various image and video generation models:
+A unified API endpoint supports multiple image and video generation models:
 
 - **Image Generation**: 5 models including GPT-4o, Gemini, Seedream
 - **Video Generation**: 4 models including Sora2, VEO3
@@ -157,19 +157,18 @@ A unified API endpoint supporting various image and video generation models:
 
 Charged by points, clear and transparent:
 
-- Each task returns an estimated point consumption
-- Actual point consumption is shown after task completion
-- Pay only for successfully generated content
+- Each task returns an estimated points consumption
+- Actual points consumption is shown after task completion
+- You only pay for successfully generated content
 - No hidden fees
 
 ### Flexible Configuration
 
-Supports various generation parameter settings:
+Supports various generation parameter configurations:
 
-- **Images**: multiple aspect ratios (1:1, 3:2, 2:3)
-- **Videos**: multiple aspect ratios (16:9, 9:16), durations (10 seconds, 15 seconds), resolutions
+- **Image**: multiple aspect ratios (1:1, 3:2, 2:3)
+- **Video**: multiple aspect ratios (16:9, 9:16), durations (10 seconds, 15 seconds), resolutions
 - Supports reference images (image-to-image, image-to-video)
-- Custom metadata
 
 ## Authentication Method
 
@@ -186,16 +185,16 @@ Visit the <a href={apiKeyUrl} target="_blank">API Key Management Page</a> to obt
 ## FAQ
 
 <AccordionGroup>
-  <Accordion title="How to get the API Key?">
-    Visit the <a href={apiKeyUrl} target="_blank">API Key Management page</a>, and log in to create and manage your API Key.
+  <Accordion title="How to get an API Key?">
+    Visit the <a href={apiKeyUrl} target="_blank">API Key Management Page</a>, where you can create and manage your API Key after logging in.
   </Accordion>
 
-  <Accordion title="How long does image and video generation take?">
-    All generation tasks are processed asynchronously. Image generation usually takes a few seconds to tens of seconds. Video generation depends on duration and resolution and typically takes 1-5 minutes. After submitting the task, a task_id is returned immediately, and you can track progress via the status query API.
+  <Accordion title="How long does it take to generate images and videos?">
+    All generation tasks are processed asynchronously. Image generation usually takes a few seconds to tens of seconds, while video generation depends on duration and resolution, typically taking 1-5 minutes. After submitting a task, you will immediately receive a task_id, which you can use to track progress via the status query API.
   </Accordion>
 
-  <Accordion title="How to check task status?">
-    Use the task status query API by providing the `task_id` returned when submitting the task, or your own `out_task_id` (choose one):
+  <Accordion title="How to query task status?">
+    Use the task status query API by providing the `task_id` returned when submitting the task, or your own `out_task_id` (either one):
 
     ```bash
     POST https://aireiter.com/api/openapi/query
@@ -205,31 +204,27 @@ Visit the <a href={apiKeyUrl} target="_blank">API Key Management Page</a> to obt
   </Accordion>
 
   <Accordion title="What is out_task_id?">
-    `out_task_id` is the initiator's task ID, which you define when submitting the task:
+    `out_task_id` is the client-side task ID, which you customize when submitting a task:
 
-    - **Required Parameter**: You must provide `out_task_id` when submitting the task
-    - **Business Identifier**: You can use your system’s order number, business ID, etc. as the identifier
-    - **Flexible Query**: You can query task status directly with `out_task_id` without saving the system-returned `task_id`
-    - **Result Association**: Both `task_id` and `out_task_id` will be returned in the query result to help associate business data
+    - **Required parameter**: `out_task_id` must be provided when submitting a task
+    - **Business identifier**: You can use an order number, business ID, etc., from your system as the identifier
+    - **Flexible query**: You can directly query task status using `out_task_id` without saving the system-returned `task_id`
+    - **Result association**: Both `task_id` and `out_task_id` will be returned in query results to help associate with your business data
   </Accordion>
 
-  <Accordion title="Is webhook callback supported?">
-    Yes, you can provide the `callback_url` parameter when submitting the task. After completion, the system will send a POST request to that URL, including the full task result.
-  </Accordion>
-
-  <Accordion title="How is billing handled?">
+  <Accordion title="How is billing done?">
     AIReiter uses a credit-based billing system:
 
-    - Estimated credits consumed (`estimated_credits`) are returned when submitting the task
-    - Actual credits used (`credits_used`) are returned after the task completes
-    - You only pay for successfully generated content; failed tasks are free
-    - Credit consumption varies by model
+    - An estimated credit consumption (`estimated_credits`) is returned when submitting a task
+    - Actual credits used (`credits_used`) are returned after the task is completed
+    - You only pay for successfully generated content; failed tasks are not charged
+    - Credits consumed vary by model
   </Accordion>
 
   <Accordion title="What image and video formats are supported?">
-    - **Images**: Supports common formats like JPEG, PNG
-    - **Videos**: Outputs MP4 format
-    - **Reference Images**: Input supports publicly accessible image URLs
+    - **Images**: Supports common formats such as JPEG, PNG
+    - **Videos**: Outputs in MP4 format
+    - **Reference images**: Input supports publicly accessible image URLs
   </Accordion>
 </AccordionGroup>
 

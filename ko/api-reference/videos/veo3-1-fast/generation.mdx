@@ -34,33 +34,33 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  모델 파라미터 객체
+  모델 매개변수 객체
 
   <Expandable title="params 객체 속성">
     <ParamField body="prompt" type="string" required>
-      비디오 생성용 텍스트 설명
+      비디오 생성을 위한 텍스트 설명
 
       제한 없음
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      참고 이미지의 URL, 비디오 생성용 (첫 프레임)
+      참고 이미지의 URL, 영상 생성(첫 프레임)에 사용
 
       * 단일 이미지만 지원
-      * 공개 접근 가능한 URL 지원
+      * 공개적으로 접근 가능한 URL 지원
     </ParamField>
 
     <ParamField body="end_image_url" type="string">
-      마지막 프레임 참고 이미지 URL
+      마지막 프레임 참고 이미지의 URL
 
       * 단일 이미지만 지원
-      * 공개 접근 가능한 URL 지원
+      * 공개적으로 접근 가능한 URL 지원
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="16:9">
-      비디오 가로세로 비율
+      비디오 가로 세로 비율
 
-      지원되는 가로세로 비율:
+      지원 비율:
 
       * `16:9` - 가로(기본값)
       * `9:16` - 세로
@@ -69,20 +69,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  요청자 작업 ID
+  발신자 작업 ID
 
-  사용자가 정의한 작업 식별자, 필수
-</ParamField>
-<ParamField body="callback_url" type="string">
-  작업 완료 후 콜백 알림 주소
-
-  작업 완료 시 시스템이 이 주소로 POST 요청을 보내 결과를 알림
-</ParamField>
-
-<ParamField body="metadata" type="object">
-  사용자 정의 메타데이터
-
-  조회 시 원본 그대로 반환되며 비즈니스 식별에 사용 가능
+  사용자 정의 작업 식별자, 필수
 </ParamField>
 
 ## Response

@@ -32,48 +32,48 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  モデルパラメータオブジェクト
+  モデルのパラメーターオブジェクト
 
   <Expandable title="params オブジェクトのプロパティ">
     <ParamField body="prompt" type="string" required>
-      画像生成のためのテキスト説明
+      画像生成のテキスト説明
 
       制限なし
     </ParamField>
 
     <ParamField body="image_url" type="array">
-      参照画像のURLリスト、画像変換生成用
+      画像生成の参考となるURLリスト（イメージからイメージへ）
 
       * 最大9枚の画像
-      * 公開アクセス可能なURLをサポート
+      * 公開アクセス可能なURLに対応
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="1:1">
       画像生成のアスペクト比
 
-      対応アスペクト比：
+      サポートされているアスペクト比：
 
       * `1:1` - 正方形（デフォルト）
-      * `16:9` - 横向きワイドスクリーン
-      * `9:16` - 縦向きスクリーン
-      * `4:3` - 横向き4:3
-      * `3:4` - 縦向き3:4
+      * `16:9` - 横長ワイドスクリーン
+      * `9:16` - 縦長スクリーン
+      * `4:3` - 横長4:3
+      * `3:4` - 縦長3:4
     </ParamField>
 
     <ParamField body="resolution" type="string" default="1K">
       画像解像度
 
-      対応解像度：
+      サポートされている解像度：
 
-      * `1K` - ベース解像度（デフォルト）
+      * `1K` - 基本解像度（デフォルト）
       * `2K` - 標準解像度
       * `4K` - 高解像度
     </ParamField>
 
     <ParamField body="output_n" type="string" default="1">
-      生成する画像の枚数
+      生成画像の枚数
 
-      対応値：
+      サポートされている値：
 
       * `1` - 1枚生成（デフォルト）
       * `2` - 2枚生成
@@ -83,20 +83,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発注者タスクID
+  発信者タスクID
 
   ユーザー定義のタスク識別子、必須
-</ParamField>
-<ParamField body="callback_url" type="string">
-  タスク完了後のコールバック通知先URL
-
-  タスク完了後、システムはこのURLにPOSTリクエストで結果を通知します
-</ParamField>
-
-<ParamField body="metadata" type="object">
-  カスタムメタデータ
-
-  クエリ結果返却時にそのまま返され、業務識別に利用可能
 </ParamField>
 
 ## Response

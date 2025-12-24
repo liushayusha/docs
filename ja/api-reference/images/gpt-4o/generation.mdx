@@ -34,18 +34,18 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="params" type="object" required>
   モデルパラメータオブジェクト
 
-  <Expandable title="params オブジェクトの属性">
+  <Expandable title="params オブジェクトのプロパティ">
     <ParamField body="prompt" type="string" required>
-      画像生成のテキスト説明
+      画像生成用のテキスト説明
 
       制限なし
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      参照画像のURL（画像から画像への生成に使用）
+      参考画像の URL、画像から画像への生成用
 
-      * 単一の画像のみ対応
-      * 公開アクセス可能なURL対応
+      * 単一画像のみ対応
+      * 公開アクセス可能な URL のみ対応
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="1:1">
@@ -54,28 +54,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       対応アスペクト比：
 
       * `1:1` - 正方形（デフォルト）
-      * `3:2` - 横方向 3:2
-      * `2:3` - 縦方向 2:3
+      * `3:2` - 横向き 3:2
+      * `2:3` - 縦向き 2:3
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発信者タスクID
+  発信元タスクID
 
-  ユーザー定義のタスク識別子、必須
-</ParamField>
-
-<ParamField body="callback_url" type="string">
-  タスク完了後のコールバック通知先URL
-
-  タスク完了後、システムはこのURLにPOSTリクエストを送信して結果を通知します
-</ParamField>
-
-<ParamField body="metadata" type="object">
-  カスタムメタデータ
-
-  クエリ結果時にそのまま返され、ビジネス識別に利用可能
+  ユーザー定義タスク識別子、必須
 </ParamField>
 
 ## Response

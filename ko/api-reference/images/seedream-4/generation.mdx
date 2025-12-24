@@ -32,7 +32,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  모델 매개변수 객체
+  모델 파라미터 객체
 
   <Expandable title="params 객체 속성">
     <ParamField body="prompt" type="string" required>
@@ -42,20 +42,20 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="image_url" type="array">
-      참조 이미지의 URL 목록, 이미지 투 이미지용
+      참고 이미지 URL 목록, 이미지에서 이미지 생성에 사용
 
-      * 최대 9장 이미지
-      * 공개 접근 가능한 URL 지원
+      * 최대 9개의 이미지
+      * 공개적으로 접근 가능한 URL 지원
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="1:1">
-      이미지 생성의 가로 세로 비율
+      이미지 생성 시 가로 세로 비율
 
       지원하는 비율:
 
       * `1:1` - 정사각형 (기본값)
       * `16:9` - 가로 와이드스크린
-      * `9:16` - 세로 세로스크린
+      * `9:16` - 세로 화면
       * `4:3` - 가로 4:3
       * `3:4` - 세로 3:4
     </ParamField>
@@ -67,13 +67,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
       * `1K` - 기본 해상도 (기본값)
       * `2K` - 표준 해상도
-      * `4K` - 고화질 해상도
+      * `4K` - 고해상도
     </ParamField>
 
     <ParamField body="output_n" type="string" default="1">
       생성할 이미지 수
 
-      지원하는 값:
+      지원 값:
 
       * `1` - 1장 생성 (기본값)
       * `2` - 2장 생성
@@ -83,20 +83,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  발신자 작업 ID
+  요청자 작업 ID
 
-  사용자가 정의하는 작업 식별자, 필수 입력
-</ParamField>
-<ParamField body="callback_url" type="string">
-  작업 완료 후 콜백 알림 주소
-
-  작업 완료 시 시스템이 이 주소로 POST 요청을 보내 결과를 알림
-</ParamField>
-
-<ParamField body="metadata" type="object">
-  사용자 정의 메타데이터
-
-  조회 시 그대로 반환되며, 비즈니스 식별에 사용 가능
+  사용자가 정의한 작업 식별자, 필수
 </ParamField>
 
 ## Response
