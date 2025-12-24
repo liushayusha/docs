@@ -1,9 +1,9 @@
 ---
 title: 'Seedream V4 Image Generation'
 description: |
-    - Asynchronous processing mode, returns task ID for later query
-    - Supports multiple generation modes including text-to-image and image-to-image
-api: 'POST https://test.aireiter.com/api/openapi/submit'
+    - Asynchronous processing mode, returns task ID for subsequent queries
+    - Supports multiple generation modes such as text-to-image and image-to-image
+api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
@@ -102,18 +102,18 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Response
 
 <ResponseField name="task_id" type="string">
-  Task ID, used for querying results
+  Task ID, used to query results
 </ResponseField>
 
 <ResponseField name="out_task_id" type="string">
-  Initiator's task ID, can be used to query results
+  Initiator's Task ID, can be used to query results
 </ResponseField>
 <ResponseField name="status" type="string">
   Initial status, fixed as `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  Estimated credits consumed
+  Estimated consumed credits
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
@@ -123,13 +123,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <RequestExample>
   ```bash cURL
   curl --request POST \
-    --url https://test.aireiter.com/api/openapi/submit \
+    --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
       "model": "seedream_v4",
       "params": {
-        "prompt": "Beautiful sunset by the seaside",
+        "prompt": "Beautiful sunset by the sea",
         "aspect_ratio": "16:9",
         "resolution": "2K",
         "output_n": "2"
@@ -140,12 +140,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```python Python
   import requests
 
-  url = "https://test.aireiter.com/api/openapi/submit"
+  url = "https://aireiter.com/api/openapi/submit"
 
   payload = {
       "model": "seedream_v4",
       "params": {
-          "prompt": "Beautiful sunset by the seaside",
+          "prompt": "Beautiful sunset by the sea",
           "aspect_ratio": "16:9",
           "resolution": "2K",
           "output_n": "2"
@@ -163,12 +163,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```
 
   ```javascript JavaScript
-  const url = "https://test.aireiter.com/api/openapi/submit";
+  const url = "https://aireiter.com/api/openapi/submit";
 
   const payload = {
     model: "seedream_v4",
     params: {
-      prompt: "Beautiful sunset by the seaside",
+      prompt: "Beautiful sunset by the sea",
       aspect_ratio: "16:9",
       resolution: "2K",
       output_n: "2"
@@ -202,12 +202,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   )
 
   func main() {
-      url := "https://test.aireiter.com/api/openapi/submit"
+      url := "https://aireiter.com/api/openapi/submit"
 
       payload := map[string]interface{}{
           "model": "seedream_v4",
           "params": map[string]interface{}{
-              "prompt":       "Beautiful sunset by the seaside",
+              "prompt":       "Beautiful sunset by the sea",
               "aspect_ratio": "16:9",
               "resolution":   "2K",
               "output_n":     "2",
@@ -240,13 +240,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   public class Main {
       public static void main(String[] args) throws Exception {
-          String url = "https://test.aireiter.com/api/openapi/submit";
+          String url = "https://aireiter.com/api/openapi/submit";
 
           String payload = """
           {
             "model": "seedream_v4",
             "params": {
-              "prompt": "Beautiful sunset by the seaside",
+              "prompt": "Beautiful sunset by the sea",
               "aspect_ratio": "16:9",
               "resolution": "2K",
               "output_n": "2"
@@ -273,12 +273,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```php PHP
   <?php
 
-  $url = "https://test.aireiter.com/api/openapi/submit";
+  $url = "https://aireiter.com/api/openapi/submit";
 
   $payload = [
       "model" => "seedream_v4",
       "params" => [
-          "prompt" => "Beautiful sunset by the seaside",
+          "prompt" => "Beautiful sunset by the sea",
           "aspect_ratio" => "16:9",
           "resolution" => "2K",
           "output_n" => "2"
@@ -306,12 +306,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   require 'json'
   require 'uri'
 
-  url = URI("https://test.aireiter.com/api/openapi/submit")
+  url = URI("https://aireiter.com/api/openapi/submit")
 
   payload = {
     model: "seedream_v4",
     params: {
-      prompt: "Beautiful sunset by the seaside",
+      prompt: "Beautiful sunset by the sea",
       aspect_ratio: "16:9",
       resolution: "2K",
       output_n: "2"
@@ -332,12 +332,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "https://test.aireiter.com/api/openapi/submit")!
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
 
   let payload: [String: Any] = [
       "model": "seedream_v4",
       "params": [
-          "prompt": "Beautiful sunset by the seaside",
+          "prompt": "Beautiful sunset by the sea",
           "aspect_ratio": "16:9",
           "resolution": "2K",
           "output_n": "2"
@@ -374,12 +374,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
       static async Task Main(string[] args)
       {
-          var url = "https://test.aireiter.com/api/openapi/submit";
+          var url = "https://aireiter.com/api/openapi/submit";
 
           var payload = @"{
               ""model"": ""seedream_v4"",
               ""params"": {
-                  ""prompt"": ""Beautiful sunset by the seaside"",
+                  ""prompt"": ""Beautiful sunset by the sea"",
                   ""aspect_ratio"": ""16:9"",
                   ""resolution"": ""2K"",
                   ""output_n"": ""2""
@@ -410,11 +410,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       curl = curl_easy_init();
 
       if(curl) {
-          const char *url = "https://test.aireiter.com/api/openapi/submit";
+          const char *url = "https://aireiter.com/api/openapi/submit";
           const char *payload = "{"
               "\"model\":\"seedream_v4\","
               "\"params\":{"
-                  "\"prompt\":\"Beautiful sunset by the seaside\","
+                  "\"prompt\":\"Beautiful sunset by the sea\","
                   "\"aspect_ratio\":\"16:9\","
                   "\"resolution\":\"2K\","
                   "\"output_n\":\"2\""
@@ -450,12 +450,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
-          NSURL *url = [NSURL URLWithString:@"https://test.aireiter.com/api/openapi/submit"];
+          NSURL *url = [NSURL URLWithString:@"https://aireiter.com/api/openapi/submit"];
 
           NSDictionary *payload = @{
               @"model": @"seedream_v4",
               @"params": @{
-                  @"prompt": @"Beautiful sunset by the seaside",
+                  @"prompt": @"Beautiful sunset by the sea",
                   @"aspect_ratio": @"16:9",
                   @"resolution": @"2K",
                   @"output_n": @"2"
@@ -498,12 +498,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   open Cohttp
   open Cohttp_lwt_unix
 
-  let url = "https://test.aireiter.com/api/openapi/submit"
+  let url = "https://aireiter.com/api/openapi/submit"
 
   let payload = {|{
     "model": "seedream_v4",
     "params": {
-      "prompt": "Beautiful sunset by the seaside",
+      "prompt": "Beautiful sunset by the sea",
       "aspect_ratio": "16:9",
       "resolution": "2K",
       "output_n": "2"
@@ -529,12 +529,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   import 'package:http/http.dart' as http;
 
   void main() async {
-    final url = Uri.parse('https://test.aireiter.com/api/openapi/submit');
+    final url = Uri.parse('https://aireiter.com/api/openapi/submit');
 
     final payload = {
       'model': 'seedream_v4',
       'params': {
-        'prompt': 'Beautiful sunset by the seaside',
+        'prompt': 'Beautiful sunset by the sea',
         'aspect_ratio': '16:9',
         'resolution': '2K',
         'output_n': '2'
@@ -558,12 +558,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   library(httr)
   library(jsonlite)
 
-  url <- "https://test.aireiter.com/api/openapi/submit"
+  url <- "https://aireiter.com/api/openapi/submit"
 
   payload <- list(
     model = "seedream_v4",
     params = list(
-      prompt = "Beautiful sunset by the seaside",
+      prompt = "Beautiful sunset by the sea",
       aspect_ratio = "16:9",
       resolution = "2K",
       output_n = "2"

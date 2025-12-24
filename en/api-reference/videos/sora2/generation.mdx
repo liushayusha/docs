@@ -1,9 +1,9 @@
 ---
 title: 'Sora2 Video Generation'
 description: |
-    - Asynchronous processing mode, returns task ID for subsequent queries
-    - Supports text-to-video, image-to-video and other generation modes
-api: 'POST https://test.aireiter.com/api/openapi/submit'
+    - Asynchronous processing mode, returns a task ID for subsequent querying
+    - Supports generation modes such as text-to-video and image-to-video
+api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
@@ -88,18 +88,18 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Response
 
 <ResponseField name="task_id" type="string">
-  Task ID used to query the result
+  Task ID for querying the result
 </ResponseField>
 
 <ResponseField name="out_task_id" type="string">
-  Initiator task ID, can be used to query the result
+  Initiator's task ID, which can be used to query the result
 </ResponseField>
 <ResponseField name="status" type="string">
-  Initial status, fixed to `"pending"`
+  Initial status, fixed as `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  Estimated consumed credits
+  Estimated credit consumption
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
@@ -109,7 +109,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <RequestExample>
   ```bash cURL
   curl --request POST \
-    --url https://test.aireiter.com/api/openapi/submit \
+    --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
@@ -126,7 +126,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```python Python
   import requests
 
-  url = "https://test.aireiter.com/api/openapi/submit"
+  url = "https://aireiter.com/api/openapi/submit"
 
   payload = {
       "model": "sora2",
@@ -149,7 +149,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```
 
   ```javascript JavaScript
-  const url = "https://test.aireiter.com/api/openapi/submit";
+  const url = "https://aireiter.com/api/openapi/submit";
 
   const payload = {
     model: "sora2",
@@ -188,7 +188,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   )
 
   func main() {
-      url := "https://test.aireiter.com/api/openapi/submit"
+      url := "https://aireiter.com/api/openapi/submit"
 
       payload := map[string]interface{}{
           "model": "sora2",
@@ -228,7 +228,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   public class Main {
       public static void main(String[] args) {
           try {
-              URL url = new URL("https://test.aireiter.com/api/openapi/submit");
+              URL url = new URL("https://aireiter.com/api/openapi/submit");
               HttpURLConnection conn = (HttpURLConnection) url.openConnection();
               conn.setRequestMethod("POST");
               conn.setRequestProperty("Authorization", "Bearer <token>");
@@ -260,7 +260,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   ```php PHP
   <?php
-  $url = "https://test.aireiter.com/api/openapi/submit";
+  $url = "https://aireiter.com/api/openapi/submit";
 
   $payload = array(
       "model" => "sora2",
@@ -293,7 +293,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   require 'json'
   require 'uri'
 
-  url = URI.parse("https://test.aireiter.com/api/openapi/submit")
+  url = URI.parse("https://aireiter.com/api/openapi/submit")
 
   payload = {
     model: "sora2",
@@ -318,7 +318,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "https://test.aireiter.com/api/openapi/submit")!
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
   var request = URLRequest(url: url)
   request.httpMethod = "POST"
   request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
@@ -354,7 +354,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
       static async Task Main(string[] args)
       {
-          var url = "https://test.aireiter.com/api/openapi/submit";
+          var url = "https://aireiter.com/api/openapi/submit";
           var payload = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"A cat walking in the garden\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"},\"out_task_id\":\"my_task_123456\"}";
 
           using (var client = new HttpClient())
@@ -380,7 +380,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
       curl = curl_easy_init();
       if(curl) {
-          curl_easy_setopt(curl, CURLOPT_URL, "https://test.aireiter.com/api/openapi/submit");
+          curl_easy_setopt(curl, CURLOPT_URL, "https://aireiter.com/api/openapi/submit");
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
@@ -404,7 +404,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
-          NSURL *url = [NSURL URLWithString:@"https://test.aireiter.com/api/openapi/submit"];
+          NSURL *url = [NSURL URLWithString:@"https://aireiter.com/api/openapi/submit"];
           NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
           [request setHTTPMethod:@"POST"];
           [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
@@ -442,7 +442,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   open Cohttp
   open Cohttp_lwt_unix
 
-  let url = "https://test.aireiter.com/api/openapi/submit"
+  let url = "https://aireiter.com/api/openapi/submit"
 
   let payload = {|{"model":"sora2","params":{"prompt":"A cat walking in the garden","aspect_ratio":"16:9","video_length":"10"},"out_task_id":"my_task_123456"}|}
 
@@ -464,7 +464,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   import 'package:http/http.dart' as http;
 
   void main() async {
-    var url = Uri.parse('https://test.aireiter.com/api/openapi/submit');
+    var url = Uri.parse('https://aireiter.com/api/openapi/submit');
 
     var payload = {
       'model': 'sora2',
@@ -493,7 +493,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   library(httr)
   library(jsonlite)
 
-  url <- "https://test.aireiter.com/api/openapi/submit"
+  url <- "https://aireiter.com/api/openapi/submit"
 
   payload <- list(
     model = "sora2",

@@ -32,7 +32,7 @@ AIReiter 是一个统一的 AI 内容生成 API 平台，提供图像和视频�
 
 ```bash
 curl --request POST \
-  --url https://test.aireiter.com/api/openapi/submit \
+  --url https://aireiter.com/api/openapi/submit \
   --header 'Authorization: Bearer YOUR_API_KEY' \
   --header 'Content-Type: application/json' \
   --data '{
@@ -52,7 +52,7 @@ curl --request POST \
 ```bash
 # 使用 task_id 查询
 curl --request POST \
-  --url https://test.aireiter.com/api/openapi/query \
+  --url https://aireiter.com/api/openapi/query \
   --header 'Authorization: Bearer YOUR_API_KEY' \
   --header 'Content-Type: application/json' \
   --data-raw '{
@@ -61,7 +61,7 @@ curl --request POST \
 
 # 或使用 out_task_id 查询
 curl --request POST \
-  --url https://test.aireiter.com/api/openapi/query \
+  --url https://aireiter.com/api/openapi/query \
   --header 'Authorization: Bearer YOUR_API_KEY' \
   --header 'Content-Type: application/json' \
   --data-raw '{
@@ -199,7 +199,7 @@ Authorization: Bearer YOUR_API_KEY
     使用任务状态查询 API，可以传入提交任务时返回的 `task_id`，或者您自己设置的 `out_task_id`（二选一）：
 
     ```bash
-    POST https://test.aireiter.com/api/openapi/query
+    POST https://aireiter.com/api/openapi/query
     ```
 
     查看 [任务状态查询文档](/zh/api-reference/tasks/status) 了解详情。

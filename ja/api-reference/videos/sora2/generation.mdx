@@ -1,9 +1,9 @@
 ---
-title: 'Sora2 ビデオ生成'
+title: 'Sora2 動画生成'
 description: |
-    - 非同期処理モード、タスクIDを返し後続のクエリに使用
-    - テキストからビデオ、画像からビデオなどの生成モードをサポート
-api: 'POST https://test.aireiter.com/api/openapi/submit'
+    - 非同期処理モードで、タスクIDを返し、後続のクエリに使用可能
+    - テキストから動画生成、画像から動画生成などの生成モードに対応
+api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
@@ -88,18 +88,18 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Response
 
 <ResponseField name="task_id" type="string">
-  タスクID、結果の照会に使用されます
+  タスクID、結果の照会に使用
 </ResponseField>
 
 <ResponseField name="out_task_id" type="string">
-  発起者タスクID、結果の照会に使用できます
+  発行元タスクID、結果の照会に使用可能
 </ResponseField>
 <ResponseField name="status" type="string">
   初期状態、固定で `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  推定消費クレジット
+  予測消費クレジット
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
@@ -109,13 +109,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <RequestExample>
   ```bash cURL
   curl --request POST \
-    --url https://test.aireiter.com/api/openapi/submit \
+    --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
       "model": "sora2",
       "params": {
-        "prompt": "一只猫在花园里散步",
+        "prompt": "庭園で散歩する猫",
         "aspect_ratio": "16:9",
         "video_length": "10"
       },
@@ -126,12 +126,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```python Python
   import requests
 
-  url = "https://test.aireiter.com/api/openapi/submit"
+  url = "https://aireiter.com/api/openapi/submit"
 
   payload = {
       "model": "sora2",
       "params": {
-          "prompt": "一只猫在花园里散歩",
+          "prompt": "庭園で散歩する猫",
           "aspect_ratio": "16:9",
           "video_length": "10"
       },
@@ -149,12 +149,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```
 
   ```javascript JavaScript
-  const url = "https://test.aireiter.com/api/openapi/submit";
+  const url = "https://aireiter.com/api/openapi/submit";
 
   const payload = {
     model: "sora2",
     params: {
-      prompt: "一只猫在花园里散歩",
+      prompt: "庭園で散歩する猫",
       aspect_ratio: "16:9",
       video_length: "10"
     },
@@ -188,12 +188,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   )
 
   func main() {
-      url := "https://test.aireiter.com/api/openapi/submit"
+      url := "https://aireiter.com/api/openapi/submit"
 
       payload := map[string]interface{}{
           "model": "sora2",
           "params": map[string]interface{}{
-              "prompt":       "一只猫在花园里散歩",
+              "prompt":       "庭園で散歩する猫",
               "aspect_ratio": "16:9",
               "video_length": "10",
           },
@@ -228,14 +228,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   public class Main {
       public static void main(String[] args) {
           try {
-              URL url = new URL("https://test.aireiter.com/api/openapi/submit");
+              URL url = new URL("https://aireiter.com/api/openapi/submit");
               HttpURLConnection conn = (HttpURLConnection) url.openConnection();
               conn.setRequestMethod("POST");
               conn.setRequestProperty("Authorization", "Bearer <token>");
               conn.setRequestProperty("Content-Type", "application/json");
               conn.setDoOutput(true);
 
-              String jsonPayload = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"一只猫在花园里散歩\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"},\"out_task_id\":\"my_task_123456\"}";
+              String jsonPayload = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"庭園で散歩する猫\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"},\"out_task_id\":\"my_task_123456\"}";
 
               OutputStream os = conn.getOutputStream();
               os.write(jsonPayload.getBytes());
@@ -260,12 +260,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   ```php PHP
   <?php
-  $url = "https://test.aireiter.com/api/openapi/submit";
+  $url = "https://aireiter.com/api/openapi/submit";
 
   $payload = array(
       "model" => "sora2",
       "params" => array(
-          "prompt" => "一只猫在花园里散歩",
+          "prompt" => "庭園で散歩する猫",
           "aspect_ratio" => "16:9",
           "video_length" => "10"
       ),
@@ -293,12 +293,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   require 'json'
   require 'uri'
 
-  url = URI.parse("https://test.aireiter.com/api/openapi/submit")
+  url = URI.parse("https://aireiter.com/api/openapi/submit")
 
   payload = {
     model: "sora2",
     params: {
-      prompt: "一只猫在花园里散歩",
+      prompt: "庭園で散歩する猫",
       aspect_ratio: "16:9",
       video_length: "10"
     },
@@ -318,7 +318,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "https://test.aireiter.com/api/openapi/submit")!
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
   var request = URLRequest(url: url)
   request.httpMethod = "POST"
   request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
@@ -327,7 +327,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload: [String: Any] = [
       "model": "sora2",
       "params": [
-          "prompt": "一只猫在花园里散歩",
+          "prompt": "庭園で散歩する猫",
           "aspect_ratio": "16:9",
           "video_length": "10"
       ],
@@ -354,8 +354,8 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
       static async Task Main(string[] args)
       {
-          var url = "https://test.aireiter.com/api/openapi/submit";
-          var payload = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"一只猫在花园里散歩\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"},\"out_task_id\":\"my_task_123456\"}";
+          var url = "https://aireiter.com/api/openapi/submit";
+          var payload = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"庭園で散歩する猫\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"},\"out_task_id\":\"my_task_123456\"}";
 
           using (var client = new HttpClient())
           {
@@ -380,14 +380,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
       curl = curl_easy_init();
       if(curl) {
-          curl_easy_setopt(curl, CURLOPT_URL, "https://test.aireiter.com/api/openapi/submit");
+          curl_easy_setopt(curl, CURLOPT_URL, "https://aireiter.com/api/openapi/submit");
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
           headers = curl_slist_append(headers, "Content-Type: application/json");
           curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-          const char *data = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"一只猫在花园里散歩\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"},\"out_task_id\":\"my_task_123456\"}";
+          const char *data = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"庭園で散歩する猫\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"},\"out_task_id\":\"my_task_123456\"}";
           curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
 
           res = curl_easy_perform(curl);
@@ -404,7 +404,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
-          NSURL *url = [NSURL URLWithString:@"https://test.aireiter.com/api/openapi/submit"];
+          NSURL *url = [NSURL URLWithString:@"https://aireiter.com/api/openapi/submit"];
           NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
           [request setHTTPMethod:@"POST"];
           [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
@@ -413,7 +413,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           NSDictionary *payload = @{
               @"model": @"sora2",
               @"params": @{
-                  @"prompt": @"一只猫在花园里散歩",
+                  @"prompt": @"庭園で散歩する猫",
                   @"aspect_ratio": @"16:9",
                   @"video_length": @"10"
               },
@@ -442,9 +442,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   open Cohttp
   open Cohttp_lwt_unix
 
-  let url = "https://test.aireiter.com/api/openapi/submit"
+  let url = "https://aireiter.com/api/openapi/submit"
 
-  let payload = {|{"model":"sora2","params":{"prompt":"一只猫在花园里散歩","aspect_ratio":"16:9","video_length":"10"},"out_task_id":"my_task_123456"}|}
+  let payload = {|{"model":"sora2","params":{"prompt":"庭園で散歩する猫","aspect_ratio":"16:9","video_length":"10"},"out_task_id":"my_task_123456"}|}
 
   let () =
     let headers = Header.init ()
@@ -464,12 +464,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   import 'package:http/http.dart' as http;
 
   void main() async {
-    var url = Uri.parse('https://test.aireiter.com/api/openapi/submit');
+    var url = Uri.parse('https://aireiter.com/api/openapi/submit');
 
     var payload = {
       'model': 'sora2',
       'params': {
-        'prompt': '一只猫在花园里散歩',
+        'prompt': '庭園で散歩する猫',
         'aspect_ratio': '16:9',
         'video_length': '10'
       },
@@ -493,12 +493,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   library(httr)
   library(jsonlite)
 
-  url <- "https://test.aireiter.com/api/openapi/submit"
+  url <- "https://aireiter.com/api/openapi/submit"
 
   payload <- list(
     model = "sora2",
     params = list(
-      prompt = "一只猫在花园里散歩",
+      prompt = "庭園で散歩する猫",
       aspect_ratio = "16:9",
       video_length = "10"
     ),
@@ -538,7 +538,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```json 400
     {
         "statusCode": 400,
-        "message": "リクエストパラメータが無効です",
+        "message": "リクエストパラメーターが無効です",
         "ok": false
     }
   ```
@@ -554,7 +554,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 433,
-      "message": "アカウント残高が不足しています。チャージ後に再試行してください"
+      "message": "アカウント残高が不足しています。チャージ後に再度お試しください"
     }
   }
   ```
@@ -563,7 +563,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 500,
-      "message": "サーバー内部エラーが発生しました。後でもう一度お試しください"
+      "message": "サーバー内部エラーが発生しました。後ほど再試行してください"
     }
   }
   ```

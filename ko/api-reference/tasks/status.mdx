@@ -3,8 +3,8 @@ title: '작업 상태 조회'
 description: |
     - 비동기 작업의 실행 상태와 결과 조회
     - 실시간 상태 업데이트 및 진행 상황 추적
-    - 작업 완료 시 생성된 결과 획득
-api: 'POST https://test.aireiter.com/api/openapi/query'
+    - 작업 완료 시 생성 결과 획득
+api: 'POST https://aireiter.com/api/openapi/query'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
@@ -47,7 +47,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ResponseField name="status" type="string">
   작업 상태:
 
-  * `pending` - 대기 중
+  * `pending` - 처리 대기 중
   * `processing` - 처리 중
   * `completed` - 성공적으로 완료됨
   * `failed` - 실패
@@ -56,19 +56,19 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ResponseField name="input" type="object">
   작업 입력(선택 사항, 특정 상황에서만 반환됨)
 
-  작업 제출 시의 전체 파라미터 정보를 포함
+  작업 제출 시 전체 파라미터 정보를 포함
 </ResponseField>
 
 <ResponseField name="output" type="array">
-  작업 출력(작업 완료 후 반환됨)
+  작업 출력(작업 완료 후 반환)
 
-  생성된 결과의 배열을 포함하며, 각 요소는 생성된 리소스를 가리키는 `url` 필드를 포함
+  생성 결과를 포함하는 배열로, 각 요소는 생성된 리소스를 가리키는 `url` 필드를 포함
 </ResponseField>
 
 <ResponseField name="error" type="object">
-  오류 정보(작업 실패 시 반환됨)
+  오류 정보(작업 실패 시 반환)
 
-  <Expandable title="Properties">
+  <Expandable title="속성">
     <ResponseField name="code" type="string">
       오류 코드
     </ResponseField>
@@ -94,7 +94,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <RequestExample>
   ```bash cURL (task_id 사용)
   curl --request POST \
-    --url 'https://test.aireiter.com/api/openapi/query' \
+    --url 'https://aireiter.com/api/openapi/query' \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data-raw '{
@@ -104,7 +104,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   ```bash cURL (out_task_id 사용)
   curl --request POST \
-    --url 'https://test.aireiter.com/api/openapi/query' \
+    --url 'https://aireiter.com/api/openapi/query' \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data-raw '{
@@ -115,7 +115,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```python Python (task_id 사용)
   import requests
 
-  url = "https://test.aireiter.com/api/openapi/query"
+  url = "https://aireiter.com/api/openapi/query"
 
   headers = {
       "Authorization": "Bearer <token>",
@@ -134,7 +134,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```python Python (out_task_id 사용)
   import requests
 
-  url = "https://test.aireiter.com/api/openapi/query"
+  url = "https://aireiter.com/api/openapi/query"
 
   headers = {
       "Authorization": "Bearer <token>",
@@ -151,7 +151,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```
 
   ```javascript JavaScript
-  const url = "https://test.aireiter.com/api/openapi/query";
+  const url = "https://aireiter.com/api/openapi/query";
 
   const headers = {
     "Authorization": "Bearer <token>",
@@ -184,7 +184,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   )
 
   func main() {
-      url := "https://test.aireiter.com/api/openapi/query"
+      url := "https://aireiter.com/api/openapi/query"
 
       payload := map[string]interface{}{
           "task_id": "order_lwU2d-VkUq9-tlCCmrdYu",
@@ -218,7 +218,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   public class Main {
       public static void main(String[] args) {
           try {
-              URL url = new URL("https://test.aireiter.com/api/openapi/query");
+              URL url = new URL("https://aireiter.com/api/openapi/query");
               HttpURLConnection conn = (HttpURLConnection) url.openConnection();
               conn.setRequestMethod("POST");
               conn.setRequestProperty("Authorization", "Bearer <token>");
@@ -251,7 +251,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```php PHP
   <?php
 
-  $url = "https://test.aireiter.com/api/openapi/query";
+  $url = "https://aireiter.com/api/openapi/query";
 
   $payload = array(
       "task_id" => "order_lwU2d-VkUq9-tlCCmrdYu"
@@ -278,7 +278,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   require 'json'
   require 'uri'
 
-  url = URI.parse("https://test.aireiter.com/api/openapi/query")
+  url = URI.parse("https://aireiter.com/api/openapi/query")
 
   payload = {
     task_id: "order_lwU2d-VkUq9-tlCCmrdYu"
@@ -297,7 +297,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "https://test.aireiter.com/api/openapi/query")!
+  let url = URL(string: "https://aireiter.com/api/openapi/query")!
   var request = URLRequest(url: url)
   request.httpMethod = "POST"
   request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
@@ -333,7 +333,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
       static async Task Main(string[] args)
       {
-          var url = "https://test.aireiter.com/api/openapi/query";
+          var url = "https://aireiter.com/api/openapi/query";
           var payload = "{\"task_id\":\"order_lwU2d-VkUq9-tlCCmrdYu\"}";
 
           using var client = new HttpClient();
@@ -359,7 +359,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       curl = curl_easy_init();
 
       if(curl) {
-          const char *url = "https://test.aireiter.com/api/openapi/query";
+          const char *url = "https://aireiter.com/api/openapi/query";
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
@@ -392,7 +392,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
-          NSURL *url = [NSURL URLWithString:@"https://test.aireiter.com/api/openapi/query"];
+          NSURL *url = [NSURL URLWithString:@"https://aireiter.com/api/openapi/query"];
 
           NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
           [request setHTTPMethod:@"POST"];
@@ -431,7 +431,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   open Cohttp
   open Cohttp_lwt_unix
 
-  let url = "https://test.aireiter.com/api/openapi/query"
+  let url = "https://aireiter.com/api/openapi/query"
 
   let payload = {|{"task_id":"order_lwU2d-VkUq9-tlCCmrdYu"}|}
 
@@ -454,7 +454,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   import 'package:http/http.dart' as http;
 
   void main() async {
-    final url = Uri.parse('https://test.aireiter.com/api/openapi/query');
+    final url = Uri.parse('https://aireiter.com/api/openapi/query');
 
     final payload = {
       'task_id': 'order_lwU2d-VkUq9-tlCCmrdYu'
@@ -477,7 +477,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   library(httr)
   library(jsonlite)
 
-  url <- "https://test.aireiter.com/api/openapi/query"
+  url <- "https://aireiter.com/api/openapi/query"
 
   payload <- list(
     task_id = "order_lwU2d-VkUq9-tlCCmrdYu"
@@ -543,7 +543,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 500,
-      "message": "서버 내부 오류, 나중에 다시 시도해주세요"
+      "message": "서버 내부 오류, 잠시 후 다시 시도해 주세요"
     }
   }
   ```

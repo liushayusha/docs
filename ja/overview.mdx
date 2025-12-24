@@ -25,19 +25,19 @@ AIReiter は統一された AI コンテンツ生成 API プラットフォー�
 
 ## API ワークフロー
 
-### 1. 生成タスクの提出
+### 1. 生成タスクの送信
 
-すべての画像と動画の生成は非同期処理モードを採用しています。タスクを提出するときは `out_task_id`（発信側のタスクID）を渡す必要があり、システムは `task_id` と `out_task_id` を返します：
+すべての画像および動画生成は非同期処理モードを採用しています。タスクを送信する際には `out_task_id`（発行元タスクID）を渡す必要があり、システムは `task_id` と `out_task_id` を返します：
 
 ```bash
 curl --request POST \
-  --url https://test.aireiter.com/api/openapi/submit \
+  --url https://aireiter.com/api/openapi/submit \
   --header 'Authorization: Bearer YOUR_API_KEY' \
   --header 'Content-Type: application/json' \
   --data '{
     "model": "gpt_4o",
     "params": {
-      "prompt": "かわいい猫が庭にいる",
+      "prompt": "かわいい猫が庭にいます",
       "aspect_ratio": "1:1"
     },
     "out_task_id": "my_task_123456"
@@ -46,21 +46,21 @@ curl --request POST \
 
 ### 2. タスクステータスの照会
 
-返却された `task_id` または提出した際の `out_task_id` を使用してタスクの進捗と結果を照会します（いずれか一方）：
+返された `task_id` または送信時の `out_task_id` を使ってタスクの進行状況や結果を照会します（どちらか一方を使用）：
 
 ```bash
-# task_id を使用して照会
+# task_id で照会
 curl --request POST \
-  --url https://test.aireiter.com/api/openapi/query \
+  --url https://aireiter.com/api/openapi/query \
   --header 'Authorization: Bearer YOUR_API_KEY' \
   --header 'Content-Type: application/json' \
   --data-raw '{
     "task_id": "order_xxxxxxxxxxxx"
   }'
 
-# または out_task_id を使用して照会
+# または out_task_id で照会
 curl --request POST \
-  --url https://test.aireiter.com/api/openapi/query \
+  --url https://aireiter.com/api/openapi/query \
   --header 'Authorization: Bearer YOUR_API_KEY' \
   --header 'Content-Type: application/json' \
   --data-raw '{
@@ -70,7 +70,7 @@ curl --request POST \
 
 ### 3. 生成結果の取得
 
-タスクが完了すると、レスポンスに生成された画像または動画のURLが含まれます：
+タスク完了後、レスポンスには生成された画像または動画のURLが含まれます：
 
 ```json
 {
@@ -186,50 +186,50 @@ Authorization: Bearer YOUR_API_KEY
 ## よくある質問
 
 <AccordionGroup>
-  <Accordion title="APIキーはどうやって取得しますか？">
-    <a href={apiKeyUrl} target="_blank">APIキー管理ページ</a>にアクセスし、ログインするとAPIキーを作成および管理できます。
+  <Accordion title="APIキーはどのように取得しますか？">
+    <a href={apiKeyUrl} target="_blank">APIキー管理ページ</a>にアクセスし、ログイン後にAPIキーの作成と管理ができます。
   </Accordion>
 
   <Accordion title="画像および動画の生成にはどれくらい時間がかかりますか？">
-    すべての生成タスクは非同期処理されています。画像生成は通常数秒から数十秒かかり、動画生成は長さと解像度に応じて通常1～5分かかります。タスクを送信するとすぐにtask_idが返され、状態確認APIで進行状況を追跡できます。
+    すべての生成タスクは非同期で処理されます。画像生成は通常数秒から数十秒、動画生成は長さや解像度により、通常1〜5分かかります。タスクを提出するとすぐに task_id が返され、ステータス照会APIで進行状況を追跡できます。
   </Accordion>
 
-  <Accordion title="タスクの状態はどうやって確認しますか？">
-    タスク状態確認APIを使用し、送信時に返された`task_id`またはお客様が設定した`out_task_id`（どちらか一方）を渡してください：
+  <Accordion title="タスクのステータスはどのように確認しますか？">
+    タスクステータス照会APIを使い、提出時に返された `task_id` か、ご自分で設定した `out_task_id`（いずれか一方）を渡します：
 
     ```bash
-    POST https://test.aireiter.com/api/openapi/query
+    POST https://aireiter.com/api/openapi/query
     ```
 
-    詳細は[タスク状態確認ドキュメント](/en/api-reference/tasks/status)をご覧ください。
+    詳細は [タスクステータス照会ドキュメント](/ja/api-reference/tasks/status) をご覧ください。
   </Accordion>
 
   <Accordion title="out_task_idとは何ですか？">
-    `out_task_id`は依頼者が設定するタスクIDで、タスク送信時にカスタム設定します：
+    `out_task_id` は依頼側のタスクIDで、タスク提出時にカスタム設定します：
 
-    - **必須パラメータ**：タスク送信時に必ず`out_task_id`を渡す必要があります
-    - **ビジネス識別**：注文番号やビジネスIDなど、システム内の識別子として使用できます
-    - **柔軟な検索**：システムから返される`task_id`を保存しなくても、直接`out_task_id`でタスク状態を照会可能です
-    - **結果の紐付け**：照会結果には`task_id`と`out_task_id`が共に返され、ビジネスデータの紐付けに便利です
+    - **必須パラメータ**：タスク提出時に必ず `out_task_id` を渡してください
+    - **業務識別**：システム内の注文番号や業務IDなどを識別子として使えます
+    - **柔軟な照会**：システムから返される `task_id` を保存しなくても、`out_task_id` で直接タスクステータスを調べられます
+    - **結果の連携**：照会結果には `task_id` と `out_task_id` の両方が返るため、業務データとの紐付けが容易です
   </Accordion>
 
-  <Accordion title="Webhookコールバックはサポートされていますか？">
-    はい、タスク送信時に`callback_url`パラメータを渡すことができます。タスク完了後、システムは該当URLへPOSTリクエストを送信し、完全なタスク結果を含みます。
+  <Accordion title="Webhookコールバックは対応していますか？">
+    はい。タスク提出時に `callback_url` パラメータを渡すことが可能です。タスク完了後、システムはそのURLにPOSTリクエストを送り、タスクの結果をすべて含みます。
   </Accordion>
 
   <Accordion title="料金はどのように計算されますか？">
-    AIReiterはポイント制料金を採用しています：
+    AIReiterはポイント制料金体系を採用しています：
 
-    - タスク送信時に見積もりポイント（`estimated_credits`）が返されます
-    - タスク完了後に実消費ポイント（`credits_used`）が返されます
-    - 成功した生成内容にのみ課金し、失敗タスクは課金されません
-    - モデルによりポイント消費量が異なります
+    - タスク提出時に推定消費ポイント（`estimated_credits`）が返されます
+    - タスク完了後に実際の消費ポイント（`credits_used`）が返されます
+    - 成功した生成内容にのみ課金され、失敗したタスクは無料です
+    - モデルによってポイント消費が異なります
   </Accordion>
 
-  <Accordion title="どの画像形式と動画形式がサポートされていますか？">
-    - **画像**：JPEG、PNGなど一般的な形式をサポート
-    - **動画**：出力フォーマットはMP4
-    - **参考画像**：入力は公開アクセス可能な画像URLをサポート
+  <Accordion title="対応している画像フォーマットと動画フォーマットは？">
+    - **画像**：JPEG、PNGなどの一般的なフォーマットに対応
+    - **動画**：出力はMP4フォーマット
+    - **参照画像**：入力には公開アクセス可能な画像URLが使用可能
   </Accordion>
 </AccordionGroup>
 

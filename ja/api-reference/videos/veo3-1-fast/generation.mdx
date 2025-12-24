@@ -1,11 +1,11 @@
 ---
-title: 'VEO3.1 Fast ビデオ生成'
+title: 'VEO3.1 Fast 動画生成'
 description: |
-    - 非同期処理モードで、タスクIDを返し後続のクエリに使用
-    - テキストからビデオ、画像からビデオなど生成モードをサポート
-    - 高速版で速度最適化済み
-    - 初期フレームと末尾フレームの参照画像をサポート
-api: 'POST https://test.aireiter.com/api/openapi/submit'
+    - 非同期処理モード、後続のクエリに使用するタスクIDを返す
+    - テキストから動画、画像から動画などの生成モードをサポート
+    - 高速バージョン、速度最適化済み
+    - 最初と最後のフレームの参照画像をサポート
+api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
@@ -88,14 +88,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Response
 
 <ResponseField name="task_id" type="string">
-  タスクID。結果を照会するために使用します
+  タスクID、結果のクエリに使用されます
 </ResponseField>
 
 <ResponseField name="out_task_id" type="string">
-  発信者のタスクID。結果を照会するために使用可能です
+  発信者タスクID、結果のクエリに使用可能です
 </ResponseField>
 <ResponseField name="status" type="string">
-  初期状態。固定値は `"pending"`
+  初期状態で、固定値は `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
@@ -103,19 +103,19 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  作成日時（ISOフォーマット）
+  作成日時（ISO形式）
 </ResponseField>
 
 <RequestExample>
   ```bash cURL
   curl --request POST \
-    --url https://test.aireiter.com/api/openapi/submit \
+    --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
       "model": "veo3_1_fast",
       "params": {
-        "prompt": "山間の霧がゆっくり流れる",
+        "prompt": "山間の霧がゆっくりと流れる",
         "image_url": "https://example.com/start.jpg",
         "end_image_url": "https://example.com/end.jpg",
         "aspect_ratio": "16:9"
@@ -127,12 +127,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```python Python
   import requests
 
-  url = "https://test.aireiter.com/api/openapi/submit"
+  url = "https://aireiter.com/api/openapi/submit"
 
   payload = {
       "model": "veo3_1_fast",
       "params": {
-          "prompt": "山間の霧がゆっくり流れる",
+          "prompt": "山間の霧がゆっくりと流れる",
           "image_url": "https://example.com/start.jpg",
           "end_image_url": "https://example.com/end.jpg",
           "aspect_ratio": "16:9"
@@ -151,12 +151,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```
 
   ```javascript JavaScript
-  const url = "https://test.aireiter.com/api/openapi/submit";
+  const url = "https://aireiter.com/api/openapi/submit";
 
   const payload = {
     model: "veo3_1_fast",
     params: {
-      prompt: "山間の霧がゆっくり流れる",
+      prompt: "山間の霧がゆっくりと流れる",
       image_url: "https://example.com/start.jpg",
       end_image_url: "https://example.com/end.jpg",
       aspect_ratio: "16:9"
@@ -191,12 +191,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   )
 
   func main() {
-      url := "https://test.aireiter.com/api/openapi/submit"
+      url := "https://aireiter.com/api/openapi/submit"
 
       payload := map[string]interface{}{
           "model": "veo3_1_fast",
           "params": map[string]interface{}{
-              "prompt":        "山間の霧がゆっくり流れる",
+              "prompt":        "山間の霧がゆっくりと流れる",
               "image_url":     "https://example.com/start.jpg",
               "end_image_url": "https://example.com/end.jpg",
               "aspect_ratio":  "16:9",
@@ -232,14 +232,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   public class Main {
       public static void main(String[] args) {
           try {
-              URL url = new URL("https://test.aireiter.com/api/openapi/submit");
+              URL url = new URL("https://aireiter.com/api/openapi/submit");
               HttpURLConnection conn = (HttpURLConnection) url.openConnection();
               conn.setRequestMethod("POST");
               conn.setRequestProperty("Authorization", "Bearer <token>");
               conn.setRequestProperty("Content-Type", "application/json");
               conn.setDoOutput(true);
 
-              String jsonPayload = "{\"model\":\"veo3_1_fast\",\"params\":{\"prompt\":\"山間の霧がゆっくり流れる\",\"image_url\":\"https://example.com/start.jpg\",\"end_image_url\":\"https://example.com/end.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
+              String jsonPayload = "{\"model\":\"veo3_1_fast\",\"params\":{\"prompt\":\"山間の霧がゆっくりと流れる\",\"image_url\":\"https://example.com/start.jpg\",\"end_image_url\":\"https://example.com/end.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
 
               OutputStream os = conn.getOutputStream();
               os.write(jsonPayload.getBytes());
@@ -264,12 +264,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   ```php PHP
   <?php
-  $url = "https://test.aireiter.com/api/openapi/submit";
+  $url = "https://aireiter.com/api/openapi/submit";
 
   $payload = array(
       "model" => "veo3_1_fast",
       "params" => array(
-          "prompt" => "山間の霧がゆっくり流れる",
+          "prompt" => "山間の霧がゆっくりと流れる",
           "image_url" => "https://example.com/start.jpg",
           "end_image_url" => "https://example.com/end.jpg",
           "aspect_ratio" => "16:9"
@@ -298,12 +298,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   require 'json'
   require 'uri'
 
-  url = URI.parse("https://test.aireiter.com/api/openapi/submit")
+  url = URI.parse("https://aireiter.com/api/openapi/submit")
 
   payload = {
     model: "veo3_1_fast",
     params: {
-      prompt: "山間の霧がゆっくり流れる",
+      prompt: "山間の霧がゆっくりと流れる",
       image_url: "https://example.com/start.jpg",
       end_image_url: "https://example.com/end.jpg",
       aspect_ratio: "16:9"
@@ -324,7 +324,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "https://test.aireiter.com/api/openapi/submit")!
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
   var request = URLRequest(url: url)
   request.httpMethod = "POST"
   request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
@@ -333,7 +333,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload: [String: Any] = [
       "model": "veo3_1_fast",
       "params": [
-          "prompt": "山間の霧がゆっくり流れる",
+          "prompt": "山間の霧がゆっくりと流れる",
           "image_url": "https://example.com/start.jpg",
           "end_image_url": "https://example.com/end.jpg",
           "aspect_ratio": "16:9"
@@ -361,8 +361,8 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
       static async Task Main(string[] args)
       {
-          var url = "https://test.aireiter.com/api/openapi/submit";
-          var payload = "{\"model\":\"veo3_1_fast\",\"params\":{\"prompt\":\"山間の霧がゆっくり流れる\",\"image_url\":\"https://example.com/start.jpg\",\"end_image_url\":\"https://example.com/end.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
+          var url = "https://aireiter.com/api/openapi/submit";
+          var payload = "{\"model\":\"veo3_1_fast\",\"params\":{\"prompt\":\"山間の霧がゆっくりと流れる\",\"image_url\":\"https://example.com/start.jpg\",\"end_image_url\":\"https://example.com/end.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
 
           using (var client = new HttpClient())
           {
@@ -387,14 +387,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
       curl = curl_easy_init();
       if(curl) {
-          curl_easy_setopt(curl, CURLOPT_URL, "https://test.aireiter.com/api/openapi/submit");
+          curl_easy_setopt(curl, CURLOPT_URL, "https://aireiter.com/api/openapi/submit");
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
           headers = curl_slist_append(headers, "Content-Type: application/json");
           curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-          const char *data = "{\"model\":\"veo3_1_fast\",\"params\":{\"prompt\":\"山間の霧がゆっくり流れる\",\"image_url\":\"https://example.com/start.jpg\",\"end_image_url\":\"https://example.com/end.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
+          const char *data = "{\"model\":\"veo3_1_fast\",\"params\":{\"prompt\":\"山間の霧がゆっくりと流れる\",\"image_url\":\"https://example.com/start.jpg\",\"end_image_url\":\"https://example.com/end.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
           curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
 
           res = curl_easy_perform(curl);
@@ -411,7 +411,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
-          NSURL *url = [NSURL URLWithString:@"https://test.aireiter.com/api/openapi/submit"];
+          NSURL *url = [NSURL URLWithString:@"https://aireiter.com/api/openapi/submit"];
           NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
           [request setHTTPMethod:@"POST"];
           [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
@@ -420,7 +420,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           NSDictionary *payload = @{
               @"model": @"veo3_1_fast",
               @"params": @{
-                  @"prompt": @"山間の霧がゆっくり流れる",
+                  @"prompt": @"山間の霧がゆっくりと流れる",
                   @"image_url": @"https://example.com/start.jpg",
                   @"end_image_url": @"https://example.com/end.jpg",
                   @"aspect_ratio": @"16:9"
@@ -450,9 +450,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   open Cohttp
   open Cohttp_lwt_unix
 
-  let url = "https://test.aireiter.com/api/openapi/submit"
+  let url = "https://aireiter.com/api/openapi/submit"
 
-  let payload = {|{"model":"veo3_1_fast","params":{"prompt":"山間の霧がゆっくり流れる","image_url":"https://example.com/start.jpg","end_image_url":"https://example.com/end.jpg","aspect_ratio":"16:9"},"out_task_id":"my_task_123456"}|}
+  let payload = {|{"model":"veo3_1_fast","params":{"prompt":"山間の霧がゆっくりと流れる","image_url":"https://example.com/start.jpg","end_image_url":"https://example.com/end.jpg","aspect_ratio":"16:9"},"out_task_id":"my_task_123456"}|}
 
   let () =
     let headers = Header.init ()
@@ -472,12 +472,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   import 'package:http/http.dart' as http;
 
   void main() async {
-    var url = Uri.parse('https://test.aireiter.com/api/openapi/submit');
+    var url = Uri.parse('https://aireiter.com/api/openapi/submit');
 
     var payload = {
       'model': 'veo3_1_fast',
       'params': {
-        'prompt': '山間の霧がゆっくり流れる',
+        'prompt': '山間の霧がゆっくりと流れる',
         'image_url': 'https://example.com/start.jpg',
         'end_image_url': 'https://example.com/end.jpg',
         'aspect_ratio': '16:9'
@@ -502,12 +502,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   library(httr)
   library(jsonlite)
 
-  url <- "https://test.aireiter.com/api/openapi/submit"
+  url <- "https://aireiter.com/api/openapi/submit"
 
   payload <- list(
     model = "veo3_1_fast",
     params = list(
-      prompt = "山間の霧がゆっくり流れる",
+      prompt = "山間の霧がゆっくりと流れる",
       image_url = "https://example.com/start.jpg",
       end_image_url = "https://example.com/end.jpg",
       aspect_ratio = "16:9"
@@ -548,7 +548,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```json 400
     {
         "statusCode": 400,
-        "message": "リクエストパラメータが無効です",
+        "message": "リクエストパラメーターが無効です",
         "ok": false
     }
   ```
@@ -564,7 +564,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 433,
-      "message": "アカウント残高が不足しています。チャージ後に再試行してください"
+      "message": "アカウントの残高が不足しています。チャージ後に再度お試しください"
     }
   }
   ```
@@ -573,7 +573,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 500,
-      "message": "サーバー内部エラー。しばらくしてから再試行してください"
+      "message": "サーバー内部エラーが発生しました。後ほど再試行してください"
     }
   }
   ```

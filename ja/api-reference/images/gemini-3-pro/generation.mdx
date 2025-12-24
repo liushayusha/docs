@@ -1,9 +1,9 @@
 ---
 title: 'Nano Banana Pro 画像生成'
 description: |
-    - 非同期処理モードで、タスクIDを返し後続の照会に使用可能
+    - 非同期処理モード、タスクIDを返して後続のクエリに使用
     - 高品質な画像生成、プロフェッショナルレベルの画像作成
-api: 'POST https://test.aireiter.com/api/openapi/submit'
+api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
@@ -108,29 +108,29 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Response
 
 <ResponseField name="task_id" type="string">
-  タスクID、結果を照会するために使用されます
+  タスクID、結果のクエリに使用されます
 </ResponseField>
 
 <ResponseField name="out_task_id" type="string">
-  発信元のタスクIDで、結果の照会に使用できます
+  発信者のタスクID、結果のクエリに使用可能です
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  初期状態で、固定値は `"pending"`
+  初期状態、固定で `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  推定消費クレジット
+  予測消費クレジット
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  作成日時（ISO 形式）
+  作成日時（ISO形式）
 </ResponseField>
 
 <RequestExample>
   ```bash cURL
   curl --request POST \
-    --url https://test.aireiter.com/api/openapi/submit \
+    --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
@@ -148,7 +148,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```python Python
   import requests
 
-  url = "https://test.aireiter.com/api/openapi/submit"
+  url = "https://aireiter.com/api/openapi/submit"
 
   payload = {
       "model": "nano_banana_pro",
@@ -172,7 +172,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```
 
   ```javascript JavaScript
-  const url = "https://test.aireiter.com/api/openapi/submit";
+  const url = "https://aireiter.com/api/openapi/submit";
 
   const payload = {
     model: "nano_banana_pro",
@@ -212,7 +212,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   )
 
   func main() {
-      url := "https://test.aireiter.com/api/openapi/submit"
+      url := "https://aireiter.com/api/openapi/submit"
 
       payload := map[string]interface{}{
           "model": "nano_banana_pro",
@@ -251,7 +251,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   public class Main {
       public static void main(String[] args) throws Exception {
-          String url = "https://test.aireiter.com/api/openapi/submit";
+          String url = "https://aireiter.com/api/openapi/submit";
 
           String payload = """
           {
@@ -285,7 +285,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```php PHP
   <?php
 
-  $url = "https://test.aireiter.com/api/openapi/submit";
+  $url = "https://aireiter.com/api/openapi/submit";
 
   $payload = [
       "model" => "nano_banana_pro",
@@ -319,7 +319,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   require 'json'
   require 'uri'
 
-  url = URI("https://test.aireiter.com/api/openapi/submit")
+  url = URI("https://aireiter.com/api/openapi/submit")
 
   payload = {
     model: "nano_banana_pro",
@@ -346,7 +346,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "https://test.aireiter.com/api/openapi/submit")!
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
 
   let payload: [String: Any] = [
       "model": "nano_banana_pro",
@@ -389,7 +389,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
       static async Task Main(string[] args)
       {
-          var url = "https://test.aireiter.com/api/openapi/submit";
+          var url = "https://aireiter.com/api/openapi/submit";
 
           var payload = @"{
               ""model"": ""nano_banana_pro"",
@@ -426,7 +426,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       curl = curl_easy_init();
 
       if(curl) {
-          const char *url = "https://test.aireiter.com/api/openapi/submit";
+          const char *url = "https://aireiter.com/api/openapi/submit";
           const char *payload = "{"
               "\"model\":\"nano_banana_pro\","
               "\"params\":{"
@@ -467,7 +467,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
-          NSURL *url = [NSURL URLWithString:@"https://test.aireiter.com/api/openapi/submit"];
+          NSURL *url = [NSURL URLWithString:@"https://aireiter.com/api/openapi/submit"];
 
           NSDictionary *payload = @{
               @"model": @"nano_banana_pro",
@@ -516,7 +516,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   open Cohttp
   open Cohttp_lwt_unix
 
-  let url = "https://test.aireiter.com/api/openapi/submit"
+  let url = "https://aireiter.com/api/openapi/submit"
 
   let payload = {|{
     "model": "nano_banana_pro",
@@ -548,7 +548,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   import 'package:http/http.dart' as http;
 
   void main() async {
-    final url = Uri.parse('https://test.aireiter.com/api/openapi/submit');
+    final url = Uri.parse('https://aireiter.com/api/openapi/submit');
 
     final payload = {
       'model': 'nano_banana_pro',
@@ -578,7 +578,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   library(httr)
   library(jsonlite)
 
-  url <- "https://test.aireiter.com/api/openapi/submit"
+  url <- "https://aireiter.com/api/openapi/submit"
 
   payload <- list(
     model = "nano_banana_pro",
@@ -631,7 +631,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 401,
-      "message": "認証に失敗しました。APIキーを確認してください",
+      "message": "認証失敗、APIキーを確認してください",
     }
   }
   ```
@@ -648,7 +648,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 500,
-      "message": "サーバ内部エラーが発生しました。後ほど再試行してください"
+      "message": "サーバー内部エラー、後でもう一度お試しください"
     }
   }
   ```

@@ -1,10 +1,10 @@
 ---
-title: 'タスクのステータスを取得する'
+title: 'タスクのステータス取得'
 description: |
-    - 非同期タスクの実行ステータスと結果をクエリする
-    - リアルタイムステータス更新と進捗追跡
-    - タスク完了時に生成結果を取得する
-api: 'POST https://test.aireiter.com/api/openapi/query'
+    - 非同期タスクの実行ステータスと結果のクエリ
+    - リアルタイムのステータス更新と進行状況の追跡
+    - タスク完了時に生成結果を取得
+api: 'POST https://aireiter.com/api/openapi/query'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
@@ -38,7 +38,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   task_idと二者択一で、いずれか一方の提供が必須
 </ParamField>
 
-## Response
+## レスポンス
 
 <ResponseField name="task_id" type="string">
   タスクID
@@ -47,28 +47,28 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ResponseField name="status" type="string">
   タスクステータス：
 
-  * `pending` - キューで処理待ち
+  * `pending` - 処理待ちキュー
   * `processing` - 処理中
   * `completed` - 成功完了
   * `failed` - 失敗
 </ResponseField>
 
 <ResponseField name="input" type="object">
-  タスク入力（オプション、一部の場合のみ返されます）
+  タスク入力（オプション、特定の場合のみ返却）
 
-  タスク提出時の完全なパラメータ情報を含みます
+  タスク提出時の完全なパラメータ情報を含む
 </ResponseField>
 
 <ResponseField name="output" type="array">
-  タスク出力（タスク完了後に返されます）
+  タスク出力（タスク完了後に返却）
 
-  生成結果の配列を含み、各要素は生成されたリソースを指す `url` フィールドを持っています
+  生成結果の配列を含み、各要素は生成されたリソースを指す `url` フィールドを含む
 </ResponseField>
 
 <ResponseField name="error" type="object">
-  エラー情報（タスク失敗時に返されます）
+  エラー情報（タスク失敗時に返却）
 
-  <Expandable title="Properties">
+  <Expandable title="プロパティ">
     <ResponseField name="code" type="string">
       エラーコード
     </ResponseField>
@@ -80,7 +80,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <ResponseField name="credits_used" type="number">
-  消費したクレジット
+  使用したクレジット
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
@@ -88,13 +88,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <ResponseField name="completed_at" type="string">
-  完了日時（タスク完了後に返されます、ISO 8601形式）
+  完了日時（タスク完了後に返却、ISO 8601形式）
 </ResponseField>
 
 <RequestExample>
   ```bash cURL (task_idを使用)
   curl --request POST \
-    --url 'https://test.aireiter.com/api/openapi/query' \
+    --url 'https://aireiter.com/api/openapi/query' \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data-raw '{
@@ -104,7 +104,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   ```bash cURL (out_task_idを使用)
   curl --request POST \
-    --url 'https://test.aireiter.com/api/openapi/query' \
+    --url 'https://aireiter.com/api/openapi/query' \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data-raw '{
@@ -115,7 +115,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```python Python (task_idを使用)
   import requests
 
-  url = "https://test.aireiter.com/api/openapi/query"
+  url = "https://aireiter.com/api/openapi/query"
 
   headers = {
       "Authorization": "Bearer <token>",
@@ -134,7 +134,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```python Python (out_task_idを使用)
   import requests
 
-  url = "https://test.aireiter.com/api/openapi/query"
+  url = "https://aireiter.com/api/openapi/query"
 
   headers = {
       "Authorization": "Bearer <token>",
@@ -151,7 +151,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```
 
   ```javascript JavaScript
-  const url = "https://test.aireiter.com/api/openapi/query";
+  const url = "https://aireiter.com/api/openapi/query";
 
   const headers = {
     "Authorization": "Bearer <token>",
@@ -184,7 +184,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   )
 
   func main() {
-      url := "https://test.aireiter.com/api/openapi/query"
+      url := "https://aireiter.com/api/openapi/query"
 
       payload := map[string]interface{}{
           "task_id": "order_lwU2d-VkUq9-tlCCmrdYu",
@@ -218,7 +218,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   public class Main {
       public static void main(String[] args) {
           try {
-              URL url = new URL("https://test.aireiter.com/api/openapi/query");
+              URL url = new URL("https://aireiter.com/api/openapi/query");
               HttpURLConnection conn = (HttpURLConnection) url.openConnection();
               conn.setRequestMethod("POST");
               conn.setRequestProperty("Authorization", "Bearer <token>");
@@ -251,7 +251,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```php PHP
   <?php
 
-  $url = "https://test.aireiter.com/api/openapi/query";
+  $url = "https://aireiter.com/api/openapi/query";
 
   $payload = array(
       "task_id" => "order_lwU2d-VkUq9-tlCCmrdYu"
@@ -278,7 +278,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   require 'json'
   require 'uri'
 
-  url = URI.parse("https://test.aireiter.com/api/openapi/query")
+  url = URI.parse("https://aireiter.com/api/openapi/query")
 
   payload = {
     task_id: "order_lwU2d-VkUq9-tlCCmrdYu"
@@ -297,7 +297,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "https://test.aireiter.com/api/openapi/query")!
+  let url = URL(string: "https://aireiter.com/api/openapi/query")!
   var request = URLRequest(url: url)
   request.httpMethod = "POST"
   request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
@@ -333,7 +333,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
       static async Task Main(string[] args)
       {
-          var url = "https://test.aireiter.com/api/openapi/query";
+          var url = "https://aireiter.com/api/openapi/query";
           var payload = "{\"task_id\":\"order_lwU2d-VkUq9-tlCCmrdYu\"}";
 
           using var client = new HttpClient();
@@ -359,7 +359,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       curl = curl_easy_init();
 
       if(curl) {
-          const char *url = "https://test.aireiter.com/api/openapi/query";
+          const char *url = "https://aireiter.com/api/openapi/query";
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
@@ -392,7 +392,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
-          NSURL *url = [NSURL URLWithString:@"https://test.aireiter.com/api/openapi/query"];
+          NSURL *url = [NSURL URLWithString:@"https://aireiter.com/api/openapi/query"];
 
           NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
           [request setHTTPMethod:@"POST"];
@@ -431,7 +431,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   open Cohttp
   open Cohttp_lwt_unix
 
-  let url = "https://test.aireiter.com/api/openapi/query"
+  let url = "https://aireiter.com/api/openapi/query"
 
   let payload = {|{"task_id":"order_lwU2d-VkUq9-tlCCmrdYu"}|}
 
@@ -454,7 +454,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   import 'package:http/http.dart' as http;
 
   void main() async {
-    final url = Uri.parse('https://test.aireiter.com/api/openapi/query');
+    final url = Uri.parse('https://aireiter.com/api/openapi/query');
 
     final payload = {
       'task_id': 'order_lwU2d-VkUq9-tlCCmrdYu'
@@ -477,7 +477,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   library(httr)
   library(jsonlite)
 
-  url <- "https://test.aireiter.com/api/openapi/query"
+  url <- "https://aireiter.com/api/openapi/query"
 
   payload <- list(
     task_id = "order_lwU2d-VkUq9-tlCCmrdYu"

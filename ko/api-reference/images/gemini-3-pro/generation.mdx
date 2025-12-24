@@ -1,9 +1,9 @@
 ---
 title: 'Nano Banana Pro 이미지 생성'
 description: |
-    - 비동기 처리 모드, 이후 조회를 위한 작업 ID 반환
-    - 고품질 이미지 생성, 전문 수준의 이미지 제작
-api: 'POST https://test.aireiter.com/api/openapi/submit'
+    - 비동기 처리 모드, 후속 조회를 위한 작업 ID 반환
+    - 고품질 이미지 생성, 전문급 이미지 제작
+api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
@@ -112,31 +112,31 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <ResponseField name="out_task_id" type="string">
-  발신자 작업 ID, 결과 조회에 사용 가능
+  요청자 작업 ID, 결과 조회에 사용 가능
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  초기 상태, 고정 값 `"pending"`
+  초기 상태로 고정값 `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  예상 소비 크레딧
+  예상 소모 크레딧
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  생성 시각(ISO 포맷)
+  생성 시간(ISO 형식)
 </ResponseField>
 
 <RequestExample>
   ```bash cURL
   curl --request POST \
-    --url https://test.aireiter.com/api/openapi/submit \
+    --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
       "model": "nano_banana_pro",
       "params": {
-        "prompt": "전문가 수준의 도시 야경",
+        "prompt": "전문가급 도시 야경",
         "aspect_ratio": "16:9",
         "resolution": "2K",
         "format": "png"
@@ -148,12 +148,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```python Python
   import requests
 
-  url = "https://test.aireiter.com/api/openapi/submit"
+  url = "https://aireiter.com/api/openapi/submit"
 
   payload = {
       "model": "nano_banana_pro",
       "params": {
-          "prompt": "전문가 수준의 도시 야경",
+          "prompt": "전문가급 도시 야경",
           "aspect_ratio": "16:9",
           "resolution": "2K",
           "format": "png"
@@ -172,12 +172,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```
 
   ```javascript JavaScript
-  const url = "https://test.aireiter.com/api/openapi/submit";
+  const url = "https://aireiter.com/api/openapi/submit";
 
   const payload = {
     model: "nano_banana_pro",
     params: {
-      prompt: "전문가 수준의 도시 야경",
+      prompt: "전문가급 도시 야경",
       aspect_ratio: "16:9",
       resolution: "2K",
       format: "png"
@@ -212,12 +212,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   )
 
   func main() {
-      url := "https://test.aireiter.com/api/openapi/submit"
+      url := "https://aireiter.com/api/openapi/submit"
 
       payload := map[string]interface{}{
           "model": "nano_banana_pro",
           "params": map[string]interface{}{
-              "prompt":       "전문가 수준의 도시 야경",
+              "prompt":       "전문가급 도시 야경",
               "aspect_ratio": "16:9",
               "resolution":   "2K",
               "format":       "png",
@@ -251,13 +251,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   public class Main {
       public static void main(String[] args) throws Exception {
-          String url = "https://test.aireiter.com/api/openapi/submit";
+          String url = "https://aireiter.com/api/openapi/submit";
 
           String payload = """
           {
             "model": "nano_banana_pro",
             "params": {
-              "prompt": "전문가 수준의 도시 야경",
+              "prompt": "전문가급 도시 야경",
               "aspect_ratio": "16:9",
               "resolution": "2K",
               "format": "png"
@@ -285,12 +285,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```php PHP
   <?php
 
-  $url = "https://test.aireiter.com/api/openapi/submit";
+  $url = "https://aireiter.com/api/openapi/submit";
 
   $payload = [
       "model" => "nano_banana_pro",
       "params" => [
-          "prompt" => "전문가 수준의 도시 야경",
+          "prompt" => "전문가급 도시 야경",
           "aspect_ratio" => "16:9",
           "resolution" => "2K",
           "format" => "png"
@@ -319,12 +319,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   require 'json'
   require 'uri'
 
-  url = URI("https://test.aireiter.com/api/openapi/submit")
+  url = URI("https://aireiter.com/api/openapi/submit")
 
   payload = {
     model: "nano_banana_pro",
     params: {
-      prompt: "전문가 수준의 도시 야경",
+      prompt: "전문가급 도시 야경",
       aspect_ratio: "16:9",
       resolution: "2K",
       format: "png"
@@ -346,12 +346,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "https://test.aireiter.com/api/openapi/submit")!
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
 
   let payload: [String: Any] = [
       "model": "nano_banana_pro",
       "params": [
-          "prompt": "전문가 수준의 도시 야경",
+          "prompt": "전문가급 도시 야경",
           "aspect_ratio": "16:9",
           "resolution": "2K",
           "format": "png"
@@ -389,12 +389,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
       static async Task Main(string[] args)
       {
-          var url = "https://test.aireiter.com/api/openapi/submit";
+          var url = "https://aireiter.com/api/openapi/submit";
 
           var payload = @"{
               ""model"": ""nano_banana_pro"",
               ""params"": {
-                  ""prompt"": ""전문가 수준의 도시 야경"",
+                  ""prompt"": ""전문가급 도시 야경"",
                   ""aspect_ratio"": ""16:9"",
                   ""resolution"": ""2K"",
                   ""format"": ""png""
@@ -426,11 +426,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       curl = curl_easy_init();
 
       if(curl) {
-          const char *url = "https://test.aireiter.com/api/openapi/submit";
+          const char *url = "https://aireiter.com/api/openapi/submit";
           const char *payload = "{"
               "\"model\":\"nano_banana_pro\","
               "\"params\":{"
-                  "\"prompt\":\"전문가 수준의 도시 야경\","
+                  "\"prompt\":\"전문가급 도시 야경\","
                   "\"aspect_ratio\":\"16:9\","
                   "\"resolution\":\"2K\","
                   "\"format\":\"png\""
@@ -467,12 +467,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   int main(int argc, const char * argv[]) {
       @autoreleasepool {
-          NSURL *url = [NSURL URLWithString:@"https://test.aireiter.com/api/openapi/submit"];
+          NSURL *url = [NSURL URLWithString:@"https://aireiter.com/api/openapi/submit"];
 
           NSDictionary *payload = @{
               @"model": @"nano_banana_pro",
               @"params": @{
-                  @"prompt": @"전문가 수준의 도시 야경",
+                  @"prompt": @"전문가급 도시 야경",
                   @"aspect_ratio": @"16:9",
                   @"resolution": @"2K",
                   @"format": @"png"
@@ -516,12 +516,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   open Cohttp
   open Cohttp_lwt_unix
 
-  let url = "https://test.aireiter.com/api/openapi/submit"
+  let url = "https://aireiter.com/api/openapi/submit"
 
   let payload = {|{
     "model": "nano_banana_pro",
     "params": {
-      "prompt": "전문가 수준의 도시 야경",
+      "prompt": "전문가급 도시 야경",
       "aspect_ratio": "16:9",
       "resolution": "2K",
       "format": "png"
@@ -548,12 +548,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   import 'package:http/http.dart' as http;
 
   void main() async {
-    final url = Uri.parse('https://test.aireiter.com/api/openapi/submit');
+    final url = Uri.parse('https://aireiter.com/api/openapi/submit');
 
     final payload = {
       'model': 'nano_banana_pro',
       'params': {
-        'prompt': '전문가 수준의 도시 야경',
+        'prompt': '전문가급 도시 야경',
         'aspect_ratio': '16:9',
         'resolution': '2K',
         'format': 'png'
@@ -578,12 +578,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   library(httr)
   library(jsonlite)
 
-  url <- "https://test.aireiter.com/api/openapi/submit"
+  url <- "https://aireiter.com/api/openapi/submit"
 
   payload <- list(
     model = "nano_banana_pro",
     params = list(
-      prompt = "전문가 수준의 도시 야경",
+      prompt = "전문가급 도시 야경",
       aspect_ratio = "16:9",
       resolution = "2K",
       format = "png"
@@ -623,7 +623,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```json 400
     {
         "statusCode": 400,
-        "message": "요청 파라미터가 유효하지 않습니다",
+        "message": "요청 파라미터가 유효하지 않음",
         "ok": false
     }
   ```
@@ -648,7 +648,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 500,
-      "message": "서버 내부 오류, 나중에 다시 시도하세요"
+      "message": "서버 내부 오류, 잠시 후 재시도 바랍니다"
     }
   }
   ```
