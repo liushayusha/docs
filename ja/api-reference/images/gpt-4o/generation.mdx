@@ -68,12 +68,8 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 ## Response
 
-<ResponseField name="task_id" type="string">
-  タスクID、結果の照会に使用します
-</ResponseField>
-
 <ResponseField name="out_task_id" type="string">
-  発信元のタスクID、結果の照会に使用可能です
+  発信者側のタスクIDで、結果の照会に使用可能です
 </ResponseField>
 
 <ResponseField name="status" type="string">
@@ -85,7 +81,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  作成日時（ISOフォーマット）
+  作成日時（ISO形式）
 </ResponseField>
 
 <RequestExample>
@@ -539,7 +535,6 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     "statusCode": 200,
     "message": "",
     "data": {
-        "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
         "out_task_id": "my_task_123456",
         "status": "pending",
         "estimated_credits": 100,
@@ -559,7 +554,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 401,
-      "message": "認証に失敗しました。APIキーを確認してください"
+      "message": "認証に失敗しました。APIキーをご確認ください"
     }
   }
   ```
@@ -576,7 +571,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 500,
-      "message": "サーバー内部エラーです。後ほど再試行してください"
+      "message": "サーバ内部エラーが発生しました。後で再試行してください"
     }
   }
   ```

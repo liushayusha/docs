@@ -76,12 +76,8 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 ## Response
 
-<ResponseField name="task_id" type="string">
-  Task ID used for querying the result
-</ResponseField>
-
 <ResponseField name="out_task_id" type="string">
-  Initiator task ID, which can be used to query the result
+  Initiator task ID, can be used to query the result
 </ResponseField>
 <ResponseField name="status" type="string">
   Initial status, fixed as `"pending"`
@@ -104,7 +100,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     --data '{
       "model": "veo3_1_fast",
       "params": {
-        "prompt": "The mist slowly flows in the mountain",
+        "prompt": "The mist slowly flows through the mountains",
         "image_url": "https://example.com/start.jpg",
         "end_image_url": "https://example.com/end.jpg",
         "aspect_ratio": "16:9"
@@ -121,7 +117,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
       "model": "veo3_1_fast",
       "params": {
-          "prompt": "The mist slowly flows in the mountain",
+          "prompt": "The mist slowly flows through the mountains",
           "image_url": "https://example.com/start.jpg",
           "end_image_url": "https://example.com/end.jpg",
           "aspect_ratio": "16:9"
@@ -145,7 +141,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   const payload = {
     model: "veo3_1_fast",
     params: {
-      prompt: "The mist slowly flows in the mountain",
+      prompt: "The mist slowly flows through the mountains",
       image_url: "https://example.com/start.jpg",
       end_image_url: "https://example.com/end.jpg",
       aspect_ratio: "16:9"
@@ -185,7 +181,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       payload := map[string]interface{}{
           "model": "veo3_1_fast",
           "params": map[string]interface{}{
-              "prompt":        "The mist slowly flows in the mountain",
+              "prompt":        "The mist slowly flows through the mountains",
               "image_url":     "https://example.com/start.jpg",
               "end_image_url": "https://example.com/end.jpg",
               "aspect_ratio":  "16:9",
@@ -228,7 +224,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
               conn.setRequestProperty("Content-Type", "application/json");
               conn.setDoOutput(true);
 
-              String jsonPayload = "{\"model\":\"veo3_1_fast\",\"params\":{\"prompt\":\"The mist slowly flows in the mountain\",\"image_url\":\"https://example.com/start.jpg\",\"end_image_url\":\"https://example.com/end.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
+              String jsonPayload = "{\"model\":\"veo3_1_fast\",\"params\":{\"prompt\":\"The mist slowly flows through the mountains\",\"image_url\":\"https://example.com/start.jpg\",\"end_image_url\":\"https://example.com/end.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
 
               OutputStream os = conn.getOutputStream();
               os.write(jsonPayload.getBytes());
@@ -258,7 +254,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   $payload = array(
       "model" => "veo3_1_fast",
       "params" => array(
-          "prompt" => "The mist slowly flows in the mountain",
+          "prompt" => "The mist slowly flows through the mountains",
           "image_url" => "https://example.com/start.jpg",
           "end_image_url" => "https://example.com/end.jpg",
           "aspect_ratio" => "16:9"
@@ -292,7 +288,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
     model: "veo3_1_fast",
     params: {
-      prompt: "The mist slowly flows in the mountain",
+      prompt: "The mist slowly flows through the mountains",
       image_url: "https://example.com/start.jpg",
       end_image_url: "https://example.com/end.jpg",
       aspect_ratio: "16:9"
@@ -322,7 +318,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload: [String: Any] = [
       "model": "veo3_1_fast",
       "params": [
-          "prompt": "The mist slowly flows in the mountain",
+          "prompt": "The mist slowly flows through the mountains",
           "image_url": "https://example.com/start.jpg",
           "end_image_url": "https://example.com/end.jpg",
           "aspect_ratio": "16:9"
@@ -351,7 +347,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       static async Task Main(string[] args)
       {
           var url = "https://aireiter.com/api/openapi/submit";
-          var payload = "{\"model\":\"veo3_1_fast\",\"params\":{\"prompt\":\"The mist slowly flows in the mountain\",\"image_url\":\"https://example.com/start.jpg\",\"end_image_url\":\"https://example.com/end.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
+          var payload = "{\"model\":\"veo3_1_fast\",\"params\":{\"prompt\":\"The mist slowly flows through the mountains\",\"image_url\":\"https://example.com/start.jpg\",\"end_image_url\":\"https://example.com/end.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
 
           using (var client = new HttpClient())
           {
@@ -383,7 +379,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           headers = curl_slist_append(headers, "Content-Type: application/json");
           curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-          const char *data = "{\"model\":\"veo3_1_fast\",\"params\":{\"prompt\":\"The mist slowly flows in the mountain\",\"image_url\":\"https://example.com/start.jpg\",\"end_image_url\":\"https://example.com/end.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
+          const char *data = "{\"model\":\"veo3_1_fast\",\"params\":{\"prompt\":\"The mist slowly flows through the mountains\",\"image_url\":\"https://example.com/start.jpg\",\"end_image_url\":\"https://example.com/end.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
           curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
 
           res = curl_easy_perform(curl);
@@ -409,7 +405,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           NSDictionary *payload = @{
               @"model": @"veo3_1_fast",
               @"params": @{
-                  @"prompt": @"The mist slowly flows in the mountain",
+                  @"prompt": @"The mist slowly flows through the mountains",
                   @"image_url": @"https://example.com/start.jpg",
                   @"end_image_url": @"https://example.com/end.jpg",
                   @"aspect_ratio": @"16:9"
@@ -441,7 +437,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   let url = "https://aireiter.com/api/openapi/submit"
 
-  let payload = {|{"model":"veo3_1_fast","params":{"prompt":"The mist slowly flows in the mountain","image_url":"https://example.com/start.jpg","end_image_url":"https://example.com/end.jpg","aspect_ratio":"16:9"},"out_task_id":"my_task_123456"}|}
+  let payload = {|{"model":"veo3_1_fast","params":{"prompt":"The mist slowly flows through the mountains","image_url":"https://example.com/start.jpg","end_image_url":"https://example.com/end.jpg","aspect_ratio":"16:9"},"out_task_id":"my_task_123456"}|}
 
   let () =
     let headers = Header.init ()
@@ -466,7 +462,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     var payload = {
       'model': 'veo3_1_fast',
       'params': {
-        'prompt': 'The mist slowly flows in the mountain',
+        'prompt': 'The mist slowly flows through the mountains',
         'image_url': 'https://example.com/start.jpg',
         'end_image_url': 'https://example.com/end.jpg',
         'aspect_ratio': '16:9'
@@ -496,7 +492,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload <- list(
     model = "veo3_1_fast",
     params = list(
-      prompt = "The mist slowly flows in the mountain",
+      prompt = "The mist slowly flows through the mountains",
       image_url = "https://example.com/start.jpg",
       end_image_url = "https://example.com/end.jpg",
       aspect_ratio = "16:9"
@@ -524,8 +520,6 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     "statusCode": 200,
     "message": "",
     "data": {
-        "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
-        "out_task_id": "my_task_123456",
         "out_task_id": "my_task_123456",
         "status": "pending",
         "estimated_credits": 100,

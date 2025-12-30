@@ -76,23 +76,19 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 ## Response
 
-<ResponseField name="task_id" type="string">
-  작업 ID, 결과 조회에 사용됩니다
-</ResponseField>
-
 <ResponseField name="out_task_id" type="string">
-  발주 측 작업 ID, 결과 조회에 사용할 수 있습니다
+  호출자 작업 ID로, 결과 조회에 사용할 수 있습니다
 </ResponseField>
 <ResponseField name="status" type="string">
-  초기 상태, 고정값 `"pending"`
+  초기 상태로 고정되어 있으며 `"pending"`입니다
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  예상 사용 크레딧
+  예상 소모 크레딧
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  생성 시간 (ISO 포맷)
+  생성 시간(ISO 형식)
 </ResponseField>
 
 <RequestExample>
@@ -104,7 +100,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     --data '{
       "model": "sora2",
       "params": {
-        "prompt": "한 마리 고양이가 정원에서 산책합니다",
+        "prompt": "한 마리 고양이가 정원을 산책하고 있습니다",
         "aspect_ratio": "16:9",
         "video_length": "10"
       },
@@ -120,7 +116,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
       "model": "sora2",
       "params": {
-          "prompt": "한 마리 고양이가 정원에서 산책합니다",
+          "prompt": "한 마리 고양이가 정원을 산책하고 있습니다",
           "aspect_ratio": "16:9",
           "video_length": "10"
       },
@@ -143,7 +139,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   const payload = {
     model: "sora2",
     params: {
-      prompt: "한 마리 고양이가 정원에서 산책합니다",
+      prompt: "한 마리 고양이가 정원을 산책하고 있습니다",
       aspect_ratio: "16:9",
       video_length: "10"
     },
@@ -182,7 +178,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       payload := map[string]interface{}{
           "model": "sora2",
           "params": map[string]interface{}{
-              "prompt":       "한 마리 고양이가 정원에서 산책합니다",
+              "prompt":       "한 마리 고양이가 정원을 산책하고 있습니다",
               "aspect_ratio": "16:9",
               "video_length": "10",
           },
@@ -224,7 +220,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
               conn.setRequestProperty("Content-Type", "application/json");
               conn.setDoOutput(true);
 
-              String jsonPayload = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"한 마리 고양이가 정원에서 산책합니다\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"},\"out_task_id\":\"my_task_123456\"}";
+              String jsonPayload = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"한 마리 고양이가 정원을 산책하고 있습니다\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"},\"out_task_id\":\"my_task_123456\"}";
 
               OutputStream os = conn.getOutputStream();
               os.write(jsonPayload.getBytes());
@@ -254,7 +250,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   $payload = array(
       "model" => "sora2",
       "params" => array(
-          "prompt" => "한 마리 고양이가 정원에서 산책합니다",
+          "prompt" => "한 마리 고양이가 정원을 산책하고 있습니다",
           "aspect_ratio" => "16:9",
           "video_length" => "10"
       ),
@@ -287,7 +283,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
     model: "sora2",
     params: {
-      prompt: "한 마리 고양이가 정원에서 산책합니다",
+      prompt: "한 마리 고양이가 정원을 산책하고 있습니다",
       aspect_ratio: "16:9",
       video_length: "10"
     },
@@ -316,7 +312,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload: [String: Any] = [
       "model": "sora2",
       "params": [
-          "prompt": "한 마리 고양이가 정원에서 산책합니다",
+          "prompt": "한 마리 고양이가 정원을 산책하고 있습니다",
           "aspect_ratio": "16:9",
           "video_length": "10"
       ],
@@ -344,7 +340,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       static async Task Main(string[] args)
       {
           var url = "https://aireiter.com/api/openapi/submit";
-          var payload = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"한 마리 고양이가 정원에서 산책합니다\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"},\"out_task_id\":\"my_task_123456\"}";
+          var payload = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"한 마리 고양이가 정원을 산책하고 있습니다\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"},\"out_task_id\":\"my_task_123456\"}";
 
           using (var client = new HttpClient())
           {
@@ -376,7 +372,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           headers = curl_slist_append(headers, "Content-Type: application/json");
           curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-          const char *data = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"한 마리 고양이가 정원에서 산책합니다\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"},\"out_task_id\":\"my_task_123456\"}";
+          const char *data = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"한 마리 고양이가 정원을 산책하고 있습니다\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"},\"out_task_id\":\"my_task_123456\"}";
           curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
 
           res = curl_easy_perform(curl);
@@ -402,7 +398,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           NSDictionary *payload = @{
               @"model": @"sora2",
               @"params": @{
-                  @"prompt": @"한 마리 고양이가 정원에서 산책합니다",
+                  @"prompt": @"한 마리 고양이가 정원을 산책하고 있습니다",
                   @"aspect_ratio": @"16:9",
                   @"video_length": @"10"
               },
@@ -433,7 +429,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   let url = "https://aireiter.com/api/openapi/submit"
 
-  let payload = {|{"model":"sora2","params":{"prompt":"한 마리 고양이가 정원에서 산책합니다","aspect_ratio":"16:9","video_length":"10"},"out_task_id":"my_task_123456"}|}
+  let payload = {|{"model":"sora2","params":{"prompt":"한 마리 고양이가 정원을 산책하고 있습니다","aspect_ratio":"16:9","video_length":"10"},"out_task_id":"my_task_123456"}|}
 
   let () =
     let headers = Header.init ()
@@ -458,7 +454,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     var payload = {
       'model': 'sora2',
       'params': {
-        'prompt': '한 마리 고양이가 정원에서 산책합니다',
+        'prompt': '한 마리 고양이가 정원을 산책하고 있습니다',
         'aspect_ratio': '16:9',
         'video_length': '10'
       },
@@ -487,7 +483,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload <- list(
     model = "sora2",
     params = list(
-      prompt = "한 마리 고양이가 정원에서 산책합니다",
+      prompt = "한 마리 고양이가 정원을 산책하고 있습니다",
       aspect_ratio = "16:9",
       video_length = "10"
     ),
@@ -514,8 +510,6 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     "statusCode": 200,
     "message": "",
     "data": {
-        "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
-        "out_task_id": "my_task_123456",
         "out_task_id": "my_task_123456",
         "status": "pending",
         "estimated_credits": 100,
@@ -543,7 +537,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 433,
-      "message": "계정 잔액 부족, 충전 후 다시 시도하세요"
+      "message": "계정 잔액이 부족합니다. 충전 후 다시 시도하세요"
     }
   }
   ```
@@ -552,7 +546,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 500,
-      "message": "서버 내부 오류, 잠시 후 다시 시도하세요"
+      "message": "서버 내부 오류, 나중에 다시 시도해주세요"
     }
   }
   ```

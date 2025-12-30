@@ -84,19 +84,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 ## Response
 
-<ResponseField name="task_id" type="string">
-  タスクID、結果を照会するために使用されます
+<ResponseField name="out_task_id" type="string">
+  発信者のタスクID、結果の照会に使用可能
 </ResponseField>
 
-<ResponseField name="out_task_id" type="string">
-  発信元タスクID、結果を照会するために使用できます
-</ResponseField>
 <ResponseField name="status" type="string">
-  初期状態で、固定値は `"pending"`
+  初期状態、固定で `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  予想消費クレジット
+  予測消費クレジット
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
@@ -112,7 +109,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     --data '{
       "model": "seedream_v4_5",
       "params": {
-        "prompt": "夢のような森の夜景",
+        "prompt": "夢のような森林の夜景",
         "aspect_ratio": "16:9",
         "resolution": "high"
       },
@@ -128,7 +125,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
       "model": "seedream_v4_5",
       "params": {
-          "prompt": "夢のような森の夜景",
+          "prompt": "夢のような森林の夜景",
           "aspect_ratio": "16:9",
           "resolution": "high"
       },
@@ -151,7 +148,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   const payload = {
     model: "seedream_v4_5",
     params: {
-      prompt: "夢のような森の夜景",
+      prompt: "夢のような森林の夜景",
       aspect_ratio: "16:9",
       resolution: "high"
     }
@@ -189,7 +186,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       payload := map[string]interface{}{
           "model": "seedream_v4_5",
           "params": map[string]interface{}{
-              "prompt":       "夢のような森の夜景",
+              "prompt":       "夢のような森林の夜景",
               "aspect_ratio": "16:9",
               "resolution":   "high",
     
@@ -227,7 +224,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           {
             "model": "seedream_v4_5",
             "params": {
-              "prompt": "夢のような森の夜景",
+              "prompt": "夢のような森林の夜景",
               "aspect_ratio": "16:9",
               "resolution": "high"
 
@@ -260,7 +257,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   $payload = [
       "model" => "seedream_v4_5",
       "params" => [
-          "prompt" => "夢のような森の夜景",
+          "prompt" => "夢のような森林の夜景",
           "aspect_ratio" => "16:9",
           "resolution" => "high"
       ]
@@ -292,7 +289,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
     model: "seedream_v4_5",
     params: {
-      prompt: "夢のような森の夜景",
+      prompt: "夢のような森林の夜景",
       aspect_ratio: "16:9",
       resolution: "high"
     }
@@ -317,7 +314,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload: [String: Any] = [
       "model": "seedream_v4_5",
       "params": [
-          "prompt": "夢のような森の夜景",
+          "prompt": "夢のような森林の夜景",
           "aspect_ratio": "16:9",
           "resolution": "high"
 
@@ -360,7 +357,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           var payload = @"{
               ""model"": ""seedream_v4_5"",
               ""params"": {
-                  ""prompt"": ""夢のような森の夜景"",
+                  ""prompt"": ""夢のような森林の夜景"",
                   ""aspect_ratio"": ""16:9"",
                   ""resolution"": ""high""
               }
@@ -394,7 +391,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           const char *payload = "{"
               "\"model\":\"seedream_v4_5\","
               "\"params\":{"
-                  "\"prompt\":\"夢のような森の夜景\","
+                  "\"prompt\":\"夢のような森林の夜景\","
                   "\"aspect_ratio\":\"16:9\","
                   "\"resolution\":\"high\""
               "}"
@@ -434,7 +431,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           NSDictionary *payload = @{
               @"model": @"seedream_v4_5",
               @"params": @{
-                  @"prompt": @"夢のような森の夜景",
+                  @"prompt": @"夢のような森林の夜景",
                   @"aspect_ratio": @"16:9",
                   @"resolution": @"high"
               }
@@ -481,7 +478,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload = {|{
     "model": "seedream_v4_5",
     "params": {
-      "prompt": "夢のような森の夜景",
+      "prompt": "夢のような森林の夜景",
       "aspect_ratio": "16:9",
       "resolution": "high"
 
@@ -513,7 +510,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     final payload = {
       'model': 'seedream_v4_5',
       'params': {
-        'prompt': '夢のような森の夜景',
+        'prompt': '夢のような森林の夜景',
         'aspect_ratio': '16:9',
         'resolution': 'high'
       }
@@ -541,7 +538,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload <- list(
     model = "seedream_v4_5",
     params = list(
-      prompt = "夢のような森の夜景",
+      prompt = "夢のような森林の夜景",
       aspect_ratio = "16:9",
       resolution = "high"
     )
@@ -567,7 +564,6 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     "statusCode": 200,
     "message": "",
     "data": {
-        "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
         "out_task_id": "my_task_123456",
         "status": "pending",
         "estimated_credits": 100,
@@ -579,7 +575,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```json 400
     {
         "statusCode": 400,
-        "message": "リクエストパラメータが無効です",
+        "message": "リクエストパラメーターが無効です",
         "ok": false
     }
   ```
@@ -587,7 +583,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 401,
-      "message": "認証に失敗しました。APIキーを確認してください"
+      "message": "認証に失敗しました。APIキーを確認してください。"
     }
   }
   ```
@@ -595,7 +591,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 433,
-      "message": "アカウント残高が不足しています。入金後に再試行してください"
+      "message": "アカウント残高が不足しています。チャージ後に再試行してください。"
     }
   }
   ```
@@ -604,7 +600,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 500,
-      "message": "サーバー内部エラーです。後ほど再試行してください"
+      "message": "サーバー内部エラーです。後ほど再試行してください。"
     }
   }
   ```

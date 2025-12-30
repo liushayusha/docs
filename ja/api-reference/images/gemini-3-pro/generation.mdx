@@ -95,20 +95,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 ## Response
 
-<ResponseField name="task_id" type="string">
-  タスクID、結果のクエリに使用されます
-</ResponseField>
-
 <ResponseField name="out_task_id" type="string">
-  発信者のタスクID、結果のクエリに使用可能です
+  発注者タスクID。結果の照会に使用可能
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  初期状態、固定で `"pending"`
+  初期状態。固定で `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  予測消費クレジット
+  推定消費クレジット
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
@@ -124,7 +120,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     --data '{
       "model": "nano_banana_pro",
       "params": {
-        "prompt": "プロフェッショナルな都市夜景",
+        "prompt": "プロフェッショナルな都市の夜景",
         "aspect_ratio": "16:9",
         "resolution": "2K",
         "format": "png"
@@ -141,7 +137,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
       "model": "nano_banana_pro",
       "params": {
-          "prompt": "プロフェッショナルな都市夜景",
+          "prompt": "プロフェッショナルな都市の夜景",
           "aspect_ratio": "16:9",
           "resolution": "2K",
           "format": "png"
@@ -165,7 +161,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   const payload = {
     model: "nano_banana_pro",
     params: {
-      prompt: "プロフェッショナルな都市夜景",
+      prompt: "プロフェッショナルな都市の夜景",
       aspect_ratio: "16:9",
       resolution: "2K",
       format: "png"
@@ -205,7 +201,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       payload := map[string]interface{}{
           "model": "nano_banana_pro",
           "params": map[string]interface{}{
-              "prompt":       "プロフェッショナルな都市夜景",
+              "prompt":       "プロフェッショナルな都市の夜景",
               "aspect_ratio": "16:9",
               "resolution":   "2K",
               "format":       "png",
@@ -245,7 +241,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           {
             "model": "nano_banana_pro",
             "params": {
-              "prompt": "プロフェッショナルな都市夜景",
+              "prompt": "プロフェッショナルな都市の夜景",
               "aspect_ratio": "16:9",
               "resolution": "2K",
               "format": "png"
@@ -278,7 +274,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   $payload = [
       "model" => "nano_banana_pro",
       "params" => [
-          "prompt" => "プロフェッショナルな都市夜景",
+          "prompt" => "プロフェッショナルな都市の夜景",
           "aspect_ratio" => "16:9",
           "resolution" => "2K",
           "format" => "png"
@@ -312,7 +308,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
     model: "nano_banana_pro",
     params: {
-      prompt: "プロフェッショナルな都市夜景",
+      prompt: "プロフェッショナルな都市の夜景",
       aspect_ratio: "16:9",
       resolution: "2K",
       format: "png"
@@ -339,7 +335,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload: [String: Any] = [
       "model": "nano_banana_pro",
       "params": [
-          "prompt": "プロフェッショナルな都市夜景",
+          "prompt": "プロフェッショナルな都市の夜景",
           "aspect_ratio": "16:9",
           "resolution": "2K",
           "format": "png"
@@ -382,7 +378,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           var payload = @"{
               ""model"": ""nano_banana_pro"",
               ""params"": {
-                  ""prompt"": ""プロフェッショナルな都市夜景"",
+                  ""prompt"": ""プロフェッショナルな都市の夜景"",
                   ""aspect_ratio"": ""16:9"",
                   ""resolution"": ""2K"",
                   ""format"": ""png""
@@ -418,7 +414,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           const char *payload = "{"
               "\"model\":\"nano_banana_pro\","
               "\"params\":{"
-                  "\"prompt\":\"プロフェッショナルな都市夜景\","
+                  "\"prompt\":\"プロフェッショナルな都市の夜景\","
                   "\"aspect_ratio\":\"16:9\","
                   "\"resolution\":\"2K\","
                   "\"format\":\"png\""
@@ -460,7 +456,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           NSDictionary *payload = @{
               @"model": @"nano_banana_pro",
               @"params": @{
-                  @"prompt": @"プロフェッショナルな都市夜景",
+                  @"prompt": @"プロフェッショナルな都市の夜景",
                   @"aspect_ratio": @"16:9",
                   @"resolution": @"2K",
                   @"format": @"png"
@@ -509,7 +505,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload = {|{
     "model": "nano_banana_pro",
     "params": {
-      "prompt": "プロフェッショナルな都市夜景",
+      "prompt": "プロフェッショナルな都市の夜景",
       "aspect_ratio": "16:9",
       "resolution": "2K",
       "format": "png"
@@ -541,7 +537,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     final payload = {
       'model': 'nano_banana_pro',
       'params': {
-        'prompt': 'プロフェッショナルな都市夜景',
+        'prompt': 'プロフェッショナルな都市の夜景',
         'aspect_ratio': '16:9',
         'resolution': '2K',
         'format': 'png'
@@ -571,7 +567,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload <- list(
     model = "nano_banana_pro",
     params = list(
-      prompt = "プロフェッショナルな都市夜景",
+      prompt = "プロフェッショナルな都市の夜景",
       aspect_ratio = "16:9",
       resolution = "2K",
       format = "png"
@@ -599,7 +595,6 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     "statusCode": 200,
     "message": "",
     "data": {
-        "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
         "out_task_id": "my_task_123456",
         "status": "pending",
         "estimated_credits": 100,
@@ -619,7 +614,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 401,
-      "message": "認証失敗、APIキーを確認してください",
+      "message": "認証に失敗しました。APIキーをご確認ください",
     }
   }
   ```
@@ -627,7 +622,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 433,
-      "message": "アカウント残高が不足しています。チャージ後に再試行してください",
+      "message": "アカウント残高が不足しています。チャージ後に再度お試しください",
     }
   }
   ```
@@ -636,7 +631,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 500,
-      "message": "サーバー内部エラー、後でもう一度お試しください"
+      "message": "サーバー内部エラーが発生しました。後ほど再度お試しください"
     }
   }
   ```

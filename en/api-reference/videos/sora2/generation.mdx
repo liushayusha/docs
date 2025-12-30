@@ -76,19 +76,15 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 ## Response
 
-<ResponseField name="task_id" type="string">
-  Task ID for querying the result
-</ResponseField>
-
 <ResponseField name="out_task_id" type="string">
-  Initiator's task ID, which can be used to query the result
+  Initiator task ID, which can be used to query the result
 </ResponseField>
 <ResponseField name="status" type="string">
   Initial status, fixed as `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  Estimated credit consumption
+  Estimated consumed credits
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
@@ -514,8 +510,6 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     "statusCode": 200,
     "message": "",
     "data": {
-        "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
-        "out_task_id": "my_task_123456",
         "out_task_id": "my_task_123456",
         "status": "pending",
         "estimated_credits": 100,

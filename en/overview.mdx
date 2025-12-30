@@ -25,9 +25,9 @@ AIReiter is a unified AI content generation API platform that provides image and
 
 ## API Workflow
 
-### 1. Submit Generation Task
+### 1. Submit Generate Task
 
-All image and video generation are processed asynchronously. When submitting a task, you need to provide the `out_task_id` (the initiator's task ID). The system will return both `task_id` and `out_task_id`:
+All image and video generation uses asynchronous processing. When submitting a task, you need to provide `out_task_id` (initiator's task ID), and the system will return the same `out_task_id`:
 
 ```bash
 curl --request POST \
@@ -46,19 +46,9 @@ curl --request POST \
 
 ### 2. Query Task Status
 
-Use the returned `task_id` or the submitted `out_task_id` to query the task progress and results (either one):
+Use the `out_task_id` you submitted to check the task progress and results:
 
 ```bash
-# Query using task_id
-curl --request POST \
-  --url https://aireiter.com/api/openapi/query \
-  --header 'Authorization: Bearer YOUR_API_KEY' \
-  --header 'Content-Type: application/json' \
-  --data-raw '{
-    "task_id": "order_xxxxxxxxxxxx"
-  }'
-
-# Or query using out_task_id
 curl --request POST \
   --url https://aireiter.com/api/openapi/query \
   --header 'Authorization: Bearer YOUR_API_KEY' \
@@ -68,7 +58,7 @@ curl --request POST \
   }'
 ```
 
-### 3. Retrieve Generation Results
+### 3. Get Generate Result
 
 After the task is completed, the response will include URLs of the generated images or videos:
 
@@ -77,7 +67,6 @@ After the task is completed, the response will include URLs of the generated ima
   "statusCode": 200,
   "message": "",
   "data": {
-    "task_id": "order_xxxxxxxxxxxx",
     "out_task_id": "my_task_123456",
     "status": "completed",
     "output": [
@@ -136,38 +125,38 @@ Supports text-to-video and image-to-video, offering various resolution and durat
 
 ### Asynchronous Task Processing
 
-All generation requests use an asynchronous processing mode to avoid long wait times:
+All generation requests use asynchronous processing to avoid long wait times:
 
-- When submitting a task, you must provide `out_task_id` (the initiator’s task ID for business identification)
-- The system immediately returns the generated `task_id` and your submitted `out_task_id`
-- You can query the task status using either `task_id` or `out_task_id` (choose one)
+- You must provide `out_task_id` (initiator task ID for business identification) when submitting a task
+- Immediately returns your submitted `out_task_id`
+- You can query task status using the `out_task_id`
 - Supports optional webhook callback notifications
-- Task status updates in real-time: `pending` → `processing` → `completed`
+- Real-time task status updates: `pending` → `processing` → `completed`
 
 ### Multi-Model Support
 
-A unified API endpoint supports multiple image and video generation models:
+One unified API endpoint supporting various image and video generation models:
 
-- **Image Generation**: 5 models including GPT-4o, Gemini, Seedream
-- **Video Generation**: 4 models including Sora2, VEO3
+- **Image Generation**: 5 models including GPT-4o, Gemini, Seedream, etc.
+- **Video Generation**: 4 models including Sora2, VEO3, etc.
 - Unified request format and response structure
 - Flexible parameter configuration
 
 ### Transparent Pricing
 
-Charged by points, clear and transparent:
+Charged by credits with clear transparency:
 
-- Each task returns an estimated points consumption
-- Actual points consumption is shown after task completion
-- You only pay for successfully generated content
+- Each task returns the estimated credit consumption
+- Actual credit consumption shown after task completion
+- Pay only for successfully generated content
 - No hidden fees
 
 ### Flexible Configuration
 
 Supports various generation parameter configurations:
 
-- **Image**: multiple aspect ratios (1:1, 3:2, 2:3)
-- **Video**: multiple aspect ratios (16:9, 9:16), durations (10 seconds, 15 seconds), resolutions
+- **Images**: multiple aspect ratios (1:1, 3:2, 2:3)
+- **Videos**: multiple aspect ratios (16:9, 9:16), durations (10 seconds, 15 seconds), resolutions
 - Supports reference images (image-to-image, image-to-video)
 
 ## Authentication Method
@@ -186,15 +175,15 @@ Visit the <a href={apiKeyUrl} target="_blank">API Key Management Page</a> to obt
 
 <AccordionGroup>
   <Accordion title="How to get an API Key?">
-    Visit the <a href={apiKeyUrl} target="_blank">API Key Management Page</a>, where you can create and manage your API Key after logging in.
+    Visit the <a href={apiKeyUrl} target="_blank">API Key Management page</a>, log in to create and manage your API Keys.
   </Accordion>
 
-  <Accordion title="How long does it take to generate images and videos?">
-    All generation tasks are processed asynchronously. Image generation usually takes a few seconds to tens of seconds, while video generation depends on duration and resolution, typically taking 1-5 minutes. After submitting a task, you will immediately receive a task_id, which you can use to track progress via the status query API.
+  <Accordion title="How long does image and video generation take?">
+    All generation tasks are processed asynchronously. Image generation usually takes a few seconds to tens of seconds. Video generation typically takes 1-5 minutes depending on duration and resolution. After submitting the task you will immediately get an out_task_id, which can be used to track progress via the status query API.
   </Accordion>
 
   <Accordion title="How to query task status?">
-    Use the task status query API by providing the `task_id` returned when submitting the task, or your own `out_task_id` (either one):
+    Use the task status query API and pass your custom `out_task_id`:
 
     ```bash
     POST https://aireiter.com/api/openapi/query
@@ -204,27 +193,27 @@ Visit the <a href={apiKeyUrl} target="_blank">API Key Management Page</a> to obt
   </Accordion>
 
   <Accordion title="What is out_task_id?">
-    `out_task_id` is the client-side task ID, which you customize when submitting a task:
+    `out_task_id` is a client-generated task ID, set by you when submitting a task:
 
-    - **Required parameter**: `out_task_id` must be provided when submitting a task
-    - **Business identifier**: You can use an order number, business ID, etc., from your system as the identifier
-    - **Flexible query**: You can directly query task status using `out_task_id` without saving the system-returned `task_id`
-    - **Result association**: Both `task_id` and `out_task_id` will be returned in query results to help associate with your business data
+    - **Required parameter**: You must include `out_task_id` when submitting a task
+    - **Business identifier**: Can be your system’s order number, business ID, etc.
+    - **Flexible query**: Use `out_task_id` directly to query task status
+    - **Result association**: The query result will include `out_task_id` to help you correlate business data
   </Accordion>
 
-  <Accordion title="How is billing done?">
+  <Accordion title="How is billing calculated?">
     AIReiter uses a credit-based billing system:
 
-    - An estimated credit consumption (`estimated_credits`) is returned when submitting a task
-    - Actual credits used (`credits_used`) are returned after the task is completed
-    - You only pay for successfully generated content; failed tasks are not charged
-    - Credits consumed vary by model
+    - Estimated credit consumption (`estimated_credits`) is returned when submitting a task
+    - Actual credit consumption (`credits_used`) is returned when the task is completed
+    - Only pay for successfully generated content; failed tasks are free
+    - Different models consume different amounts of credits
   </Accordion>
 
   <Accordion title="What image and video formats are supported?">
-    - **Images**: Supports common formats such as JPEG, PNG
+    - **Images**: Supports common formats like JPEG, PNG
     - **Videos**: Outputs in MP4 format
-    - **Reference images**: Input supports publicly accessible image URLs
+    - **Reference images**: Accepts publicly accessible image URLs as input
   </Accordion>
 </AccordionGroup>
 

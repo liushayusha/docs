@@ -95,12 +95,8 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 ## Response
 
-<ResponseField name="task_id" type="string">
-  Task ID, used to query results
-</ResponseField>
-
 <ResponseField name="out_task_id" type="string">
-  Initiator's task ID, can be used to query results
+  Initiator task ID, can be used to query results
 </ResponseField>
 
 <ResponseField name="status" type="string">
@@ -108,7 +104,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  Estimated consumed credits
+  Estimated credits consumption
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
@@ -124,7 +120,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     --data '{
       "model": "nano_banana_pro",
       "params": {
-        "prompt": "Professional city nightscape",
+        "prompt": "Professional-grade city nightscape",
         "aspect_ratio": "16:9",
         "resolution": "2K",
         "format": "png"
@@ -141,7 +137,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
       "model": "nano_banana_pro",
       "params": {
-          "prompt": "Professional city nightscape",
+          "prompt": "Professional-grade city nightscape",
           "aspect_ratio": "16:9",
           "resolution": "2K",
           "format": "png"
@@ -165,7 +161,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   const payload = {
     model: "nano_banana_pro",
     params: {
-      prompt: "Professional city nightscape",
+      prompt: "Professional-grade city nightscape",
       aspect_ratio: "16:9",
       resolution: "2K",
       format: "png"
@@ -205,7 +201,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       payload := map[string]interface{}{
           "model": "nano_banana_pro",
           "params": map[string]interface{}{
-              "prompt":       "Professional city nightscape",
+              "prompt":       "Professional-grade city nightscape",
               "aspect_ratio": "16:9",
               "resolution":   "2K",
               "format":       "png",
@@ -245,7 +241,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           {
             "model": "nano_banana_pro",
             "params": {
-              "prompt": "Professional city nightscape",
+              "prompt": "Professional-grade city nightscape",
               "aspect_ratio": "16:9",
               "resolution": "2K",
               "format": "png"
@@ -278,7 +274,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   $payload = [
       "model" => "nano_banana_pro",
       "params" => [
-          "prompt" => "Professional city nightscape",
+          "prompt" => "Professional-grade city nightscape",
           "aspect_ratio" => "16:9",
           "resolution" => "2K",
           "format" => "png"
@@ -312,7 +308,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
     model: "nano_banana_pro",
     params: {
-      prompt: "Professional city nightscape",
+      prompt: "Professional-grade city nightscape",
       aspect_ratio: "16:9",
       resolution: "2K",
       format: "png"
@@ -339,7 +335,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload: [String: Any] = [
       "model": "nano_banana_pro",
       "params": [
-          "prompt": "Professional city nightscape",
+          "prompt": "Professional-grade city nightscape",
           "aspect_ratio": "16:9",
           "resolution": "2K",
           "format": "png"
@@ -382,7 +378,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           var payload = @"{
               ""model"": ""nano_banana_pro"",
               ""params"": {
-                  ""prompt"": ""Professional city nightscape"",
+                  ""prompt"": ""Professional-grade city nightscape"",
                   ""aspect_ratio"": ""16:9"",
                   ""resolution"": ""2K"",
                   ""format"": ""png""
@@ -418,7 +414,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           const char *payload = "{"
               "\"model\":\"nano_banana_pro\","
               "\"params\":{"
-                  "\"prompt\":\"Professional city nightscape\","
+                  "\"prompt\":\"Professional-grade city nightscape\","
                   "\"aspect_ratio\":\"16:9\","
                   "\"resolution\":\"2K\","
                   "\"format\":\"png\""
@@ -460,7 +456,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           NSDictionary *payload = @{
               @"model": @"nano_banana_pro",
               @"params": @{
-                  @"prompt": @"Professional city nightscape",
+                  @"prompt": @"Professional-grade city nightscape",
                   @"aspect_ratio": @"16:9",
                   @"resolution": @"2K",
                   @"format": @"png"
@@ -509,7 +505,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload = {|{
     "model": "nano_banana_pro",
     "params": {
-      "prompt": "Professional city nightscape",
+      "prompt": "Professional-grade city nightscape",
       "aspect_ratio": "16:9",
       "resolution": "2K",
       "format": "png"
@@ -541,7 +537,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     final payload = {
       'model': 'nano_banana_pro',
       'params': {
-        'prompt': 'Professional city nightscape',
+        'prompt': 'Professional-grade city nightscape',
         'aspect_ratio': '16:9',
         'resolution': '2K',
         'format': 'png'
@@ -571,7 +567,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload <- list(
     model = "nano_banana_pro",
     params = list(
-      prompt = "Professional city nightscape",
+      prompt = "Professional-grade city nightscape",
       aspect_ratio = "16:9",
       resolution = "2K",
       format = "png"
@@ -599,7 +595,6 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     "statusCode": 200,
     "message": "",
     "data": {
-        "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
         "out_task_id": "my_task_123456",
         "status": "pending",
         "estimated_credits": 100,
@@ -619,7 +614,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 401,
-      "message": "Authentication failed, please check your API key",
+      "message": "Authentication failed, please verify your API key",
     }
   }
   ```

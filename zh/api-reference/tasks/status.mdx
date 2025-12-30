@@ -27,23 +27,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 ## Body
 
-<ParamField body="task_id" type="string">
-  生成API返回的任务ID
-
-  与 out_task_id 二选一，必须提供其中一个
-</ParamField>
-
-<ParamField body="out_task_id" type="string">
-  发起方任务ID
-
-  与 task_id 二选一，必须提供其中一个
+<ParamField body="out_task_id" type="string" required>
+  发起方任务ID，必填
 </ParamField>
 
 ## Response
-
-<ResponseField name="task_id" type="string">
-  任务ID
-</ResponseField>
 
 <ResponseField name="status" type="string">
   任务状态：
@@ -93,17 +81,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <RequestExample>
-  ```bash cURL (使用 task_id)
-  curl --request POST \
-    --url 'https://aireiter.com/api/openapi/query' \
-    --header 'Authorization: Bearer <token>' \
-    --header 'Content-Type: application/json' \
-    --data-raw '{
-      "task_id": "order_lwU2d-VkUq9-tlCCmrdYu"
-    }'
-  ```
-
-  ```bash cURL (使用 out_task_id)
+  ```bash cURL
   curl --request POST \
     --url 'https://aireiter.com/api/openapi/query' \
     --header 'Authorization: Bearer <token>' \
@@ -113,26 +91,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     }'
   ```
 
-  ```python Python (使用 task_id)
-  import requests
-
-  url = "https://aireiter.com/api/openapi/query"
-
-  headers = {
-      "Authorization": "Bearer <token>",
-      "Content-Type": "application/json"
-  }
-
-  payload = {
-      "task_id": "order_lwU2d-VkUq9-tlCCmrdYu"
-  }
-
-  response = requests.post(url, json=payload, headers=headers)
-
-  print(response.json())
-  ```
-
-  ```python Python (使用 out_task_id)
+  ```python Python
   import requests
 
   url = "https://aireiter.com/api/openapi/query"
@@ -160,7 +119,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   };
 
   const payload = {
-    task_id: "order_lwU2d-VkUq9-tlCCmrdYu"
+    out_task_id: "my_task_123456"
   };
 
   fetch(url, {
@@ -188,7 +147,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       url := "https://aireiter.com/api/openapi/query"
 
       payload := map[string]interface{}{
-          "task_id": "order_lwU2d-VkUq9-tlCCmrdYu",
+          "out_task_id": "my_task_123456",
       }
 
       jsonData, _ := json.Marshal(payload)
@@ -226,7 +185,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
               conn.setRequestProperty("Content-Type", "application/json");
               conn.setDoOutput(true);
 
-              String jsonPayload = "{\"task_id\":\"order_lwU2d-VkUq9-tlCCmrdYu\"}";
+              String jsonPayload = "{\"out_task_id\":\"my_task_123456\"}";
 
               OutputStream os = conn.getOutputStream();
               os.write(jsonPayload.getBytes());
@@ -255,7 +214,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   $url = "https://aireiter.com/api/openapi/query";
 
   $payload = array(
-      "task_id" => "order_lwU2d-VkUq9-tlCCmrdYu"
+      "out_task_id" => "my_task_123456"
   );
 
   $ch = curl_init($url);
@@ -282,7 +241,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   url = URI.parse("https://aireiter.com/api/openapi/query")
 
   payload = {
-    task_id: "order_lwU2d-VkUq9-tlCCmrdYu"
+    out_task_id: "my_task_123456"
   }
 
   http = Net::HTTP.new(url.host, url.port)
@@ -305,7 +264,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
   let payload: [String: Any] = [
-      "task_id": "order_lwU2d-VkUq9-tlCCmrdYu"
+      "out_task_id": "my_task_123456"
   ]
 
   request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
@@ -335,7 +294,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       static async Task Main(string[] args)
       {
           var url = "https://aireiter.com/api/openapi/query";
-          var payload = "{\"task_id\":\"order_lwU2d-VkUq9-tlCCmrdYu\"}";
+          var payload = "{\"out_task_id\":\"my_task_123456\"}";
 
           using var client = new HttpClient();
           client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
@@ -366,7 +325,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
           headers = curl_slist_append(headers, "Content-Type: application/json");
 
-          const char *data = "{\"task_id\":\"order_lwU2d-VkUq9-tlCCmrdYu\"}";
+          const char *data = "{\"out_task_id\":\"my_task_123456\"}";
 
           curl_easy_setopt(curl, CURLOPT_URL, url);
           curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
@@ -401,7 +360,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
 
           NSDictionary *payload = @{
-              @"task_id": @"order_lwU2d-VkUq9-tlCCmrdYu"
+              @"out_task_id": @"my_task_123456"
           };
 
           NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload options:0 error:nil];
@@ -434,7 +393,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   let url = "https://aireiter.com/api/openapi/query"
 
-  let payload = {|{"task_id":"order_lwU2d-VkUq9-tlCCmrdYu"}|}
+  let payload = {|{"out_task_id":"my_task_123456"}|}
 
   let () =
     let headers = Header.init ()
@@ -458,7 +417,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     final url = Uri.parse('https://aireiter.com/api/openapi/query');
 
     final payload = {
-      'task_id': 'order_lwU2d-VkUq9-tlCCmrdYu'
+      'out_task_id': 'my_task_123456'
     };
 
     final response = await http.post(
@@ -481,7 +440,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   url <- "https://aireiter.com/api/openapi/query"
 
   payload <- list(
-    task_id = "order_lwU2d-VkUq9-tlCCmrdYu"
+    out_task_id = "my_task_123456"
   )
 
   response <- POST(
@@ -504,7 +463,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     "statusCode": 200,
     "message": "",
     "data": {
-        "task_id": "order_lwU2d-VkUq9-tlCCmrdYu",
+        "out_task_id": "my_task_123456",
         "status": "completed",
         "created_at": "2025-12-18T10:12:11.000Z",
         "completed_at": "2025-12-18T10:13:41.000Z",
@@ -535,7 +494,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```json 400
   {
     "statusCode": 400,
-    "message": "Missing required field: task_id",
+    "message": "Missing required field: out_task_id",
     "ok": false
   }
   ```

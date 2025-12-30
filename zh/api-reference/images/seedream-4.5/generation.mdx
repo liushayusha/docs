@@ -85,13 +85,10 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 ## Response
 
-<ResponseField name="task_id" type="string">
-  任务ID，用于查询结果
-</ResponseField>
-
 <ResponseField name="out_task_id" type="string">
   发起方任务ID，可用于查询结果
 </ResponseField>
+
 <ResponseField name="status" type="string">
   初始状态，固定为 `"pending"`
 </ResponseField>
@@ -568,7 +565,6 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     "statusCode": 200,
     "message": "",
     "data": {
-        "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
         "out_task_id": "my_task_123456",
         "status": "pending",
         "estimated_credits": 100,

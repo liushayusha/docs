@@ -76,23 +76,19 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 ## Response
 
-<ResponseField name="task_id" type="string">
-  タスクID、結果の照会に使用
-</ResponseField>
-
 <ResponseField name="out_task_id" type="string">
-  発行元タスクID、結果の照会に使用可能
+  発注者のタスクID。結果の照会に使用可能
 </ResponseField>
 <ResponseField name="status" type="string">
-  初期状態、固定で `"pending"`
+  初期状態で固定の `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  予測消費クレジット
+  推定消費クレジット
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  作成日時（ISO形式）
+  作成日時（ISOフォーマット）
 </ResponseField>
 
 <RequestExample>
@@ -104,7 +100,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     --data '{
       "model": "sora2",
       "params": {
-        "prompt": "庭園で散歩する猫",
+        "prompt": "庭で散歩している猫",
         "aspect_ratio": "16:9",
         "video_length": "10"
       },
@@ -120,7 +116,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
       "model": "sora2",
       "params": {
-          "prompt": "庭園で散歩する猫",
+          "prompt": "庭で散歩している猫",
           "aspect_ratio": "16:9",
           "video_length": "10"
       },
@@ -143,7 +139,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   const payload = {
     model: "sora2",
     params: {
-      prompt: "庭園で散歩する猫",
+      prompt: "庭で散歩している猫",
       aspect_ratio: "16:9",
       video_length: "10"
     },
@@ -182,7 +178,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       payload := map[string]interface{}{
           "model": "sora2",
           "params": map[string]interface{}{
-              "prompt":       "庭園で散歩する猫",
+              "prompt":       "庭で散歩している猫",
               "aspect_ratio": "16:9",
               "video_length": "10",
           },
@@ -224,7 +220,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
               conn.setRequestProperty("Content-Type", "application/json");
               conn.setDoOutput(true);
 
-              String jsonPayload = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"庭園で散歩する猫\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"},\"out_task_id\":\"my_task_123456\"}";
+              String jsonPayload = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"庭で散歩している猫\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"},\"out_task_id\":\"my_task_123456\"}";
 
               OutputStream os = conn.getOutputStream();
               os.write(jsonPayload.getBytes());
@@ -254,7 +250,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   $payload = array(
       "model" => "sora2",
       "params" => array(
-          "prompt" => "庭園で散歩する猫",
+          "prompt" => "庭で散歩している猫",
           "aspect_ratio" => "16:9",
           "video_length" => "10"
       ),
@@ -287,7 +283,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
     model: "sora2",
     params: {
-      prompt: "庭園で散歩する猫",
+      prompt: "庭で散歩している猫",
       aspect_ratio: "16:9",
       video_length: "10"
     },
@@ -316,7 +312,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload: [String: Any] = [
       "model": "sora2",
       "params": [
-          "prompt": "庭園で散歩する猫",
+          "prompt": "庭で散歩している猫",
           "aspect_ratio": "16:9",
           "video_length": "10"
       ],
@@ -344,7 +340,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       static async Task Main(string[] args)
       {
           var url = "https://aireiter.com/api/openapi/submit";
-          var payload = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"庭園で散歩する猫\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"},\"out_task_id\":\"my_task_123456\"}";
+          var payload = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"庭で散歩している猫\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"},\"out_task_id\":\"my_task_123456\"}";
 
           using (var client = new HttpClient())
           {
@@ -376,7 +372,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           headers = curl_slist_append(headers, "Content-Type: application/json");
           curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-          const char *data = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"庭園で散歩する猫\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"},\"out_task_id\":\"my_task_123456\"}";
+          const char *data = "{\"model\":\"sora2\",\"params\":{\"prompt\":\"庭で散歩している猫\",\"aspect_ratio\":\"16:9\",\"video_length\":\"10\"},\"out_task_id\":\"my_task_123456\"}";
           curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
 
           res = curl_easy_perform(curl);
@@ -402,7 +398,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           NSDictionary *payload = @{
               @"model": @"sora2",
               @"params": @{
-                  @"prompt": @"庭園で散歩する猫",
+                  @"prompt": @"庭で散歩している猫",
                   @"aspect_ratio": @"16:9",
                   @"video_length": @"10"
               },
@@ -433,7 +429,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   let url = "https://aireiter.com/api/openapi/submit"
 
-  let payload = {|{"model":"sora2","params":{"prompt":"庭園で散歩する猫","aspect_ratio":"16:9","video_length":"10"},"out_task_id":"my_task_123456"}|}
+  let payload = {|{"model":"sora2","params":{"prompt":"庭で散歩している猫","aspect_ratio":"16:9","video_length":"10"},"out_task_id":"my_task_123456"}|}
 
   let () =
     let headers = Header.init ()
@@ -458,7 +454,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     var payload = {
       'model': 'sora2',
       'params': {
-        'prompt': '庭園で散歩する猫',
+        'prompt': '庭で散歩している猫',
         'aspect_ratio': '16:9',
         'video_length': '10'
       },
@@ -487,7 +483,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload <- list(
     model = "sora2",
     params = list(
-      prompt = "庭園で散歩する猫",
+      prompt = "庭で散歩している猫",
       aspect_ratio = "16:9",
       video_length = "10"
     ),
@@ -514,8 +510,6 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     "statusCode": 200,
     "message": "",
     "data": {
-        "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
-        "out_task_id": "my_task_123456",
         "out_task_id": "my_task_123456",
         "status": "pending",
         "estimated_credits": 100,
@@ -527,7 +521,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```json 400
     {
         "statusCode": 400,
-        "message": "リクエストパラメーターが無効です",
+        "message": "リクエストパラメータが無効です",
         "ok": false
     }
   ```
@@ -543,7 +537,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 433,
-      "message": "アカウント残高が不足しています。チャージ後に再度お試しください"
+      "message": "アカウント残高が不足しています。チャージ後に再試行してください"
     }
   }
   ```
@@ -552,7 +546,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 500,
-      "message": "サーバー内部エラーが発生しました。後ほど再試行してください"
+      "message": "サーバー内部エラーが発生しました。しばらくしてから再試行してください"
     }
   }
   ```

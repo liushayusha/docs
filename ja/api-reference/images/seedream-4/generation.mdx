@@ -90,15 +90,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 ## Response
 
-<ResponseField name="task_id" type="string">
-  タスクID。結果の照会に使用されます
+<ResponseField name="out_task_id" type="string">
+  発注者のタスクID。結果のクエリに使用可能
 </ResponseField>
 
-<ResponseField name="out_task_id" type="string">
-  発信側のタスクID。結果の照会に使用できます
-</ResponseField>
 <ResponseField name="status" type="string">
-  初期状態。固定で`"pending"`
+  初期状態。固定で `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
@@ -106,7 +103,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  作成日時（ISO形式）
+  作成日時（ISOフォーマット）
 </ResponseField>
 
 <RequestExample>
@@ -579,7 +576,6 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     "statusCode": 200,
     "message": "",
     "data": {
-        "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
         "out_task_id": "my_task_123456",
         "status": "pending",
         "estimated_credits": 100,
@@ -616,7 +612,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 500,
-      "message": "サーバー内部エラー。後でもう一度お試しください"
+      "message": "サーバー内部エラーです。後で再試行してください"
     }
   }
   ```

@@ -75,23 +75,15 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 ## Response
 
-<ResponseField name="task_id" type="string">
-  작업 ID, 결과 조회에 사용
-</ResponseField>
-
 <ResponseField name="out_task_id" type="string">
-  발신자 작업 ID, 결과 조회에 사용 가능
-</ResponseField>
-
-<ResponseField name="out_task_id" type="string">
-  발신자 작업 ID, 결과 조회에 사용 가능
+  요청자 작업 ID, 결과 조회에 사용할 수 있습니다
 </ResponseField>
 <ResponseField name="status" type="string">
   초기 상태, 고정값 `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  예상 소모 포인트
+  예상 소모 크레딧
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
@@ -107,7 +99,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     --data '{
       "model": "veo3_1",
       "params": {
-        "prompt": "이 이미지를 움직이게 하세요",
+        "prompt": "이 이미지를 움직이게 해주세요",
         "image_url": "https://example.com/reference.jpg",
         "aspect_ratio": "16:9"
       },
@@ -123,7 +115,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
       "model": "veo3_1",
       "params": {
-          "prompt": "이 이미지를 움직이게 하세요",
+          "prompt": "이 이미지를 움직이게 해주세요",
           "image_url": "https://example.com/reference.jpg",
           "aspect_ratio": "16:9"
       },
@@ -146,7 +138,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   const payload = {
     model: "veo3_1",
     params: {
-      prompt: "이 이미지를 움직이게 하세요",
+      prompt: "이 이미지를 움직이게 해주세요",
       image_url: "https://example.com/reference.jpg",
       aspect_ratio: "16:9"
     },
@@ -185,7 +177,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       payload := map[string]interface{}{
           "model": "veo3_1",
           "params": map[string]interface{}{
-              "prompt":       "이 이미지를 움직이게 하세요",
+              "prompt":       "이 이미지를 움직이게 해주세요",
               "image_url":    "https://example.com/reference.jpg",
               "aspect_ratio": "16:9",
           },
@@ -227,7 +219,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
               conn.setRequestProperty("Content-Type", "application/json");
               conn.setDoOutput(true);
 
-              String jsonPayload = "{\"model\":\"veo3_1\",\"params\":{\"prompt\":\"이 이미지를 움직이게 하세요\",\"image_url\":\"https://example.com/reference.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
+              String jsonPayload = "{\"model\":\"veo3_1\",\"params\":{\"prompt\":\"이 이미지를 움직이게 해주세요\",\"image_url\":\"https://example.com/reference.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
 
               OutputStream os = conn.getOutputStream();
               os.write(jsonPayload.getBytes());
@@ -257,7 +249,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   $payload = array(
       "model" => "veo3_1",
       "params" => array(
-          "prompt" => "이 이미지를 움직이게 하세요",
+          "prompt" => "이 이미지를 움직이게 해주세요",
           "image_url" => "https://example.com/reference.jpg",
           "aspect_ratio" => "16:9"
       ),
@@ -290,7 +282,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
     model: "veo3_1",
     params: {
-      prompt: "이 이미지를 움직이게 하세요",
+      prompt: "이 이미지를 움직이게 해주세요",
       image_url: "https://example.com/reference.jpg",
       aspect_ratio: "16:9"
     },
@@ -319,7 +311,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload: [String: Any] = [
       "model": "veo3_1",
       "params": [
-          "prompt": "이 이미지를 움직이게 하세요",
+          "prompt": "이 이미지를 움직이게 해주세요",
           "image_url": "https://example.com/reference.jpg",
           "aspect_ratio": "16:9"
       ],
@@ -347,7 +339,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       static async Task Main(string[] args)
       {
           var url = "https://aireiter.com/api/openapi/submit";
-          var payload = "{\"model\":\"veo3_1\",\"params\":{\"prompt\":\"이 이미지를 움직이게 하세요\",\"image_url\":\"https://example.com/reference.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
+          var payload = "{\"model\":\"veo3_1\",\"params\":{\"prompt\":\"이 이미지를 움직이게 해주세요\",\"image_url\":\"https://example.com/reference.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
 
           using (var client = new HttpClient())
           {
@@ -379,7 +371,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           headers = curl_slist_append(headers, "Content-Type: application/json");
           curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-          const char *data = "{\"model\":\"veo3_1\",\"params\":{\"prompt\":\"이 이미지를 움직이게 하세요\",\"image_url\":\"https://example.com/reference.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
+          const char *data = "{\"model\":\"veo3_1\",\"params\":{\"prompt\":\"이 이미지를 움직이게 해주세요\",\"image_url\":\"https://example.com/reference.jpg\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"my_task_123456\"}";
           curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
 
           res = curl_easy_perform(curl);
@@ -405,7 +397,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           NSDictionary *payload = @{
               @"model": @"veo3_1",
               @"params": @{
-                  @"prompt": @"이 이미지를 움직이게 하세요",
+                  @"prompt": @"이 이미지를 움직이게 해주세요",
                   @"image_url": @"https://example.com/reference.jpg",
                   @"aspect_ratio": @"16:9"
               },
@@ -436,7 +428,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   let url = "https://aireiter.com/api/openapi/submit"
 
-  let payload = {|{"model":"veo3_1","params":{"prompt":"이 이미지를 움직이게 하세요","image_url":"https://example.com/reference.jpg","aspect_ratio":"16:9"},"out_task_id":"my_task_123456"}|}
+  let payload = {|{"model":"veo3_1","params":{"prompt":"이 이미지를 움직이게 해주세요","image_url":"https://example.com/reference.jpg","aspect_ratio":"16:9"},"out_task_id":"my_task_123456"}|}
 
   let () =
     let headers = Header.init ()
@@ -461,7 +453,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     var payload = {
       'model': 'veo3_1',
       'params': {
-        'prompt': '이 이미지를 움직이게 하세요',
+        'prompt': '이 이미지를 움직이게 해주세요',
         'image_url': 'https://example.com/reference.jpg',
         'aspect_ratio': '16:9'
       },
@@ -490,7 +482,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload <- list(
     model = "veo3_1",
     params = list(
-      prompt = "이 이미지를 움직이게 하세요",
+      prompt = "이 이미지를 움직이게 해주세요",
       image_url = "https://example.com/reference.jpg",
       aspect_ratio = "16:9"
     ),
@@ -517,8 +509,6 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     "statusCode": 200,
     "message": "",
     "data": {
-        "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
-        "out_task_id": "my_task_123456",
         "out_task_id": "my_task_123456",
         "status": "pending",
         "estimated_credits": 100,
@@ -538,7 +528,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 401,
-      "message": "인증 실패, API 키를 확인하세요"
+      "message": "인증에 실패했습니다. API 키를 확인해 주세요"
     }
   }
   ```
@@ -546,7 +536,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 433,
-      "message": "계정 잔액 부족, 충전 후 다시 시도하세요"
+      "message": "계정 잔액이 부족합니다. 충전 후 다시 시도해 주세요"
     }
   }
   ```
@@ -555,7 +545,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 500,
-      "message": "서버 내부 오류, 잠시 후 다시 시도하세요"
+      "message": "서버 내부 오류입니다. 잠시 후 다시 시도해 주세요"
     }
   }
   ```

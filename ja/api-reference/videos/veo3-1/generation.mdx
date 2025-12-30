@@ -75,16 +75,8 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 ## Response
 
-<ResponseField name="task_id" type="string">
-  タスクID、結果の問い合わせに使用
-</ResponseField>
-
 <ResponseField name="out_task_id" type="string">
-  発信側のタスクID、結果の問い合わせに使用可能
-</ResponseField>
-
-<ResponseField name="out_task_id" type="string">
-  発信側のタスクID、結果の問い合わせに使用可能
+  発信者タスクID。結果の照会に使用できます
 </ResponseField>
 <ResponseField name="status" type="string">
   初期状態、固定で `"pending"`
@@ -517,8 +509,6 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     "statusCode": 200,
     "message": "",
     "data": {
-        "task_id": "order_p9EyMzcBxkH7zxQhlnP6k",
-        "out_task_id": "my_task_123456",
         "out_task_id": "my_task_123456",
         "status": "pending",
         "estimated_credits": 100,
@@ -555,7 +545,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 500,
-      "message": "サーバ内部エラーが発生しました。後でもう一度やり直してください"
+      "message": "サーバー内部エラーが発生しました。後ほど再試行してください"
     }
   }
   ```
