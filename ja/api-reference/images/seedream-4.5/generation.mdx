@@ -42,33 +42,33 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="image_url" type="array">
-      画像生成の参照用画像 URL リスト
+      参考画像のURLリスト、画像から画像生成に使用
 
       * 最大9枚の画像
-      * 公開アクセス可能なURLをサポート
+      * 公開アクセス可能なURLサポート
     </ParamField>
 
-    <ParamField body="aspect_ratio" type="string" default="1:1">
+    <ParamField body="aspect_ratio" type="string">
       画像生成のアスペクト比
 
-      対応するアスペクト比：
+      サポートされているアスペクト比：
 
-      * `1:1` - 正方形（デフォルト）
-      * `3:2` - 横3:2
-      * `2:3` - 縦2:3
-      * `4:3` - 横4:3
-      * `3:4` - 縦3:4
-      * `5:4` - 横5:4
-      * `4:5` - 縦4:5
-      * `16:9` - 横ワイドスクリーン
-      * `9:16` - 縦ワイドスクリーン
+      * `1:1` - 正方形
+      * `3:2` - 横向き3:2
+      * `2:3` - 縦向き2:3
+      * `4:3` - 横向き4:3
+      * `3:4` - 縦向き3:4
+      * `5:4` - 横向き5:4
+      * `4:5` - 縦向き4:5
+      * `16:9` - 横向きワイドスクリーン
+      * `9:16` - 縦向きポートレート
       * `21:9` - 超ワイドスクリーン
     </ParamField>
 
     <ParamField body="resolution" type="string" default="basic">
       画像解像度
 
-      対応する解像度：
+      サポートされている解像度：
 
       * `basic` - 基本解像度（デフォルト）
       * `high` - 高解像度
@@ -77,7 +77,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発注者タスクID
+  発行者タスクID
 
   ユーザー定義のタスク識別子、必須
 </ParamField>

@@ -34,26 +34,26 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="params" type="object" required>
   モデルパラメータオブジェクト
 
-  <Expandable title="params オブジェクトのプロパティ">
+  <Expandable title="params オブジェクトの属性">
     <ParamField body="prompt" type="string" required>
-      画像生成用のテキスト説明
+      画像生成のテキスト説明
 
       制限なし
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      参考画像の URL、画像から画像への生成用
+      画像生成の参考画像のURL
 
-      * 単一画像のみ対応
-      * 公開アクセス可能な URL のみ対応
+      * 単一画像のみサポート
+      * 公開アクセス可能なURLに対応
     </ParamField>
 
-    <ParamField body="aspect_ratio" type="string" default="1:1">
+    <ParamField body="aspect_ratio" type="string">
       画像生成のアスペクト比
 
       対応アスペクト比：
 
-      * `1:1` - 正方形（デフォルト）
+      * `1:1` - 正方形
       * `3:2` - 横向き 3:2
       * `2:3` - 縦向き 2:3
     </ParamField>
@@ -61,9 +61,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発信元タスクID
+  発注者のタスクID
 
-  ユーザー定義タスク識別子、必須
+  ユーザー定義のタスク識別子、必須
 </ParamField>
 
 ## Response

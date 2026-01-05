@@ -28,7 +28,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="model" type="string" required>
   모델 이름
 
-  고정값: `"seedream_v4"`
+  고정 값: `"seedream_v4"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
@@ -42,20 +42,20 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="image_url" type="array">
-      참고 이미지 URL 목록, 이미지에서 이미지 생성에 사용
+      참조 이미지 URL 목록, 이미지로부터 이미지 생성용
 
-      * 최대 9개의 이미지
-      * 공개적으로 접근 가능한 URL 지원
+      * 최대 9개 이미지
+      * 공개 접근 가능한 URL 지원
     </ParamField>
 
-    <ParamField body="aspect_ratio" type="string" default="1:1">
+    <ParamField body="aspect_ratio" type="string">
       이미지 생성 시 가로 세로 비율
 
-      지원하는 비율:
+      지원 비율:
 
-      * `1:1` - 정사각형 (기본값)
+      * `1:1` - 정사각형
       * `16:9` - 가로 와이드스크린
-      * `9:16` - 세로 화면
+      * `9:16` - 세로 세로스크린
       * `4:3` - 가로 4:3
       * `3:4` - 세로 3:4
     </ParamField>
@@ -63,7 +63,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     <ParamField body="resolution" type="string" default="1K">
       이미지 해상도
 
-      지원하는 해상도:
+      지원 해상도:
 
       * `1K` - 기본 해상도 (기본값)
       * `2K` - 표준 해상도
@@ -85,7 +85,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="out_task_id" type="string" required>
   요청자 작업 ID
 
-  사용자가 정의한 작업 식별자, 필수
+  사용자 정의 작업 식별자, 필수 입력
 </ParamField>
 
 ## Response

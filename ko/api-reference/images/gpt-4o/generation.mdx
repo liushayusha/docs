@@ -42,18 +42,18 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      참조 이미지 URL, 이미지로부터 이미지 생성용
+      참고 이미지 URL, 이미지 생성에 사용
 
       * 단일 이미지만 지원
       * 공개 접근 가능한 URL 지원
     </ParamField>
 
-    <ParamField body="aspect_ratio" type="string" default="1:1">
-      이미지 생성 시 가로 세로 비율
+    <ParamField body="aspect_ratio" type="string">
+      이미지 생성의 가로 세로 비율
 
-      지원 가로 세로 비율:
+      지원하는 비율:
 
-      * `1:1` - 정사각형 (기본값)
+      * `1:1` - 정사각형
       * `3:2` - 가로 3:2
       * `2:3` - 세로 2:3
     </ParamField>

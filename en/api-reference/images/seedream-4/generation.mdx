@@ -38,7 +38,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     <ParamField body="prompt" type="string" required>
       Text Description for Image Generation
 
-      No limit
+      No Limit
     </ParamField>
 
     <ParamField body="image_url" type="array">
@@ -48,16 +48,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       * Supports publicly accessible URLs
     </ParamField>
 
-    <ParamField body="aspect_ratio" type="string" default="1:1">
-      Aspect Ratio of Generated Image
+    <ParamField body="aspect_ratio" type="string">
+      Aspect Ratio for Image Generation
 
-      Supported ratios:
+      Supported aspect ratios:
 
-      * `1:1` - Square (default)
-      * `16:9` - Horizontal widescreen
-      * `9:16` - Vertical portrait
-      * `4:3` - Horizontal 4:3
-      * `3:4` - Vertical 3:4
+      * `1:1` - Square
+      * `16:9` - Landscape widescreen
+      * `9:16` - Portrait vertical
+      * `4:3` - Landscape 4:3
+      * `3:4` - Portrait 3:4
     </ParamField>
 
     <ParamField body="resolution" type="string" default="1K">
@@ -65,7 +65,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
       Supported resolutions:
 
-      * `1K` - Basic resolution (default)
+      * `1K` - Base resolution (default)
       * `2K` - Standard resolution
       * `4K` - High definition resolution
     </ParamField>

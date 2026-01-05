@@ -34,11 +34,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="params" type="object" required>
   Model parameters object
 
-  <Expandable title="params object Properties">
+  <Expandable title="params object properties">
     <ParamField body="prompt" type="string" required>
       Text description for image generation
 
-      No limitations
+      No limit
     </ParamField>
 
     <ParamField body="image_url" type="array">
@@ -48,21 +48,21 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       * Supports publicly accessible URLs
     </ParamField>
 
-    <ParamField body="aspect_ratio" type="string" default="auto">
+    <ParamField body="aspect_ratio" type="string">
       Aspect ratio for image generation
 
       Supported aspect ratios:
 
-      * `auto` - Auto (default)
+      * `auto` - Automatic
       * `1:1` - Square
-      * `3:2` - Landscape 3:2
-      * `2:3` - Portrait 2:3
-      * `4:3` - Landscape 4:3
-      * `3:4` - Portrait 3:4
-      * `5:4` - Landscape 5:4
-      * `4:5` - Portrait 4:5
-      * `16:9` - Landscape widescreen
-      * `9:16` - Portrait vertical screen
+      * `3:2` - Horizontal 3:2
+      * `2:3` - Vertical 2:3
+      * `4:3` - Horizontal 4:3
+      * `3:4` - Vertical 3:4
+      * `5:4` - Horizontal 5:4
+      * `4:5` - Vertical 4:5
+      * `16:9` - Horizontal widescreen
+      * `9:16` - Vertical fullscreen
       * `21:9` - Ultra widescreen
     </ParamField>
 
@@ -78,7 +78,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  Client task ID
+  Initiator task ID
 
   User-defined task identifier, required
 </ParamField>

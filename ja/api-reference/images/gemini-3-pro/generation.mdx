@@ -32,7 +32,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  モデルパラメータオブジェクト
+  モデルパラメーターオブジェクト
 
   <Expandable title="params オブジェクトのプロパティ">
     <ParamField body="prompt" type="string" required>
@@ -42,19 +42,19 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="image_url" type="array">
-      参考画像のURLリスト（画像から画像へ生成するために使用）
+      画像生成のための参照画像のURLリスト
 
       * 最大8枚の画像
       * 公開アクセス可能なURLをサポート
     </ParamField>
 
-    <ParamField body="aspect_ratio" type="string" default="1:1">
+    <ParamField body="aspect_ratio" type="string">
       画像生成のアスペクト比
 
-      サポートされているアスペクト比：
+      サポートされるアスペクト比：
 
       * `auto` - 自動
-      * `1:1` - 正方形（デフォルト）
+      * `1:1` - 正方形
       * `3:2` - 横向き3:2
       * `2:3` - 縦向き2:3
       * `4:3` - 横向き4:3
@@ -62,16 +62,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       * `5:4` - 横向き5:4
       * `4:5` - 縦向き4:5
       * `16:9` - 横向きワイドスクリーン
-      * `9:16` - 縦向き縦長スクリーン
+      * `9:16` - 縦向き縦長画面
       * `21:9` - 超ワイドスクリーン
     </ParamField>
 
     <ParamField body="resolution" type="string" default="1K">
       画像解像度
 
-      サポートされている解像度：
+      サポートされる解像度：
 
-      * `1K` - ベース解像度（デフォルト）
+      * `1K` - 基本解像度（デフォルト）
       * `2K` - 標準解像度
       * `4K` - 高解像度
     </ParamField>
@@ -79,7 +79,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     <ParamField body="format" type="string" default="png">
       画像出力フォーマット
 
-      サポートされているフォーマット：
+      サポートされるフォーマット：
 
       * `png` - PNGフォーマット（デフォルト）
       * `jpg` - JPEGフォーマット
@@ -90,7 +90,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="out_task_id" type="string" required>
   発起者タスクID
 
-  ユーザー定義のタスク識別子。必須
+  ユーザー定義のタスク識別子、必須
 </ParamField>
 
 ## Response
