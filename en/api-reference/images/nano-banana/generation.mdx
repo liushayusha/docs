@@ -41,8 +41,8 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       No limit
     </ParamField>
 
-    <ParamField body="image_url" type="array">
-      List of reference image URLs for image-to-image generation
+    <ParamField body="image_url" type="string[]">
+      List of reference image URLs for image-to-image
 
       * Up to 9 images
       * Supports publicly accessible URLs
@@ -55,15 +55,15 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
       * `auto` - Automatic
       * `1:1` - Square
-      * `3:2` - Horizontal 3:2
-      * `2:3` - Vertical 2:3
-      * `4:3` - Horizontal 4:3
-      * `3:4` - Vertical 3:4
-      * `5:4` - Horizontal 5:4
-      * `4:5` - Vertical 4:5
-      * `16:9` - Horizontal widescreen
-      * `9:16` - Vertical fullscreen
-      * `21:9` - Ultra widescreen
+      * `3:2` - Landscape 3:2
+      * `2:3` - Portrait 2:3
+      * `4:3` - Landscape 4:3
+      * `3:4` - Portrait 3:4
+      * `5:4` - Landscape 5:4
+      * `4:5` - Portrait 4:5
+      * `16:9` - Wide landscape
+      * `9:16` - Tall portrait
+      * `21:9` - Ultra-wide
     </ParamField>
 
     <ParamField body="format" type="string" default="png">

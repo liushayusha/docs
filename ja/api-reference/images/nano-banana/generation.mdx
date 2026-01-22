@@ -36,13 +36,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   <Expandable title="params オブジェクトのプロパティ">
     <ParamField body="prompt" type="string" required>
-      画像生成のテキスト説明
+      画像生成のためのテキスト説明
 
       制限なし
     </ParamField>
 
-    <ParamField body="image_url" type="array">
-      参照画像のURLリスト。画像から画像への生成に使用
+    <ParamField body="image_url" type="string[]">
+      画像生成の参考となる画像のURLリスト
 
       * 最大9枚の画像
       * 公開アクセス可能なURLをサポート
@@ -61,24 +61,24 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       * `3:4` - 縦向き3:4
       * `5:4` - 横向き5:4
       * `4:5` - 縦向き4:5
-      * `16:9` - 横向きワイドスクリーン
-      * `9:16` - 縦向き縦長スクリーン
+      * `16:9` - 横長ワイドスクリーン
+      * `9:16` - 縦長スクリーン
       * `21:9` - 超ワイドスクリーン
     </ParamField>
 
     <ParamField body="format" type="string" default="png">
-      画像出力フォーマット
+      画像出力形式
 
-      対応フォーマット：
+      対応形式：
 
-      * `png` - PNGフォーマット（デフォルト）
-      * `jpeg` - JPEGフォーマット
+      * `png` - PNG形式（デフォルト）
+      * `jpeg` - JPEG形式
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発注元タスクID
+  発信者タスクID
 
   ユーザー定義のタスク識別子、必須
 </ParamField>

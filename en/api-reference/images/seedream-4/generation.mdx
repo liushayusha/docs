@@ -26,32 +26,32 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  Model Name
+  Model name
 
   Fixed value: `"seedream_v4"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  Model Parameters Object
+  Model parameters object
 
-  <Expandable title="params Object Properties">
+  <Expandable title="params object properties">
     <ParamField body="prompt" type="string" required>
-      Text Description for Image Generation
+      Text description for image generation
 
-      No Limit
+      No limitations
     </ParamField>
 
-    <ParamField body="image_url" type="array">
-      List of Reference Image URLs for Image-to-Image
+    <ParamField body="image_url" type="string[]">
+      List of reference image URLs for image-to-image
 
       * Up to 9 images
       * Supports publicly accessible URLs
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string">
-      Aspect Ratio for Image Generation
+      Aspect ratio for image generation
 
-      Supported aspect ratios:
+      Supported ratios:
 
       * `1:1` - Square
       * `16:9` - Landscape widescreen
@@ -61,17 +61,17 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="resolution" type="string" default="1K">
-      Image Resolution
+      Image resolution
 
       Supported resolutions:
 
-      * `1K` - Base resolution (default)
+      * `1K` - Basic resolution (default)
       * `2K` - Standard resolution
       * `4K` - High definition resolution
     </ParamField>
 
     <ParamField body="output_n" type="string" default="1">
-      Number of Images to Generate
+      Number of images to generate
 
       Supported values:
 
@@ -83,7 +83,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  Initiator Task ID
+  Initiator task ID
 
   User-defined task identifier, required
 </ParamField>

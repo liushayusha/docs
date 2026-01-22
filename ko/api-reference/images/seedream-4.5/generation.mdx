@@ -28,30 +28,30 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="model" type="string" required>
   모델 이름
 
-  고정 값: `"seedream_v4_5"`
+  고정값: `"seedream_v4_5"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  모델 매개변수 객체
+  모델 파라미터 객체
 
   <Expandable title="params 객체 속성">
     <ParamField body="prompt" type="string" required>
-      이미지 생성 텍스트 설명
+      이미지 생성을 위한 텍스트 설명
 
       제한 없음
     </ParamField>
 
-    <ParamField body="image_url" type="array">
-      참조 이미지 URL 목록, 이미지로부터 이미지 생성용
+    <ParamField body="image_url" type="string[]">
+      참고 이미지 URL 목록, 이미지 변환용
 
-      * 최대 9개 이미지
-      * 공개적으로 접근 가능한 URL 지원
+      * 최대 9장 이미지
+      * 공개 접근 가능한 URL 지원
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string">
-      이미지 생성 가로세로 비
+      이미지 생성 가로세로 비율
 
-      지원 가로세로 비:
+      지원하는 비율:
 
       * `1:1` - 정사각형
       * `3:2` - 가로 3:2
@@ -61,8 +61,8 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       * `5:4` - 가로 5:4
       * `4:5` - 세로 4:5
       * `16:9` - 가로 와이드스크린
-      * `9:16` - 세로 세로스크린
-      * `21:9` - 초와이드스크린
+      * `9:16` - 세로 와이드스크린
+      * `21:9` - 울트라 와이드스크린
     </ParamField>
 
     <ParamField body="resolution" type="string" default="basic">
@@ -70,14 +70,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
       지원 해상도:
 
-      * `basic` - 기본 해상도(기본값)
+      * `basic` - 기본 해상도 (기본값)
       * `high` - 고해상도
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  요청자 작업 ID
+  발신자 작업 ID
 
   사용자 정의 작업 식별자, 필수
 </ParamField>

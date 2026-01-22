@@ -41,17 +41,17 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       制限なし
     </ParamField>
 
-    <ParamField body="image_url" type="array">
-      参考画像のURLリスト、画像から画像生成に使用
+    <ParamField body="image_url" type="string[]">
+      画像生成のためのリファレンス画像のURLリスト
 
       * 最大9枚の画像
-      * 公開アクセス可能なURLサポート
+      * 公開アクセス可能なURLをサポート
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string">
       画像生成のアスペクト比
 
-      サポートされているアスペクト比：
+      サポートされるアスペクト比：
 
       * `1:1` - 正方形
       * `3:2` - 横向き3:2
@@ -61,14 +61,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       * `5:4` - 横向き5:4
       * `4:5` - 縦向き4:5
       * `16:9` - 横向きワイドスクリーン
-      * `9:16` - 縦向きポートレート
+      * `9:16` - 縦向き縦長画面
       * `21:9` - 超ワイドスクリーン
     </ParamField>
 
     <ParamField body="resolution" type="string" default="basic">
       画像解像度
 
-      サポートされている解像度：
+      サポートされる解像度：
 
       * `basic` - 基本解像度（デフォルト）
       * `high` - 高解像度
