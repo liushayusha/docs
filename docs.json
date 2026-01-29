@@ -91,6 +91,27 @@
                 "pages": [
                   "zh/api-reference/videos/veo3-1-fast/generation"
                 ]
+              },
+              {
+                "group": "Seedance-1.5-pro",
+                "icon": "video",
+                "pages": [
+                  "zh/api-reference/videos/seedance-1-5-pro/generation"
+                ]
+              },
+              {
+                "group": "Seedance Pro Fast",
+                "icon": "video",
+                "pages": [
+                  "zh/api-reference/videos/seedance_pro_fast/generation"
+                ]
+              },
+              {
+                "group": "Seedance Pro",
+                "icon": "video",
+                "pages": [
+                  "zh/api-reference/videos/seedance_pro/generation"
+                ]
               }
             ]
           },
@@ -183,6 +204,27 @@
                 "icon": "video",
                 "pages": [
                   "en/api-reference/videos/veo3-1-fast/generation"
+                ]
+              },
+              {
+                "group": "Seedance-1.5-pro",
+                "icon": "video",
+                "pages": [
+                  "en/api-reference/videos/seedance-1-5-pro/generation"
+                ]
+              },
+              {
+                "group": "Seedance Pro Fast",
+                "icon": "video",
+                "pages": [
+                  "en/api-reference/videos/seedance_pro_fast/generation"
+                ]
+              },
+              {
+                "group": "Seedance Pro",
+                "icon": "video",
+                "pages": [
+                  "en/api-reference/videos/seedance_pro/generation"
                 ]
               }
             ]
@@ -277,6 +319,27 @@
                 "pages": [
                   "ja/api-reference/videos/veo3-1-fast/generation"
                 ]
+              },
+              {
+                "group": "Seedance-1.5-pro",
+                "icon": "video",
+                "pages": [
+                  "ja/api-reference/videos/seedance-1-5-pro/generation"
+                ]
+              },
+              {
+                "group": "Seedance Pro Fast",
+                "icon": "video",
+                "pages": [
+                  "ja/api-reference/videos/seedance_pro_fast/generation"
+                ]
+              },
+              {
+                "group": "Seedance Pro",
+                "icon": "video",
+                "pages": [
+                  "ja/api-reference/videos/seedance_pro/generation"
+                ]
               }
             ]
           },
@@ -369,6 +432,27 @@
                 "icon": "video",
                 "pages": [
                   "ko/api-reference/videos/veo3-1-fast/generation"
+                ]
+              },
+              {
+                "group": "Seedance-1.5-pro",
+                "icon": "video",
+                "pages": [
+                  "ko/api-reference/videos/seedance-1-5-pro/generation"
+                ]
+              },
+              {
+                "group": "Seedance Pro Fast",
+                "icon": "video",
+                "pages": [
+                  "ko/api-reference/videos/seedance_pro_fast/generation"
+                ]
+              },
+              {
+                "group": "Seedance Pro",
+                "icon": "video",
+                "pages": [
+                  "ko/api-reference/videos/seedance_pro/generation"
                 ]
               }
             ]

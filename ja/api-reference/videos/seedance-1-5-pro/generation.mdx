@@ -1,9 +1,9 @@
 ---
-title: 'Sora2 Pro ビデオ生成'
+title: 'Seedance-1.5-pro ビデオ生成'
 description: |
-    - 非同期処理モード、タスクIDを返して後続の照会に使用
-    - テキストからビデオ、画像からビデオなどの生成モードをサポート
-    - プロバージョン、高解像度をサポート
+   - 非同期処理モード、後続のクエリに使用するタスクIDを返す
+   - テキストからビデオへの変換、画像からビデオへの変換（最初のフレーム/最後のフレーム/複数の参照画像）をサポート
+   - 横画面、縦画面の複数の比率をサポート
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -11,13 +11,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  すべてのエンドポイントはBearer Tokenによる認証が必要です
+  すべてのエンドポイントはBearer Tokenによる認証が必要です。
 
-  API Keyの取得方法：
+  APIキーの取得：
 
-  <a href={apiKeyUrl} target="_blank">API Key管理ページ</a>にアクセスしてAPI Keyを取得してください
+  <a href={apiKeyUrl} target="_blank">API Key 管理ページ</a> にアクセスしてAPIキーを取得してください。
 
-  リクエストヘッダーに以下を追加して使用します：
+  使用時にはリクエストヘッダーに以下を追加します：
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -29,61 +29,89 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="model" type="string" required>
   モデル名
 
-  固定値：`"sora2_pro"`
+  固定値：`"seedance_1_5_pro"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  モデルパラメーターオブジェクト
+  モデルパラメータオブジェクト
 
   <Expandable title="params オブジェクトのプロパティ">
     <ParamField body="prompt" type="string" required>
-      ビデオ生成のテキスト説明
+      動画生成のテキスト説明
 
       制限なし
     </ParamField>
 
-    <ParamField body="image_url" type="string">
-      参考画像のURL（動画生成のための最初のフレーム）
+    <ParamField body="video_length" type="number" default="5">
+      動画の長さ（秒）
 
-      * 単一画像のみ対応
-      * 公開アクセス可能なURLをサポート
+      対応可能な長さの範囲：4～12秒
+
+      デフォルト値：5秒
     </ParamField>
 
-    <ParamField body="aspect_ratio" type="string" default="16:9">
+    <ParamField body="aspect_ratio" type="string" required>
       動画のアスペクト比
 
-      対応アスペクト比：
-
-      * `16:9` - 横向き（デフォルト）
+      対応可能なアスペクト比：
+      * `16:9` - 横向き
       * `9:16` - 縦向き
     </ParamField>
 
-    <ParamField body="video_length" type="string" default="10">
-      動画の長さ（秒）
+    <ParamField body="resolution" type="string" required>
+      動画の解像度
 
-      対応長さ：
-
-      * `10` - 10秒（デフォルト）（HD）
-      * `15` - 15秒（HD）
-      * `25` - 25秒
+      対応可能な解像度：
+      * `720p` - 標準画質
+      * `1080p` - 高画質
     </ParamField>
 
+    <ParamField body="image_url" type="string">
+      参考画像のURL（動画生成の最初のフレーム用）
+
+      * 1枚の画像のみサポート
+      * 公開アクセス可能なURLに対応
+    </ParamField>
+
+    <ParamField body="end_image_url" type="string">
+      終了フレームの参考画像URL
+
+      * 1枚の画像のみサポート
+      * 公開アクセス可能なURLに対応
+    </ParamField>
+
+    <ParamField body="generate_audio" type="boolean" default="false">
+      音声を生成するかどうか
+
+      `true`に設定すると、動画にAI生成の音声が含まれます
+
+      デフォルト値：`false`
+    </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
   発注者タスクID
 
-  ユーザー定義のタスク識別子、必須
+  ユーザーが定義するタスク識別子で必須
 </ParamField>
+
+### 解像度とアスペクト比の組み合わせ表
+
+| アスペクト比 | 解像度 | 実際のサイズ |
+|--------------|--------|--------------|
+| 16:9         | 720p   | 1280x720     |
+| 16:9         | 1080p  | 1920x1080    |
+| 9:16         | 720p   | 720x1280     |
+| 9:16         | 1080p  | 1080x1920    |
 
 ## Response
 
 <ResponseField name="out_task_id" type="string">
-  発注側のタスクIDで、結果の照会に使用できます
+  発行者のタスクID。結果の照会に使用可能
 </ResponseField>
 <ResponseField name="status" type="string">
-  初期状態で、固定値は `"pending"` です
+  初期状態で、固定値は `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
@@ -101,12 +129,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
-      "model": "sora2_pro",
+      "model": "seedance_1_5_pro",
       "params": {
-        "prompt": "庭で散歩している猫",
+        "prompt": "日光の下で遊ぶかわいい子猫、ふわふわの毛並み、明るい目",
+        "video_length": 5,
         "aspect_ratio": "16:9",
-        "video_length": "15",
-        "resolution": "high"
+        "resolution": "720p"
       },
       "out_task_id": "my_task_123456"
     }'
@@ -118,12 +146,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   url = "https://aireiter.com/api/openapi/submit"
 
   payload = {
-      "model": "sora2_pro",
+      "model": "seedance_1_5_pro",
       "params": {
-          "prompt": "庭で散歩している猫",
+          "prompt": "日光の下で遊ぶかわいい子猫、ふわふわの毛並み、明るい目",
+          "video_length": 5,
           "aspect_ratio": "16:9",
-          "video_length": "15",
-          "resolution": "high"
+          "resolution": "720p"
       },
       "out_task_id": "my_task_123456"
   }
@@ -142,12 +170,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   const url = "https://aireiter.com/api/openapi/submit";
 
   const payload = {
-    model: "sora2_pro",
+    model: "seedance_1_5_pro",
     params: {
-      prompt: "庭で散歩している猫",
+      prompt: "日光の下で遊ぶかわいい子猫、ふわふわの毛並み、明るい目",
+      video_length: 5,
       aspect_ratio: "16:9",
-      video_length: "15",
-      resolution: "high"
+      resolution: "720p"
     },
     out_task_id: "my_task_123456"
   };
@@ -182,12 +210,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       url := "https://aireiter.com/api/openapi/submit"
 
       payload := map[string]interface{}{
-          "model": "sora2_pro",
+          "model": "seedance_1_5_pro",
           "params": map[string]interface{}{
-              "prompt":       "庭で散歩している猫",
+              "prompt":       "日光の下で遊ぶかわいい子猫、ふわふわの毛並み、明るい目",
+              "video_length": 5,
               "aspect_ratio": "16:9",
-              "video_length": "15",
-              "resolution":   "high",
+              "resolution":   "720p",
           },
           "out_task_id": "my_task_123456",
       }
@@ -227,7 +255,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
               conn.setRequestProperty("Content-Type", "application/json");
               conn.setDoOutput(true);
 
-              String jsonPayload = "{\"model\":\"sora2_pro\",\"params\":{\"prompt\":\"庭で散歩している猫\",\"aspect_ratio\":\"16:9\",\"video_length\":\"15\",\"resolution\":\"high\"},\"out_task_id\":\"my_task_123456\"}";
+              String jsonPayload = "{\"model\":\"seedance_1_5_pro\",\"params\":{\"prompt\":\"日光の下で遊ぶかわいい子猫、ふわふわの毛並み、明るい目\",\"video_length\":5,\"aspect_ratio\":\"16:9\",\"resolution\":\"720p\"},\"out_task_id\":\"my_task_123456\"}";
 
               OutputStream os = conn.getOutputStream();
               os.write(jsonPayload.getBytes());
@@ -255,12 +283,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   $url = "https://aireiter.com/api/openapi/submit";
 
   $payload = array(
-      "model" => "sora2_pro",
+      "model" => "seedance_1_5_pro",
       "params" => array(
-          "prompt" => "庭で散歩している猫",
+          "prompt" => "日光の下で遊ぶかわいい子猫、ふわふわの毛並み、明るい目",
+          "video_length" => 5,
           "aspect_ratio" => "16:9",
-          "video_length" => "15",
-          "resolution" => "high"
+          "resolution" => "720p"
       ),
       "out_task_id" => "my_task_123456"
   );
@@ -289,17 +317,18 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   url = URI.parse("https://aireiter.com/api/openapi/submit")
 
   payload = {
-    model: "sora2_pro",
+    model: "seedance_1_5_pro",
     params: {
-      prompt: "庭で散歩している猫",
+      prompt: "日光の下で遊ぶかわいい子猫、ふわふわの毛並み、明るい目",
+      video_length: 5,
       aspect_ratio: "16:9",
-      video_length: "15",
-      resolution: "high"
+      resolution: "720p"
     },
     out_task_id: "my_task_123456"
   }
 
   http = Net::HTTP.new(url.host, url.port)
+  http.use_ssl = true
   request = Net::HTTP::Post.new(url.path)
   request["Authorization"] = "Bearer <token>"
   request["Content-Type"] = "application/json"
@@ -319,12 +348,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
   let payload: [String: Any] = [
-      "model": "sora2_pro",
+      "model": "seedance_1_5_pro",
       "params": [
-          "prompt": "庭で散歩している猫",
+          "prompt": "日光の下で遊ぶかわいい子猫、ふわふわの毛並み、明るい目",
+          "video_length": 5,
           "aspect_ratio": "16:9",
-          "video_length": "15",
-          "resolution": "high"
+          "resolution": "720p"
       ],
       "out_task_id": "my_task_123456"
   ]
@@ -350,7 +379,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       static async Task Main(string[] args)
       {
           var url = "https://aireiter.com/api/openapi/submit";
-          var payload = "{\"model\":\"sora2_pro\",\"params\":{\"prompt\":\"庭で散歩している猫\",\"aspect_ratio\":\"16:9\",\"video_length\":\"15\",\"resolution\":\"high\"},\"out_task_id\":\"my_task_123456\"}";
+          var payload = "{\"model\":\"seedance_1_5_pro\",\"params\":{\"prompt\":\"日光の下で遊ぶかわいい子猫、ふわふわの毛並み、明るい目\",\"video_length\":5,\"aspect_ratio\":\"16:9\",\"resolution\":\"720p\"},\"out_task_id\":\"my_task_123456\"}";
 
           using (var client = new HttpClient())
           {
@@ -362,158 +391,6 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           }
       }
   }
-  ```
-
-  ```c C
-  #include <stdio.h>
-  #include <curl/curl.h>
-
-  int main(void)
-  {
-      CURL *curl;
-      CURLcode res;
-
-      curl = curl_easy_init();
-      if(curl) {
-          curl_easy_setopt(curl, CURLOPT_URL, "https://aireiter.com/api/openapi/submit");
-
-          struct curl_slist *headers = NULL;
-          headers = curl_slist_append(headers, "Authorization: Bearer <token>");
-          headers = curl_slist_append(headers, "Content-Type: application/json");
-          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-
-          const char *data = "{\"model\":\"sora2_pro\",\"params\":{\"prompt\":\"庭で散歩している猫\",\"aspect_ratio\":\"16:9\",\"video_length\":\"15\",\"resolution\":\"high\"},\"out_task_id\":\"my_task_123456\"}";
-          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
-
-          res = curl_easy_perform(curl);
-
-          curl_slist_free_all(headers);
-          curl_easy_cleanup(curl);
-      }
-      return 0;
-  }
-  ```
-
-  ```objectivec Objective-C
-  #import <Foundation/Foundation.h>
-
-  int main(int argc, const char * argv[]) {
-      @autoreleasepool {
-          NSURL *url = [NSURL URLWithString:@"https://aireiter.com/api/openapi/submit"];
-          NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
-          [request setHTTPMethod:@"POST"];
-          [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
-          [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
-
-          NSDictionary *payload = @{
-              @"model": @"sora2_pro",
-              @"params": @{
-                  @"prompt": @"庭で散歩している猫",
-                  @"aspect_ratio": @"16:9",
-                  @"video_length": @"15",
-                  @"resolution": @"high"
-              },
-              @"out_task_id": @"my_task_123456"
-          };
-
-          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload options:0 error:nil];
-          [request setHTTPBody:jsonData];
-
-          NSURLSession *session = [NSURLSession sharedSession];
-          NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-              if (data) {
-                  NSString *result = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-                  NSLog(@"%@", result);
-              }
-          }];
-          [task resume];
-          [[NSRunLoop currentRunLoop] run];
-      }
-      return 0;
-  }
-  ```
-
-  ```ocaml OCaml
-  open Lwt
-  open Cohttp
-  open Cohttp_lwt_unix
-
-  let url = "https://aireiter.com/api/openapi/submit"
-
-  let payload = {|{"model":"sora2_pro","params":{"prompt":"庭で散歩している猫","aspect_ratio":"16:9","video_length":"15","resolution":"high"},"out_task_id":"my_task_123456"}|}
-
-  let () =
-    let headers = Header.init ()
-      |> fun h -> Header.add h "Authorization" "Bearer <token>"
-      |> fun h -> Header.add h "Content-Type" "application/json" in
-    let body = Cohttp_lwt.Body.of_string payload in
-
-    let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
-      body |> Cohttp_lwt.Body.to_string >|= fun body ->
-      print_endline body
-    in
-    Lwt_main.run response
-  ```
-
-  ```dart Dart
-  import 'dart:convert';
-  import 'package:http/http.dart' as http;
-
-  void main() async {
-    var url = Uri.parse('https://aireiter.com/api/openapi/submit');
-
-    var payload = {
-      'model': 'sora2_pro',
-      'params': {
-        'prompt': '庭で散歩している猫',
-        'aspect_ratio': '16:9',
-        'video_length': '15',
-        'resolution': 'high'
-      },
-      'out_task_id': 'my_task_123456'
-    };
-
-    var response = await http.post(
-      url,
-      headers: {
-        'Authorization': 'Bearer <token>',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode(payload),
-    );
-
-    print(response.body);
-  }
-  ```
-
-  ```r R
-  library(httr)
-  library(jsonlite)
-
-  url <- "https://aireiter.com/api/openapi/submit"
-
-  payload <- list(
-    model = "sora2_pro",
-    params = list(
-      prompt = "庭で散歩している猫",
-      aspect_ratio = "16:9",
-      video_length = "15",
-      resolution = "high"
-    ),
-    out_task_id = "my_task_123456"
-  )
-
-  response <- POST(
-    url,
-    add_headers(
-      Authorization = "Bearer <token>",
-      `Content-Type` = "application/json"
-    ),
-    body = toJSON(payload, auto_unbox = TRUE),
-    encode = "json"
-  )
-
-  cat(content(response, "text"))
   ```
 </RequestExample>
 
@@ -542,7 +419,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 401,
-      "message": "認証に失敗しました。APIキーをご確認ください"
+      "message": "認証に失敗しました。APIキーを確認してください"
     }
   }
   ```
@@ -550,7 +427,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 433,
-      "message": "アカウント残高が不足しています。チャージ後に再度お試しください"
+      "message": "アカウント残高が不足しています。チャージ後に再試行してください"
     }
   }
   ```
@@ -559,7 +436,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 500,
-      "message": "サーバー内部エラーが発生しました。後ほど再度お試しください"
+      "message": "サーバー内部エラー。しばらくしてから再試行してください"
     }
   }
   ```

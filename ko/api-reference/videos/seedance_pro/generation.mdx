@@ -1,9 +1,9 @@
 ---
-title: 'Sora2 Pro 비디오 생성'
+title: 'Seedance Pro 영상 생성'
 description: |
-    - 비동기 처리 모드, 이후 조회를 위한 작업 ID 반환
-    - 텍스트-투-비디오, 이미지-투-비디오 등 생성 모드 지원
-    - 전문가 버전, 더 높은 해상도 지원
+   - 비동기 처리 모드, 후속 조회를 위한 작업 ID 반환
+   - 텍스트 → 영상, 이미지 → 영상(첫 프레임/마지막 프레임/다중 참조 이미지) 지원
+   - 가로, 세로 다양한 비율 지원
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -11,11 +11,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  모든 API는 Bearer Token을 사용하여 인증해야 합니다.
+  모든 API는 Bearer Token을 사용한 인증이 필요합니다
 
-  API Key 받기:
+  API 키 받기:
 
-  <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a>에서 API Key를 받으세요.
+  <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a>에서 API 키를 받으세요
 
   요청 헤더에 다음을 추가하여 사용합니다:
 
@@ -29,61 +29,81 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="model" type="string" required>
   모델 이름
 
-  고정 값: `"sora2_pro"`
+  고정 값: `"seedance_pro"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  모델 매개변수 객체
+  모델 파라미터 객체
 
   <Expandable title="params 객체 속성">
     <ParamField body="prompt" type="string" required>
-      비디오 생성을 위한 텍스트 설명
+      영상 생성을 위한 텍스트 설명
 
       제한 없음
     </ParamField>
 
-    <ParamField body="image_url" type="string">
-      비디오 생성을 위한 참조 이미지 URL(첫 프레임)
+    <ParamField body="video_length" type="number" default="5">
+      영상 길이(초)
 
-      * 단일 이미지 지원
-      * 공개적으로 접근 가능한 URL 지원
+      지원 길이 범위: 4-12초
+
+      기본값: 5초
     </ParamField>
 
-    <ParamField body="aspect_ratio" type="string" default="16:9">
-      비디오 가로 세로 비율
+    <ParamField body="aspect_ratio" type="string" required>
+      영상 가로세로 비율
 
-      지원되는 가로 세로 비율:
-
-      * `16:9` - 가로 (기본값)
+      지원 비율:
+      * `16:9` - 가로
       * `9:16` - 세로
     </ParamField>
 
-    <ParamField body="video_length" type="string" default="10">
-      비디오 길이(초)
+    <ParamField body="resolution" type="string" required>
+      영상 해상도
 
-      지원 길이:
-
-      * `10` - 10초 (기본값)(HD)
-      * `15` - 15초 (HD)
-      * `25` - 25초
+      지원 해상도:
+      * `720p` - 표준 화질
+      * `1080p` - 고화질
     </ParamField>
 
+    <ParamField body="image_url" type="string">
+      영상 생성용 참조 이미지 URL(첫 프레임)
+
+      * 단일 이미지만 지원
+      * 공개 접근 가능한 URL 지원
+    </ParamField>
+
+    <ParamField body="end_image_url" type="string">
+      마지막 프레임 참조 이미지 URL
+
+      * 단일 이미지만 지원
+      * 공개 접근 가능한 URL 지원
+    </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  발신자 작업 ID
+  요청자 작업 ID
 
-  사용자 정의 작업 식별자, 필수
+  사용자 정의 작업 식별자, 필수 입력
 </ParamField>
+
+### 해상도 및 가로세로 비율 조합 표
+
+| 가로세로 비율 | 해상도 | 실제 크기 |
+|--------|--------|----------|
+| 16:9   | 720p   | 1280x720 |
+| 16:9   | 1080p  | 1920x1080|
+| 9:16   | 720p   | 720x1280 |
+| 9:16   | 1080p  | 1080x1920|
 
 ## Response
 
 <ResponseField name="out_task_id" type="string">
-  요청자 작업 ID, 결과 조회에 사용할 수 있습니다
+  요청자 작업 ID로, 결과 조회에 사용할 수 있습니다
 </ResponseField>
 <ResponseField name="status" type="string">
-  초기 상태, 고정 값은 `"pending"`입니다
+  초기 상태로, 고정값 `"pending"`입니다
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
@@ -101,12 +121,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
-      "model": "sora2_pro",
+      "model": "seedance_pro",
       "params": {
-        "prompt": "정원에서 산책하는 고양이 한 마리",
+        "prompt": "햇빛 아래에서 놀고 있는 귀여운 새끼 고양이, 폭신한 털, 반짝이는 눈",
+        "video_length": 5,
         "aspect_ratio": "16:9",
-        "video_length": "15",
-        "resolution": "high"
+        "resolution": "720p"
       },
       "out_task_id": "my_task_123456"
     }'
@@ -118,12 +138,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   url = "https://aireiter.com/api/openapi/submit"
 
   payload = {
-      "model": "sora2_pro",
+      "model": "seedance_pro",
       "params": {
-          "prompt": "정원에서 산책하는 고양이 한 마리",
+          "prompt": "햇빛 아래에서 놀고 있는 귀여운 새끼 고양이, 폭신한 털, 반짝이는 눈",
+          "video_length": 5,
           "aspect_ratio": "16:9",
-          "video_length": "15",
-          "resolution": "high"
+          "resolution": "720p"
       },
       "out_task_id": "my_task_123456"
   }
@@ -142,12 +162,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   const url = "https://aireiter.com/api/openapi/submit";
 
   const payload = {
-    model: "sora2_pro",
+    model: "seedance_pro",
     params: {
-      prompt: "정원에서 산책하는 고양이 한 마리",
+      prompt: "햇빛 아래에서 놀고 있는 귀여운 새끼 고양이, 폭신한 털, 반짝이는 눈",
+      video_length: 5,
       aspect_ratio: "16:9",
-      video_length: "15",
-      resolution: "high"
+      resolution: "720p"
     },
     out_task_id: "my_task_123456"
   };
@@ -182,12 +202,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       url := "https://aireiter.com/api/openapi/submit"
 
       payload := map[string]interface{}{
-          "model": "sora2_pro",
+          "model": "seedance_pro",
           "params": map[string]interface{}{
-              "prompt":       "정원에서 산책하는 고양이 한 마리",
+              "prompt":       "햇빛 아래에서 놀고 있는 귀여운 새끼 고양이, 폭신한 털, 반짝이는 눈",
+              "video_length": 5,
               "aspect_ratio": "16:9",
-              "video_length": "15",
-              "resolution":   "high",
+              "resolution":   "720p",
           },
           "out_task_id": "my_task_123456",
       }
@@ -227,7 +247,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
               conn.setRequestProperty("Content-Type", "application/json");
               conn.setDoOutput(true);
 
-              String jsonPayload = "{\"model\":\"sora2_pro\",\"params\":{\"prompt\":\"정원에서 산책하는 고양이 한 마리\",\"aspect_ratio\":\"16:9\",\"video_length\":\"15\",\"resolution\":\"high\"},\"out_task_id\":\"my_task_123456\"}";
+              String jsonPayload = "{\"model\":\"seedance_pro\",\"params\":{\"prompt\":\"햇빛 아래에서 놀고 있는 귀여운 새끼 고양이, 폭신한 털, 반짝이는 눈\",\"video_length\":5,\"aspect_ratio\":\"16:9\",\"resolution\":\"720p\"},\"out_task_id\":\"my_task_123456\"}";
 
               OutputStream os = conn.getOutputStream();
               os.write(jsonPayload.getBytes());
@@ -255,12 +275,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   $url = "https://aireiter.com/api/openapi/submit";
 
   $payload = array(
-      "model" => "sora2_pro",
+      "model" => "seedance_pro",
       "params" => array(
-          "prompt" => "정원에서 산책하는 고양이 한 마리",
+          "prompt" => "햇빛 아래에서 놀고 있는 귀여운 새끼 고양이, 폭신한 털, 반짝이는 눈",
+          "video_length" => 5,
           "aspect_ratio" => "16:9",
-          "video_length" => "15",
-          "resolution" => "high"
+          "resolution" => "720p"
       ),
       "out_task_id" => "my_task_123456"
   );
@@ -289,17 +309,18 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   url = URI.parse("https://aireiter.com/api/openapi/submit")
 
   payload = {
-    model: "sora2_pro",
+    model: "seedance_pro",
     params: {
-      prompt: "정원에서 산책하는 고양이 한 마리",
+      prompt: "햇빛 아래에서 놀고 있는 귀여운 새끼 고양이, 폭신한 털, 반짝이는 눈",
+      video_length: 5,
       aspect_ratio: "16:9",
-      video_length: "15",
-      resolution: "high"
+      resolution: "720p"
     },
     out_task_id: "my_task_123456"
   }
 
   http = Net::HTTP.new(url.host, url.port)
+  http.use_ssl = true
   request = Net::HTTP::Post.new(url.path)
   request["Authorization"] = "Bearer <token>"
   request["Content-Type"] = "application/json"
@@ -319,12 +340,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
   let payload: [String: Any] = [
-      "model": "sora2_pro",
+      "model": "seedance_pro",
       "params": [
-          "prompt": "정원에서 산책하는 고양이 한 마리",
+          "prompt": "햇빛 아래에서 놀고 있는 귀여운 새끼 고양이, 폭신한 털, 반짝이는 눈",
+          "video_length": 5,
           "aspect_ratio": "16:9",
-          "video_length": "15",
-          "resolution": "high"
+          "resolution": "720p"
       ],
       "out_task_id": "my_task_123456"
   ]
@@ -350,7 +371,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       static async Task Main(string[] args)
       {
           var url = "https://aireiter.com/api/openapi/submit";
-          var payload = "{\"model\":\"sora2_pro\",\"params\":{\"prompt\":\"정원에서 산책하는 고양이 한 마리\",\"aspect_ratio\":\"16:9\",\"video_length\":\"15\",\"resolution\":\"high\"},\"out_task_id\":\"my_task_123456\"}";
+          var payload = "{\"model\":\"seedance_pro\",\"params\":{\"prompt\":\"햇빛 아래에서 놀고 있는 귀여운 새끼 고양이, 폭신한 털, 반짝이는 눈\",\"video_length\":5,\"aspect_ratio\":\"16:9\",\"resolution\":\"720p\"},\"out_task_id\":\"my_task_123456\"}";
 
           using (var client = new HttpClient())
           {
@@ -362,158 +383,6 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           }
       }
   }
-  ```
-
-  ```c C
-  #include <stdio.h>
-  #include <curl/curl.h>
-
-  int main(void)
-  {
-      CURL *curl;
-      CURLcode res;
-
-      curl = curl_easy_init();
-      if(curl) {
-          curl_easy_setopt(curl, CURLOPT_URL, "https://aireiter.com/api/openapi/submit");
-
-          struct curl_slist *headers = NULL;
-          headers = curl_slist_append(headers, "Authorization: Bearer <token>");
-          headers = curl_slist_append(headers, "Content-Type: application/json");
-          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-
-          const char *data = "{\"model\":\"sora2_pro\",\"params\":{\"prompt\":\"정원에서 산책하는 고양이 한 마리\",\"aspect_ratio\":\"16:9\",\"video_length\":\"15\",\"resolution\":\"high\"},\"out_task_id\":\"my_task_123456\"}";
-          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
-
-          res = curl_easy_perform(curl);
-
-          curl_slist_free_all(headers);
-          curl_easy_cleanup(curl);
-      }
-      return 0;
-  }
-  ```
-
-  ```objectivec Objective-C
-  #import <Foundation/Foundation.h>
-
-  int main(int argc, const char * argv[]) {
-      @autoreleasepool {
-          NSURL *url = [NSURL URLWithString:@"https://aireiter.com/api/openapi/submit"];
-          NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
-          [request setHTTPMethod:@"POST"];
-          [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
-          [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
-
-          NSDictionary *payload = @{
-              @"model": @"sora2_pro",
-              @"params": @{
-                  @"prompt": @"정원에서 산책하는 고양이 한 마리",
-                  @"aspect_ratio": @"16:9",
-                  @"video_length": @"15",
-                  @"resolution": @"high"
-              },
-              @"out_task_id": @"my_task_123456"
-          };
-
-          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload options:0 error:nil];
-          [request setHTTPBody:jsonData];
-
-          NSURLSession *session = [NSURLSession sharedSession];
-          NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-              if (data) {
-                  NSString *result = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-                  NSLog(@"%@", result);
-              }
-          }];
-          [task resume];
-          [[NSRunLoop currentRunLoop] run];
-      }
-      return 0;
-  }
-  ```
-
-  ```ocaml OCaml
-  open Lwt
-  open Cohttp
-  open Cohttp_lwt_unix
-
-  let url = "https://aireiter.com/api/openapi/submit"
-
-  let payload = {|{"model":"sora2_pro","params":{"prompt":"정원에서 산책하는 고양이 한 마리","aspect_ratio":"16:9","video_length":"15","resolution":"high"},"out_task_id":"my_task_123456"}|}
-
-  let () =
-    let headers = Header.init ()
-      |> fun h -> Header.add h "Authorization" "Bearer <token>"
-      |> fun h -> Header.add h "Content-Type" "application/json" in
-    let body = Cohttp_lwt.Body.of_string payload in
-
-    let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
-      body |> Cohttp_lwt.Body.to_string >|= fun body ->
-      print_endline body
-    in
-    Lwt_main.run response
-  ```
-
-  ```dart Dart
-  import 'dart:convert';
-  import 'package:http/http.dart' as http;
-
-  void main() async {
-    var url = Uri.parse('https://aireiter.com/api/openapi/submit');
-
-    var payload = {
-      'model': 'sora2_pro',
-      'params': {
-        'prompt': '정원에서 산책하는 고양이 한 마리',
-        'aspect_ratio': '16:9',
-        'video_length': '15',
-        'resolution': 'high'
-      },
-      'out_task_id': 'my_task_123456'
-    };
-
-    var response = await http.post(
-      url,
-      headers: {
-        'Authorization': 'Bearer <token>',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode(payload),
-    );
-
-    print(response.body);
-  }
-  ```
-
-  ```r R
-  library(httr)
-  library(jsonlite)
-
-  url <- "https://aireiter.com/api/openapi/submit"
-
-  payload <- list(
-    model = "sora2_pro",
-    params = list(
-      prompt = "정원에서 산책하는 고양이 한 마리",
-      aspect_ratio = "16:9",
-      video_length = "15",
-      resolution = "high"
-    ),
-    out_task_id = "my_task_123456"
-  )
-
-  response <- POST(
-    url,
-    add_headers(
-      Authorization = "Bearer <token>",
-      `Content-Type` = "application/json"
-    ),
-    body = toJSON(payload, auto_unbox = TRUE),
-    encode = "json"
-  )
-
-  cat(content(response, "text"))
   ```
 </RequestExample>
 
@@ -534,7 +403,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```json 400
     {
         "statusCode": 400,
-        "message": "잘못된 요청 파라미터",
+        "message": "요청 파라미터가 유효하지 않습니다",
         "ok": false
     }
   ```
@@ -550,7 +419,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 433,
-      "message": "계정 잔액 부족, 충전 후 다시 시도하세요"
+      "message": "계정 잔액이 부족합니다. 충전 후 다시 시도하세요"
     }
   }
   ```

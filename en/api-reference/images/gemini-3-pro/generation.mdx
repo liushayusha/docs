@@ -32,13 +32,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  Model parameters object
+  Model parameter object
 
   <Expandable title="params object properties">
     <ParamField body="prompt" type="string" required>
       Text description for image generation
 
-      No limits
+      No limitations
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
@@ -71,19 +71,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
       Supported resolutions:
 
-      * `1K` - Base resolution (default)
+      * `1K` - Basic resolution (default)
       * `2K` - Standard resolution
       * `4K` - High definition resolution
     </ParamField>
-
-    <ParamField body="format" type="string" default="png">
-      Image output format
-
-      Supported formats:
-
-      * `png` - PNG format (default)
-      * `jpg` - JPEG format
-    </ParamField>
+    
   </Expandable>
 </ParamField>
 

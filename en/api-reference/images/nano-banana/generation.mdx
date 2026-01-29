@@ -26,30 +26,30 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  Model name
+  Model Name
 
   Fixed value: `"nano_banana"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  Model parameters object
+  Model Parameters Object
 
-  <Expandable title="params object properties">
+  <Expandable title="params Object Properties">
     <ParamField body="prompt" type="string" required>
-      Text description for image generation
+      Text Description for Image Generation
 
-      No limit
+      No limitations
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      List of reference image URLs for image-to-image
+      List of Reference Image URLs for Image-to-Image
 
       * Up to 9 images
       * Supports publicly accessible URLs
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string">
-      Aspect ratio for image generation
+      Aspect Ratio for Image Generation
 
       Supported aspect ratios:
 
@@ -61,24 +61,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       * `3:4` - Portrait 3:4
       * `5:4` - Landscape 5:4
       * `4:5` - Portrait 4:5
-      * `16:9` - Wide landscape
-      * `9:16` - Tall portrait
-      * `21:9` - Ultra-wide
+      * `16:9` - Landscape widescreen
+      * `9:16` - Portrait vertical screen
+      * `21:9` - Ultra widescreen
     </ParamField>
 
-    <ParamField body="format" type="string" default="png">
-      Image output format
-
-      Supported formats:
-
-      * `png` - PNG format (default)
-      * `jpeg` - JPEG format
-    </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  Initiator task ID
+  Initiator Task ID
 
   User-defined task identifier, required
 </ParamField>

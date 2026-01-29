@@ -32,17 +32,17 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  モデルパラメーターオブジェクト
+  モデルのパラメータオブジェクト
 
   <Expandable title="params オブジェクトのプロパティ">
     <ParamField body="prompt" type="string" required>
-      画像生成のためのテキスト説明
+      画像生成のテキスト説明
 
       制限なし
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      画像生成の参考となる画像のURLリスト
+      参照画像のURLリスト、画像から画像への生成に使用
 
       * 最大9枚の画像
       * 公開アクセス可能なURLをサポート
@@ -51,34 +51,26 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     <ParamField body="aspect_ratio" type="string">
       画像生成のアスペクト比
 
-      対応アスペクト比：
+      サポートされるアスペクト比：
 
       * `auto` - 自動
       * `1:1` - 正方形
-      * `3:2` - 横向き3:2
-      * `2:3` - 縦向き2:3
-      * `4:3` - 横向き4:3
-      * `3:4` - 縦向き3:4
-      * `5:4` - 横向き5:4
-      * `4:5` - 縦向き4:5
+      * `3:2` - 横長3:2
+      * `2:3` - 縦長2:3
+      * `4:3` - 横長4:3
+      * `3:4` - 縦長3:4
+      * `5:4` - 横長5:4
+      * `4:5` - 縦長4:5
       * `16:9` - 横長ワイドスクリーン
-      * `9:16` - 縦長スクリーン
-      * `21:9` - 超ワイドスクリーン
+      * `9:16` - 縦長ポートレート
+      * `21:9` - 超横長ワイドスクリーン
     </ParamField>
 
-    <ParamField body="format" type="string" default="png">
-      画像出力形式
-
-      対応形式：
-
-      * `png` - PNG形式（デフォルト）
-      * `jpeg` - JPEG形式
-    </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発信者タスクID
+  発起者タスクID
 
   ユーザー定義のタスク識別子、必須
 </ParamField>

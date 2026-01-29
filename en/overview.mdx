@@ -82,36 +82,36 @@ After the task is completed, the response will include URLs of the generated ima
 
 ### Image Generation Series
 
-AIReiter offers a variety of image generation models, supporting both text-to-image and image-to-image capabilities:
+AIReiter offers various image generation models supporting text-to-image and image-to-image functionalities:
 
 <CardGroup cols={2}>
   <Card title="GPT-4o Image" icon="image" href="/en/api-reference/images/gpt-4o/generation">
-    OpenAI's high-quality image generation model
+    OpenAI’s high-quality image generation model
   </Card>
   <Card title="Gemini-2.5-Flash (Nano banana)" icon="image" href="/en/api-reference/images/nano-banana/generation">
-    Google's latest fast image generation model
+    Google’s latest fast image generation model
   </Card>
   <Card title="Gemini-3-Pro (Nano banana pro)" icon="image" href="/en/api-reference/images/gemini-3-pro/generation">
-    Google's professional-grade image generation model
+    Google’s professional-grade image generation model
   </Card>
   <Card title="Seedream-4.0" icon="image" href="/en/api-reference/images/seedream-4/generation">
     Efficient image generation solution
   </Card>
   <Card title="Seedream-4.5" icon="image" href="/en/api-reference/images/seedream-4.5/generation">
-    Latest version of Seedream
+    The latest version of Seedream
   </Card>
 </CardGroup>
 
 ### Video Generation Series
 
-Supports text-to-video and image-to-video, offering various resolution and duration options:
+Supports text-to-video and image-to-video, offering multiple resolution and duration options:
 
 <CardGroup cols={2}>
   <Card title="Sora2" icon="video" href="/en/api-reference/videos/sora2/generation">
     OpenAI Sora2 video generation model (10-15 seconds)
   </Card>
   <Card title="Sora2 Pro" icon="video" href="/en/api-reference/videos/sora2-pro/generation">
-    Sora2 Pro, supports HD resolution
+    Sora2 Professional version, supports HD resolution
   </Card>
   <Card title="VEO3.1" icon="video" href="/en/api-reference/videos/veo3-1/generation">
     Google VEO3.1 video generation model
@@ -119,26 +119,35 @@ Supports text-to-video and image-to-video, offering various resolution and durat
   <Card title="VEO3.1 Fast" icon="video" href="/en/api-reference/videos/veo3-1-fast/generation">
     VEO3.1 Fast version
   </Card>
+  <Card title="Seedance-1.5-pro" icon="video" href="/en/api-reference/videos/seedance-1-5-pro/generation">
+    Supports start/end frame control and audio generation (4-12 seconds)
+  </Card>
+  <Card title="Seedance Pro Fast" icon="video" href="/en/api-reference/videos/seedance_pro_fast/generation">
+    Seedance fast version, supports start frame control
+  </Card>
+  <Card title="Seedance Pro" icon="video" href="/en/api-reference/videos/seedance_pro/generation">
+    Seedance professional version, supports start/end frame control
+  </Card>
 </CardGroup>
 
 ## Core Features
 
 ### Asynchronous Task Processing
 
-All generation requests use asynchronous processing to avoid long wait times:
+All generation requests are processed asynchronously to avoid long waiting times:
 
-- You must provide `out_task_id` (initiator task ID for business identification) when submitting a task
+- When submitting a task, `out_task_id` (the initiator's task ID for business identification) must be provided
 - Immediately returns your submitted `out_task_id`
-- You can query task status using the `out_task_id`
+- You can use `out_task_id` to query the task status
 - Supports optional webhook callback notifications
-- Real-time task status updates: `pending` → `processing` → `completed`
+- Task status updates in real time: `pending` → `processing` → `completed`
 
 ### Multi-Model Support
 
-One unified API endpoint supporting various image and video generation models:
+A unified API endpoint supporting multiple image and video generation models:
 
-- **Image Generation**: 5 models including GPT-4o, Gemini, Seedream, etc.
-- **Video Generation**: 4 models including Sora2, VEO3, etc.
+- **Image Generation**: 5 models including GPT-4o, Gemini, Seedream
+- **Video Generation**: 7 models including Sora2, VEO3, Seedance
 - Unified request format and response structure
 - Flexible parameter configuration
 
@@ -146,17 +155,17 @@ One unified API endpoint supporting various image and video generation models:
 
 Charged by credits with clear transparency:
 
-- Each task returns the estimated credit consumption
+- Each task returns estimated credit consumption
 - Actual credit consumption shown after task completion
 - Pay only for successfully generated content
 - No hidden fees
 
 ### Flexible Configuration
 
-Supports various generation parameter configurations:
+Supports a variety of generation parameter configurations:
 
-- **Images**: multiple aspect ratios (1:1, 3:2, 2:3)
-- **Videos**: multiple aspect ratios (16:9, 9:16), durations (10 seconds, 15 seconds), resolutions
+- **Image**: multiple aspect ratios (1:1, 3:2, 2:3)
+- **Video**: multiple aspect ratios (16:9, 9:16), durations (10 seconds, 15 seconds), resolutions
 - Supports reference images (image-to-image, image-to-video)
 
 ## Authentication Method

@@ -82,42 +82,51 @@ curl --request POST \
 
 ### 画像生成シリーズ
 
-AIReiter は複数の画像生成モデルを提供しており、テキストから画像生成および画像から画像生成機能をサポートしています：
+AIReiterはテキストから画像への生成や画像から画像への生成機能をサポートする多様な画像生成モデルを提供しています：
 
 <CardGroup cols={2}>
-  <Card title="GPT-4o Image" icon="image" href="/zh/api-reference/images/gpt-4o/generation">
-    OpenAI の高品質な画像生成モデル
+  <Card title="GPT-4o Image" icon="image" href="/ja/api-reference/images/gpt-4o/generation">
+    OpenAIの高品質な画像生成モデル
   </Card>
-  <Card title="Gemini-2.5-Flash (Nano banana)" icon="image" href="/zh/api-reference/images/nano-banana/generation">
-    Google の最新高速画像生成モデル
+  <Card title="Gemini-2.5-Flash (Nano banana)" icon="image" href="/ja/api-reference/images/nano-banana/generation">
+    Googleの最新高速画像生成モデル
   </Card>
-  <Card title="Gemini-3-Pro (Nano banana pro)" icon="image" href="/zh/api-reference/images/gemini-3-pro/generation">
-    Google のプロフェッショナルグレード画像生成モデル
+  <Card title="Gemini-3-Pro (Nano banana pro)" icon="image" href="/ja/api-reference/images/gemini-3-pro/generation">
+    Googleのプロフェッショナル向け画像生成モデル
   </Card>
-  <Card title="Seedream-4.0" icon="image" href="/zh/api-reference/images/seedream-4/generation">
+  <Card title="Seedream-4.0" icon="image" href="/ja/api-reference/images/seedream-4/generation">
     効率的な画像生成ソリューション
   </Card>
-  <Card title="Seedream-4.5" icon="image" href="/zh/api-reference/images/seedream-4.5/generation">
-    Seedream の最新バージョン
+  <Card title="Seedream-4.5" icon="image" href="/ja/api-reference/images/seedream-4.5/generation">
+    Seedream最新バージョン
   </Card>
 </CardGroup>
 
 ### 動画生成シリーズ
 
-テキストから動画生成および画像から動画生成をサポートし、複数の解像度と長さのオプションを提供します：
+テキストから動画への生成や画像から動画への生成をサポートし、複数の解像度と動画長さオプションを提供します：
 
 <CardGroup cols={2}>
-  <Card title="Sora2" icon="video" href="/zh/api-reference/videos/sora2/generation">
-    OpenAI Sora2 動画生成モデル（10〜15秒）
+  <Card title="Sora2" icon="video" href="/ja/api-reference/videos/sora2/generation">
+    OpenAI Sora2 動画生成モデル（10～15秒）
   </Card>
-  <Card title="Sora2 Pro" icon="video" href="/zh/api-reference/videos/sora2-pro/generation">
-    Sora2 プロ版、高解像度対応
+  <Card title="Sora2 Pro" icon="video" href="/ja/api-reference/videos/sora2-pro/generation">
+    Sora2プロ版、HD解像度対応
   </Card>
-  <Card title="VEO3.1" icon="video" href="/zh/api-reference/videos/veo3-1/generation">
+  <Card title="VEO3.1" icon="video" href="/ja/api-reference/videos/veo3-1/generation">
     Google VEO3.1 動画生成モデル
   </Card>
-  <Card title="VEO3.1 Fast" icon="video" href="/zh/api-reference/videos/veo3-1-fast/generation">
-    VEO3.1 高速版
+  <Card title="VEO3.1 Fast" icon="video" href="/ja/api-reference/videos/veo3-1-fast/generation">
+    VEO3.1高速バージョン
+  </Card>
+  <Card title="Seedance-1.5-pro" icon="video" href="/ja/api-reference/videos/seedance-1-5-pro/generation">
+    初頭および末尾フレーム制御と音声生成対応（4～12秒）
+  </Card>
+  <Card title="Seedance Pro Fast" icon="video" href="/ja/api-reference/videos/seedance_pro_fast/generation">
+    Seedance高速バージョン、初頭フレーム制御対応
+  </Card>
+  <Card title="Seedance Pro" icon="video" href="/ja/api-reference/videos/seedance_pro/generation">
+    Seedanceプロ版、初頭および末尾フレーム制御対応
   </Card>
 </CardGroup>
 
@@ -127,37 +136,37 @@ AIReiter は複数の画像生成モデルを提供しており、テキスト�
 
 すべての生成リクエストは非同期処理モードを採用し、長時間の待機を回避します：
 
-- タスクを送信する際に `out_task_id`（発信者側のタスクID、ビジネス識別用）を渡す必要があります
-- 提出した `out_task_id` をすぐに返します
-- `out_task_id` を使用してタスクの状態を問い合わせ可能です
-- webhookコールバック通知をサポート（任意）
-- タスク状態はリアルタイムで更新：`pending` → `processing` → `completed`
+- タスクを提出する際に `out_task_id` （発信元のタスクID、ビジネス識別用）を渡す必要があります
+- 提出した `out_task_id` を即時に返します
+- `out_task_id` を使ってタスクの状態を問い合わせ可能です
+- webhookコールバックによる通知をサポート（オプション）
+- タスクの状態はリアルタイムで更新：`pending` → `processing` → `completed`
 
-### マルチモデル対応
+### 複数モデル対応
 
-統一されたAPIエンドポイントで、複数の画像・動画生成モデルをサポート：
+統一されたAPIエンドポイントで、多様な画像および動画生成モデルをサポート：
 
-- **画像生成**：GPT-4o、Gemini、Seedreamなど計5モデル
-- **動画生成**：Sora2、VEO3など計4モデル
-- 統一されたリクエストフォーマットとレスポンス構造
+- **画像生成**：GPT-4o、Gemini、Seedreamなど5つのモデル
+- **動画生成**：Sora2、VEO3、Seedanceなど7つのモデル
+- 統一されたリクエスト形式とレスポンス構造
 - 柔軟なパラメータ設定
 
 ### 透明な料金体系
 
-ポイント課金で、明確かつ透明：
+ポイント制で課金、透明かつ明確：
 
-- 各タスクで予測消費ポイントを返却
+- 各タスクで見積もり消費ポイントを返却
 - タスク完了後に実際の消費ポイントを表示
-- 成功した生成コンテンツのみ課金対象
-- 隠れた費用なし
+- 成功した生成内容にのみ支払い
+- 隠れた料金なし
 
 ### 柔軟な設定
 
-多彩な生成パラメータ設定をサポート：
+多様な生成パラメータ設定をサポート：
 
-- **画像**：複数のアスペクト比（1:1、3:2、2:3）
-- **動画**：複数のアスペクト比（16:9、9:16）、長さ（10秒、15秒）、解像度
-- 参照画像のサポート（画像から画像、画像から動画）
+- **画像**：様々なアスペクト比（1:1、3:2、2:3）
+- **動画**：様々なアスペクト比（16:9、9:16）、長さ（10秒、15秒）、解像度
+- 参照画像をサポート（画像から画像、画像から動画）
 
 ## 認証方法
 

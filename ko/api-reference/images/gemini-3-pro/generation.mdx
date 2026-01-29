@@ -28,7 +28,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="model" type="string" required>
   모델 이름
 
-  고정값: `"nano_banana_pro"`
+  고정 값: `"nano_banana_pro"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
@@ -36,22 +36,22 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   <Expandable title="params 객체 속성">
     <ParamField body="prompt" type="string" required>
-      이미지 생성 텍스트 설명
+      이미지 생성을 위한 텍스트 설명
 
       제한 없음
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      참조 이미지 URL 목록 (이미지에서 이미지 생성용)
+      이미지 생성 참고용 URL 목록
 
-      * 최대 8개의 이미지
-      * 공개 접근 가능한 URL 지원
+      * 최대 8장 이미지
+      * 공개적으로 접근 가능한 URL 지원
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string">
-      이미지 생성 가로 세로 비율
+      이미지 생성 비율
 
-      지원 가로 세로 비율:
+      지원하는 비율:
 
       * `auto` - 자동
       * `1:1` - 정사각형
@@ -62,7 +62,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       * `5:4` - 가로 5:4
       * `4:5` - 세로 4:5
       * `16:9` - 가로 와이드스크린
-      * `9:16` - 세로 세로스크린
+      * `9:16` - 세로 와이드스크린
       * `21:9` - 울트라 와이드스크린
     </ParamField>
 
@@ -75,22 +75,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       * `2K` - 표준 해상도
       * `4K` - 고해상도
     </ParamField>
-
-    <ParamField body="format" type="string" default="png">
-      이미지 출력 포맷
-
-      지원 포맷:
-
-      * `png` - PNG 포맷 (기본값)
-      * `jpg` - JPEG 포맷
-    </ParamField>
+    
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  요청자 작업 ID
+  발신자 작업 ID
 
-  사용자 지정 작업 식별자, 필수
+  사용자가 정의한 작업 식별자, 필수
 </ParamField>
 
 ## Response
