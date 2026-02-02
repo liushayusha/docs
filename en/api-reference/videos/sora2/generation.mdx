@@ -2,10 +2,23 @@
 title: 'Sora2 Video Generation'
 description: |
     - Asynchronous processing mode, returns a task ID for subsequent querying
-    - Supports generation modes such as text-to-video and image-to-video
-api: 'POST https://aireiter.com/api/openapi/submit'
+    - Supports text-to-video, image-to-video and other generation modes
+# api: 'POST https://aireiter.com/api/openapi/submit'  # Under maintenance, temporarily disabled
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+<Warning>
+🔧 **Service Maintenance**
+
+The Sora2 model is currently undergoing system maintenance and upgrades, and is temporarily unable to accept new generation requests.
+
+**Alternatives**:
+- Use [Sora2 Pro](/en/api-reference/videos/sora2-pro/generation) - professional version supporting higher resolution
+- Use [VEO3.1](/en/api-reference/videos/veo3-1/generation) - Google video generation model
+- Use [Seedance-1.5-pro](/en/api-reference/videos/seedance-1-5-pro/generation) - supports head and tail frame control and audio generation
+
+Thank you for your understanding and support.
+</Warning>
 
 ## Authorizations
 

@@ -1,11 +1,24 @@
 ---
-title: 'Sora2 動画生成'
+title: 'Sora2 ビデオ生成'
 description: |
-    - 非同期処理モードで、タスクIDを返し、後続のクエリに使用可能
-    - テキストから動画生成、画像から動画生成などの生成モードに対応
-api: 'POST https://aireiter.com/api/openapi/submit'
+    - 非同期処理モード、タスクIDを返し後続のクエリに使用
+    - テキストからビデオ、画像からビデオなどの生成モードに対応
+# api: 'POST https://aireiter.com/api/openapi/submit'  # メンテナンス中、一時停止
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+<Warning>
+🔧 **サービスメンテナンス中**
+
+Sora2モデルは現在システムのアップグレードメンテナンス中のため、新しい生成リクエストを一時的に受け付けておりません。
+
+**代替案**:
+- [Sora2 Pro](/zh/api-reference/videos/sora2-pro/generation) を使用 - プロフェッショナル版でより高い解像度に対応
+- [VEO3.1](/zh/api-reference/videos/veo3-1/generation) を使用 - Googleのビデオ生成モデル
+- [Seedance-1.5-pro](/zh/api-reference/videos/seedance-1-5-pro/generation) を使用 - 始終フレーム制御と音声生成に対応
+
+ご理解とご支援に感謝いたします。
+</Warning>
 
 ## Authorizations
 
