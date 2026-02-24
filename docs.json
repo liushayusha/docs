@@ -57,6 +57,13 @@
                 "pages": [
                   "zh/api-reference/images/seedream-4.5/generation"
                 ]
+              },
+              {
+                "group": "Seedream-5.0",
+                "icon": "image",
+                "pages": [
+                  "zh/api-reference/images/seedream-5.0/generation"
+                ]
               }
             ]
           },
@@ -170,6 +177,13 @@
                 "icon": "image",
                 "pages": [
                   "en/api-reference/images/seedream-4.5/generation"
+                ]
+              },
+              {
+                "group": "Seedream-5.0",
+                "icon": "image",
+                "pages": [
+                  "en/api-reference/images/seedream-5.0/generation"
                 ]
               }
             ]
@@ -285,6 +299,13 @@
                 "pages": [
                   "ja/api-reference/images/seedream-4.5/generation"
                 ]
+              },
+              {
+                "group": "Seedream-5.0",
+                "icon": "image",
+                "pages": [
+                  "ja/api-reference/images/seedream-5.0/generation"
+                ]
               }
             ]
           },
@@ -398,6 +419,13 @@
                 "icon": "image",
                 "pages": [
                   "ko/api-reference/images/seedream-4.5/generation"
+                ]
+              },
+              {
+                "group": "Seedream-5.0",
+                "icon": "image",
+                "pages": [
+                  "ko/api-reference/images/seedream-5.0/generation"
                 ]
               }
             ]

@@ -1,0 +1,27 @@
+[
+  {
+    "id": "__frontmatter__",
+    "hash": "3ebc17f7",
+    "index": 0
+  },
+  {
+    "id": "__prologue__",
+    "hash": "5c3ee9f8",
+    "index": 1
+  },
+  {
+    "id": "section-0-authorizations",
+    "hash": "83d46ba4",
+    "index": 2
+  },
+  {
+    "id": "section-1-body",
+    "hash": "4fc7f97a",
+    "index": 3
+  },
+  {
+    "id": "section-2-response",
+    "hash": "dbd42fc0",
+    "index": 4
+  }
+]

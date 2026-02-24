@@ -1,0 +1,649 @@
+---
+title: 'Seedream V5 画像生成'
+description: |
+    - 非同期処理モード、後続のクエリ用にタスクIDを返却
+    - より高品質な画像生成
+    - ネット検索サポートで生成効果を強化
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  すべてのエンドポイントはBearer Tokenによる認証が必要です
+
+  API Keyの取得：
+
+  <a href={apiKeyUrl} target="_blank">API Key管理ページ</a>にアクセスしてAPI Keyを取得してください
+
+  使用時はリクエストヘッダーに以下を追加します：
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  モデル名
+
+  固定値：`"seedream_v5"`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  モデルパラメーターオブジェクト
+
+  <Expandable title="params オブジェクトのプロパティ">
+    <ParamField body="prompt" type="string" required>
+      画像生成のテキスト説明
+
+      制限なし
+    </ParamField>
+
+    <ParamField body="image_url" type="string[]">
+      画像生成の参考となる画像のURL一覧
+
+      * 最大9枚の画像
+      * 公開されアクセス可能なURLに対応
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string">
+      画像生成のアスペクト比
+
+      対応アスペクト比：
+
+      * `1:1` - 正方形
+      * `3:2` - 横向き3:2
+      * `2:3` - 縦向き2:3
+      * `4:3` - 横向き4:3
+      * `3:4` - 縦向き3:4
+      * `16:9` - 横向きワイドスクリーン
+      * `9:16` - 縦向き縦長画面
+      * `21:9` - 超ワイドスクリーン
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="2K">
+      画像解像度
+
+      対応解像度：
+
+      * `2K` - 2K解像度（デフォルト）
+      * `3K` - 3K高解像度
+    </ParamField>
+
+    {/* <ParamField body="output_format" type="string" default="jpeg">
+      出力画像フォーマット
+
+      対応フォーマット：
+
+      * `jpeg` - JPEGフォーマット（デフォルト）
+      * `png` - PNGフォーマット
+    </ParamField> */}
+
+    <ParamField body="web_search" type="boolean" default="false">
+      インターネット検索のオン/オフ
+
+      有効にするとモデルはプロンプトに基づき自律的に商品や天気などのインターネット情報を検索するか判断し、生成効果を向上させますが、遅延が増加します
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="callback_url" type="string">
+  タスク完了後のコールバックURL
+</ParamField>
+
+<ParamField body="metadata" type="object">
+  カスタムメタデータ、そのまま返却
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  発行者のタスクID
+
+  ユーザー定義のタスク識別子で必須
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  発注側のタスクIDで、結果の照会に使用できます
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  初期状態で、固定値は `"pending"`
+</ResponseField>
+
+<ResponseField name="estimated_credits" type="number">
+  推定消費クレジット
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  作成日時（ISO形式）
+</ResponseField>
+
+<RequestExample>
+  ```bash cURL
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "seedream_v5",
+      "params": {
+        "prompt": "窓辺に座る1匹のオレンジ猫、窓の外は東京の夜景、サイバーパンクスタイル",
+        "aspect_ratio": "16:9",
+        "resolution": "3K",
+        "web_search": false
+      },
+      "out_task_id": "my_task_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "seedream_v5",
+      "params": {
+          "prompt": "窓辺に座る1匹のオレンジ猫、窓の外は東京の夜景、サイバーパンクスタイル",
+          "aspect_ratio": "16:9",
+          "resolution": "3K",
+          "web_search": False
+      },
+      "out_task_id": "my_task_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "seedream_v5",
+    params: {
+      prompt: "窓辺に座る1匹のオレンジ猫、窓の外は東京の夜景、サイバーパンクスタイル",
+      aspect_ratio: "16:9",
+      resolution: "3K",
+      web_search: false
+    },
+    out_task_id: "my_task_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "seedream_v5",
+          "params": map[string]interface{}{
+              "prompt":        "窓辺に座る1匹のオレンジ猫、窓の外は東京の夜景、サイバーパンクスタイル",
+              "aspect_ratio":  "16:9",
+              "resolution":    "3K",
+              "web_search":    false,
+          },
+          "out_task_id": "my_task_123456",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/openapi/submit";
+
+          String payload = """
+          {
+            "model": "seedream_v5",
+            "params": {
+              "prompt": "窓辺に座る1匹のオレンジ猫、窓の外は東京の夜景、サイバーパンクスタイル",
+              "aspect_ratio": "16:9",
+              "resolution": "3K",
+              "web_search": false
+            },
+            "out_task_id": "my_task_123456"
+          }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = [
+      "model" => "seedream_v5",
+      "params" => [
+          "prompt" => "窓辺に座る1匹のオレンジ猫、窓の外は東京の夜景、サイバーパンクスタイル",
+          "aspect_ratio" => "16:9",
+          "resolution" => "3K",
+          "web_search" => false
+      ],
+      "out_task_id" => "my_task_123456"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url = URI("https://aireiter.com/api/openapi/submit")
+
+  payload = {
+    model: "seedream_v5",
+    params: {
+      prompt: "窓辺に座る1匹のオレンジ猫、窓の外は東京の夜景、サイバーパンクスタイル",
+      aspect_ratio: "16:9",
+      resolution: "3K",
+      web_search: false
+    },
+    out_task_id: "my_task_123456"
+  }
+
+  http = Net::HTTP.new(url.host, url.port)
+
+  request = Net::HTTP::Post.new(url)
+  request["Authorization"] = "Bearer <token>"
+  request["Content-Type"] = "application/json"
+  request.body = payload.to_json
+
+  response = http.request(request)
+  puts response.body
+  ```
+
+  ```swift Swift
+  import Foundation
+
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
+
+  let payload: [String: Any] = [
+      "model": "seedream_v5",
+      "params": [
+          "prompt": "窓辺に座る1匹のオレンジ猫、窓の外は東京の夜景、サイバーパンクスタイル",
+          "aspect_ratio": "16:9",
+          "resolution": "3K",
+          "web_search": false
+      ] as [String: Any],
+      "out_task_id": "my_task_123456"
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      if let error = error {
+          print("Error: \(error)")
+          return
+      }
+
+      if let data = data, let responseString = String(data: data, encoding: .utf8) {
+          print(responseString)
+      }
+  }
+
+  task.resume()
+  ```
+
+  ```csharp C#
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url = "https://aireiter.com/api/openapi/submit";
+
+          var payload = @"{
+              ""model"": ""seedream_v5"",
+              ""params"": {
+                  ""prompt"": ""窓辺に座る1匹のオレンジ猫、窓の外は東京の夜景、サイバーパンクスタイル"",
+                  ""aspect_ratio"": ""16:9"",
+                  ""resolution"": ""3K"",
+                  ""web_search"": false
+              },
+              ""out_task_id"": ""my_task_123456""
+          }";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+
+          var content = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          var result = await response.Content.ReadAsStringAsync();
+
+          Console.WriteLine(result);
+      }
+  }
+  ```
+
+  ```c C
+  #include <stdio.h>
+  #include <curl/curl.h>
+
+  int main(void) {
+      CURL *curl;
+      CURLcode res;
+
+      curl_global_init(CURL_GLOBAL_DEFAULT);
+      curl = curl_easy_init();
+
+      if(curl) {
+          const char *url = "https://aireiter.com/api/openapi/submit";
+          const char *payload = "{"
+              "\"model\":\"seedream_v5\","
+              "\"params\":{"
+                  "\"prompt\":\"窓辺に座る1匹のオレンジ猫、窓の外は東京の夜景、サイバーパンクスタイル\","
+                  "\"aspect_ratio\":\"16:9\","
+                  "\"resolution\":\"3K\","
+                  "\"web_search\":false"
+              "},"
+              "\"out_task_id\":\"my_task_123456\""
+          "}";
+
+          struct curl_slist *headers = NULL;
+          headers = curl_slist_append(headers, "Authorization: Bearer <token>");
+          headers = curl_slist_append(headers, "Content-Type: application/json");
+
+          curl_easy_setopt(curl, CURLOPT_URL, url);
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
+          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+          res = curl_easy_perform(curl);
+
+          if(res != CURLE_OK) {
+              fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                      curl_easy_strerror(res));
+          }
+
+          curl_slist_free_all(headers);
+          curl_easy_cleanup(curl);
+      }
+
+      curl_global_cleanup();
+      return 0;
+  }
+  ```
+
+  ```objectivec Objective-C
+  #import <Foundation/Foundation.h>
+
+  int main(int argc, const char * argv[]) {
+      @autoreleasepool {
+          NSURL *url = [NSURL URLWithString:@"https://aireiter.com/api/openapi/submit"];
+
+          NSDictionary *payload = @{
+              @"model": @"seedream_v5",
+              @"params": @{
+                  @"prompt": @"窓辺に座る1匹のオレンジ猫、窓の外は東京の夜景、サイバーパンクスタイル",
+                  @"aspect_ratio": @"16:9",
+                  @"resolution": @"3K",
+                  @"web_search": @NO
+              },
+              @"out_task_id": @"my_task_123456"
+          };
+
+          NSError *error;
+          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
+                                                            options:0
+                                                              error:&error];
+
+          NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+          [request setHTTPMethod:@"POST"];
+          [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
+          [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+          [request setHTTPBody:jsonData];
+
+          NSURLSessionDataTask *task = [[NSURLSession sharedSession]
+              dataTaskWithRequest:request
+              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+                  if (error) {
+                      NSLog(@"Error: %@", error);
+                      return;
+                  }
+                  NSString *result = [[NSString alloc] initWithData:data
+                                                          encoding:NSUTF8StringEncoding];
+                  NSLog(@"%@", result);
+              }];
+
+          [task resume];
+          [[NSRunLoop mainRunLoop] run];
+      }
+      return 0;
+  }
+  ```
+
+  ```ocaml OCaml
+  (* Requires cohttp and yojson libraries *)
+  open Lwt
+  open Cohttp
+  open Cohttp_lwt_unix
+
+  let url = "https://aireiter.com/api/openapi/submit"
+
+  let payload = {|{
+    "model": "seedream_v5",
+    "params": {
+      "prompt": "窓辺に座る1匹のオレンジ猫、窓の外は東京の夜景、サイバーパンクスタイル",
+      "aspect_ratio": "16:9",
+      "resolution": "3K",
+      "web_search": false
+    },
+    "out_task_id": "my_task_123456"
+  }|}
+
+  let () =
+    let headers = Header.init ()
+      |> fun h -> Header.add h "Authorization" "Bearer <token>"
+      |> fun h -> Header.add h "Content-Type" "application/json"
+    in
+    let body = Cohttp_lwt.Body.of_string payload in
+
+    let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
+      body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
+      print_endline body_str
+    in
+    Lwt_main.run response
+  ```
+
+  ```dart Dart
+  import 'dart:convert';
+  import 'package:http/http.dart' as http;
+
+  void main() async {
+    final url = Uri.parse('https://aireiter.com/api/openapi/submit');
+
+    final payload = {
+      'model': 'seedream_v5',
+      'params': {
+        'prompt': '窓辺に座る1匹のオレンジ猫、窓の外は東京の夜景、サイバーパンクスタイル',
+        'aspect_ratio': '16:9',
+        'resolution': '3K',
+        'web_search': false
+      },
+      'out_task_id': 'my_task_123456'
+    };
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer <token>',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(payload),
+    );
+
+    print(response.body);
+  }
+  ```
+
+  ```r R
+  library(httr)
+  library(jsonlite)
+
+  url <- "https://aireiter.com/api/openapi/submit"
+
+  payload <- list(
+    model = "seedream_v5",
+    params = list(
+      prompt = "窓辺に座る1匹のオレンジ猫、窓の外は東京の夜景、サイバーパンクスタイル",
+      aspect_ratio = "16:9",
+      resolution = "3K",
+      web_search = FALSE
+    ),
+    out_task_id = "my_task_123456"
+  )
+
+  response <- POST(
+    url,
+    add_headers(
+      Authorization = "Bearer <token>",
+      `Content-Type` = "application/json"
+    ),
+    body = toJSON(payload, auto_unbox = TRUE),
+    encode = "raw"
+  )
+
+  cat(content(response, "text"))
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "out_task_id": "my_task_123456",
+        "status": "pending",
+        "estimated_credits": 100,
+        "created_at": "2025-12-22T06:03:28.242Z"
+    }
+}
+  ```
+
+  ```json 400
+    {
+        "statusCode": 400,
+        "message": "リクエストパラメータが無効です",
+        "ok": false
+    }
+  ```
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "認証に失敗しました。APIキーをご確認ください"
+    }
+  }
+  ```
+```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "アカウント残高不足です。チャージ後に再試行してください"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "サーバ内部エラーです。しばらくしてから再度お試しください"
+    }
+  }
+  ```
+</ResponseExample>
