@@ -59,10 +59,10 @@
                 ]
               },
               {
-                "group": "Seedream-5.0",
+                "group": "Seedream V5 lite",
                 "icon": "image",
                 "pages": [
-                  "zh/api-reference/images/seedream-5.0/generation"
+                  "zh/api-reference/images/seedream-v5-lite/generation"
                 ]
               }
             ]
@@ -180,10 +180,10 @@
                 ]
               },
               {
-                "group": "Seedream-5.0",
+                "group": "Seedream V5 lite",
                 "icon": "image",
                 "pages": [
-                  "en/api-reference/images/seedream-5.0/generation"
+                  "en/api-reference/images/seedream-v5-lite/generation"
                 ]
               }
             ]
@@ -301,10 +301,10 @@
                 ]
               },
               {
-                "group": "Seedream-5.0",
+                "group": "Seedream V5 lite",
                 "icon": "image",
                 "pages": [
-                  "ja/api-reference/images/seedream-5.0/generation"
+                  "ja/api-reference/images/seedream-v5-lite/generation"
                 ]
               }
             ]
@@ -422,10 +422,10 @@
                 ]
               },
               {
-                "group": "Seedream-5.0",
+                "group": "Seedream V5 lite",
                 "icon": "image",
                 "pages": [
-                  "ko/api-reference/images/seedream-5.0/generation"
+                  "ko/api-reference/images/seedream-v5-lite/generation"
                 ]
               }
             ]

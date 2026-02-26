@@ -1,24 +1,23 @@
 ---
-title: 'Seedream V5 图片生成'
+title: 'Seedream V5 lite 이미지 생성'
 description: |
-    - 异步处理模式，返回任务ID用于后续查询
-    - 更高质量的图片生成
-    - 支持联网搜索增强生成效果
+    - 비동기 처리 모드, 후속 조회용 작업 ID 반환
+    - 더 높은 품질의 이미지 생성
+    - 네트워크 검색 지원으로 생성 효과 향상
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
-
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  所有接口均需要使用Bearer Token进行认证
+  모든 인터페이스는 Bearer Token 인증을 사용해야 합니다.
 
-  获取 API Key：
+  API Key 받기:
 
-  访问 <a href={apiKeyUrl} target="_blank">API Key 管理页面</a> 获取您的 API Key
+  <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a>에 접속하여 API Key를 받으세요.
 
-  使用时在请求头中添加：
+  사용할 때 요청 헤더에 다음을 추가하세요:
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -28,99 +27,99 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  模型名称
+  모델 이름
 
-  固定值：`"seedream_v5"`
+  고정 값: `"seedream_v5_lite"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  模型参数对象
+  모델 파라미터 객체
 
-  <Expandable title="params 对象属性">
+  <Expandable title="params 객체 속성">
     <ParamField body="prompt" type="string" required>
-      图像生成的文本描述
+      이미지 생성 텍스트 설명
 
-      无限制
+      제한 없음
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      参考图像的 URL 列表，用于图生图
+      참고 이미지 URL 목록, 이미지-기반 이미지 생성에 사용
 
-      * 最多 9 张图片
-      * 支持公开可访问的 URL
+      * 최대 9장 이미지
+      * 공개적으로 접근 가능한 URL 지원
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string">
-      图像生成的宽高比
+      이미지 생성 가로세로 비율
 
-      支持的宽高比：
+      지원하는 가로세로 비율:
 
-      * `1:1` - 正方形
-      * `3:2` - 横向 3:2
-      * `2:3` - 纵向 2:3
-      * `4:3` - 横向 4:3
-      * `3:4` - 纵向 3:4
-      * `16:9` - 横向宽屏
-      * `9:16` - 纵向竖屏
-      * `21:9` - 超宽屏
+      * `1:1` - 정사각형
+      * `3:2` - 가로 3:2
+      * `2:3` - 세로 2:3
+      * `4:3` - 가로 4:3
+      * `3:4` - 세로 3:4
+      * `16:9` - 가로 와이드스크린
+      * `9:16` - 세로 세로 화면
+      * `21:9` - 울트라 와이드스크린
     </ParamField>
 
     <ParamField body="resolution" type="string" default="2K">
-      图像分辨率
+      이미지 해상도
 
-      支持的分辨率：
+      지원 해상도:
 
-      * `2K` - 2K 分辨率（默认）
-      * `3K` - 3K 高清分辨率
+      * `2K` - 2K 해상도(기본값)
+      * `3K` - 3K 고화질 해상도
     </ParamField>
 
     {/* <ParamField body="output_format" type="string" default="jpeg">
-      输出图片格式
+      출력 이미지 포맷
 
-      支持的格式：
+      지원 포맷:
 
-      * `jpeg` - JPEG 格式（默认）
-      * `png` - PNG 格式
+      * `jpeg` - JPEG 포맷(기본값)
+      * `png` - PNG 포맷
     </ParamField> */}
 
     <ParamField body="web_search" type="boolean" default="false">
-      联网搜索开关
+      인터넷 검색 활성화 스위치
 
-      开启后模型根据提示词自主判断是否搜索互联网内容（如商品、天气等），提升生成效果，但会增加时延
+      활성화 시 모델이 프롬프트에 따라 인터넷 내용(상품, 날씨 등)을 검색할지 판단하여 생성 품질 향상, 하지만 지연 시간 증가
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="callback_url" type="string">
-  任务完成后的回调地址
+  작업 완료 후 콜백 주소
 </ParamField>
 
 <ParamField body="metadata" type="object">
-  自定义元数据，原样返回
+  사용자 정의 메타데이터, 그대로 반환
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  发起方任务ID
+  요청자 작업 ID
 
-  用户自定义的任务标识，必填
+  사용자가 정의한 작업 식별자, 필수
 </ParamField>
 
 ## Response
 
 <ResponseField name="out_task_id" type="string">
-  发起方任务ID，可用于查询结果
+  요청자 작업 ID로, 결과를 조회하는 데 사용할 수 있습니다
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  初始状态，固定为 `"pending"`
+  초기 상태로, 고정값 `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  预估消耗积分
+  예상 소모 크레딧
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  创建时间（ISO 格式）
+  생성 시간(ISO 형식)
 </ResponseField>
 
 <RequestExample>
@@ -130,9 +129,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
-      "model": "seedream_v5",
+      "model": "seedream_v5_lite",
       "params": {
-        "prompt": "一只橘猫坐在窗台上，窗外是东京夜景，赛博朋克风格",
+        "prompt": "한 마리 주황색 고양이가 창턱에 앉아 있고, 창밖은 도쿄 야경, 사이버펑크 스타일",
         "aspect_ratio": "16:9",
         "resolution": "3K",
         "web_search": false
@@ -147,9 +146,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   url = "https://aireiter.com/api/openapi/submit"
 
   payload = {
-      "model": "seedream_v5",
+      "model": "seedream_v5_lite",
       "params": {
-          "prompt": "一只橘猫坐在窗台上，窗外是东京夜景，赛博朋克风格",
+          "prompt": "한 마리 주황색 고양이가 창턱에 앉아 있고, 창밖은 도쿄 야경, 사이버펑크 스타일",
           "aspect_ratio": "16:9",
           "resolution": "3K",
           "web_search": False
@@ -171,9 +170,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   const url = "https://aireiter.com/api/openapi/submit";
 
   const payload = {
-    model: "seedream_v5",
+    model: "seedream_v5_lite",
     params: {
-      prompt: "一只橘猫坐在窗台上，窗外是东京夜景，赛博朋克风格",
+      prompt: "한 마리 주황색 고양이가 창턱에 앉아 있고, 창밖은 도쿄 야경, 사이버펑크 스타일",
       aspect_ratio: "16:9",
       resolution: "3K",
       web_search: false
@@ -211,9 +210,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       url := "https://aireiter.com/api/openapi/submit"
 
       payload := map[string]interface{}{
-          "model": "seedream_v5",
+          "model": "seedream_v5_lite",
           "params": map[string]interface{}{
-              "prompt":        "一只橘猫坐在窗台上，窗外是东京夜景，赛博朋克风格",
+              "prompt":        "한 마리 주황색 고양이가 창턱에 앉아 있고, 창밖은 도쿄 야경, 사이버펑크 스타일",
               "aspect_ratio":  "16:9",
               "resolution":    "3K",
               "web_search":    false,
@@ -251,9 +250,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
           String payload = """
           {
-            "model": "seedream_v5",
+            "model": "seedream_v5_lite",
             "params": {
-              "prompt": "一只橘猫坐在窗台上，窗外是东京夜景，赛博朋克风格",
+              "prompt": "한 마리 주황색 고양이가 창턱에 앉아 있고, 창밖은 도쿄 야경, 사이버펑크 스타일",
               "aspect_ratio": "16:9",
               "resolution": "3K",
               "web_search": false
@@ -284,9 +283,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   $url = "https://aireiter.com/api/openapi/submit";
 
   $payload = [
-      "model" => "seedream_v5",
+      "model" => "seedream_v5_lite",
       "params" => [
-          "prompt" => "一只橘猫坐在窗台上，窗外是东京夜景，赛博朋克风格",
+          "prompt" => "한 마리 주황색 고양이가 창턱에 앉아 있고, 창밖은 도쿄 야경, 사이버펑크 스타일",
           "aspect_ratio" => "16:9",
           "resolution" => "3K",
           "web_search" => false
@@ -318,9 +317,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   url = URI("https://aireiter.com/api/openapi/submit")
 
   payload = {
-    model: "seedream_v5",
+    model: "seedream_v5_lite",
     params: {
-      prompt: "一只橘猫坐在窗台上，窗外是东京夜景，赛博朋克风格",
+      prompt: "한 마리 주황색 고양이가 창턱에 앉아 있고, 창밖은 도쿄 야경, 사이버펑크 스타일",
       aspect_ratio: "16:9",
       resolution: "3K",
       web_search: false
@@ -345,9 +344,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let url = URL(string: "https://aireiter.com/api/openapi/submit")!
 
   let payload: [String: Any] = [
-      "model": "seedream_v5",
+      "model": "seedream_v5_lite",
       "params": [
-          "prompt": "一只橘猫坐在窗台上，窗外是东京夜景，赛博朋克风格",
+          "prompt": "한 마리 주황색 고양이가 창턱에 앉아 있고, 창밖은 도쿄 야경, 사이버펑크 스타일",
           "aspect_ratio": "16:9",
           "resolution": "3K",
           "web_search": false
@@ -388,9 +387,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           var url = "https://aireiter.com/api/openapi/submit";
 
           var payload = @"{
-              ""model"": ""seedream_v5"",
+              ""model"": ""seedream_v5_lite"",
               ""params"": {
-                  ""prompt"": ""一只橘猫坐在窗台上，窗外是东京夜景，赛博朋克风格"",
+                  ""prompt"": ""한 마리 주황색 고양이가 창턱에 앉아 있고, 창밖은 도쿄 야경, 사이버펑크 스타일"",
                   ""aspect_ratio"": ""16:9"",
                   ""resolution"": ""3K"",
                   ""web_search"": false
@@ -424,9 +423,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       if(curl) {
           const char *url = "https://aireiter.com/api/openapi/submit";
           const char *payload = "{"
-              "\"model\":\"seedream_v5\","
+              "\"model\":\"seedream_v5_lite\","
               "\"params\":{"
-                  "\"prompt\":\"一只橘猫坐在窗台上，窗外是东京夜景，赛博朋克风格\","
+                  "\"prompt\":\"한 마리 주황색 고양이가 창턱에 앉아 있고, 창밖은 도쿄 야경, 사이버펑크 스타일\","
                   "\"aspect_ratio\":\"16:9\","
                   "\"resolution\":\"3K\","
                   "\"web_search\":false"
@@ -466,9 +465,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           NSURL *url = [NSURL URLWithString:@"https://aireiter.com/api/openapi/submit"];
 
           NSDictionary *payload = @{
-              @"model": @"seedream_v5",
+              @"model": @"seedream_v5_lite",
               @"params": @{
-                  @"prompt": @"一只橘猫坐在窗台上，窗外是东京夜景，赛博朋克风格",
+                  @"prompt": @"한 마리 주황색 고양이가 창턱에 앉아 있고, 창밖은 도쿄 야경, 사이버펑크 스타일",
                   @"aspect_ratio": @"16:9",
                   @"resolution": @"3K",
                   @"web_search": @NO
@@ -515,9 +514,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let url = "https://aireiter.com/api/openapi/submit"
 
   let payload = {|{
-    "model": "seedream_v5",
+    "model": "seedream_v5_lite",
     "params": {
-      "prompt": "一只橘猫坐在窗台上，窗外是东京夜景，赛博朋克风格",
+      "prompt": "한 마리 주황색 고양이가 창턱에 앉아 있고, 창밖은 도쿄 야경, 사이버펑크 스타일",
       "aspect_ratio": "16:9",
       "resolution": "3K",
       "web_search": false
@@ -547,9 +546,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     final url = Uri.parse('https://aireiter.com/api/openapi/submit');
 
     final payload = {
-      'model': 'seedream_v5',
+      'model': 'seedream_v5_lite',
       'params': {
-        'prompt': '一只橘猫坐在窗台上，窗外是东京夜景，赛博朋克风格',
+        'prompt': '한 마리 주황색 고양이가 창턱에 앉아 있고, 창밖은 도쿄 야경, 사이버펑크 스타일',
         'aspect_ratio': '16:9',
         'resolution': '3K',
         'web_search': false
@@ -577,9 +576,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   url <- "https://aireiter.com/api/openapi/submit"
 
   payload <- list(
-    model = "seedream_v5",
+    model = "seedream_v5_lite",
     params = list(
-      prompt = "一只橘猫坐在窗台上，窗外是东京夜景，赛博朋克风格",
+      prompt = "한 마리 주황색 고양이가 창턱에 앉아 있고, 창밖은 도쿄 야경, 사이버펑크 스타일",
       aspect_ratio = "16:9",
       resolution = "3K",
       web_search = FALSE
@@ -618,7 +617,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```json 400
     {
         "statusCode": 400,
-        "message": "请求参数无效",
+        "message": "요청 파라미터가 유효하지 않습니다",
         "ok": false
     }
   ```
@@ -626,7 +625,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 401,
-      "message": "身份验证失败，请检查您的API密钥"
+      "message": "인증 실패, API 키를 확인하십시오"
     }
   }
   ```
@@ -634,7 +633,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 433,
-      "message": "账户余额不足，请充值后再试"
+      "message": "계정 잔액이 부족합니다. 충전 후 다시 시도하십시오"
     }
   }
   ```
@@ -643,7 +642,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 500,
-      "message": "服务器内部错误，请稍后重试"
+      "message": "서버 내부 오류입니다. 잠시 후 다시 시도하십시오"
     }
   }
   ```
