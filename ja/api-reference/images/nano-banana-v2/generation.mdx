@@ -1,8 +1,8 @@
 ---
-title: 'Nano Banana 画像生成'
+title: 'Nano Banana V2 画像生成'
 description: |
-    - 非同期処理モードで、後続のクエリ用にタスクIDを返します
-    - 高速な生成スピードで、迅速な画像作成に最適化されています
+    - 非同期処理モードで、タスクIDを返し、後続のクエリに使用
+    - テキストから画像生成、画像変換、画像編集など多様な生成モードに対応
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -10,7 +10,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  すべてのエンドポイントではBearer Tokenを使用した認証が必要です。
+  すべてのエンドポイントはBearer Tokenによる認証が必要です。
 
   APIキーの取得：
 
@@ -28,11 +28,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="model" type="string" required>
   モデル名
 
-  固定値：`"nano_banana"`
+  固定値：`"nano_banana_v2"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  モデルのパラメータオブジェクト
+  モデルパラメータオブジェクト
 
   <Expandable title="params オブジェクトのプロパティ">
     <ParamField body="prompt" type="string" required>
@@ -42,16 +42,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      参照画像のURLリスト、画像から画像への生成に使用
+      参照画像のURLリスト（画像から画像を生成するために使用）
 
-      * 最大9枚の画像
+      * 最大8枚の画像
       * 公開アクセス可能なURLをサポート
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string">
       画像生成のアスペクト比
 
-      サポートされるアスペクト比：
+      対応するアスペクト比：
 
       * `auto` - 自動
       * `1:1` - 正方形
@@ -62,15 +62,25 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       * `5:4` - 横長5:4
       * `4:5` - 縦長4:5
       * `16:9` - 横長ワイドスクリーン
-      * `9:16` - 縦長ポートレート
-      * `21:9` - 超横長ワイドスクリーン
+      * `9:16` - 縦長スクリーン
+      * `21:9` - 超ワイドスクリーン
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="1K">
+      画像解像度
+
+      対応解像度：
+
+      * `1K` - ベース解像度（デフォルト）
+      * `2K` - 標準解像度
+      * `4K` - 高解像度
     </ParamField>
 
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発起者タスクID
+  発行者タスクID
 
   ユーザー定義のタスク識別子、必須
 </ParamField>
@@ -78,11 +88,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Response
 
 <ResponseField name="out_task_id" type="string">
-  発信元のタスクIDで、結果の照会に使用できます
+  発起側タスクID、結果のクエリに使用可能
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  初期状態で、常に `"pending"` に固定されています
+  初期状態、固定で `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
@@ -90,7 +100,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  作成日時（ISO形式）
+  作成日時（ISOフォーマット）
 </ResponseField>
 
 <RequestExample>
@@ -100,11 +110,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
-      "model": "nano_banana",
+      "model": "nano_banana_v2",
       "params": {
-        "prompt": "月光下の竹林の小径",
+        "prompt": "夕焼けの海辺の灯台",
         "aspect_ratio": "16:9",
-
+        "resolution": "2K"
       },
       "out_task_id": "my_task_123456"
     }'
@@ -116,11 +126,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   url = "https://aireiter.com/api/openapi/submit"
 
   payload = {
-      "model": "nano_banana",
+      "model": "nano_banana_v2",
       "params": {
-          "prompt": "月光下の竹林の小径",
+          "prompt": "夕焼けの海辺の灯台",
           "aspect_ratio": "16:9",
-  
+          "resolution": "2K"
       },
       "out_task_id": "my_task_123456"
   }
@@ -139,11 +149,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   const url = "https://aireiter.com/api/openapi/submit";
 
   const payload = {
-    model: "nano_banana",
+    model: "nano_banana_v2",
     params: {
-      prompt: "月光下の竹林の小径",
+      prompt: "夕焼けの海辺の灯台",
       aspect_ratio: "16:9",
-
+      resolution: "2K"
     },
     out_task_id: "my_task_123456"
   };
@@ -178,11 +188,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       url := "https://aireiter.com/api/openapi/submit"
 
       payload := map[string]interface{}{
-          "model": "nano_banana",
+          "model": "nano_banana_v2",
           "params": map[string]interface{}{
-              "prompt":       "月光下の竹林の小径",
+              "prompt":       "夕焼けの海辺の灯台",
               "aspect_ratio": "16:9",
-
+              "resolution":   "2K",
           },
           "out_task_id": "my_task_123456",
       }
@@ -217,11 +227,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
           String payload = """
           {
-            "model": "nano_banana",
+            "model": "nano_banana_v2",
             "params": {
-              "prompt": "月光下の竹林の小径",
+              "prompt": "夕焼けの海辺の灯台",
               "aspect_ratio": "16:9",
-      
+              "resolution": "2K"
             },
             "out_task_id": "my_task_123456"
           }
@@ -249,11 +259,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   $url = "https://aireiter.com/api/openapi/submit";
 
   $payload = [
-      "model" => "nano_banana",
+      "model" => "nano_banana_v2",
       "params" => [
-          "prompt" => "月光下の竹林の小径",
+          "prompt" => "夕焼けの海辺の灯台",
           "aspect_ratio" => "16:9",
-
+          "resolution" => "2K"
       ],
       "out_task_id" => "my_task_123456"
   ];
@@ -282,11 +292,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   url = URI("https://aireiter.com/api/openapi/submit")
 
   payload = {
-    model: "nano_banana",
+    model: "nano_banana_v2",
     params: {
-      prompt: "月光下の竹林の小径",
+      prompt: "夕焼けの海辺の灯台",
       aspect_ratio: "16:9",
-
+      resolution: "2K"
     },
     out_task_id: "my_task_123456"
   }
@@ -308,12 +318,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let url = URL(string: "https://aireiter.com/api/openapi/submit")!
 
   let payload: [String: Any] = [
-      "model": "nano_banana",
+      "model": "nano_banana_v2",
       "params": [
-          "prompt": "月光下の竹林の小径",
+          "prompt": "夕焼けの海辺の灯台",
           "aspect_ratio": "16:9",
-  
-      ]
+          "resolution": "2K"
+      ],
+      "out_task_id": "my_task_123456"
   ]
 
   var request = URLRequest(url: url)
@@ -349,12 +360,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           var url = "https://aireiter.com/api/openapi/submit";
 
           var payload = @"{
-              ""model"": ""nano_banana"",
+              ""model"": ""nano_banana_v2"",
               ""params"": {
-                  ""prompt"": ""月光下の竹林の小径"",
+                  ""prompt"": ""夕焼けの海辺の灯台"",
                   ""aspect_ratio"": ""16:9"",
-
-              }
+                  ""resolution"": ""2K""
+              },
+              ""out_task_id"": ""my_task_123456""
           }";
 
           using var client = new HttpClient();
@@ -383,12 +395,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       if(curl) {
           const char *url = "https://aireiter.com/api/openapi/submit";
           const char *payload = "{"
-              "\"model\":\"nano_banana\","
+              "\"model\":\"nano_banana_v2\","
               "\"params\":{"
-                  "\"prompt\":\"月光下の竹林の小径\","
+                  "\"prompt\":\"夕焼けの海辺の灯台\","
                   "\"aspect_ratio\":\"16:9\","
-
-              "}"
+                  "\"resolution\":\"2K\""
+              "},"
+              "\"out_task_id\":\"my_task_123456\""
           "}";
 
           struct curl_slist *headers = NULL;
@@ -423,12 +436,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           NSURL *url = [NSURL URLWithString:@"https://aireiter.com/api/openapi/submit"];
 
           NSDictionary *payload = @{
-              @"model": @"nano_banana",
+              @"model": @"nano_banana_v2",
               @"params": @{
-                  @"prompt": @"月光下の竹林の小径",
+                  @"prompt": @"夕焼けの海辺の灯台",
                   @"aspect_ratio": @"16:9",
-
-              }
+                  @"resolution": @"2K"
+              },
+              @"out_task_id": @"my_task_123456"
           };
 
           NSError *error;
@@ -470,12 +484,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let url = "https://aireiter.com/api/openapi/submit"
 
   let payload = {|{
-    "model": "nano_banana",
+    "model": "nano_banana_v2",
     "params": {
-      "prompt": "月光下の竹林の小径",
+      "prompt": "夕焼けの海辺の灯台",
       "aspect_ratio": "16:9",
-
-    }
+      "resolution": "2K"
+    },
+    "out_task_id": "my_task_123456"
   }|}
 
   let () =
@@ -500,12 +515,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     final url = Uri.parse('https://aireiter.com/api/openapi/submit');
 
     final payload = {
-      'model': 'nano_banana',
+      'model': 'nano_banana_v2',
       'params': {
-        'prompt': '月光下の竹林の小径',
+        'prompt': '夕焼けの海辺の灯台',
         'aspect_ratio': '16:9',
-
-      }
+        'resolution': '2K'
+      },
+      'out_task_id': 'my_task_123456'
     };
 
     final response = await http.post(
@@ -528,12 +544,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   url <- "https://aireiter.com/api/openapi/submit"
 
   payload <- list(
-    model = "nano_banana",
+    model = "nano_banana_v2",
     params = list(
-      prompt = "月光下の竹林の小径",
+      prompt = "夕焼けの海辺の灯台",
       aspect_ratio = "16:9",
-
-    )
+      resolution = "2K"
+    ),
+    out_task_id = "my_task_123456"
   )
 
   response <- POST(
@@ -575,7 +592,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 401,
-      "message": "認証に失敗しました。APIキーを確認してください"
+      "message": "認証に失敗しました。APIキーを確認してください",
     }
   }
   ```
@@ -583,7 +600,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 433,
-      "message": "アカウント残高が不足しています。チャージ後に再試行してください"
+      "message": "アカウント残高が不足しています。チャージ後に再試行してください",
     }
   }
   ```
@@ -592,7 +609,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 500,
-      "message": "サーバ内部エラーが発生しました。後ほど再試行してください"
+      "message": "サーバ内部エラーが発生しました。しばらくしてから再試行してください"
     }
   }
   ```

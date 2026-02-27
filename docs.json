@@ -38,6 +38,13 @@
                 ]
               },
               {
+                "group": "Nano Banana V2",
+                "icon": "image",
+                "pages": [
+                  "zh/api-reference/images/nano-banana-v2/generation"
+                ]
+              },
+              {
                 "group": "GPT-4o-image",
                 "icon": "image",
                 "pages": [
@@ -156,6 +163,13 @@
                 "icon": "image",
                 "pages": [
                   "en/api-reference/images/nano-banana/generation"
+                ]
+              },
+              {
+                "group": "Nano Banana V2",
+                "icon": "image",
+                "pages": [
+                  "en/api-reference/images/nano-banana-v2/generation"
                 ]
               },
               {
@@ -280,6 +294,13 @@
                 ]
               },
               {
+                "group": "Nano Banana V2",
+                "icon": "image",
+                "pages": [
+                  "ja/api-reference/images/nano-banana-v2/generation"
+                ]
+              },
+              {
                 "group": "GPT-4o-image",
                 "icon": "image",
                 "pages": [
@@ -398,6 +419,13 @@
                 "icon": "image",
                 "pages": [
                   "ko/api-reference/images/nano-banana/generation"
+                ]
+              },
+              {
+                "group": "Nano Banana V2",
+                "icon": "image",
+                "pages": [
+                  "ko/api-reference/images/nano-banana-v2/generation"
                 ]
               },
               {

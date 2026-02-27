@@ -78,19 +78,19 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Response
 
 <ResponseField name="out_task_id" type="string">
-  요청자 작업 ID로, 결과를 조회할 때 사용할 수 있습니다
+  요청자 작업 ID로, 결과 조회에 사용할 수 있습니다
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  초기 상태로, 고정값 `"pending"`입니다
+  초기 상태로, 고정값 `"pending"` 입니다
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  예상 소모 포인트
+  예상 사용 포인트
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  생성 시간 (ISO 형식)
+  생성 시간(ISO 형식)
 </ResponseField>
 
 <RequestExample>
@@ -102,9 +102,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     --data '{
       "model": "nano_banana",
       "params": {
-        "prompt": "달빛 아래 대나무 숲 오솔길",
+        "prompt": "달빛 아래의 대나무숲 산책길",
         "aspect_ratio": "16:9",
-        "format": "png"
+
       },
       "out_task_id": "my_task_123456"
     }'
@@ -118,9 +118,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
       "model": "nano_banana",
       "params": {
-          "prompt": "달빛 아래 대나무 숲 오솔길",
+          "prompt": "달빛 아래의 대나무숲 산책길",
           "aspect_ratio": "16:9",
-          "format": "png"
+  
       },
       "out_task_id": "my_task_123456"
   }
@@ -141,9 +141,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   const payload = {
     model: "nano_banana",
     params: {
-      prompt: "달빛 아래 대나무 숲 오솔길",
+      prompt: "달빛 아래의 대나무숲 산책길",
       aspect_ratio: "16:9",
-      format: "png"
+
     },
     out_task_id: "my_task_123456"
   };
@@ -180,9 +180,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       payload := map[string]interface{}{
           "model": "nano_banana",
           "params": map[string]interface{}{
-              "prompt":       "달빛 아래 대나무 숲 오솔길",
+              "prompt":       "달빛 아래의 대나무숲 산책길",
               "aspect_ratio": "16:9",
-              "format":       "png",
+
           },
           "out_task_id": "my_task_123456",
       }
@@ -219,9 +219,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           {
             "model": "nano_banana",
             "params": {
-              "prompt": "달빛 아래 대나무 숲 오솔길",
+              "prompt": "달빛 아래의 대나무숲 산책길",
               "aspect_ratio": "16:9",
-              "format": "png"
+      
             },
             "out_task_id": "my_task_123456"
           }
@@ -251,9 +251,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   $payload = [
       "model" => "nano_banana",
       "params" => [
-          "prompt" => "달빛 아래 대나무 숲 오솔길",
+          "prompt" => "달빛 아래의 대나무숲 산책길",
           "aspect_ratio" => "16:9",
-          "format" => "png"
+
       ],
       "out_task_id" => "my_task_123456"
   ];
@@ -284,9 +284,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
     model: "nano_banana",
     params: {
-      prompt: "달빛 아래 대나무 숲 오솔길",
+      prompt: "달빛 아래의 대나무숲 산책길",
       aspect_ratio: "16:9",
-      format: "png"
+
     },
     out_task_id: "my_task_123456"
   }
@@ -310,9 +310,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload: [String: Any] = [
       "model": "nano_banana",
       "params": [
-          "prompt": "달빛 아래 대나무 숲 오솔길",
+          "prompt": "달빛 아래의 대나무숲 산책길",
           "aspect_ratio": "16:9",
-          "format": "png"
+  
       ]
   ]
 
@@ -351,9 +351,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           var payload = @"{
               ""model"": ""nano_banana"",
               ""params"": {
-                  ""prompt"": ""달빛 아래 대나무 숲 오솔길"",
+                  ""prompt"": ""달빛 아래의 대나무숲 산책길"",
                   ""aspect_ratio"": ""16:9"",
-                  ""format"": ""png""
+
               }
           }";
 
@@ -385,9 +385,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           const char *payload = "{"
               "\"model\":\"nano_banana\","
               "\"params\":{"
-                  "\"prompt\":\"달빛 아래 대나무 숲 오솔길\","
+                  "\"prompt\":\"달빛 아래의 대나무숲 산책길\","
                   "\"aspect_ratio\":\"16:9\","
-                  "\"format\":\"png\""
+
               "}"
           "}";
 
@@ -425,9 +425,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           NSDictionary *payload = @{
               @"model": @"nano_banana",
               @"params": @{
-                  @"prompt": @"달빛 아래 대나무 숲 오솔길",
+                  @"prompt": @"달빛 아래의 대나무숲 산책길",
                   @"aspect_ratio": @"16:9",
-                  @"format": @"png"
+
               }
           };
 
@@ -472,9 +472,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload = {|{
     "model": "nano_banana",
     "params": {
-      "prompt": "달빛 아래 대나무 숲 오솔길",
+      "prompt": "달빛 아래의 대나무숲 산책길",
       "aspect_ratio": "16:9",
-      "format": "png"
+
     }
   }|}
 
@@ -502,9 +502,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     final payload = {
       'model': 'nano_banana',
       'params': {
-        'prompt': '달빛 아래 대나무 숲 오솔길',
+        'prompt': '달빛 아래의 대나무숲 산책길',
         'aspect_ratio': '16:9',
-        'format': 'png'
+
       }
     };
 
@@ -530,9 +530,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload <- list(
     model = "nano_banana",
     params = list(
-      prompt = "달빛 아래 대나무 숲 오솔길",
+      prompt = "달빛 아래의 대나무숲 산책길",
       aspect_ratio = "16:9",
-      format = "png"
+
     )
   )
 
@@ -567,7 +567,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```json 400
     {
         "statusCode": 400,
-        "message": "요청 파라미터가 유효하지 않습니다",
+        "message": "잘못된 요청 파라미터",
         "ok": false
     }
   ```
@@ -575,7 +575,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 401,
-      "message": "인증 실패입니다. API 키를 확인해 주세요"
+      "message": "인증 실패, API 키를 확인하세요"
     }
   }
   ```
@@ -583,7 +583,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 433,
-      "message": "계정 잔액이 부족합니다. 충전 후 다시 시도해 주세요"
+      "message": "계정 잔액 부족, 충전 후 다시 시도하세요"
     }
   }
   ```
@@ -592,7 +592,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 500,
-      "message": "서버 내부 오류입니다. 잠시 후 다시 시도해 주세요"
+      "message": "서버 내부 오류, 잠시 후 다시 시도하세요"
     }
   }
   ```

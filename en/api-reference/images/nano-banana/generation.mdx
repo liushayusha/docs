@@ -78,7 +78,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Response
 
 <ResponseField name="out_task_id" type="string">
-  Requester task ID, can be used to query the results
+  Initiator's task ID, can be used to query the results
 </ResponseField>
 
 <ResponseField name="status" type="string">
@@ -86,7 +86,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  Estimated credits consumed
+  Estimated credit consumption
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
@@ -102,9 +102,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     --data '{
       "model": "nano_banana",
       "params": {
-        "prompt": "A bamboo forest path under the moonlight",
+        "prompt": "A bamboo path under the moonlight",
         "aspect_ratio": "16:9",
-        "format": "png"
+
       },
       "out_task_id": "my_task_123456"
     }'
@@ -118,9 +118,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
       "model": "nano_banana",
       "params": {
-          "prompt": "A bamboo forest path under the moonlight",
+          "prompt": "A bamboo path under the moonlight",
           "aspect_ratio": "16:9",
-          "format": "png"
+  
       },
       "out_task_id": "my_task_123456"
   }
@@ -141,9 +141,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   const payload = {
     model: "nano_banana",
     params: {
-      prompt: "A bamboo forest path under the moonlight",
+      prompt: "A bamboo path under the moonlight",
       aspect_ratio: "16:9",
-      format: "png"
+
     },
     out_task_id: "my_task_123456"
   };
@@ -180,9 +180,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       payload := map[string]interface{}{
           "model": "nano_banana",
           "params": map[string]interface{}{
-              "prompt":       "A bamboo forest path under the moonlight",
+              "prompt":       "A bamboo path under the moonlight",
               "aspect_ratio": "16:9",
-              "format":       "png",
+
           },
           "out_task_id": "my_task_123456",
       }
@@ -219,9 +219,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           {
             "model": "nano_banana",
             "params": {
-              "prompt": "A bamboo forest path under the moonlight",
+              "prompt": "A bamboo path under the moonlight",
               "aspect_ratio": "16:9",
-              "format": "png"
+      
             },
             "out_task_id": "my_task_123456"
           }
@@ -251,9 +251,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   $payload = [
       "model" => "nano_banana",
       "params" => [
-          "prompt" => "A bamboo forest path under the moonlight",
+          "prompt" => "A bamboo path under the moonlight",
           "aspect_ratio" => "16:9",
-          "format" => "png"
+
       ],
       "out_task_id" => "my_task_123456"
   ];
@@ -284,9 +284,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
     model: "nano_banana",
     params: {
-      prompt: "A bamboo forest path under the moonlight",
+      prompt: "A bamboo path under the moonlight",
       aspect_ratio: "16:9",
-      format: "png"
+
     },
     out_task_id: "my_task_123456"
   }
@@ -310,9 +310,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload: [String: Any] = [
       "model": "nano_banana",
       "params": [
-          "prompt": "A bamboo forest path under the moonlight",
+          "prompt": "A bamboo path under the moonlight",
           "aspect_ratio": "16:9",
-          "format": "png"
+  
       ]
   ]
 
@@ -351,9 +351,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           var payload = @"{
               ""model"": ""nano_banana"",
               ""params"": {
-                  ""prompt"": ""A bamboo forest path under the moonlight"",
+                  ""prompt"": ""A bamboo path under the moonlight"",
                   ""aspect_ratio"": ""16:9"",
-                  ""format"": ""png""
+
               }
           }";
 
@@ -385,9 +385,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           const char *payload = "{"
               "\"model\":\"nano_banana\","
               "\"params\":{"
-                  "\"prompt\":\"A bamboo forest path under the moonlight\","
+                  "\"prompt\":\"A bamboo path under the moonlight\","
                   "\"aspect_ratio\":\"16:9\","
-                  "\"format\":\"png\""
+
               "}"
           "}";
 
@@ -425,9 +425,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           NSDictionary *payload = @{
               @"model": @"nano_banana",
               @"params": @{
-                  @"prompt": @"A bamboo forest path under the moonlight",
+                  @"prompt": @"A bamboo path under the moonlight",
                   @"aspect_ratio": @"16:9",
-                  @"format": @"png"
+
               }
           };
 
@@ -472,9 +472,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload = {|{
     "model": "nano_banana",
     "params": {
-      "prompt": "A bamboo forest path under the moonlight",
+      "prompt": "A bamboo path under the moonlight",
       "aspect_ratio": "16:9",
-      "format": "png"
+
     }
   }|}
 
@@ -502,9 +502,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     final payload = {
       'model': 'nano_banana',
       'params': {
-        'prompt': 'A bamboo forest path under the moonlight',
+        'prompt': 'A bamboo path under the moonlight',
         'aspect_ratio': '16:9',
-        'format': 'png'
+
       }
     };
 
@@ -530,9 +530,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload <- list(
     model = "nano_banana",
     params = list(
-      prompt = "A bamboo forest path under the moonlight",
+      prompt = "A bamboo path under the moonlight",
       aspect_ratio = "16:9",
-      format = "png"
+
     )
   )
 

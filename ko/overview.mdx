@@ -78,60 +78,63 @@ curl --request POST \
 }
 ```
 
-## 지원 모델
+## 지원하는 모델
 
 ### 이미지 생성 시리즈
 
-AIReiter는 텍스트에서 이미지 생성과 이미지에서 이미지 생성 기능을 지원하는 다양한 이미지 생성 모델을 제공합니다:
+AIReiter는 텍스트 기반 이미지 생성과 이미지 변환 기능을 지원하는 다양한 이미지 생성 모델을 제공합니다:
 
 <CardGroup cols={2}>
-  <Card title="GPT-4o Image" icon="image" href="/ko/api-reference/images/gpt-4o/generation">
+  <Card title="GPT-4o Image" icon="image" href="/zh/api-reference/images/gpt-4o/generation">
     OpenAI의 고품질 이미지 생성 모델
   </Card>
-  <Card title="Gemini-2.5-Flash (Nano banana)" icon="image" href="/ko/api-reference/images/nano-banana/generation">
-    Google의 최신 고속 이미지 생성 모델
+  <Card title="Gemini-2.5-Flash (Nano banana)" icon="image" href="/zh/api-reference/images/nano-banana/generation">
+    구글 최신 고속 이미지 생성 모델
   </Card>
-  <Card title="Gemini-3-Pro (Nano banana pro)" icon="image" href="/ko/api-reference/images/gemini-3-pro/generation">
-    Google의 전문 수준 이미지 생성 모델
+  <Card title="Gemini-3-Pro (Nano banana pro)" icon="image" href="/zh/api-reference/images/gemini-3-pro/generation">
+    구글 전문가급 이미지 생성 모델
   </Card>
-  <Card title="Seedream-4.0" icon="image" href="/ko/api-reference/images/seedream-4/generation">
+  <Card title="Nano Banana V2" icon="image" href="/zh/api-reference/images/nano-banana-v2/generation">
+    텍스트-이미지 변환, 이미지 변환, 이미지 편집 등 다양한 생성 모드 지원
+  </Card>
+  <Card title="Seedream-4.0" icon="image" href="/zh/api-reference/images/seedream-4/generation">
     효율적인 이미지 생성 솔루션
   </Card>
-  <Card title="Seedream-4.5" icon="image" href="/ko/api-reference/images/seedream-4.5/generation">
+  <Card title="Seedream-4.5" icon="image" href="/zh/api-reference/images/seedream-4.5/generation">
     Seedream 4.5 버전
   </Card>
-  <Card title="Seedream V5 lite" icon="image" href="/ko/api-reference/images/seedream-v5-lite/generation">
-    Seedream 최신 버전으로, 인터넷 검색 강화 생성을 지원합니다
+  <Card title="Seedream V5 lite" icon="image" href="/zh/api-reference/images/seedream-v5-lite/generation">
+    Seedream 최신 버전, 온라인 검색 강화 생성 지원
   </Card>
 </CardGroup>
 
 ### 비디오 생성 시리즈
 
-텍스트에서 비디오 생성과 이미지에서 비디오 생성 기능을 지원하며, 다양한 해상도 및 길이 옵션을 제공합니다:
+텍스트 기반 비디오 생성 및 이미지 기반 비디오 생성을 지원하며, 다양한 해상도와 길이 옵션을 제공합니다:
 
 <CardGroup cols={2}>
   <Card title="Sora2 [유지보수 중]" icon="wrench">
     🔧 **유지보수 중** - OpenAI Sora2 비디오 생성 모델 (10-15초)
 
-    현재 사용 불가능하며, Sora2 Pro 또는 다른 모델 사용을 권장합니다
+    현재 사용할 수 없으며, Sora2 Pro 또는 다른 모델 사용을 권장합니다
   </Card>
-  <Card title="Sora2 Pro" icon="video" href="/ko/api-reference/videos/sora2-pro/generation">
-    Sora2 전문 버전으로 고화질 해상도를 지원합니다
+  <Card title="Sora2 Pro" icon="video" href="/zh/api-reference/videos/sora2-pro/generation">
+    Sora2 전문 버전, 고화질 해상도 지원
   </Card>
-  <Card title="VEO3.1" icon="video" href="/ko/api-reference/videos/veo3-1/generation">
-    Google VEO3.1 비디오 생성 모델
+  <Card title="VEO3.1" icon="video" href="/zh/api-reference/videos/veo3-1/generation">
+    구글 VEO3.1 비디오 생성 모델
   </Card>
-  <Card title="VEO3.1 Fast" icon="video" href="/ko/api-reference/videos/veo3-1-fast/generation">
-    VEO3.1 고속 버전
+  <Card title="VEO3.1 Fast" icon="video" href="/zh/api-reference/videos/veo3-1-fast/generation">
+    VEO3.1 빠른 버전
   </Card>
-  <Card title="Seedance-1.5-pro" icon="video" href="/ko/api-reference/videos/seedance-1-5-pro/generation">
-    시작과 끝 프레임 제어 및 오디오 생성을 지원합니다 (4-12초)
+  <Card title="Seedance-1.5-pro" icon="video" href="/zh/api-reference/videos/seedance-1-5-pro/generation">
+    시작 및 끝 프레임 제어와 오디오 생성 지원 (4-12초)
   </Card>
-  <Card title="Seedance Pro Fast" icon="video" href="/ko/api-reference/videos/seedance_pro_fast/generation">
-    Seedance 고속 버전으로 시작 프레임 제어를 지원합니다
+  <Card title="Seedance Pro Fast" icon="video" href="/zh/api-reference/videos/seedance_pro_fast/generation">
+    Seedance 빠른 버전, 시작 프레임 제어 지원
   </Card>
-  <Card title="Seedance Pro" icon="video" href="/ko/api-reference/videos/seedance_pro/generation">
-    Seedance 전문 버전으로 시작과 끝 프레임 제어를 지원합니다
+  <Card title="Seedance Pro" icon="video" href="/zh/api-reference/videos/seedance_pro/generation">
+    Seedance 전문 버전, 시작 및 끝 프레임 제어 지원
   </Card>
 </CardGroup>
 
