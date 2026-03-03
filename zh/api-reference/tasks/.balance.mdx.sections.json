@@ -1,7 +1,7 @@
 [
   {
     "id": "__frontmatter__",
-    "hash": "da816de6",
+    "hash": "cd24bbd9",
     "index": 0
   },
   {
@@ -15,13 +15,8 @@
     "index": 2
   },
   {
-    "id": "section-1-body",
-    "hash": "fafc451e",
+    "id": "section-1-response",
+    "hash": "2fb9c88c",
     "index": 3
-  },
-  {
-    "id": "section-2-response",
-    "hash": "64419d1e",
-    "index": 4
   }
 ]

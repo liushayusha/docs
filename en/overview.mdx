@@ -16,7 +16,10 @@ AIReiter is a unified AI content generation API platform that provides image and
     Generate video content using models like Sora2, VEO3
   </Card>
   <Card title="Task Status Query" icon="list-check" href="/en/api-reference/tasks/status">
-    Retrieve the execution status and results of asynchronous tasks
+    Query the execution status and results of asynchronous tasks
+  </Card>
+  <Card title="Check Balance" icon="wallet" href="/en/api-reference/tasks/balance">
+    Check point balance and remaining free quota for each model
   </Card>
   <Card title="Get API Key" icon="key" href={apiKeyUrl}>
     Access the console to get your API Key
@@ -82,7 +85,7 @@ After the task is completed, the response will include URLs of the generated ima
 
 ### Image Generation Series
 
-AIReiter offers multiple image generation models that support text-to-image and image-to-image capabilities:
+AIReiter offers various image generation models, supporting text-to-image and image-to-image capabilities:
 
 <CardGroup cols={2}>
   <Card title="GPT-4o Image" icon="image" href="/en/api-reference/images/gpt-4o/generation">
@@ -92,7 +95,7 @@ AIReiter offers multiple image generation models that support text-to-image and 
     Google's latest fast image generation model
   </Card>
   <Card title="Gemini-3-Pro (Nano banana pro)" icon="image" href="/en/api-reference/images/gemini-3-pro/generation">
-    Google's professional-grade image generation model
+    Google's professional image generation model
   </Card>
   <Card title="Nano Banana V2" icon="image" href="/en/api-reference/images/nano-banana-v2/generation">
     Supports multiple generation modes including text-to-image, image-to-image, and image editing
@@ -104,20 +107,20 @@ AIReiter offers multiple image generation models that support text-to-image and 
     Seedream version 4.5
   </Card>
   <Card title="Seedream V5 lite" icon="image" href="/en/api-reference/images/seedream-v5-lite/generation">
-    Latest Seedream version, supports augmented generation with internet search
+    Latest Seedream version, supports internet search enhanced generation
   </Card>
 </CardGroup>
 
 ### Video Generation Series
 
-Supports text-to-video and image-to-video generation with various resolution and duration options:
+Supports text-to-video and image-to-video generation, offering multiple resolution and duration options:
 
 <CardGroup cols={2}>
   <Card title="Sora2" icon="video" href="/en/api-reference/videos/sora2/generation">
     OpenAI Sora2 video generation model (10-15 seconds)
   </Card>
   <Card title="Sora2 Pro" icon="video" href="/en/api-reference/videos/sora2-pro/generation">
-    Sora2 professional edition, supports HD resolution
+    Sora2 Pro, supports HD resolution
   </Card>
   <Card title="VEO3.1" icon="video" href="/en/api-reference/videos/veo3-1/generation">
     Google VEO3.1 video generation model
@@ -132,7 +135,7 @@ Supports text-to-video and image-to-video generation with various resolution and
     Seedance fast version, supports start frame control
   </Card>
   <Card title="Seedance Pro" icon="video" href="/en/api-reference/videos/seedance_pro/generation">
-    Seedance professional edition, supports start/end frame control
+    Seedance Pro, supports start/end frame control
   </Card>
 </CardGroup>
 

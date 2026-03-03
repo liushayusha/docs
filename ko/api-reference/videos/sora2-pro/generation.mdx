@@ -33,37 +33,37 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  모델 매개변수 객체
+  모델 파라미터 객체
 
   <Expandable title="params 객체 속성">
     <ParamField body="prompt" type="string" required>
-      비디오 생성을 위한 텍스트 설명
+      비디오 생성용 텍스트 설명
 
       제한 없음
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      비디오 생성을 위한 참조 이미지 URL(첫 프레임)
+      참조 이미지 URL, 비디오 생성용(첫 프레임)
 
-      * 단일 이미지 지원
+      * 단일 이미지만 지원
       * 공개적으로 접근 가능한 URL 지원
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="16:9">
       비디오 가로 세로 비율
 
-      지원되는 가로 세로 비율:
+      지원하는 비율:
 
-      * `16:9` - 가로 (기본값)
+      * `16:9` - 가로(기본값)
       * `9:16` - 세로
     </ParamField>
 
     <ParamField body="video_length" type="string">
       비디오 길이(초)
 
-      지원 길이:
+      지원하는 길이:
 
-      * `15` - 15초 (기본값)(HD)
+      * `15` - 15초(기본값)(HD)
       * `25` - 25초
     </ParamField>
 
@@ -71,9 +71,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  발신자 작업 ID
+  요청자 작업 ID
 
-  사용자 정의 작업 식별자, 필수
+  사용자가 정의하는 작업 식별자, 필수
 </ParamField>
 
 ## Response

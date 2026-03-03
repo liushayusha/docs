@@ -133,7 +133,8 @@
             "group": "任务管理",
             "icon": "list-check",
             "pages": [
-              "zh/api-reference/tasks/status"
+              "zh/api-reference/tasks/status",
+              "zh/api-reference/tasks/balance"
             ]
           }
         ]
@@ -261,7 +262,8 @@
             "group": "Task Management",
             "icon": "list-check",
             "pages": [
-              "en/api-reference/tasks/status"
+              "en/api-reference/tasks/status",
+              "en/api-reference/tasks/balance"
             ]
           }
         ]
@@ -389,7 +391,8 @@
             "group": "タスク管理",
             "icon": "list-check",
             "pages": [
-              "ja/api-reference/tasks/status"
+              "ja/api-reference/tasks/status",
+              "ja/api-reference/tasks/balance"
             ]
           }
         ]
@@ -517,7 +520,8 @@
             "group": "작업 관리",
             "icon": "list-check",
             "pages": [
-              "ko/api-reference/tasks/status"
+              "ko/api-reference/tasks/status",
+              "ko/api-reference/tasks/balance"
             ]
           }
         ]

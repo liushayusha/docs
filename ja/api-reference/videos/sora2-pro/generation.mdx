@@ -33,7 +33,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  モデルパラメーターオブジェクト
+  モデルパラメータオブジェクト
 
   <Expandable title="params オブジェクトのプロパティ">
     <ParamField body="prompt" type="string" required>
@@ -43,14 +43,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      参考画像のURL（動画生成のための最初のフレーム）
+      参考画像のURL（テキストから動画生成のための最初のフレーム）
 
       * 単一画像のみ対応
-      * 公開アクセス可能なURLをサポート
+      * 公開されてアクセス可能なURLがサポートされる
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="16:9">
-      動画のアスペクト比
+      ビデオのアスペクト比
 
       対応アスペクト比：
 
@@ -59,7 +59,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="video_length" type="string">
-      動画の長さ（秒）
+      ビデオの長さ（秒）
 
       対応長さ：
 
@@ -71,9 +71,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発注者タスクID
+  発起者のタスクID
 
-  ユーザー定義のタスク識別子、必須
+  ユーザーがカスタマイズするタスク識別子、必須
 </ParamField>
 
 ## Response

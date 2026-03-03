@@ -1,0 +1,297 @@
+---
+title: '残高照会'
+description: |
+    - ユーザーのポイント残高を照会する
+    - 各モデルの無料利用可能回数を取得する
+api: 'GET https://aireiter.com/api/openapi/balance'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  すべてのエンドポイントはBearer Tokenによる認証が必要です
+
+  APIキーの取得方法：
+
+  <a href={apiKeyUrl} target="_blank">API Key 管理ページ</a> にアクセスしてAPIキーを取得してください
+
+  リクエストヘッダーに次を追加して使用します：
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Response
+
+<ResponseField name="statusCode" type="number">
+  HTTPステータスコード。200は成功を表します
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  メッセージ。成功時は空文字列です
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  レスポンスデータ
+
+  <Expandable title="プロパティ">
+    <ResponseField name="credits" type="number">
+      ユーザーの現在のクレジット残高
+    </ResponseField>
+
+    <ResponseField name="free_quotas" type="array">
+      各モデルの無料クォータ情報
+
+      <Expandable title="配列要素のプロパティ">
+        <ResponseField name="model_key" type="string">
+          モデル識別子
+        </ResponseField>
+
+        <ResponseField name="total" type="number">
+          無料クォータの合計回数
+        </ResponseField>
+
+        <ResponseField name="used" type="number">
+          使用済み回数
+        </ResponseField>
+
+        <ResponseField name="remaining" type="number">
+          残りの利用可能回数
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="ok" type="boolean">
+  リクエストが成功したかどうか
+</ResponseField>
+
+<RequestExample>
+  ```bash cURL
+  curl --request GET \
+    --url 'https://aireiter.com/api/openapi/balance' \
+    --header 'Authorization: Bearer <token>'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/balance"
+
+  headers = {
+      "Authorization": "Bearer <token>"
+  }
+
+  response = requests.get(url, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/balance";
+
+  const headers = {
+    "Authorization": "Bearer <token>"
+  };
+
+  fetch(url, {
+    method: "GET",
+    headers: headers
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/balance"
+
+      req, _ := http.NewRequest("GET", url, nil)
+      req.Header.Set("Authorization", "Bearer <token>")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.io.BufferedReader;
+  import java.io.InputStreamReader;
+  import java.net.HttpURLConnection;
+  import java.net.URL;
+
+  public class Main {
+      public static void main(String[] args) {
+          try {
+              URL url = new URL("https://aireiter.com/api/openapi/balance");
+              HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+              conn.setRequestMethod("GET");
+              conn.setRequestProperty("Authorization", "Bearer <token>");
+
+              BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+              String line;
+              StringBuilder response = new StringBuilder();
+              while ((line = br.readLine()) != null) {
+                  response.append(line);
+              }
+              br.close();
+
+              System.out.println(response.toString());
+          } catch (Exception e) {
+              e.printStackTrace();
+          }
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://aireiter.com/api/openapi/balance";
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+      "Authorization: Bearer <token>"
+  ));
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url = URI.parse("https://aireiter.com/api/openapi/balance")
+
+  http = Net::HTTP.new(url.host, url.port)
+  request = Net::HTTP::Get.new(url.path)
+  request["Authorization"] = "Bearer <token>"
+
+  response = http.request(request)
+  puts response.body
+  ```
+
+  ```swift Swift
+  import Foundation
+
+  let url = URL(string: "https://aireiter.com/api/openapi/balance")!
+  var request = URLRequest(url: url)
+  request.httpMethod = "GET"
+  request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      if let error = error {
+          print("Error: \(error)")
+          return
+      }
+
+      if let data = data, let responseString = String(data: data, encoding: .utf8) {
+          print(responseString)
+      }
+  }
+
+  task.resume()
+  ```
+
+  ```csharp C#
+  using System;
+  using System.Net.Http;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url = "https://aireiter.com/api/openapi/balance";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+          var response = await client.GetAsync(url);
+          var result = await response.Content.ReadAsStringAsync();
+
+          Console.WriteLine(result);
+      }
+  }
+  ```
+
+  ```dart Dart
+  import 'dart:convert';
+  import 'package:http/http.dart' as http;
+
+  void main() async {
+    final url = Uri.parse('https://aireiter.com/api/openapi/balance');
+
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer <token>',
+      },
+    );
+
+    print(response.body);
+  }
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+  {
+    "statusCode": 200,
+    "message": "",
+    "data": {
+      "credits": 500,
+      "free_quotas": [
+        {
+          "model_key": "nano_banana_v2",
+          "total": 10,
+          "used": 3,
+          "remaining": 7
+        }
+      ]
+    },
+    "ok": true
+  }
+  ```
+
+  ```json 401
+  {
+    "statusCode": 401,
+    "message": "Unauthorized",
+    "ok": false
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "サーバー内部エラーです。しばらくしてからもう一度お試しください"
+    }
+  }
+  ```
+</ResponseExample>
