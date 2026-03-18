@@ -1,0 +1,1015 @@
+---
+title: 'OpenAI 채팅 보완 인터페이스'
+description: |
+    - OpenAI Chat Completions API 형식과 완전 호환
+    - 다중 회차 대화, 도구 호출, 구조화 출력, 스트리밍 응답 지원
+    - OpenAI SDK의 `baseURL`을 바로 교체 가능하며, 다른 코드는 수정할 필요 없음
+api: 'POST https://aireiter.com/api/v1/chat/completions'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  API 키, Bearer Token 형식
+
+  API Key 받기:
+
+  <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a> 에서 API Key를 받으세요
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  모델 이름
+
+  **OpenAI 호환 모델(도구 호출에 권장):**
+  * `gpt-4o-mini` — 경량 빠름, 빈번한 간단한 작업에 적합
+  * `gpt-4o` — 종합 추천, 성능과 비용 균형
+  * `gpt-5.2` — 고성능 버전, **도구 호출 완전 지원**
+  * 더 많은 모델은 `GET /api/v1/models` 참고
+
+  **Claude 모델(Anthropic 프로토콜 중계):**
+  * `claude-haiku-4-5-20251001` — 경량 빠름
+  * `claude-sonnet-4-5-20250929` — 종합 추천
+  * `claude-sonnet-4-6` — Sonnet 새 버전
+  * `claude-opus-4-5-20251101` — 플래그십 추론 모델
+  * `claude-opus-4-6` — Opus 새 버전, 가장 강력함
+
+  전체 모델 목록은 `GET /api/v1/models` 확인
+</ParamField>
+
+<ParamField body="messages" type="array" required>
+  메시지 목록
+
+  모델은 메시지 이력을 기반으로 다음 응답을 생성합니다. 각 메시지는 `role`과 `content`를 포함합니다.
+
+  <Expandable title="필드 설명">
+    <ParamField body="role" type="string" required>
+      역할 타입
+
+      * `system` — 시스템 프롬프트(메시지 목록에서 추출해 별도로 처리)
+      * `user` — 사용자 메시지
+      * `assistant` — AI 응답(다중 대화에 사용)
+    </ParamField>
+
+    <ParamField body="content" type="string" required>
+      메시지 내용, 순수 텍스트 문자열
+    </ParamField>
+  </Expandable>
+
+  **순수 텍스트 메시지:**
+
+  ```json theme={null}
+  [{"role": "user", "content": "안녕하세요"}]
+  ```
+
+  **다중 대화:**
+
+  ```json theme={null}
+  [
+    {"role": "system",    "content": "당신은 전문 코드 리뷰어입니다."},
+    {"role": "user",      "content": "이 코드를 봐주세요."},
+    {"role": "assistant", "content": "분석해 보겠습니다..."},
+    {"role": "user",      "content": "성능 문제는 없나요?"}
+  ]
+  ```
+
+  **다중 도구 호출:**
+
+  ```json theme={null}
+  [
+    {"role": "user", "content": "오늘 베이징 날씨 어때?"},
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "call_001",
+          "type": "function",
+          "function": {"name": "get_weather", "arguments": "{\"city\": \"베이징\"}"}
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_001",
+      "content": "베이징: 25°C, 맑음"
+    }
+  ]
+  ```
+</ParamField>
+
+<ParamField body="max_tokens" type="integer">
+  최대 출력 토큰 수
+
+  모델이 최대 생성할 토큰 수를 제어하며, 모델은 상한에 도달하기 전에 자연스럽게 종료할 수 있습니다. 최소값: `1`.
+  기본값은 제한 없음(모델 컨텍스트 창 크기에 제한됨).
+</ParamField>
+
+<ParamField body="max_completion_tokens" type="integer">
+  최대 출력 토큰 수(`max_tokens`의 새 이름)
+
+  `max_tokens`와 완전히 동일하며 둘 중 하나만 제공하면 되고, `max_tokens`가 우선합니다.
+</ParamField>
+
+<ParamField body="stream" type="boolean">
+  스트리밍 출력 활성화 여부
+
+  `true`로 설정 시 SSE(Server-Sent Events)를 통해 실시간 스트리밍으로 반환됩니다. **기본값 `true`**. 스트리밍이 아닌 응답을 원하면 `"stream": false`를 명시적으로 전달해야 합니다.
+
+  `false`로 설정 시, 생성 완료 후 한 번에 전체 응답을 반환합니다.
+</ParamField>
+
+<ParamField body="temperature" type="number">
+  온도, 범위 `0–2`
+
+  * 낮은 값(`0.2` 등): 출력이 더 확정적이고 보수적임
+  * 높은 값(`0.8` 등): 출력이 더 무작위적이고 창의적임
+
+  기본값은 `1.0`입니다. `top_p`와 동시에 사용하는 것은 권장하지 않습니다.
+</ParamField>
+
+<ParamField body="top_p" type="number">
+  핵심 샘플링 매개변수, 범위 `0–1`
+
+  누적 확률이 `top_p`에 도달하는 토큰 집합에서 샘플링합니다. 기본값은 `1.0`.
+  `temperature`와 함께 사용하는 것은 권장하지 않습니다.
+</ParamField>
+
+<ParamField body="frequency_penalty" type="number">
+  빈도 페널티, 범위 `-2.0–2.0`
+
+  양수는 이미 생성된 텍스트에서 토큰의 출현 빈도에 따라 페널티를 부과하여 반복 출력 확률을 줄입니다. 기본값은 `0`입니다.
+</ParamField>
+
+<ParamField body="presence_penalty" type="number">
+  존재 페널티, 범위 `-2.0–2.0`
+
+  양수는 이미 등장한 토큰에 페널티를 적용하여 모델이 새로운 주제를 탐색하도록 유도합니다. 기본값은 `0`입니다.
+</ParamField>
+
+<ParamField body="seed" type="integer">
+  랜덤 시드
+
+  설정 시 동일한 시드와 동일한 요청 파라미터에 대해 가능한 한 결정적 출력을 생성하여 결과 재현성을 확보합니다.
+</ParamField>
+
+<ParamField body="stop" type="string | array">
+  중지 시퀀스
+
+  이 문자열(또는 배열 내 임의의 문자열)이 나오면 모델은 즉시 생성 중지합니다. 최대 4개까지 설정 가능.
+
+  ```json theme={null}
+  {"stop": ["\n\nUser:", "###END###"]}
+  ```
+</ParamField>
+
+<ParamField body="tools" type="array">
+  도구 정의 목록
+
+  모델이 호출할 수 있는 함수 도구들을 정의하며, 각 도구는 이름, 설명 및 파라미터 JSON 스키마를 포함합니다.
+
+  ```json theme={null}
+  {
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "get_weather",
+          "description": "지정 도시의 현재 날씨를 가져옵니다",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "city": {
+                "type": "string",
+                "description": "도시 이름, 예: 베이징"
+              },
+              "unit": {
+                "type": "string",
+                "enum": ["celsius", "fahrenheit"]
+              }
+            },
+            "required": ["city"]
+          }
+        }
+      }
+    ]
+  }
+  ```
+</ParamField>
+
+<ParamField body="tool_choice" type="string | object">
+  도구 선택 전략
+
+  * `"auto"` — 모델이 도구 호출 여부 스스로 결정 (기본값)
+  * `"required"` — 특정 도구 호출을 모델에 강제
+  * `"none"` — 도구 호출을 금지
+  * `{"type": "function", "function": {"name": "get_weather"}}` — 지정 도구 강제 호출
+
+  ```json theme={null}
+  {"tool_choice": "required"}
+  ```
+</ParamField>
+
+<ParamField body="parallel_tool_calls" type="boolean">
+  병렬 도구 호출 허용 여부
+
+  `false`로 설정 시 한 번에 하나의 도구만 호출합니다. 기본값은 `true`(병렬 허용).
+</ParamField>
+
+<ParamField body="response_format" type="object">
+  응답 형식
+
+  모델의 출력 형식을 제어합니다.
+
+  <Expandable title="필드 설명">
+    <ParamField body="type" type="string" required>
+      형식 유형
+
+      * `"text"` — 일반 텍스트 (기본값)
+      * `"json_object"` — JSON 객체, 모델이 유효한 JSON 출력
+      * `"json_schema"` — 지정된 JSON 스키마에 엄격히 따름
+    </ParamField>
+
+    <ParamField body="json_schema" type="object">
+      `type`이 `"json_schema"`일 때 필수
+
+      <Expandable title="필드 설명">
+        <ParamField body="name" type="string" required>
+          스키마 이름
+        </ParamField>
+        <ParamField body="schema" type="object" required>
+          JSON 스키마 정의, 모델은 이 구조를 엄격히 준수
+        </ParamField>
+        <ParamField body="strict" type="boolean">
+          엄격 모드 활성화 여부, 기본값 `true`
+        </ParamField>
+      </Expandable>
+    </ParamField>
+  </Expandable>
+
+  **JSON 객체 모드:**
+
+  ```json theme={null}
+  {"response_format": {"type": "json_object"}}
+  ```
+
+  **JSON 스키마 모드:**
+
+  ```json theme={null}
+  {
+    "response_format": {
+      "type": "json_schema",
+      "json_schema": {
+        "name": "analysis_result",
+        "strict": true,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "summary":    {"type": "string"},
+            "score":      {"type": "number"},
+            "tags":       {"type": "array", "items": {"type": "string"}}
+          },
+          "required": ["summary", "score", "tags"]
+        }
+      }
+    }
+  }
+  ```
+</ParamField>
+
+<ParamField body="reasoning_effort" type="string">
+  추론 강도
+
+  추론을 지원하는 모델(예: `gpt-5.2` 이상)에 적용되며, 모델의 추론 깊이를 제어합니다.
+
+  * `"low"` — 빠른 추론으로 토큰 절약
+  * `"medium"` — 균형 잡힌 추론
+  * `"high"` — 심층 추론으로 더 정확하지만 더 많은 토큰 소모
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">
+  완성의 고유 식별자
+
+  예시: `"chatcmpl-9vKqnMf3Ax8ZpRdTw2LsYe7b"`
+</ResponseField>
+
+<ResponseField name="object" type="string">
+  객체 유형, 고정값은 `"chat.completion"`(비스트리밍) 또는 `"chat.completion.chunk"`(스트리밍)
+</ResponseField>
+
+<ResponseField name="created" type="integer">
+  생성 시간, Unix 타임스탬프(초)
+</ResponseField>
+
+<ResponseField name="model" type="string">
+  요청 시 전달한 모델 이름
+</ResponseField>
+
+<ResponseField name="task_id" type="string">
+  청구 작업 ID(프로젝트 확장 필드), 이번 호출의 포인트 사용 기록 추적용
+</ResponseField>
+
+<ResponseField name="choices" type="array">
+  생성 결과 배열(항상 1개 항목)
+
+  <Expandable title="필드 설명">
+    <ResponseField name="index" type="integer">
+      결과 인덱스, 고정값 `0`
+    </ResponseField>
+
+    <ResponseField name="message" type="object">
+      **비스트리밍 응답**에서의 완전한 메시지 객체
+
+      * `role` — 고정값 `"assistant"`
+      * `content` — 텍스트 내용(툴 호출 시는 `null`)
+      * `tool_calls` — 툴 호출 목록(툴 호출이 있을 때 존재)
+    </ResponseField>
+
+    <ResponseField name="delta" type="object">
+      **스트리밍 응답**에서의 증분 내용
+
+      * 첫 프레임: `{"role": "assistant"}`
+      * 텍스트 프레임: `{"content": "..."}`
+      * 툴 호출 프레임: `{"tool_calls": [{"index": 0, "id": "...", "type": "function", "function": {"name": "...", "arguments": ""}}]}`
+      * 종료 프레임: `{}`
+    </ResponseField>
+
+    <ResponseField name="finish_reason" type="string">
+      중단 이유
+
+      * `"stop"` — 자연 종료
+      * `"length"` — `max_tokens` 한도 도달
+      * `"tool_calls"` — 모델이 툴 호출 요청
+      * `"content_filter"` — 내용 필터링
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="usage" type="object">
+  토큰 사용 통계(비스트리밍은 응답 본문 최상단, 스트리밍은 마지막 프레임)
+
+  <Expandable title="필드 설명">
+    <ResponseField name="prompt_tokens" type="integer">
+      입력 토큰 수(시스템 프롬프트 포함)
+    </ResponseField>
+
+    <ResponseField name="completion_tokens" type="integer">
+      출력 토큰 수
+    </ResponseField>
+
+    <ResponseField name="total_tokens" type="integer">
+      총 토큰 수
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+  ```bash cURL theme={null}
+  curl https://aireiter.com/api/v1/chat/completions \
+    -H "Authorization: Bearer $API_KEY" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "model": "claude-sonnet-4-5-20250929",
+      "messages": [
+        {"role": "user", "content": "你好，世界"}
+      ]
+    }'
+  ```
+
+  ```python Python theme={null}
+  from openai import OpenAI
+
+  client = OpenAI(
+      api_key="YOUR_API_KEY",
+      base_url="https://aireiter.com/api/v1"
+  )
+
+  response = client.chat.completions.create(
+      model="claude-sonnet-4-5-20250929",
+      messages=[
+          {"role": "user", "content": "你好，世界"}
+      ]
+  )
+
+  print(response.choices[0].message.content)
+  ```
+
+  ```javascript JavaScript theme={null}
+  import OpenAI from 'openai';
+
+  const client = new OpenAI({
+    apiKey: process.env.API_KEY,
+    baseURL: 'https://aireiter.com/api/v1'
+  });
+
+  const response = await client.chat.completions.create({
+    model: 'claude-sonnet-4-5-20250929',
+    messages: [
+      { role: 'user', content: '你好，世界' }
+    ]
+  });
+
+  console.log(response.choices[0].message.content);
+  ```
+
+  ```go Go theme={null}
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+      "os"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/v1/chat/completions"
+
+      payload := map[string]interface{}{
+          "model": "claude-sonnet-4-5-20250929",
+          "messages": []map[string]string{
+              {"role": "user", "content": "你好，世界"},
+          },
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer "+os.Getenv("API_KEY"))
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java theme={null}
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url    = "https://aireiter.com/api/v1/chat/completions";
+          String apiKey = System.getenv("API_KEY");
+
+          String payload = """
+          {
+            "model": "claude-sonnet-4-5-20250929",
+            "messages": [
+              {"role": "user", "content": "你好，世界"}
+            ]
+          }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer " + apiKey)
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP theme={null}
+  <?php
+
+  $url    = "https://aireiter.com/api/v1/chat/completions";
+  $apiKey = getenv('API_KEY');
+
+  $payload = [
+      "model"    => "claude-sonnet-4-5-20250929",
+      "messages" => [
+          ["role" => "user", "content" => "你好，世界"]
+      ]
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer " . $apiKey,
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby theme={null}
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url     = URI("https://aireiter.com/api/v1/chat/completions")
+  api_key = ENV['API_KEY']
+
+  payload = {
+    model:    "claude-sonnet-4-5-20250929",
+    messages: [{ role: "user", content: "你好，世界" }]
+  }
+
+  http         = Net::HTTP.new(url.host, url.port)
+  http.use_ssl = true
+
+  request                   = Net::HTTP::Post.new(url)
+  request["Authorization"]  = "Bearer #{api_key}"
+  request["Content-Type"]   = "application/json"
+  request.body              = payload.to_json
+
+  puts http.request(request).body
+  ```
+
+  ```swift Swift theme={null}
+  import Foundation
+
+  let url    = URL(string: "https://aireiter.com/api/v1/chat/completions")!
+  let apiKey = ProcessInfo.processInfo.environment["API_KEY"] ?? ""
+
+  let payload: [String: Any] = [
+      "model":    "claude-sonnet-4-5-20250929",
+      "messages": [["role": "user", "content": "你好，世界"]]
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json",  forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  URLSession.shared.dataTask(with: request) { data, _, _ in
+      if let data = data {
+          print(String(data: data, encoding: .utf8) ?? "")
+      }
+  }.resume()
+  ```
+
+  ```csharp C# theme={null}
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url    = "https://aireiter.com/api/v1/chat/completions";
+          var apiKey = Environment.GetEnvironmentVariable("API_KEY");
+
+          var payload = @"{
+              ""model"": ""claude-sonnet-4-5-20250929"",
+              ""messages"": [
+                  {""role"": ""user"", ""content"": ""你好，世界""}
+              ]
+          }";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
+
+          var content  = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          Console.WriteLine(await response.Content.ReadAsStringAsync());
+      }
+  }
+  ```
+
+  ```c C theme={null}
+  #include <stdio.h>
+  #include <curl/curl.h>
+  #include <stdlib.h>
+  #include <string.h>
+
+  int main(void) {
+      CURL *curl;
+      const char *api_key = getenv("API_KEY");
+
+      curl_global_init(CURL_GLOBAL_DEFAULT);
+      curl = curl_easy_init();
+
+      if (curl) {
+          const char *payload =
+              "{\"model\":\"claude-sonnet-4-5-20250929\","
+              "\"messages\":[{\"role\":\"user\",\"content\":\"你好，世界\"}]}";
+
+          char auth_header[256];
+          snprintf(auth_header, sizeof(auth_header), "Authorization: Bearer %s", api_key);
+
+          struct curl_slist *headers = NULL;
+          headers = curl_slist_append(headers, auth_header);
+          headers = curl_slist_append(headers, "Content-Type: application/json");
+
+          curl_easy_setopt(curl, CURLOPT_URL, "https://aireiter.com/api/v1/chat/completions");
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
+          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+          curl_easy_perform(curl);
+          curl_slist_free_all(headers);
+          curl_easy_cleanup(curl);
+      }
+
+      curl_global_cleanup();
+      return 0;
+  }
+  ```
+
+  ```dart Dart theme={null}
+  import 'dart:convert';
+  import 'dart:io';
+  import 'package:http/http.dart' as http;
+
+  void main() async {
+    final url    = Uri.parse('https://aireiter.com/api/v1/chat/completions');
+    final apiKey = Platform.environment['API_KEY']!;
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer $apiKey',
+        'Content-Type':  'application/json',
+      },
+      body: jsonEncode({
+        'model':    'claude-sonnet-4-5-20250929',
+        'messages': [{'role': 'user', 'content': '你好，世界'}],
+      }),
+    );
+
+    print(response.body);
+  }
+  ```
+
+  ```r R theme={null}
+  library(httr)
+  library(jsonlite)
+
+  url     <- "https://aireiter.com/api/v1/chat/completions"
+  api_key <- Sys.getenv("API_KEY")
+
+  response <- POST(
+    url,
+    add_headers(
+      `Authorization` = paste("Bearer", api_key),
+      `Content-Type`  = "application/json"
+    ),
+    body = toJSON(list(
+      model    = "claude-sonnet-4-5-20250929",
+      messages = list(list(role = "user", content = "你好，世界"))
+    ), auto_unbox = TRUE),
+    encode = "raw"
+  )
+
+  cat(content(response, "text"))
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200 비스트리밍 theme={null}
+  {
+    "id": "chatcmpl-9vKqnMf3Ax8ZpRdTw2LsYe7b",
+    "object": "chat.completion",
+    "created": 1741680000,
+    "model": "claude-sonnet-4-5-20250929",
+    "task_id": "task_abc123",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "안녕하세요! 무엇을 도와드릴까요?"
+        },
+        "finish_reason": "stop"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 12,
+      "completion_tokens": 15,
+      "total_tokens": 27
+    }
+  }
+  ```
+
+  ```json 200 툴 호출 theme={null}
+  {
+    "id": "chatcmpl-9vKqnMf3Ax8ZpRdTw2LsYe7b",
+    "object": "chat.completion",
+    "created": 1741680000,
+    "model": "claude-sonnet-4-5-20250929",
+    "task_id": "task_abc123",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": null,
+          "tool_calls": [
+            {
+              "id": "call_01A09q90qw90lq917835lq9",
+              "type": "function",
+              "function": {
+                "name": "get_weather",
+                "arguments": "{\"city\": \"베이징\"}"
+              }
+            }
+          ]
+        },
+        "finish_reason": "tool_calls"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 85,
+      "completion_tokens": 22,
+      "total_tokens": 107
+    }
+  }
+  ```
+
+  ```json 400 theme={null}
+  {
+    "error": {
+      "message": "messages는 필수이며 비어있을 수 없습니다",
+      "type": "invalid_request_error",
+      "param": null,
+      "code": null
+    }
+  }
+  ```
+
+  ```json 401 theme={null}
+  {
+    "error": {
+      "message": "유효하지 않은 API 키",
+      "type": "invalid_request_error",
+      "param": null,
+      "code": null
+    }
+  }
+  ```
+
+  ```json 402 theme={null}
+  {
+    "error": {
+      "message": "포인트 부족",
+      "type": "invalid_request_error",
+      "param": null,
+      "code": null
+    }
+  }
+  ```
+
+  ```json 404 theme={null}
+  {
+    "error": {
+      "message": "모델 'xxx'을(를) 찾을 수 없습니다",
+      "type": "invalid_request_error",
+      "param": null,
+      "code": null
+    }
+  }
+  ```
+
+  ```json 502 theme={null}
+  {
+    "error": {
+      "message": "모든 공급자 실패",
+      "type": "invalid_request_error",
+      "param": null,
+      "code": null
+    }
+  }
+  ```
+</ResponseExample>
+
+## 사용 예제
+
+### 기본 대화
+
+```python theme={null}
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://aireiter.com/api/v1"
+)
+
+response = client.chat.completions.create(
+    model="claude-sonnet-4-5-20250929",
+    messages=[
+        {"role": "user", "content": "Python으로 퀵정렬 구현하기"}
+    ]
+)
+
+print(response.choices[0].message.content)
+```
+
+### 시스템 프롬프트 + 다중 라운드 대화
+
+```python theme={null}
+response = client.chat.completions.create(
+    model="claude-sonnet-4-5-20250929",
+    messages=[
+        {"role": "system",    "content": "당신은 숙련된 Python 개발 전문가로, 코드 리뷰와 성능 최적화에 능숙합니다."},
+        {"role": "user",      "content": "GIL이란 무엇인가요?"},
+        {"role": "assistant", "content": "GIL(글로벌 인터프리터 락)은..."},
+        {"role": "user",      "content": "GIL을 우회해 진정한 병렬 처리를 구현하는 방법은?"}
+    ],
+    temperature=0.3
+)
+```
+
+### 스트리밍 응답
+
+```python theme={null}
+stream = client.chat.completions.create(
+    model="claude-sonnet-4-5-20250929",
+    messages=[{"role": "user", "content": "양자 컴퓨팅에 관한 기술 블로그 작성"}],
+    stream=True
+)
+
+for chunk in stream:
+    delta = chunk.choices[0].delta
+    if delta.content:
+        print(delta.content, end="", flush=True)
+```
+
+### 도구 호출 (완전한 다중 라운드 프로세스)
+
+```python theme={null}
+import json
+
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "get_stock_price",
+            "description": "주식 실시간 가격 가져오기",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "ticker": {"type": "string", "description": "주식 코드 예: AAPL"}
+                },
+                "required": ["ticker"]
+            }
+        }
+    }
+]
+
+messages = [{"role": "user", "content": "테슬라 주가가 얼마인가요?"}]
+
+# 1라운드: 모델이 도구 호출 결정
+response = client.chat.completions.create(
+    model="claude-sonnet-4-5-20250929",
+    messages=messages,
+    tools=tools
+)
+
+# 도구 호출 처리
+if response.choices[0].finish_reason == "tool_calls":
+    tool_call = response.choices[0].message.tool_calls[0]
+
+    # 도구 실행(비즈니스 로직)
+    tool_result = {"price": 245.80, "currency": "USD"}
+
+    # 2라운드: 결과를 모델에 반환
+    messages += [
+        response.choices[0].message,
+        {
+            "role": "tool",
+            "tool_call_id": tool_call.id,
+            "content": json.dumps(tool_result)
+        }
+    ]
+
+    final = client.chat.completions.create(
+        model="claude-sonnet-4-5-20250929",
+        messages=messages,
+        tools=tools
+    )
+    print(final.choices[0].message.content)
+```
+
+### 구조화된 출력 (JSON 스키마)
+
+```python theme={null}
+response = client.chat.completions.create(
+    model="claude-sonnet-4-5-20250929",
+    messages=[
+        {"role": "user", "content": "다음 제품 리뷰 감정 분석: '이 이어폰 음질이 훌륭하지만, 배터리 지속시간은 보통입니다'"}
+    ],
+    response_format={
+        "type": "json_schema",
+        "json_schema": {
+            "name": "sentiment_analysis",
+            "strict": True,
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "sentiment":   {"type": "string", "enum": ["positive", "negative", "mixed"]},
+                    "score":       {"type": "number", "description": "감정 점수 -1.0에서 1.0까지"},
+                    "highlights":  {"type": "array", "items": {"type": "string"}}
+                },
+                "required": ["sentiment", "score", "highlights"]
+            }
+        }
+    }
+)
+
+result = json.loads(response.choices[0].message.content)
+print(result)
+# {"sentiment": "mixed", "score": 0.2, "highlights": ["음질 훌륭", "배터리 지속시간 보통"]}
+```
+
+### 샘플링 매개변수 제어
+
+```python theme={null}
+# 창의적 글쓰기: 높은 온도 + 빈도 페널티
+response = client.chat.completions.create(
+    model="claude-sonnet-4-5-20250929",
+    messages=[{"role": "user", "content": "가을에 관한 현대시 한 편 써줘"}],
+    temperature=0.9,
+    frequency_penalty=0.5,
+    presence_penalty=0.3
+)
+
+# 정확한 출력: 낮은 온도 + 고정 시드
+response = client.chat.completions.create(
+    model="claude-sonnet-4-5-20250929",
+    messages=[{"role": "user", "content": "1234 × 5678 계산 결과"}],
+    temperature=0.0,
+    seed=42
+)
+```
+
+## 스트리밍 응답 이벤트 형식
+
+```text theme={null}
+data: {"id":"chatcmpl-xxx","object":"chat.completion.chunk","created":1741680000,"model":"claude-sonnet-4-5-20250929","task_id":"task_abc123","choices":[{"index":0,"delta":{"role":"assistant"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-xxx","object":"chat.completion.chunk","created":1741680000,"model":"claude-sonnet-4-5-20250929","choices":[{"index":0,"delta":{"content":"안녕하세요"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-xxx","object":"chat.completion.chunk","created":1741680000,"model":"claude-sonnet-4-5-20250929","choices":[{"index":0,"delta":{"content":"!"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-xxx","object":"chat.completion.chunk","created":1741680000,"model":"claude-sonnet-4-5-20250929","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"usage":{"prompt_tokens":12,"completion_tokens":5,"total_tokens":17}}
+
+data: [DONE]
+```
+
+도구 호출 스트리밍 이벤트:
+
+```text theme={null}
+data: {"id":"chatcmpl-xxx","object":"chat.completion.chunk","created":1741680000,"model":"claude-sonnet-4-5-20250929","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"call_abc","type":"function","function":{"name":"get_weather","arguments":""}}]},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-xxx","object":"chat.completion.chunk","created":1741680000,"model":"claude-sonnet-4-5-20250929","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"{\"city\""}}]},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-xxx","object":"chat.completion.chunk","created":1741680000,"model":"claude-sonnet-4-5-20250929","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":": \"北京\"}"}}]},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-xxx","object":"chat.completion.chunk","created":1741680000,"model":"claude-sonnet-4-5-20250929","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":85,"completion_tokens":22,"total_tokens":107}}
+
+data: [DONE]
+```
+
+## 주의사항
+
+1. **인증 방식**: `Authorization: Bearer <api_key>` 형식만 지원하며, OpenAI SDK를 사용할 경우 `api_key`를 직접 설정하면 됩니다.
+
+2. **기본 스트리밍**: `stream` 매개변수는 기본값이 `true`입니다. 비스트리밍 응답이 필요한 경우 명시적으로 `"stream": false`를 전달해야 합니다.
+
+3. **포인트 부족**: 잔액이 부족하면 HTTP `402`를 반환하니, 충전 후 다시 시도하세요.
+
+4. **stop 및 중지 시퀀스**: 현재 `stop` 매개변수는 작동하지 않으며, 하위 공급자가 이 기능을 지원하지 않습니다. 매개변수를 전달해도 오류가 발생하지 않지만 지정한 시퀀스에서 생성이 중지되지 않습니다.
+
+5. **response_format 주의**: 현재 하위 공급자의 `response_format` 지원이 제한적입니다 — `json_object` 모드에서는 모델이 순수 JSON 대신 Markdown 코드 블록을 출력할 수 있고, `json_schema` 모드에서는 스키마 제약이 지켜지지 않을 수 있습니다. 구조화된 출력을 원할 경우 프롬프트 내에 명확히 원하는 형식을 설명하는 것을 권장합니다.
+
+6. **도구 매개변수**: `parameters` 필드는 합법적인 JSON Schema여야 하며, `required` 배열이 필수 매개변수를 결정합니다.
+
+7. **모델 선택 권장 사항**:
+   * Haiku — 고빈도 간단 질문, 비용이 가장 저렴함
+   * Sonnet — 코드 생성 및 문서 처리, 종합 추천
+   * Opus — 복잡한 추론 및 긴 문서 분석, 가장 강력함
+   * `-thinking` 시리즈 — 수학 증명, 논리 추론 등 깊은 사고가 필요한 상황

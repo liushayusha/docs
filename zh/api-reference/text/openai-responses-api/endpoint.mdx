@@ -1,0 +1,976 @@
+---
+title: 'OpenAI Responses API'
+description: |
+    - 兼容 OpenAI Responses API 协议，支持文本对话、图像理解、工具调用、结构化输出与推理模式
+    - 主要供 Codex CLI 及 AI SDK 等工具使用
+api: 'POST https://aireiter.com/api/v1/responses'
+---
+
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## 认证
+
+<ParamField header="Authorization" type="string" required>
+  Bearer Token 认证。格式：`Authorization: Bearer <api-key>`
+
+  获取 API Key：
+
+  访问 <a href={apiKeyUrl} target="_blank">API Key 管理页面</a> 获取您的 API Key
+</ParamField>
+
+<ParamField header="x-api-key" type="string">
+  替代认证方式，与 `Authorization` 二选一。格式：`x-api-key: <api-key>`
+</ParamField>
+
+## 请求体参数
+
+<ParamField body="model" type="string" required>
+  要使用的模型名称。示例：`claude-sonnet-4-5-20250929`、`gpt-4o`。
+
+  可通过 `GET /api/v1/models` 获取完整模型列表。
+</ParamField>
+
+<ParamField body="input" type="string | array" required>
+  对话输入内容，支持两种格式：
+
+  - **字符串**：直接传入用户消息文本
+  - **消息数组**：包含多条消息，支持多轮对话
+
+  <Expandable title="消息数组格式">
+    每条消息为对象，包含以下字段：
+
+    <ParamField body="role" type="string" required>
+      消息角色：`user`、`assistant`、`system`
+    </ParamField>
+
+    <ParamField body="content" type="string | array" required>
+      消息内容，可以是文本字符串，也可以是内容块数组（支持图像等多模态内容）：
+
+      ```json
+      [
+        { "type": "input_text", "text": "Describe this image." },
+        { "type": "input_image", "image_url": { "url": "https://..." } }
+      ]
+      ```
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="instructions" type="string">
+  系统提示词（System Prompt）。用于设定模型的行为准则、角色身份或上下文背景。
+
+  等效于消息数组中 `role: "system"` 的消息。
+</ParamField>
+
+<ParamField body="stream" type="boolean" default="true">
+  是否启用流式输出。
+
+  - `true`（默认）：以 SSE 事件流方式逐 token 返回，适合实时展示
+  - `false`：等待完整响应后一次性返回，适合批量处理
+</ParamField>
+
+<ParamField body="max_output_tokens" type="integer">
+  生成回复的最大 token 数。超出限制时响应 `status` 为 `"incomplete"`，`incomplete_details.reason` 为 `"max_output_tokens"`。
+</ParamField>
+
+<ParamField body="temperature" type="number">
+  采样温度，范围 `0` ~ `2`。值越高输出越随机，值越低输出越确定性。不建议同时修改 `temperature` 和 `top_p`。
+</ParamField>
+
+<ParamField body="top_p" type="number">
+  核采样概率，范围 `0` ~ `1`。模型仅从累积概率达到 `top_p` 的 token 中采样。
+</ParamField>
+
+<ParamField body="tools" type="array">
+  可供模型调用的工具列表。当前仅支持 `type: "function"` 类型，不支持 `web_search`、`file_search`、`computer_use` 等内置工具。
+
+  <Expandable title="function 工具格式">
+    <ParamField body="type" type="string" required>
+      固定为 `"function"`
+    </ParamField>
+
+    <ParamField body="name" type="string" required>
+      函数名称，需符合 `^[a-zA-Z0-9_-]{1,64}$`
+    </ParamField>
+
+    <ParamField body="description" type="string">
+      函数描述，帮助模型判断何时调用此工具
+    </ParamField>
+
+    <ParamField body="parameters" type="object">
+      参数定义，遵循 JSON Schema 格式
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="tool_choice" type="string | object" default="auto">
+  工具调用策略：
+
+  - `"auto"`：模型自动决定是否调用工具
+  - `"none"`：禁止调用工具
+  - `"required"`：强制调用至少一个工具
+  - `{ "type": "function", "name": "function_name" }`：强制调用指定工具
+</ParamField>
+
+<ParamField body="parallel_tool_calls" type="boolean" default="true">
+  是否允许模型并行调用多个工具。仅在提供了 `tools` 时有效。
+</ParamField>
+
+<ParamField body="text" type="object">
+  输出格式控制。
+
+  <Expandable title="text 对象">
+    <ParamField body="format" type="object">
+      <Expandable title="format 对象">
+        <ParamField body="type" type="string" required>
+          输出格式类型：
+          - `"text"`：普通文本（默认）
+          - `"json_object"`：JSON 格式
+          - `"json_schema"`：符合指定 Schema 的 JSON
+        </ParamField>
+
+        <ParamField body="name" type="string">
+          Schema 名称（仅 `json_schema` 时有效）
+        </ParamField>
+
+        <ParamField body="description" type="string">
+          Schema 描述（仅 `json_schema` 时有效）
+        </ParamField>
+
+        <ParamField body="strict" type="boolean" default="true">
+          是否严格遵循 Schema（仅 `json_schema` 时有效）
+        </ParamField>
+
+        <ParamField body="schema" type="object">
+          JSON Schema 定义（仅 `json_schema` 时必填）
+        </ParamField>
+      </Expandable>
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="reasoning" type="object">
+  推理模式配置（适用于支持推理的模型，如 `gpt-5.2` 及以上）。
+
+  <Expandable title="reasoning 对象">
+    <ParamField body="effort" type="string">
+      推理强度：`"low"` | `"medium"` | `"high"`
+    </ParamField>
+
+  </Expandable>
+</ParamField>
+
+## 响应字段
+
+<ResponseField name="id" type="string">
+  响应唯一标识符，格式：`resp_` + 24位随机字符串
+</ResponseField>
+
+<ResponseField name="object" type="string">
+  固定为 `"response"`
+</ResponseField>
+
+<ResponseField name="created_at" type="number">
+  响应创建时间，Unix 时间戳（秒，含毫秒精度）
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  响应状态：
+  - `"completed"`：正常完成
+  - `"incomplete"`：因 `max_output_tokens` 提前截止
+  - `"in_progress"`：流式输出进行中（仅在流式事件中出现）
+  - `"failed"`：生成失败
+</ResponseField>
+
+<ResponseField name="model" type="string">
+  实际使用的模型名称
+</ResponseField>
+
+<ResponseField name="task_id" type="string">
+  平台扩展字段。本次调用的计费任务 ID，可用于对账与消耗查询。
+
+  **注意**：
+  - **非流式**：`task_id` 直接位于响应 JSON 的顶层
+  - **流式**：`task_id` 嵌套在 `response.created`（第一个事件）和 `response.completed`（最后一个事件）的 `response` 对象内，需解析原始 SSE 事件获取，OpenAI SDK 的流式接口不会自动暴露此字段
+</ResponseField>
+
+<ResponseField name="output" type="array">
+  输出内容数组，可包含文本消息和工具调用两种类型。
+
+  <Expandable title="message 类型">
+    <ResponseField name="id" type="string">
+      消息 ID，格式：`msg_` + 16位随机字符串
+    </ResponseField>
+
+    <ResponseField name="type" type="string">
+      固定为 `"message"`
+    </ResponseField>
+
+    <ResponseField name="role" type="string">
+      固定为 `"assistant"`
+    </ResponseField>
+
+    <ResponseField name="status" type="string">
+      `"completed"` | `"in_progress"`
+    </ResponseField>
+
+    <ResponseField name="content" type="array">
+      内容块数组：
+
+      <Expandable title="output_text 内容块">
+        <ResponseField name="type" type="string">
+          固定为 `"output_text"`
+        </ResponseField>
+
+        <ResponseField name="text" type="string">
+          模型生成的文本内容
+        </ResponseField>
+
+        <ResponseField name="annotations" type="array">
+          文本注释，通常为空数组 `[]`
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+
+  <Expandable title="function_call 类型">
+    <ResponseField name="id" type="string">
+      工具调用条目 ID，格式：`fc_` + 16位随机字符串
+    </ResponseField>
+
+    <ResponseField name="type" type="string">
+      固定为 `"function_call"`
+    </ResponseField>
+
+    <ResponseField name="call_id" type="string">
+      工具调用 ID，用于提交工具执行结果时引用
+    </ResponseField>
+
+    <ResponseField name="name" type="string">
+      被调用的函数名称
+    </ResponseField>
+
+    <ResponseField name="arguments" type="string">
+      函数参数，JSON 序列化字符串
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="output_text" type="string">
+  快捷字段，等同于 `output[0].content[0].text`（纯文本场景）。工具调用场景下为空字符串。
+</ResponseField>
+
+<ResponseField name="usage" type="object">
+  Token 用量统计。
+
+  <Expandable title="usage 对象">
+    <ResponseField name="input_tokens" type="integer">
+      输入 token 数（含 system prompt）
+    </ResponseField>
+
+    <ResponseField name="output_tokens" type="integer">
+      输出 token 数
+    </ResponseField>
+
+    <ResponseField name="total_tokens" type="integer">
+      总 token 数 = input + output
+    </ResponseField>
+
+    <ResponseField name="output_tokens_details" type="object">
+      <Expandable title="详情">
+        <ResponseField name="reasoning_tokens" type="integer">
+          推理/思考 token 数（普通模型为 `0`）
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="incomplete_details" type="object | null">
+  当 `status` 为 `"incomplete"` 时不为 null。
+
+  <Expandable title="incomplete_details 对象">
+    <ResponseField name="reason" type="string">
+      截断原因。当前仅为 `"max_output_tokens"`
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST https://aireiter.com/api/v1/responses \
+  -H "Authorization: Bearer $API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "claude-sonnet-4-5-20250929",
+    "input": "Write a one-sentence bedtime story about a unicorn.",
+    "stream": true
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://aireiter.com/api/v1"
+)
+
+response = client.responses.create(
+    model="claude-sonnet-4-5-20250929",
+    input="Write a one-sentence bedtime story about a unicorn."
+)
+
+print(response.output_text)
+```
+
+```javascript JavaScript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://aireiter.com/api/v1",
+});
+
+const response = await client.responses.create({
+  model: "claude-sonnet-4-5-20250929",
+  input: "Write a one-sentence bedtime story about a unicorn.",
+});
+
+console.log(response.output_text);
+```
+
+```go Go
+package main
+
+import (
+  "bytes"
+  "encoding/json"
+  "fmt"
+  "net/http"
+)
+
+func main() {
+  payload := map[string]interface{}{
+    "model":  "claude-sonnet-4-5-20250929",
+    "input":  "Write a one-sentence bedtime story about a unicorn.",
+    "stream": false,
+  }
+  body, _ := json.Marshal(payload)
+
+  req, _ := http.NewRequest("POST", "https://aireiter.com/api/v1/responses", bytes.NewBuffer(body))
+  req.Header.Set("Authorization", "Bearer YOUR_API_KEY")
+  req.Header.Set("Content-Type", "application/json")
+
+  resp, _ := http.DefaultClient.Do(req)
+  defer resp.Body.Close()
+
+  var result map[string]interface{}
+  json.NewDecoder(resp.Body).Decode(&result)
+  fmt.Println(result)
+}
+```
+
+```java Java
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.URI;
+import java.net.http.*;
+import java.util.Map;
+
+public class ResponsesExample {
+  public static void main(String[] args) throws Exception {
+    var payload = Map.of(
+      "model", "claude-sonnet-4-5-20250929",
+      "input", "Write a one-sentence bedtime story about a unicorn.",
+      "stream", false
+    );
+    var body = new ObjectMapper().writeValueAsString(payload);
+    var request = HttpRequest.newBuilder()
+      .uri(URI.create("https://aireiter.com/api/v1/responses"))
+      .header("Authorization", "Bearer YOUR_API_KEY")
+      .header("Content-Type", "application/json")
+      .POST(HttpRequest.BodyPublishers.ofString(body))
+      .build();
+    var response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+    System.out.println(response.body());
+  }
+}
+```
+
+```php PHP
+<?php
+$client = new GuzzleHttp\Client();
+$response = $client->post('https://aireiter.com/api/v1/responses', [
+  'headers' => [
+    'Authorization' => 'Bearer YOUR_API_KEY',
+    'Content-Type'  => 'application/json',
+  ],
+  'json' => [
+    'model'  => 'claude-sonnet-4-5-20250929',
+    'input'  => 'Write a one-sentence bedtime story about a unicorn.',
+    'stream' => false,
+  ],
+]);
+echo $response->getBody();
+```
+
+```ruby Ruby
+require 'net/http'
+require 'json'
+
+uri = URI('https://aireiter.com/api/v1/responses')
+req = Net::HTTP::Post.new(uri, {
+  'Authorization' => 'Bearer YOUR_API_KEY',
+  'Content-Type'  => 'application/json'
+})
+req.body = {
+  model:  'claude-sonnet-4-5-20250929',
+  input:  'Write a one-sentence bedtime story about a unicorn.',
+  stream: false
+}.to_json
+
+res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) { |h| h.request(req) }
+puts res.body
+```
+
+```swift Swift
+import Foundation
+
+let payload: [String: Any] = [
+  "model":  "claude-sonnet-4-5-20250929",
+  "input":  "Write a one-sentence bedtime story about a unicorn.",
+  "stream": false
+]
+
+var request = URLRequest(url: URL(string: "https://aireiter.com/api/v1/responses")!)
+request.httpMethod = "POST"
+request.setValue("Bearer YOUR_API_KEY", forHTTPHeaderField: "Authorization")
+request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+request.httpBody = try! JSONSerialization.data(withJSONObject: payload)
+
+URLSession.shared.dataTask(with: request) { data, _, _ in
+  if let data = data { print(String(data: data, encoding: .utf8)!) }
+}.resume()
+```
+
+```csharp C#
+using System.Net.Http;
+using System.Net.Http.Json;
+
+var client = new HttpClient();
+client.DefaultRequestHeaders.Add("Authorization", "Bearer YOUR_API_KEY");
+
+var response = await client.PostAsJsonAsync("https://aireiter.com/api/v1/responses", new {
+  model  = "claude-sonnet-4-5-20250929",
+  input  = "Write a one-sentence bedtime story about a unicorn.",
+  stream = false
+});
+Console.WriteLine(await response.Content.ReadAsStringAsync());
+```
+
+```c C
+#include <stdio.h>
+#include <curl/curl.h>
+
+int main() {
+  CURL *curl = curl_easy_init();
+  struct curl_slist *headers = NULL;
+  headers = curl_slist_append(headers, "Authorization: Bearer YOUR_API_KEY");
+  headers = curl_slist_append(headers, "Content-Type: application/json");
+
+  const char *data = "{\"model\":\"claude-sonnet-4-5-20250929\","
+                     "\"input\":\"Write a one-sentence bedtime story about a unicorn.\","
+                     "\"stream\":false}";
+
+  curl_easy_setopt(curl, CURLOPT_URL, "https://aireiter.com/api/v1/responses");
+  curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+  curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
+  curl_easy_perform(curl);
+  curl_easy_cleanup(curl);
+  return 0;
+}
+```
+
+```dart Dart
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+void main() async {
+  final response = await http.post(
+    Uri.parse('https://aireiter.com/api/v1/responses'),
+    headers: {
+      'Authorization': 'Bearer YOUR_API_KEY',
+      'Content-Type':  'application/json',
+    },
+    body: jsonEncode({
+      'model':  'claude-sonnet-4-5-20250929',
+      'input':  'Write a one-sentence bedtime story about a unicorn.',
+      'stream': false,
+    }),
+  );
+  print(response.body);
+}
+```
+
+```r R
+library(httr)
+library(jsonlite)
+
+response <- POST(
+  "https://aireiter.com/api/v1/responses",
+  add_headers(
+    Authorization = "Bearer YOUR_API_KEY",
+    `Content-Type` = "application/json"
+  ),
+  body = toJSON(list(
+    model  = "claude-sonnet-4-5-20250929",
+    input  = "Write a one-sentence bedtime story about a unicorn.",
+    stream = FALSE
+  ), auto_unbox = TRUE)
+)
+content(response, "text")
+```
+
+</RequestExample>
+
+<ResponseExample>
+
+```json 200 成功（非流式）
+{
+  "id": "resp_AbCdEfGhIjKlMnOpQrSt0123",
+  "object": "response",
+  "created_at": 1742000000.123,
+  "status": "completed",
+  "model": "claude-sonnet-4-5-20250929",
+  "task_id": "task_xyz123",
+  "output": [
+    {
+      "id": "msg_AbCdEfGhIjKl0123",
+      "type": "message",
+      "role": "assistant",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "text": "The little unicorn tiptoed through the moonlit meadow, leaving a trail of shimmering stardust as she galloped home to her cozy cloud.",
+          "annotations": []
+        }
+      ]
+    }
+  ],
+  "output_text": "The little unicorn tiptoed through the moonlit meadow, leaving a trail of shimmering stardust as she galloped home to her cozy cloud.",
+  "usage": {
+    "input_tokens": 20,
+    "output_tokens": 35,
+    "total_tokens": 55,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  }
+}
+```
+
+```json 200 工具调用响应
+{
+  "id": "resp_AbCdEfGhIjKlMnOpQrSt0456",
+  "object": "response",
+  "created_at": 1742000100.456,
+  "status": "completed",
+  "model": "claude-sonnet-4-5-20250929",
+  "task_id": "task_abc456",
+  "output": [
+    {
+      "id": "fc_AbCdEfGhIjKl0456",
+      "type": "function_call",
+      "call_id": "call_AbCdEfGh",
+      "name": "get_weather",
+      "arguments": "{\"location\":\"San Francisco\",\"unit\":\"celsius\"}"
+    }
+  ],
+  "output_text": "",
+  "usage": {
+    "input_tokens": 80,
+    "output_tokens": 25,
+    "total_tokens": 105,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  }
+}
+```
+
+```json 200 截断响应（incomplete）
+{
+  "id": "resp_AbCdEfGhIjKlMnOpQrSt0789",
+  "object": "response",
+  "created_at": 1742000200.789,
+  "status": "incomplete",
+  "model": "claude-sonnet-4-5-20250929",
+  "task_id": "task_def789",
+  "output": [
+    {
+      "id": "msg_AbCdEfGhIjKl0789",
+      "type": "message",
+      "role": "assistant",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "text": "Here is a very long story that was cut off due to max_output_tokens...",
+          "annotations": []
+        }
+      ]
+    }
+  ],
+  "output_text": "Here is a very long story that was cut off due to max_output_tokens...",
+  "incomplete_details": {
+    "reason": "max_output_tokens"
+  },
+  "usage": {
+    "input_tokens": 15,
+    "output_tokens": 256,
+    "total_tokens": 271,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  }
+}
+```
+
+```json 400 请求参数错误
+{
+  "type": "error",
+  "error": {
+    "type": "invalid_request_error",
+    "message": "model is required"
+  }
+}
+```
+
+```json 401 认证失败
+{
+  "type": "error",
+  "error": {
+    "type": "authentication_error",
+    "message": "Invalid API key"
+  }
+}
+```
+
+```json 402 积分不足
+{
+  "type": "error",
+  "error": {
+    "type": "invalid_request_error",
+    "message": "Insufficient credits"
+  }
+}
+```
+
+```json 404 模型不存在
+{
+  "type": "error",
+  "error": {
+    "type": "not_found_error",
+    "message": "Model 'unknown-model' not found"
+  }
+}
+```
+
+```json 502 上游服务异常
+{
+  "type": "error",
+  "error": {
+    "type": "api_error",
+    "message": "All providers failed"
+  }
+}
+```
+
+</ResponseExample>
+
+---
+
+## 流式响应事件
+
+当 `stream: true` 时，接口以 `text/event-stream` 格式返回 SSE 事件流。每个事件格式如下：
+
+```
+event: <event_type>
+data: <JSON_payload>
+
+```
+
+所有事件 payload 均包含 `sequence_number` 字段（从 `0` 递增），用于确保客户端按顺序处理事件。
+
+> **获取 `task_id`**：如需在流式模式下获取计费任务 ID，请监听第一个 `response.created` 事件并读取 `event.response.task_id`。
+
+### 事件序列（文本响应）
+
+| 序号 | 事件类型 | 说明 |
+|------|---------|------|
+| 1 | `response.created` | 响应对象创建，`status: "in_progress"` |
+| 2 | `response.in_progress` | 响应开始生成 |
+| 3 | `response.output_item.added` | 输出消息项目添加 |
+| 4 | `response.content_part.added` | 文本内容块添加，`text: ""` |
+| 5 | `response.output_text.delta` | *(重复)* 逐 token 文本增量 |
+| 6 | `response.output_text.done` | 文本内容完成，含完整文本 |
+| 7 | `response.content_part.done` | 内容块完成 |
+| 8 | `response.output_item.done` | 消息项目完成 |
+| 9 | `response.completed` | 响应完成，含完整响应对象和 usage |
+
+### 事件序列（工具调用）
+
+| 序号 | 事件类型 | 说明 |
+|------|---------|------|
+| … | `response.output_item.added` | 函数调用项目添加 |
+| … | `response.function_call_arguments.delta` | *(重复)* 函数参数增量 |
+| … | `response.function_call_arguments.done` | 函数参数完成 |
+| … | `response.output_item.done` | 函数调用项目完成 |
+| 最后 | `response.completed` | 响应完成 |
+
+### 事件示例
+
+<CodeGroup>
+
+```json response.created
+{
+  "type": "response.created",
+  "sequence_number": 0,
+  "response": {
+    "id": "resp_AbCdEfGhIjKlMnOpQrSt0123",
+    "object": "response",
+    "created_at": 1742000000.123,
+    "status": "in_progress",
+    "model": "claude-sonnet-4-5-20250929",
+    "task_id": "task_xyz123",
+    "output": [],
+    "output_text": ""
+  }
+}
+```
+
+```json response.output_text.delta
+{
+  "type": "response.output_text.delta",
+  "sequence_number": 5,
+  "item_id": "msg_AbCdEfGhIjKl0123",
+  "output_index": 0,
+  "content_index": 0,
+  "delta": "The little"
+}
+```
+
+```json response.completed
+{
+  "type": "response.completed",
+  "sequence_number": 9,
+  "response": {
+    "id": "resp_AbCdEfGhIjKlMnOpQrSt0123",
+    "object": "response",
+    "created_at": 1742000000.123,
+    "status": "completed",
+    "model": "claude-sonnet-4-5-20250929",
+    "task_id": "task_xyz123",
+    "output": [
+      {
+        "id": "msg_AbCdEfGhIjKl0123",
+        "type": "message",
+        "role": "assistant",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "text": "The little unicorn tiptoed through the moonlit meadow.",
+            "annotations": []
+          }
+        ]
+      }
+    ],
+    "output_text": "The little unicorn tiptoed through the moonlit meadow.",
+    "usage": {
+      "input_tokens": 20,
+      "output_tokens": 12,
+      "total_tokens": 32,
+      "output_tokens_details": { "reasoning_tokens": 0 }
+    }
+  }
+}
+```
+
+```json response.function_call_arguments.delta
+{
+  "type": "response.function_call_arguments.delta",
+  "sequence_number": 7,
+  "output_index": 0,
+  "delta": "{\"location\":"
+}
+```
+
+</CodeGroup>
+
+---
+
+## 使用示例
+
+### 基础文本对话
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://aireiter.com/api/v1"
+)
+
+response = client.responses.create(
+    model="claude-sonnet-4-5-20250929",
+    instructions="You are a helpful coding assistant.",
+    input="How do I reverse a string in Python?",
+)
+
+print(response.output_text)
+```
+
+### 图像理解
+
+```python
+response = client.responses.create(
+    model="claude-sonnet-4-5-20250929",
+    input=[
+        {
+            "role": "user",
+            "content": [
+                {"type": "input_text",  "text": "What's in this image?"},
+                {"type": "input_image", "image_url": {"url": "https://example.com/photo.jpg"}},
+            ],
+        }
+    ],
+)
+
+print(response.output_text)
+```
+
+### 工具调用
+
+```python
+tools = [
+    {
+        "type": "function",
+        "name": "get_weather",
+        "description": "Get current weather for a location",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "location": {"type": "string", "description": "City name"},
+                "unit":     {"type": "string", "enum": ["celsius", "fahrenheit"]},
+            },
+            "required": ["location"],
+        },
+    }
+]
+
+response = client.responses.create(
+    model="gpt-5.2",
+    input="What's the weather like in Tokyo?",
+    tools=tools,
+    tool_choice="auto",
+)
+
+# 检查是否有工具调用
+for item in response.output:
+    if item.type == "function_call":
+        print(f"Tool: {item.name}, Args: {item.arguments}")
+```
+
+### 结构化输出（JSON Schema）
+
+```python
+import json
+
+schema = {
+    "type": "object",
+    "properties": {
+        "name":    {"type": "string"},
+        "age":     {"type": "integer"},
+        "hobbies": {"type": "array", "items": {"type": "string"}},
+    },
+    "required": ["name", "age", "hobbies"],
+    "additionalProperties": False,
+}
+
+response = client.responses.create(
+    model="claude-sonnet-4-5-20250929",
+    input="Extract info: Alice is 30 years old and loves hiking and cooking.",
+    text={
+        "format": {
+            "type":   "json_schema",
+            "name":   "person_info",
+            "strict": True,
+            "schema": schema,
+        }
+    },
+)
+
+data = json.loads(response.output_text)
+print(data)  # {"name": "Alice", "age": 30, "hobbies": ["hiking", "cooking"]}
+```
+
+### 推理模式
+
+```python
+response = client.responses.create(
+    model="claude-3-7-sonnet-20250219",  # 支持推理的模型
+    input="Solve: If x + y = 10 and x * y = 21, what are x and y?",
+    reasoning={"effort": "high"},
+)
+
+print(response.output_text)
+```
+
+### 多轮对话
+
+`previous_response_id` 当前不生效，需手动在 `input` 中拼接历史消息：
+
+```python
+# 第一轮
+response1 = client.responses.create(
+    model="claude-sonnet-4-5-20250929",
+    input="My name is Bob.",
+)
+
+# 第二轮：手动拼接历史消息
+response2 = client.responses.create(
+    model="claude-sonnet-4-5-20250929",
+    input=[
+        {"role": "user",      "content": "My name is Bob."},
+        {"role": "assistant", "content": response1.output_text},
+        {"role": "user",      "content": "What's my name?"},
+    ],
+)
+
+print(response2.output_text)  # "Your name is Bob."
+```
+
+
+## 注意事项
+
+1. **默认流式**：`stream` 参数默认为 `true`。如需非流式响应，需显式传入 `"stream": false`。
+
+2. **积分不足**：余额不足时返回 HTTP `402`，请充值后重试。
+
+3. **text.format 支持有限**：当前底层供应商对结构化输出支持有限——`json_object` 模式下模型可能仍输出 Markdown 代码块而非纯 JSON；`json_schema` 模式下 Schema 约束可能不被遵守。如需结构化输出，建议在 `instructions` 或 `input` 中明确描述所需格式。
+
+4. **工具参数**：`parameters` 字段必须是合法的 JSON Schema，`required` 数组决定哪些参数为必填项。
+
+## 错误码说明
+
+| HTTP 状态码 | error.type | 说明 |
+|------------|-----------|------|
+| 400 | `invalid_request_error` | 请求参数无效（缺少必填字段、JSON 解析失败等）|
+| 401 | `authentication_error` | API Key 无效或已过期 |
+| 402 | `invalid_request_error` | 账户积分不足 |
+| 404 | `not_found_error` | 指定模型不存在 |
+| 502 | `api_error` | 上游 AI 服务商全部不可用 |
+| 503 | `api_error` | 无可用供应商配置 |

@@ -1,0 +1,1016 @@
+---
+title: 'OpenAI 聊天补全接口'
+description: |
+    - 完全兼容 OpenAI Chat Completions API 格式
+    - 支持多轮对话、工具调用、结构化输出、流式响应
+    - 可直接替换 OpenAI SDK 的 `baseURL`，无需修改其他代码
+api: 'POST https://aireiter.com/api/v1/chat/completions'
+---
+
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  API 密钥，Bearer Token 格式
+
+  获取 API Key：
+
+  访问 <a href={apiKeyUrl} target="_blank">API Key 管理页面</a> 获取您的 API Key
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  模型名称
+
+  **OpenAI 兼容模型（推荐用于工具调用）：**
+  * `gpt-4o-mini` — 轻量快速，适合高频简单任务
+  * `gpt-4o` — 综合推荐，性能与成本平衡
+  * `gpt-5.2` — 高性能版本，**完整支持工具调用**
+  * 更多模型请查询 `GET /api/v1/models`
+
+  **Claude 模型（Anthropic 协议转发）：**
+  * `claude-haiku-4-5-20251001` — 轻量快速
+  * `claude-sonnet-4-5-20250929` — 综合推荐
+  * `claude-sonnet-4-6` — Sonnet 新版
+  * `claude-opus-4-5-20251101` — 旗舰推理模型
+  * `claude-opus-4-6` — Opus 新版，能力最强
+
+  完整模型列表请查询：`GET /api/v1/models`
+</ParamField>
+
+<ParamField body="messages" type="array" required>
+  消息列表
+
+  模型根据消息历史生成下一条回复。每条消息包含 `role` 和 `content`。
+
+  <Expandable title="字段说明">
+    <ParamField body="role" type="string" required>
+      角色类型
+
+      * `system` — 系统提示（会从消息列表中提取并单独处理）
+      * `user` — 用户消息
+      * `assistant` — AI 回复（用于多轮对话）
+    </ParamField>
+
+    <ParamField body="content" type="string" required>
+      消息内容，纯文本字符串
+    </ParamField>
+  </Expandable>
+
+  **纯文本消息：**
+
+  ```json theme={null}
+  [{"role": "user", "content": "你好"}]
+  ```
+
+  **多轮对话：**
+
+  ```json theme={null}
+  [
+    {"role": "system",    "content": "你是一位专业的代码审查员。"},
+    {"role": "user",      "content": "帮我看下这段代码"},
+    {"role": "assistant", "content": "我来分析一下..."},
+    {"role": "user",      "content": "有没有性能问题？"}
+  ]
+  ```
+
+  **多轮工具调用：**
+
+  ```json theme={null}
+  [
+    {"role": "user", "content": "北京今天天气如何？"},
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "call_001",
+          "type": "function",
+          "function": {"name": "get_weather", "arguments": "{\"city\": \"北京\"}"}
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_001",
+      "content": "北京：25°C，晴"
+    }
+  ]
+  ```
+</ParamField>
+
+<ParamField body="max_tokens" type="integer">
+  最大输出 Token 数
+
+  控制模型最多生成的 token 数量，模型可能在达到上限前自然结束。最小值：`1`。
+  默认不限制（受模型上下文窗口约束）。
+</ParamField>
+
+<ParamField body="max_completion_tokens" type="integer">
+  最大输出 Token 数（`max_tokens` 的新名称）
+
+  与 `max_tokens` 完全等价，两者提供其一即可，`max_tokens` 优先级更高。
+</ParamField>
+
+<ParamField body="stream" type="boolean">
+  是否启用流式输出
+
+  设为 `true` 时，通过 SSE（Server-Sent Events）实时流式返回。**默认 `true`**。如需非流式响应，需显式传入 `"stream": false`。
+
+  设为 `false` 时，等待生成完成后一次性返回完整响应。
+</ParamField>
+
+<ParamField body="temperature" type="number">
+  温度，范围 `0–2`
+
+  * 低值（如 `0.2`）：输出更确定、保守
+  * 高值（如 `0.8`）：输出更随机、有创意
+
+  默认 `1.0`。不建议与 `top_p` 同时使用。
+</ParamField>
+
+<ParamField body="top_p" type="number">
+  核采样参数，范围 `0–1`
+
+  从累积概率达到 `top_p` 的 token 集合中采样。默认 `1.0`。
+  不建议与 `temperature` 同时使用。
+</ParamField>
+
+<ParamField body="frequency_penalty" type="number">
+  频率惩罚，范围 `-2.0–2.0`
+
+  正值会根据 token 在已生成文本中的出现频率对其进行惩罚，降低重复输出的概率。默认 `0`。
+</ParamField>
+
+<ParamField body="presence_penalty" type="number">
+  存在惩罚，范围 `-2.0–2.0`
+
+  正值会对已出现过的 token 进行惩罚，鼓励模型探索新话题。默认 `0`。
+</ParamField>
+
+<ParamField body="seed" type="integer">
+  随机种子
+
+  设置后，相同 seed + 相同请求参数将尽量产生确定性输出，便于结果复现。
+</ParamField>
+
+<ParamField body="stop" type="string | array">
+  停止序列
+
+  遇到此字符串（或数组中任意一个）时，模型立即停止生成。最多 4 个。
+
+  ```json theme={null}
+  {"stop": ["\n\nUser:", "###END###"]}
+  ```
+</ParamField>
+
+<ParamField body="tools" type="array">
+  工具定义列表
+
+  定义模型可调用的函数工具，每个工具包含名称、描述和参数 JSON Schema。
+
+  ```json theme={null}
+  {
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "get_weather",
+          "description": "获取指定城市的当前天气",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "city": {
+                "type": "string",
+                "description": "城市名称，例如：北京"
+              },
+              "unit": {
+                "type": "string",
+                "enum": ["celsius", "fahrenheit"]
+              }
+            },
+            "required": ["city"]
+          }
+        }
+      }
+    ]
+  }
+  ```
+</ParamField>
+
+<ParamField body="tool_choice" type="string | object">
+  工具选择策略
+
+  * `"auto"` — 模型自行决定是否调用工具（默认）
+  * `"required"` — 强制模型必须调用某个工具
+  * `"none"` — 禁止调用任何工具
+  * `{"type": "function", "function": {"name": "get_weather"}}` — 强制调用指定工具
+
+  ```json theme={null}
+  {"tool_choice": "required"}
+  ```
+</ParamField>
+
+<ParamField body="parallel_tool_calls" type="boolean">
+  是否允许并行工具调用
+
+  设为 `false` 时，每次只调用一个工具。默认 `true`（允许并行）。
+</ParamField>
+
+<ParamField body="response_format" type="object">
+  响应格式
+
+  控制模型输出格式。
+
+  <Expandable title="字段说明">
+    <ParamField body="type" type="string" required>
+      格式类型
+
+      * `"text"` — 普通文本（默认）
+      * `"json_object"` — JSON 对象，模型输出合法 JSON
+      * `"json_schema"` — 严格按照指定 JSON Schema 输出
+    </ParamField>
+
+    <ParamField body="json_schema" type="object">
+      当 `type` 为 `"json_schema"` 时必填
+
+      <Expandable title="字段说明">
+        <ParamField body="name" type="string" required>
+          Schema 名称
+        </ParamField>
+        <ParamField body="schema" type="object" required>
+          JSON Schema 定义，模型输出严格遵循此结构
+        </ParamField>
+        <ParamField body="strict" type="boolean">
+          是否启用严格模式，默认 `true`
+        </ParamField>
+      </Expandable>
+    </ParamField>
+  </Expandable>
+
+  **JSON 对象模式：**
+
+  ```json theme={null}
+  {"response_format": {"type": "json_object"}}
+  ```
+
+  **JSON Schema 模式：**
+
+  ```json theme={null}
+  {
+    "response_format": {
+      "type": "json_schema",
+      "json_schema": {
+        "name": "analysis_result",
+        "strict": true,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "summary":    {"type": "string"},
+            "score":      {"type": "number"},
+            "tags":       {"type": "array", "items": {"type": "string"}}
+          },
+          "required": ["summary", "score", "tags"]
+        }
+      }
+    }
+  }
+  ```
+</ParamField>
+
+<ParamField body="reasoning_effort" type="string">
+  推理强度
+
+  适用于支持推理的模型（如 `gpt-5.2` 及以上），控制模型推理深度。
+
+  * `"low"` — 快速推理，节省 token
+  * `"medium"` — 均衡推理
+  * `"high"` — 深度推理，更准确但消耗更多 token
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">
+  补全唯一标识符
+
+  示例：`"chatcmpl-9vKqnMf3Ax8ZpRdTw2LsYe7b"`
+</ResponseField>
+
+<ResponseField name="object" type="string">
+  对象类型，固定为 `"chat.completion"`（非流式）或 `"chat.completion.chunk"`（流式）
+</ResponseField>
+
+<ResponseField name="created" type="integer">
+  创建时间，Unix 时间戳（秒）
+</ResponseField>
+
+<ResponseField name="model" type="string">
+  请求时传入的模型名称
+</ResponseField>
+
+<ResponseField name="task_id" type="string">
+  计费任务 ID（项目扩展字段），用于追踪本次调用的积分消耗记录
+</ResponseField>
+
+<ResponseField name="choices" type="array">
+  生成结果数组（始终只有 1 条）
+
+  <Expandable title="字段说明">
+    <ResponseField name="index" type="integer">
+      结果索引，固定为 `0`
+    </ResponseField>
+
+    <ResponseField name="message" type="object">
+      **非流式响应**中的完整消息对象
+
+      * `role` — 固定为 `"assistant"`
+      * `content` — 文本内容（工具调用时为 `null`）
+      * `tool_calls` — 工具调用列表（有工具调用时存在）
+    </ResponseField>
+
+    <ResponseField name="delta" type="object">
+      **流式响应**中的增量内容
+
+      * 首帧：`{"role": "assistant"}`
+      * 文本帧：`{"content": "..."}`
+      * 工具调用帧：`{"tool_calls": [{"index": 0, "id": "...", "type": "function", "function": {"name": "...", "arguments": ""}}]}`
+      * 结束帧：`{}`
+    </ResponseField>
+
+    <ResponseField name="finish_reason" type="string">
+      停止原因
+
+      * `"stop"` — 自然结束
+      * `"length"` — 达到 `max_tokens` 上限
+      * `"tool_calls"` — 模型请求调用工具
+      * `"content_filter"` — 内容过滤
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="usage" type="object">
+  Token 使用统计（非流式中在响应体顶层，流式中在最后一帧）
+
+  <Expandable title="字段说明">
+    <ResponseField name="prompt_tokens" type="integer">
+      输入 token 数（含系统提示词）
+    </ResponseField>
+
+    <ResponseField name="completion_tokens" type="integer">
+      输出 token 数
+    </ResponseField>
+
+    <ResponseField name="total_tokens" type="integer">
+      总 token 数
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+  ```bash cURL theme={null}
+  curl https://aireiter.com/api/v1/chat/completions \
+    -H "Authorization: Bearer $API_KEY" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "model": "claude-sonnet-4-5-20250929",
+      "messages": [
+        {"role": "user", "content": "你好，世界"}
+      ]
+    }'
+  ```
+
+  ```python Python theme={null}
+  from openai import OpenAI
+
+  client = OpenAI(
+      api_key="YOUR_API_KEY",
+      base_url="https://aireiter.com/api/v1"
+  )
+
+  response = client.chat.completions.create(
+      model="claude-sonnet-4-5-20250929",
+      messages=[
+          {"role": "user", "content": "你好，世界"}
+      ]
+  )
+
+  print(response.choices[0].message.content)
+  ```
+
+  ```javascript JavaScript theme={null}
+  import OpenAI from 'openai';
+
+  const client = new OpenAI({
+    apiKey: process.env.API_KEY,
+    baseURL: 'https://aireiter.com/api/v1'
+  });
+
+  const response = await client.chat.completions.create({
+    model: 'claude-sonnet-4-5-20250929',
+    messages: [
+      { role: 'user', content: '你好，世界' }
+    ]
+  });
+
+  console.log(response.choices[0].message.content);
+  ```
+
+  ```go Go theme={null}
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+      "os"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/v1/chat/completions"
+
+      payload := map[string]interface{}{
+          "model": "claude-sonnet-4-5-20250929",
+          "messages": []map[string]string{
+              {"role": "user", "content": "你好，世界"},
+          },
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer "+os.Getenv("API_KEY"))
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java theme={null}
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url    = "https://aireiter.com/api/v1/chat/completions";
+          String apiKey = System.getenv("API_KEY");
+
+          String payload = """
+          {
+            "model": "claude-sonnet-4-5-20250929",
+            "messages": [
+              {"role": "user", "content": "你好，世界"}
+            ]
+          }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer " + apiKey)
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP theme={null}
+  <?php
+
+  $url    = "https://aireiter.com/api/v1/chat/completions";
+  $apiKey = getenv('API_KEY');
+
+  $payload = [
+      "model"    => "claude-sonnet-4-5-20250929",
+      "messages" => [
+          ["role" => "user", "content" => "你好，世界"]
+      ]
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer " . $apiKey,
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby theme={null}
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url     = URI("https://aireiter.com/api/v1/chat/completions")
+  api_key = ENV['API_KEY']
+
+  payload = {
+    model:    "claude-sonnet-4-5-20250929",
+    messages: [{ role: "user", content: "你好，世界" }]
+  }
+
+  http         = Net::HTTP.new(url.host, url.port)
+  http.use_ssl = true
+
+  request                   = Net::HTTP::Post.new(url)
+  request["Authorization"]  = "Bearer #{api_key}"
+  request["Content-Type"]   = "application/json"
+  request.body              = payload.to_json
+
+  puts http.request(request).body
+  ```
+
+  ```swift Swift theme={null}
+  import Foundation
+
+  let url    = URL(string: "https://aireiter.com/api/v1/chat/completions")!
+  let apiKey = ProcessInfo.processInfo.environment["API_KEY"] ?? ""
+
+  let payload: [String: Any] = [
+      "model":    "claude-sonnet-4-5-20250929",
+      "messages": [["role": "user", "content": "你好，世界"]]
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json",  forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  URLSession.shared.dataTask(with: request) { data, _, _ in
+      if let data = data {
+          print(String(data: data, encoding: .utf8) ?? "")
+      }
+  }.resume()
+  ```
+
+  ```csharp C# theme={null}
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url    = "https://aireiter.com/api/v1/chat/completions";
+          var apiKey = Environment.GetEnvironmentVariable("API_KEY");
+
+          var payload = @"{
+              ""model"": ""claude-sonnet-4-5-20250929"",
+              ""messages"": [
+                  {""role"": ""user"", ""content"": ""你好，世界""}
+              ]
+          }";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
+
+          var content  = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          Console.WriteLine(await response.Content.ReadAsStringAsync());
+      }
+  }
+  ```
+
+  ```c C theme={null}
+  #include <stdio.h>
+  #include <curl/curl.h>
+  #include <stdlib.h>
+  #include <string.h>
+
+  int main(void) {
+      CURL *curl;
+      const char *api_key = getenv("API_KEY");
+
+      curl_global_init(CURL_GLOBAL_DEFAULT);
+      curl = curl_easy_init();
+
+      if (curl) {
+          const char *payload =
+              "{\"model\":\"claude-sonnet-4-5-20250929\","
+              "\"messages\":[{\"role\":\"user\",\"content\":\"你好，世界\"}]}";
+
+          char auth_header[256];
+          snprintf(auth_header, sizeof(auth_header), "Authorization: Bearer %s", api_key);
+
+          struct curl_slist *headers = NULL;
+          headers = curl_slist_append(headers, auth_header);
+          headers = curl_slist_append(headers, "Content-Type: application/json");
+
+          curl_easy_setopt(curl, CURLOPT_URL, "https://aireiter.com/api/v1/chat/completions");
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
+          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+          curl_easy_perform(curl);
+          curl_slist_free_all(headers);
+          curl_easy_cleanup(curl);
+      }
+
+      curl_global_cleanup();
+      return 0;
+  }
+  ```
+
+  ```dart Dart theme={null}
+  import 'dart:convert';
+  import 'dart:io';
+  import 'package:http/http.dart' as http;
+
+  void main() async {
+    final url    = Uri.parse('https://aireiter.com/api/v1/chat/completions');
+    final apiKey = Platform.environment['API_KEY']!;
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer $apiKey',
+        'Content-Type':  'application/json',
+      },
+      body: jsonEncode({
+        'model':    'claude-sonnet-4-5-20250929',
+        'messages': [{'role': 'user', 'content': '你好，世界'}],
+      }),
+    );
+
+    print(response.body);
+  }
+  ```
+
+  ```r R theme={null}
+  library(httr)
+  library(jsonlite)
+
+  url     <- "https://aireiter.com/api/v1/chat/completions"
+  api_key <- Sys.getenv("API_KEY")
+
+  response <- POST(
+    url,
+    add_headers(
+      `Authorization` = paste("Bearer", api_key),
+      `Content-Type`  = "application/json"
+    ),
+    body = toJSON(list(
+      model    = "claude-sonnet-4-5-20250929",
+      messages = list(list(role = "user", content = "你好，世界"))
+    ), auto_unbox = TRUE),
+    encode = "raw"
+  )
+
+  cat(content(response, "text"))
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200 非流式 theme={null}
+  {
+    "id": "chatcmpl-9vKqnMf3Ax8ZpRdTw2LsYe7b",
+    "object": "chat.completion",
+    "created": 1741680000,
+    "model": "claude-sonnet-4-5-20250929",
+    "task_id": "task_abc123",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "你好！有什么我可以帮你的吗？"
+        },
+        "finish_reason": "stop"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 12,
+      "completion_tokens": 15,
+      "total_tokens": 27
+    }
+  }
+  ```
+
+  ```json 200 工具调用 theme={null}
+  {
+    "id": "chatcmpl-9vKqnMf3Ax8ZpRdTw2LsYe7b",
+    "object": "chat.completion",
+    "created": 1741680000,
+    "model": "claude-sonnet-4-5-20250929",
+    "task_id": "task_abc123",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": null,
+          "tool_calls": [
+            {
+              "id": "call_01A09q90qw90lq917835lq9",
+              "type": "function",
+              "function": {
+                "name": "get_weather",
+                "arguments": "{\"city\": \"北京\"}"
+              }
+            }
+          ]
+        },
+        "finish_reason": "tool_calls"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 85,
+      "completion_tokens": 22,
+      "total_tokens": 107
+    }
+  }
+  ```
+
+  ```json 400 theme={null}
+  {
+    "error": {
+      "message": "messages is required and must not be empty",
+      "type": "invalid_request_error",
+      "param": null,
+      "code": null
+    }
+  }
+  ```
+
+  ```json 401 theme={null}
+  {
+    "error": {
+      "message": "Invalid API key",
+      "type": "invalid_request_error",
+      "param": null,
+      "code": null
+    }
+  }
+  ```
+
+  ```json 402 theme={null}
+  {
+    "error": {
+      "message": "Insufficient credits",
+      "type": "invalid_request_error",
+      "param": null,
+      "code": null
+    }
+  }
+  ```
+
+  ```json 404 theme={null}
+  {
+    "error": {
+      "message": "Model 'xxx' not found",
+      "type": "invalid_request_error",
+      "param": null,
+      "code": null
+    }
+  }
+  ```
+
+  ```json 502 theme={null}
+  {
+    "error": {
+      "message": "All providers failed",
+      "type": "invalid_request_error",
+      "param": null,
+      "code": null
+    }
+  }
+  ```
+</ResponseExample>
+
+## 使用示例
+
+### 基础对话
+
+```python theme={null}
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://aireiter.com/api/v1"
+)
+
+response = client.chat.completions.create(
+    model="claude-sonnet-4-5-20250929",
+    messages=[
+        {"role": "user", "content": "用 Python 实现快速排序"}
+    ]
+)
+
+print(response.choices[0].message.content)
+```
+
+### 系统提示词 + 多轮对话
+
+```python theme={null}
+response = client.chat.completions.create(
+    model="claude-sonnet-4-5-20250929",
+    messages=[
+        {"role": "system",    "content": "你是一位资深 Python 开发专家，擅长代码审查和性能优化。"},
+        {"role": "user",      "content": "什么是 GIL？"},
+        {"role": "assistant", "content": "GIL（全局解释器锁）是..."},
+        {"role": "user",      "content": "怎么绕过 GIL 实现真正的并行？"}
+    ],
+    temperature=0.3
+)
+```
+
+### 流式响应
+
+```python theme={null}
+stream = client.chat.completions.create(
+    model="claude-sonnet-4-5-20250929",
+    messages=[{"role": "user", "content": "写一篇关于量子计算的技术博客"}],
+    stream=True
+)
+
+for chunk in stream:
+    delta = chunk.choices[0].delta
+    if delta.content:
+        print(delta.content, end="", flush=True)
+```
+
+### 工具调用（完整多轮流程）
+
+```python theme={null}
+import json
+
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "get_stock_price",
+            "description": "获取股票实时价格",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "ticker": {"type": "string", "description": "股票代码，例如：AAPL"}
+                },
+                "required": ["ticker"]
+            }
+        }
+    }
+]
+
+messages = [{"role": "user", "content": "特斯拉股价是多少？"}]
+
+# 第一轮：模型决定调用工具
+response = client.chat.completions.create(
+    model="claude-sonnet-4-5-20250929",
+    messages=messages,
+    tools=tools
+)
+
+# 处理工具调用
+if response.choices[0].finish_reason == "tool_calls":
+    tool_call = response.choices[0].message.tool_calls[0]
+
+    # 执行工具（业务逻辑）
+    tool_result = {"price": 245.80, "currency": "USD"}
+
+    # 第二轮：将结果返回给模型
+    messages += [
+        response.choices[0].message,
+        {
+            "role": "tool",
+            "tool_call_id": tool_call.id,
+            "content": json.dumps(tool_result)
+        }
+    ]
+
+    final = client.chat.completions.create(
+        model="claude-sonnet-4-5-20250929",
+        messages=messages,
+        tools=tools
+    )
+    print(final.choices[0].message.content)
+```
+
+### 结构化输出（JSON Schema）
+
+```python theme={null}
+response = client.chat.completions.create(
+    model="claude-sonnet-4-5-20250929",
+    messages=[
+        {"role": "user", "content": "分析以下产品评论的情感：'这款耳机音质出色，但续航一般'"}
+    ],
+    response_format={
+        "type": "json_schema",
+        "json_schema": {
+            "name": "sentiment_analysis",
+            "strict": True,
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "sentiment":   {"type": "string", "enum": ["positive", "negative", "mixed"]},
+                    "score":       {"type": "number", "description": "情感分值 -1.0 到 1.0"},
+                    "highlights":  {"type": "array", "items": {"type": "string"}}
+                },
+                "required": ["sentiment", "score", "highlights"]
+            }
+        }
+    }
+)
+
+result = json.loads(response.choices[0].message.content)
+print(result)
+# {"sentiment": "mixed", "score": 0.2, "highlights": ["音质出色", "续航一般"]}
+```
+
+### 采样参数控制
+
+```python theme={null}
+# 创意写作：高温度 + 频率惩罚
+response = client.chat.completions.create(
+    model="claude-sonnet-4-5-20250929",
+    messages=[{"role": "user", "content": "写一首关于秋天的现代诗"}],
+    temperature=0.9,
+    frequency_penalty=0.5,
+    presence_penalty=0.3
+)
+
+# 精确输出：低温度 + 固定种子
+response = client.chat.completions.create(
+    model="claude-sonnet-4-5-20250929",
+    messages=[{"role": "user", "content": "计算 1234 × 5678 的结果"}],
+    temperature=0.0,
+    seed=42
+)
+```
+
+## 流式响应事件格式
+
+```text theme={null}
+data: {"id":"chatcmpl-xxx","object":"chat.completion.chunk","created":1741680000,"model":"claude-sonnet-4-5-20250929","task_id":"task_abc123","choices":[{"index":0,"delta":{"role":"assistant"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-xxx","object":"chat.completion.chunk","created":1741680000,"model":"claude-sonnet-4-5-20250929","choices":[{"index":0,"delta":{"content":"你好"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-xxx","object":"chat.completion.chunk","created":1741680000,"model":"claude-sonnet-4-5-20250929","choices":[{"index":0,"delta":{"content":"！"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-xxx","object":"chat.completion.chunk","created":1741680000,"model":"claude-sonnet-4-5-20250929","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"usage":{"prompt_tokens":12,"completion_tokens":5,"total_tokens":17}}
+
+data: [DONE]
+```
+
+工具调用流式事件：
+
+```text theme={null}
+data: {"id":"chatcmpl-xxx","object":"chat.completion.chunk","created":1741680000,"model":"claude-sonnet-4-5-20250929","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"call_abc","type":"function","function":{"name":"get_weather","arguments":""}}]},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-xxx","object":"chat.completion.chunk","created":1741680000,"model":"claude-sonnet-4-5-20250929","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"{\"city\""}}]},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-xxx","object":"chat.completion.chunk","created":1741680000,"model":"claude-sonnet-4-5-20250929","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":": \"北京\"}"}}]},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-xxx","object":"chat.completion.chunk","created":1741680000,"model":"claude-sonnet-4-5-20250929","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":85,"completion_tokens":22,"total_tokens":107}}
+
+data: [DONE]
+```
+
+## 注意事项
+
+1. **认证方式**：仅支持 `Authorization: Bearer <api_key>` 格式，使用 OpenAI SDK 时直接设置 `api_key` 即可。
+
+2. **默认流式**：`stream` 参数默认为 `true`。如需非流式响应，需显式传入 `"stream": false`。
+
+3. **积分不足**：余额不足时返回 HTTP `402`，请充值后重试。
+
+4. **stop 与停止序列**：`stop` 参数目前不生效，底层供应商暂不支持该功能，传入参数不会报错但也不会在指定序列处停止生成。
+
+5. **response_format 注意**：当前底层供应商对 `response_format` 支持有限——`json_object` 模式下模型可能仍输出 Markdown 代码块而非纯 JSON；`json_schema` 模式下 Schema 约束可能不被遵守。如需结构化输出，建议在 prompt 中明确描述所需格式。
+
+6. **工具参数**：`parameters` 字段必须是合法的 JSON Schema，`required` 数组决定哪些参数为必填项。
+
+7. **模型选择建议**：
+   * Haiku — 高频简单问答，成本最低
+   * Sonnet — 代码生成、文档处理，综合推荐
+   * Opus — 复杂推理、长文分析，能力最强
+   * `-thinking` 系列 — 数学证明、逻辑推导等需要深度思考的场景

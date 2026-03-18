@@ -1,25 +1,28 @@
 ---
-title: 'AIReiter — AI Image and Video Generation API Platform'
-description: 'Unified AI image and video generation API platform. Supports multiple mainstream models including GPT-4o Image, Gemini, Sora2, VEO3, and more. Asynchronous task processing, transparent pricing, simple and easy to use.'
+title: 'AIReiter — AI Text, Image, and Video Generation API Platform'
+description: 'A unified AI text, image, and video generation API platform. Supports multiple mainstream models including Claude, GPT, Gemini, Sora2, VEO3, and more. Compatible with OpenAI SDK, asynchronous task processing, transparent pricing, and easy to use.'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
-AIReiter is a unified AI content generation API platform that provides image and video generation services. With simple REST API calls, you can use multiple mainstream AI models such as GPT-4o, Gemini, Sora2, and VEO3 to generate high-quality image and video content.
+AIReiter is a unified AI content generation API platform offering text conversation, image generation, and video generation services. By simple REST API calls, you can use various mainstream AI models such as Claude, GPT, Gemini, Sora2, and VEO3. The text interface is fully compatible with the OpenAI SDK and can be used by directly replacing the `baseURL`.
 
 ## Quick Start
 
 <CardGroup cols={2}>
+  <Card title="Text Chat" icon="message" href="/en/api-reference/text/openai-chat-completions-api/endpoint">
+    Compatible with OpenAI SDK, supports Claude, GPT and other models
+  </Card>
   <Card title="Image Generation" icon="image" href="/en/api-reference/images/gpt-4o/generation">
-    Generate images using models like GPT-4o, Gemini, Seedream
+    Generate images using GPT-4o, Gemini, Seedream and other models
   </Card>
   <Card title="Video Generation" icon="video" href="/en/api-reference/videos/sora2/generation">
-    Generate video content using models like Sora2, VEO3
+    Generate video content using Sora2, VEO3 and other models
   </Card>
   <Card title="Task Status Query" icon="list-check" href="/en/api-reference/tasks/status">
-    Query the execution status and results of asynchronous tasks
+    Query execution status and results of asynchronous tasks
   </Card>
   <Card title="Check Balance" icon="wallet" href="/en/api-reference/tasks/balance">
-    Check point balance and remaining free quota for each model
+    Check credit balance and remaining free usage counts for each model
   </Card>
   <Card title="Get API Key" icon="key" href={apiKeyUrl}>
     Access the console to get your API Key
@@ -83,9 +86,25 @@ After the task is completed, the response will include URLs of the generated ima
 
 ## Supported Models
 
+### Text Conversation Series
+
+Compatible with OpenAI Chat Completions API and Responses API, supporting multi-turn conversations, tool calls, structured output, and streaming responses:
+
+<CardGroup cols={2}>
+  <Card title="OpenAI Chat Completions API" icon="message" href="/en/api-reference/text/openai-chat-completions-api/endpoint">
+    Compatible with OpenAI SDK, supporting models like GPT, Claude, etc.
+  </Card>
+  <Card title="OpenAI Responses API" icon="message" href="/en/api-reference/text/openai-responses-api/endpoint">
+    OpenAI's latest Responses format
+  </Card>
+  <Card title="Claude Messages API" icon="message" href="/en/api-reference/text/claude-messages-api/endpoint">
+    Anthropic native Messages API format
+  </Card>
+</CardGroup>
+
 ### Image Generation Series
 
-AIReiter offers various image generation models, supporting text-to-image and image-to-image capabilities:
+AIReiter provides various image generation models, supporting text-to-image and image-to-image functions:
 
 <CardGroup cols={2}>
   <Card title="GPT-4o Image" icon="image" href="/en/api-reference/images/gpt-4o/generation">
@@ -95,7 +114,7 @@ AIReiter offers various image generation models, supporting text-to-image and im
     Google's latest fast image generation model
   </Card>
   <Card title="Gemini-3-Pro (Nano banana pro)" icon="image" href="/en/api-reference/images/gemini-3-pro/generation">
-    Google's professional image generation model
+    Google's professional-grade image generation model
   </Card>
   <Card title="Nano Banana V2" icon="image" href="/en/api-reference/images/nano-banana-v2/generation">
     Supports multiple generation modes including text-to-image, image-to-image, and image editing
@@ -107,7 +126,7 @@ AIReiter offers various image generation models, supporting text-to-image and im
     Seedream version 4.5
   </Card>
   <Card title="Seedream V5 lite" icon="image" href="/en/api-reference/images/seedream-v5-lite/generation">
-    Latest Seedream version, supports internet search enhanced generation
+    Seedream latest version, supporting internet search enhanced generation
   </Card>
 </CardGroup>
 
@@ -120,7 +139,7 @@ Supports text-to-video and image-to-video generation, offering multiple resoluti
     OpenAI Sora2 video generation model (10-15 seconds)
   </Card>
   <Card title="Sora2 Pro" icon="video" href="/en/api-reference/videos/sora2-pro/generation">
-    Sora2 Pro, supports HD resolution
+    Sora2 Pro version, supporting HD resolution
   </Card>
   <Card title="VEO3.1" icon="video" href="/en/api-reference/videos/veo3-1/generation">
     Google VEO3.1 video generation model
@@ -129,13 +148,13 @@ Supports text-to-video and image-to-video generation, offering multiple resoluti
     VEO3.1 fast version
   </Card>
   <Card title="Seedance-1.5-pro" icon="video" href="/en/api-reference/videos/seedance-1-5-pro/generation">
-    Supports start/end frame control and audio generation (4-12 seconds)
+    Supports control of start/end frames and audio generation (4-12 seconds)
   </Card>
   <Card title="Seedance Pro Fast" icon="video" href="/en/api-reference/videos/seedance_pro_fast/generation">
-    Seedance fast version, supports start frame control
+    Seedance fast version, supporting first frame control
   </Card>
   <Card title="Seedance Pro" icon="video" href="/en/api-reference/videos/seedance_pro/generation">
-    Seedance Pro, supports start/end frame control
+    Seedance professional version, supporting start and end frame control
   </Card>
 </CardGroup>
 
@@ -143,38 +162,39 @@ Supports text-to-video and image-to-video generation, offering multiple resoluti
 
 ### Asynchronous Task Processing
 
-All generation requests are processed asynchronously to avoid long waiting times:
+All generation requests use an asynchronous processing mode to avoid long waiting times:
 
-- When submitting a task, `out_task_id` (the initiator's task ID for business identification) must be provided
-- Immediately returns your submitted `out_task_id`
-- You can use `out_task_id` to query the task status
-- Supports optional webhook callback notifications
-- Task status updates in real time: `pending` → `processing` → `completed`
+- You need to provide `out_task_id` (initiator’s task ID, used for business identification) when submitting tasks
+- The submitted `out_task_id` is returned immediately
+- You can query the task status using the `out_task_id`
+- Supports webhook callback notifications (optional)
+- Task status is updated in real time: `pending` → `processing` → `completed`
 
-### Multi-Model Support
+### Multi-model Support
 
-A unified API endpoint supporting multiple image and video generation models:
+A unified API endpoint supporting various text, image, and video generation models:
 
-- **Image Generation**: 5 models including GPT-4o, Gemini, Seedream
-- **Video Generation**: 7 models including Sora2, VEO3, Seedance
+- **Text conversation**: Claude, GPT and other models, compatible with OpenAI SDK
+- **Image generation**: GPT-4o, Gemini, Seedream and other models
+- **Video generation**: Sora2, VEO3, Seedance and other models
 - Unified request format and response structure
 - Flexible parameter configuration
 
 ### Transparent Pricing
 
-Charged by credits with clear transparency:
+Charged by points, transparent and clear:
 
-- Each task returns estimated credit consumption
-- Actual credit consumption shown after task completion
+- Each task returns the estimated consumed points
+- Actual consumed points are shown after task completion
 - Pay only for successfully generated content
 - No hidden fees
 
 ### Flexible Configuration
 
-Supports a variety of generation parameter configurations:
+Supports multiple generation parameter configurations:
 
-- **Image**: multiple aspect ratios (1:1, 3:2, 2:3)
-- **Video**: multiple aspect ratios (16:9, 9:16), durations (10 seconds, 15 seconds), resolutions
+- **Image**: Various aspect ratios (1:1, 3:2, 2:3)
+- **Video**: Various aspect ratios (16:9, 9:16), durations (10 seconds, 15 seconds), resolutions
 - Supports reference images (image-to-image, image-to-video)
 
 ## Authentication Method
@@ -238,6 +258,9 @@ Visit the <a href={apiKeyUrl} target="_blank">API Key Management Page</a> to obt
 ## Next Steps
 
 <CardGroup cols={2}>
+  <Card title="View Text Conversation Documentation" icon="message" href="/en/api-reference/text/openai-chat-completions-api/endpoint">
+    Learn how to use the text conversation API
+  </Card>
   <Card title="View Image Generation Documentation" icon="image" href="/en/api-reference/images/gpt-4o/generation">
     Learn how to use various image generation models
   </Card>

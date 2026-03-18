@@ -1,0 +1,793 @@
+---
+title: 'Claude Messages API'
+description: |
+    - Fully compatible with Anthropic Messages API format
+    - Supports multi-turn conversation and visual understanding
+    - Supports streaming and non-streaming output modes
+api: 'POST https://aireiter.com/api/v1/messages'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="x-api-key" type="string" required>
+  API key used for authentication (Anthropic SDK standard method)
+
+  Get API Key:
+
+  Visit the <a href={apiKeyUrl} target="_blank">API Key management page</a> to obtain your API key
+
+  ```
+  x-api-key: YOUR_API_KEY
+  ```
+
+  Bearer Token format is also supported:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  Model Name
+
+  * `claude-haiku-4-5-20251001` — Lightweight and fast, suitable for high-frequency simple tasks
+  * `claude-sonnet-4-5-20250929` — Balanced performance and cost, overall recommended
+  * `claude-sonnet-4-6` — New version of Sonnet, more powerful
+  * `claude-opus-4-5-20251101` — Flagship inference model, suitable for complex analysis
+  * `claude-opus-4-6` — New version of Opus, most capable
+
+  For the full list of models, please refer to: `GET /api/v1/models`
+</ParamField>
+
+<ParamField body="messages" type="array" required>
+  Message List
+
+  The model generates the next reply based on message history. Each message contains `role` and `content`.
+
+  <Expandable title="Field Description">
+    <ParamField body="role" type="string" required>
+      Role Type
+
+      * `user` — User message
+      * `assistant` — AI reply (used for multi-turn dialogue or pre-filling)
+    </ParamField>
+
+    <ParamField body="content" type="string | array" required>
+      Message Content
+
+      Can be a plain string or an array of content blocks (supports text and images).
+    </ParamField>
+  </Expandable>
+
+  **Plain text message:**
+
+  ```json theme={null}
+  [{"role": "user", "content": "Hello"}]
+  ```
+
+  **Multi-turn conversation:**
+
+  ```json theme={null}
+  [
+    {"role": "user",      "content": "What is machine learning?"},
+    {"role": "assistant", "content": "Machine learning is..."},
+    {"role": "user",      "content": "Can you give an example?"}
+  ]
+  ```
+
+  **Multimodal (image + text):**
+
+  ```json theme={null}
+  [
+    {
+      "role": "user",
+      "content": [
+        {
+          "type": "image",
+          "source": {
+            "type": "url",
+            "url": "https://example.com/chart.png"
+          }
+        },
+        {"type": "text", "text": "Analyze this chart"}
+      ]
+    }
+  ]
+  ```
+
+  **Pre-filled assistant reply:**
+
+  ```json theme={null}
+  [
+    {"role": "user",      "content": "Return the analysis result in JSON format"},
+    {"role": "assistant", "content": "{"}
+  ]
+  ```
+</ParamField>
+
+<ParamField body="max_tokens" type="integer" required>
+  Maximum output tokens
+
+  Controls the maximum number of tokens the model can generate; the model may naturally end before reaching the limit. Minimum value: `1`.
+
+  Different models have different context window limits, please refer to the model documentation.
+</ParamField>
+
+<ParamField body="system" type="string | array">
+  System prompt
+
+  Sets the model’s role, instructions, and background information.
+
+  **String format (recommended):**
+
+  ```json theme={null}
+  {"system": "You are a professional Python programming tutor. Answer all questions in Chinese."}
+  ```
+
+  **Structured format (supports cache_control):**
+
+  ```json theme={null}
+  {
+    "system": [
+      {
+        "type": "text",
+        "text": "You are a professional Python programming tutor.",
+        "cache_control": {"type": "ephemeral"}
+      }
+    ]
+  }
+  ```
+</ParamField>
+
+<ParamField body="stream" type="boolean">
+  Enable streaming output
+
+  Set to `true` to return data in real-time via SSE (Server-Sent Events). **Default is `true`**. To disable streaming, explicitly pass `"stream": false`.
+
+  Streaming event order:
+  `ping` → `message_start` → `content_block_start` → `content_block_delta` × N → `content_block_stop` → `message_delta` → `message_stop`
+</ParamField>
+
+<ParamField body="temperature" type="number">
+  Temperature, range `0–1`
+
+  * Low value (e.g., `0.2`): output more certain and conservative
+  * High value (e.g., `0.8`): output more random and creative
+
+  Default is `1.0`. Not recommended to use with `top_p` simultaneously.
+</ParamField>
+
+<ParamField body="top_p" type="number">
+  Nucleus sampling parameter, range `0–1`
+
+  Samples from the set of tokens whose cumulative probability reaches `top_p`. Default is `1.0`.
+  Not recommended to use with `temperature` simultaneously.
+</ParamField>
+
+<ParamField body="top_k" type="integer">
+  Top-K sampling
+
+  Samples only from the top K tokens with the highest probability, filtering low-probability long tail. Suitable for advanced use case tuning.
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">
+  Unique identifier of the message
+
+  Example: `"msg_01XFDUDYJgAACzvnptvVoYEL"`
+</ResponseField>
+
+<ResponseField name="type" type="string">
+  Object type, fixed as `"message"`
+</ResponseField>
+
+<ResponseField name="role" type="string">
+  Role, fixed as `"assistant"`
+</ResponseField>
+
+<ResponseField name="content" type="array">
+  Array of content blocks
+
+  **Text content:**
+
+  ```json theme={null}
+  [{"type": "text", "text": "Hello! I am Claude."}]
+  ```
+
+  Content type: `text` (text)
+</ResponseField>
+
+<ResponseField name="model" type="string">
+  Name of the model that actually processed the request
+</ResponseField>
+
+<ResponseField name="stop_reason" type="string">
+  Reason for stopping
+
+  * `end_turn` — natural end
+  * `max_tokens` — reached the `max_tokens` limit
+  * `stop_sequence` — triggered a custom stop sequence
+</ResponseField>
+
+<ResponseField name="stop_sequence" type="string | null">
+  If stopped due to a stop sequence, returns the triggered sequence content; otherwise `null`
+</ResponseField>
+
+<ResponseField name="usage" type="object">
+  Token usage statistics
+
+  <Expandable title="Field Explanation">
+    <ResponseField name="input_tokens" type="integer">
+      Number of input tokens (including system prompts)
+    </ResponseField>
+
+    <ResponseField name="output_tokens" type="integer">
+      Number of output tokens
+    </ResponseField>
+
+    <ResponseField name="cache_creation_input_tokens" type="integer">
+      Number of tokens written into the cache this time (Prompt Caching)
+    </ResponseField>
+
+    <ResponseField name="cache_read_input_tokens" type="integer">
+      Number of tokens read from the cache this time (present when cache hit occurs)
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+  ```bash cURL theme={null}
+  curl https://aireiter.com/api/v1/messages \
+    -H "x-api-key: $API_KEY" \
+    -H "anthropic-version: 2023-06-01" \
+    -H "content-type: application/json" \
+    -d '{
+      "model": "claude-sonnet-4-5-20250929",
+      "max_tokens": 1024,
+      "messages": [
+        {"role": "user", "content": "Hello, world"}
+      ]
+    }'
+  ```
+
+  ```python Python theme={null}
+  import anthropic
+
+  client = anthropic.Anthropic(
+      api_key="YOUR_API_KEY",
+      base_url="https://aireiter.com/api"
+  )
+
+  message = client.messages.create(
+      model="claude-sonnet-4-5-20250929",
+      max_tokens=1024,
+      messages=[
+          {"role": "user", "content": "Hello, world"}
+      ]
+  )
+
+  print(message.content[0].text)
+  ```
+
+  ```javascript JavaScript theme={null}
+  import Anthropic from '@anthropic-ai/sdk';
+
+  const client = new Anthropic({
+    apiKey: process.env.API_KEY,
+    baseURL: 'https://aireiter.com/api'
+  });
+
+  const message = await client.messages.create({
+    model: 'claude-sonnet-4-5-20250929',
+    max_tokens: 1024,
+    messages: [
+      { role: 'user', content: 'Hello, world' }
+    ]
+  });
+
+  console.log(message.content[0].text);
+  ```
+
+  ```go Go theme={null}
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+      "os"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/v1/messages"
+
+      payload := map[string]interface{}{
+          "model":      "claude-sonnet-4-5-20250929",
+          "max_tokens": 1024,
+          "messages": []map[string]string{
+              {"role": "user", "content": "Hello, world"},
+          },
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("x-api-key", os.Getenv("API_KEY"))
+      req.Header.Set("anthropic-version", "2023-06-01")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java theme={null}
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/v1/messages";
+          String apiKey = System.getenv("API_KEY");
+
+          String payload = """
+          {
+            "model": "claude-sonnet-4-5-20250929",
+            "max_tokens": 1024,
+            "messages": [
+              {"role": "user", "content": "Hello, world"}
+            ]
+          }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("x-api-key", apiKey)
+              .header("anthropic-version", "2023-06-01")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP theme={null}
+  <?php
+
+  $url = "https://aireiter.com/api/v1/messages";
+  $apiKey = getenv('API_KEY');
+
+  $payload = [
+      "model"      => "claude-sonnet-4-5-20250929",
+      "max_tokens" => 1024,
+      "messages"   => [
+          ["role" => "user", "content" => "Hello, world"]
+      ]
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "x-api-key: " . $apiKey,
+      "anthropic-version: 2023-06-01",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby theme={null}
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url     = URI("https://aireiter.com/api/v1/messages")
+  api_key = ENV['API_KEY']
+
+  payload = {
+    model:      "claude-sonnet-4-5-20250929",
+    max_tokens: 1024,
+    messages:   [{ role: "user", content: "Hello, world" }]
+  }
+
+  http         = Net::HTTP.new(url.host, url.port)
+  http.use_ssl = true
+
+  request                    = Net::HTTP::Post.new(url)
+  request["x-api-key"]       = api_key
+  request["anthropic-version"] = "2023-06-01"
+  request["Content-Type"]    = "application/json"
+  request.body               = payload.to_json
+
+  puts http.request(request).body
+  ```
+
+  ```swift Swift theme={null}
+  import Foundation
+
+  let url    = URL(string: "https://aireiter.com/api/v1/messages")!
+  let apiKey = ProcessInfo.processInfo.environment["API_KEY"] ?? ""
+
+  let payload: [String: Any] = [
+      "model":      "claude-sonnet-4-5-20250929",
+      "max_tokens": 1024,
+      "messages":   [["role": "user", "content": "Hello, world"]]
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue(apiKey,        forHTTPHeaderField: "x-api-key")
+  request.setValue("2023-06-01",  forHTTPHeaderField: "anthropic-version")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  URLSession.shared.dataTask(with: request) { data, _, _ in
+      if let data = data {
+          print(String(data: data, encoding: .utf8) ?? "")
+      }
+  }.resume()
+  ```
+
+  ```csharp C# theme={null}
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url    = "https://aireiter.com/api/v1/messages";
+          var apiKey = Environment.GetEnvironmentVariable("API_KEY");
+
+          var payload = @"{
+              ""model"": ""claude-sonnet-4-5-20250929"",
+              ""max_tokens"": 1024,
+              ""messages"": [
+                  {""role"": ""user"", ""content"": ""Hello, world""}
+              ]
+          }";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("x-api-key", apiKey);
+          client.DefaultRequestHeaders.Add("anthropic-version", "2023-06-01");
+
+          var content  = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          Console.WriteLine(await response.Content.ReadAsStringAsync());
+      }
+  }
+  ```
+
+  ```c C theme={null}
+  #include <stdio.h>
+  #include <curl/curl.h>
+  #include <stdlib.h>
+  #include <string.h>
+
+  int main(void) {
+      CURL *curl;
+      const char *api_key = getenv("API_KEY");
+
+      curl_global_init(CURL_GLOBAL_DEFAULT);
+      curl = curl_easy_init();
+
+      if (curl) {
+          const char *payload =
+              "{\"model\":\"claude-sonnet-4-5-20250929\","
+              "\"max_tokens\":1024,"
+              "\"messages\":[{\"role\":\"user\",\"content\":\"Hello, world\"}]}";
+
+          char auth_header[256];
+          snprintf(auth_header, sizeof(auth_header), "x-api-key: %s", api_key);
+
+          struct curl_slist *headers = NULL;
+          headers = curl_slist_append(headers, auth_header);
+          headers = curl_slist_append(headers, "anthropic-version: 2023-06-01");
+          headers = curl_slist_append(headers, "Content-Type: application/json");
+
+          curl_easy_setopt(curl, CURLOPT_URL, "https://aireiter.com/api/v1/messages");
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
+          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+          curl_easy_perform(curl);
+          curl_slist_free_all(headers);
+          curl_easy_cleanup(curl);
+      }
+
+      curl_global_cleanup();
+      return 0;
+  }
+  ```
+
+  ```dart Dart theme={null}
+  import 'dart:convert';
+  import 'dart:io';
+  import 'package:http/http.dart' as http;
+
+  void main() async {
+    final url    = Uri.parse('https://aireiter.com/api/v1/messages');
+    final apiKey = Platform.environment['API_KEY']!;
+
+    final response = await http.post(
+      url,
+      headers: {
+        'x-api-key':          apiKey,
+        'anthropic-version':  '2023-06-01',
+        'Content-Type':       'application/json',
+      },
+      body: jsonEncode({
+        'model':      'claude-sonnet-4-5-20250929',
+        'max_tokens': 1024,
+        'messages':   [{'role': 'user', 'content': 'Hello, world'}],
+      }),
+    );
+
+    print(response.body);
+  }
+  ```
+
+  ```r R theme={null}
+  library(httr)
+  library(jsonlite)
+
+  url     <- "https://aireiter.com/api/v1/messages"
+  api_key <- Sys.getenv("API_KEY")
+
+  response <- POST(
+    url,
+    add_headers(
+      `x-api-key`         = api_key,
+      `anthropic-version` = "2023-06-01",
+      `Content-Type`      = "application/json"
+    ),
+    body = toJSON(list(
+      model      = "claude-sonnet-4-5-20250929",
+      max_tokens = 1024,
+      messages   = list(list(role = "user", content = "Hello, world"))
+    ), auto_unbox = TRUE),
+    encode = "raw"
+  )
+
+  cat(content(response, "text"))
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200 theme={null}
+  {
+    "id": "msg_01XFDUDYJgAACzvnptvVoYEL",
+    "type": "message",
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "Hello! I am Claude, nice to meet you."
+      }
+    ],
+    "model": "claude-sonnet-4-5-20250929",
+    "task_id": "v1api_01XFDUDYJgAACzvnptvVoYEL",
+    "stop_reason": "end_turn",
+    "stop_sequence": null,
+    "usage": {
+      "input_tokens": 12,
+      "output_tokens": 18,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+  ```
+
+  ```json 400 theme={null}
+  {
+    "type": "error",
+    "error": {
+      "type": "invalid_request_error",
+      "message": "messages is required and must not be empty"
+    }
+  }
+  ```
+
+  ```json 401 theme={null}
+  {
+    "type": "error",
+    "error": {
+      "type": "authentication_error",
+      "message": "Invalid API key"
+    }
+  }
+  ```
+
+  ```json 402 theme={null}
+  {
+    "type": "error",
+    "error": {
+      "type": "insufficient_credits_error",
+      "message": "Insufficient credits"
+    }
+  }
+  ```
+
+  ```json 404 theme={null}
+  {
+    "type": "error",
+    "error": {
+      "type": "not_found_error",
+      "message": "Model 'xxx' not found"
+    }
+  }
+  ```
+
+  ```json 500 theme={null}
+  {
+    "type": "error",
+    "error": {
+      "type": "api_error",
+      "message": "All providers failed"
+    }
+  }
+  ```
+</ResponseExample>
+
+## Usage Examples
+
+### Basic Conversation
+
+```python theme={null}
+import anthropic
+
+client = anthropic.Anthropic(
+    api_key="YOUR_API_KEY",
+    base_url="https://aireiter.com/api"
+)
+
+message = client.messages.create(
+    model="claude-sonnet-4-5-20250929",
+    max_tokens=1024,
+    messages=[
+        {"role": "user", "content": "Explain the basic principles of quantum computing"}
+    ]
+)
+
+print(message.content[0].text)
+```
+
+### System Prompt + Multi-turn Conversation
+
+```python theme={null}
+message = client.messages.create(
+    model="claude-sonnet-4-5-20250929",
+    max_tokens=1024,
+    system="You are a senior Python developer expert, skilled in code review and optimization suggestions.",
+    messages=[
+        {"role": "user",      "content": "What is a decorator?"},
+        {"role": "assistant", "content": "A decorator is Python syntactic sugar used for..."},
+        {"role": "user",      "content": "Can you give me an example from a real project?"}
+    ]
+)
+```
+
+### Streaming Response
+
+```python theme={null}
+with client.messages.stream(
+    model="claude-sonnet-4-5-20250929",
+    max_tokens=1024,
+    messages=[{"role": "user", "content": "Write a short essay about AI"}]
+) as stream:
+    for text in stream.text_stream:
+        print(text, end="", flush=True)
+```
+
+### Visual Understanding
+
+```python theme={null}
+# URL Images
+message = client.messages.create(
+    model="claude-sonnet-4-5-20250929",
+    max_tokens=1024,
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "image",
+                    "source": {"type": "url", "url": "https://example.com/chart.png"}
+                },
+                {"type": "text", "text": "Describe the trends in this chart"}
+            ]
+        }
+    ]
+)
+
+# Base64 Images
+import base64
+
+with open("image.jpg", "rb") as f:
+    image_data = base64.b64encode(f.read()).decode("utf-8")
+
+message = client.messages.create(
+    model="claude-sonnet-4-5-20250929",
+    max_tokens=1024,
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "image",
+                    "source": {
+                        "type": "base64",
+                        "media_type": "image/jpeg",
+                        "data": image_data
+                    }
+                },
+                {"type": "text", "text": "Analyze this image"}
+            ]
+        }
+    ]
+)
+```
+
+## Streaming Response Event Format
+
+```text theme={null}
+event: ping
+data: {"type":"ping"}
+
+event: message_start
+data: {"type":"message_start","message":{"id":"msg_xxx","type":"message","role":"assistant","content":[],"model":"claude-sonnet-4-5-20250929","stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":25,"output_tokens":0}}}
+
+event: content_block_start
+data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Hello"}}
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":0}
+
+event: message_delta
+data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"output_tokens":18}}
+
+event: message_stop
+data: {"type":"message_stop"}
+```
+
+## Notes
+
+1. **Authentication Methods**: Supports two methods, the `x-api-key` request header or `Authorization: Bearer`; the official Anthropic SDK defaults to the former.
+
+2. **Insufficient Credits**: Returns HTTP `402` when balance is insufficient; please recharge and try again.
+
+3. **Streaming Reconnection**: Clients should implement an SSE reconnection mechanism and, upon disconnection, decide whether to resend the request based on the received content.
+
+4. **Model Selection Recommendations**:
+   * Haiku — High-frequency simple Q&A, lowest cost
+   * Sonnet — Code generation, document processing, generally recommended
+   * Opus — Complex reasoning, long-text analysis, strongest capability

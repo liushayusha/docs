@@ -1,0 +1,1015 @@
+---
+title: 'OpenAI Chat Completions API'
+description: |
+    - Fully compatible with the OpenAI Chat Completions API format
+    - Supports multi-turn dialogues, tool calling, structured output, and streaming responses
+    - Can directly replace the `baseURL` of the OpenAI SDK without modifying other code
+api: 'POST https://aireiter.com/api/v1/chat/completions'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  API key in Bearer Token format
+
+  Get the API key:
+
+  Visit the <a href={apiKeyUrl} target="_blank">API Key management page</a> to get your API key
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  Model name
+
+  **OpenAI compatible models (recommended for tool calls):**
+  * `gpt-4o-mini` — lightweight and fast, suitable for high-frequency simple tasks
+  * `gpt-4o` — general recommendation, balanced performance and cost
+  * `gpt-5.2` — high-performance version, **full support for tool calls**
+  * For more models, please refer to `GET /api/v1/models`
+
+  **Claude models (Anthropic protocol forwarding):**
+  * `claude-haiku-4-5-20251001` — lightweight and fast
+  * `claude-sonnet-4-5-20250929` — general recommendation
+  * `claude-sonnet-4-6` — new Sonnet version
+  * `claude-opus-4-5-20251101` — flagship inference model
+  * `claude-opus-4-6` — new Opus version, most powerful
+
+  For complete model list, please refer to: `GET /api/v1/models`
+</ParamField>
+
+<ParamField body="messages" type="array" required>
+  Message list
+
+  The model generates the next reply based on the message history. Each message includes `role` and `content`.
+
+  <Expandable title="Field Description">
+    <ParamField body="role" type="string" required>
+      Role type
+
+      * `system` — system prompt (extracted and handled separately from message list)
+      * `user` — user message
+      * `assistant` — AI reply (used for multi-turn conversations)
+    </ParamField>
+
+    <ParamField body="content" type="string" required>
+      Message content, plain text string
+    </ParamField>
+  </Expandable>
+
+  **Plain text message:**
+
+  ```json theme={null}
+  [{"role": "user", "content": "Hello"}]
+  ```
+
+  **Multi-turn conversation:**
+
+  ```json theme={null}
+  [
+    {"role": "system",    "content": "You are a professional code reviewer."},
+    {"role": "user",      "content": "Please review this code snippet."},
+    {"role": "assistant", "content": "Let me analyze it..."},
+    {"role": "user",      "content": "Are there any performance issues?"}
+  ]
+  ```
+
+  **Multi-turn tool calls:**
+
+  ```json theme={null}
+  [
+    {"role": "user", "content": "What is the weather in Beijing today?"},
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "call_001",
+          "type": "function",
+          "function": {"name": "get_weather", "arguments": "{\"city\": \"Beijing\"}"}
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_001",
+      "content": "Beijing: 25°C, sunny"
+    }
+  ]
+  ```
+</ParamField>
+
+<ParamField body="max_tokens" type="integer">
+  Maximum output token count
+
+  Controls the maximum number of tokens the model can generate; the model may naturally stop before reaching the limit. Minimum value: `1`.
+  No limit by default (subject to model context window constraints).
+</ParamField>
+
+<ParamField body="max_completion_tokens" type="integer">
+  Maximum output token count (new name for `max_tokens`)
+
+  Equivalent to `max_tokens`; provide either one, with `max_tokens` having higher priority.
+</ParamField>
+
+<ParamField body="stream" type="boolean">
+  Whether to enable streaming output
+
+  When set to `true`, responses are streamed in real-time via SSE (Server-Sent Events). **Default is `true`**. To disable streaming, explicitly pass `"stream": false`.
+
+  When set to `false`, the full response is returned after generation completes.
+</ParamField>
+
+<ParamField body="temperature" type="number">
+  Temperature, range `0–2`
+
+  * Low values (e.g., `0.2`): more deterministic, conservative output
+  * High values (e.g., `0.8`): more random, creative output
+
+  Default is `1.0`. Not recommended to use with `top_p` simultaneously.
+</ParamField>
+
+<ParamField body="top_p" type="number">
+  Nucleus sampling parameter, range `0–1`
+
+  Samples from tokens with cumulative probability up to `top_p`. Default is `1.0`.
+  Not recommended to use with `temperature` simultaneously.
+</ParamField>
+
+<ParamField body="frequency_penalty" type="number">
+  Frequency penalty, range `-2.0–2.0`
+
+  Positive values penalize tokens appearing frequently in generated text, reducing repetition. Default is `0`.
+</ParamField>
+
+<ParamField body="presence_penalty" type="number">
+  Presence penalty, range `-2.0–2.0`
+
+  Positive values penalize tokens that have appeared before, encouraging the model to explore new topics. Default is `0`.
+</ParamField>
+
+<ParamField body="seed" type="integer">
+  Random seed
+
+  When set, the same seed plus identical request parameters will attempt to produce deterministic output for reproducibility.
+</ParamField>
+
+<ParamField body="stop" type="string | array">
+  Stop sequences
+
+  The model will immediately stop generation upon encountering this string (or any string in the array). Up to 4 allowed.
+
+  ```json theme={null}
+  {"stop": ["\n\nUser:", "###END###"]}
+  ```
+</ParamField>
+
+<ParamField body="tools" type="array">
+  Tool definitions list
+
+  Defines function tools callable by the model, each with a name, description, and parameter JSON Schema.
+
+  ```json theme={null}
+  {
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "get_weather",
+          "description": "Get the current weather of a specified city",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "city": {
+                "type": "string",
+                "description": "City name, e.g., Beijing"
+              },
+              "unit": {
+                "type": "string",
+                "enum": ["celsius", "fahrenheit"]
+              }
+            },
+            "required": ["city"]
+          }
+        }
+      }
+    ]
+  }
+  ```
+</ParamField>
+
+<ParamField body="tool_choice" type="string | object">
+  Tool selection policy
+
+  * `"auto"` — the model decides whether to call tools (default)
+  * `"required"` — force the model to call a tool
+  * `"none"` — prohibit calling any tools
+  * `{"type": "function", "function": {"name": "get_weather"}}` — force call a specified tool
+
+  ```json theme={null}
+  {"tool_choice": "required"}
+  ```
+</ParamField>
+
+<ParamField body="parallel_tool_calls" type="boolean">
+  Whether to allow parallel tool calls
+
+  When set to `false`, only one tool is called at a time. Default is `true` (allow parallel calls).
+</ParamField>
+
+<ParamField body="response_format" type="object">
+  Response format
+
+  Controls the model's output format.
+
+  <Expandable title="Field Description">
+    <ParamField body="type" type="string" required>
+      Format type
+
+      * `"text"` — plain text (default)
+      * `"json_object"` — JSON object, the model returns valid JSON
+      * `"json_schema"` — output strictly according to a specified JSON Schema
+    </ParamField>
+
+    <ParamField body="json_schema" type="object">
+      Required when `type` is `"json_schema"`
+
+      <Expandable title="Field Description">
+        <ParamField body="name" type="string" required>
+          Schema name
+        </ParamField>
+        <ParamField body="schema" type="object" required>
+          JSON Schema definition which the model output must strictly follow
+        </ParamField>
+        <ParamField body="strict" type="boolean">
+          Whether to enable strict mode, default is `true`
+        </ParamField>
+      </Expandable>
+    </ParamField>
+  </Expandable>
+
+  **JSON object mode:**
+
+  ```json theme={null}
+  {"response_format": {"type": "json_object"}}
+  ```
+
+  **JSON Schema mode:**
+
+  ```json theme={null}
+  {
+    "response_format": {
+      "type": "json_schema",
+      "json_schema": {
+        "name": "analysis_result",
+        "strict": true,
+        "schema": {
+          "type": "object",
+          "properties": {
+            "summary":    {"type": "string"},
+            "score":      {"type": "number"},
+            "tags":       {"type": "array", "items": {"type": "string"}}
+          },
+          "required": ["summary", "score", "tags"]
+        }
+      }
+    }
+  }
+  ```
+</ParamField>
+
+<ParamField body="reasoning_effort" type="string">
+  Reasoning effort
+
+  Applicable to models that support reasoning (such as `gpt-5.2` and above), controls the depth of model reasoning.
+
+  * `"low"` — fast reasoning, saves tokens
+  * `"medium"` — balanced reasoning
+  * `"high"` — deep reasoning, more accurate but consumes more tokens
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">
+  Completion unique identifier
+
+  Example: `"chatcmpl-9vKqnMf3Ax8ZpRdTw2LsYe7b"`
+</ResponseField>
+
+<ResponseField name="object" type="string">
+  Object type, fixed as `"chat.completion"` (non-streaming) or `"chat.completion.chunk"` (streaming)
+</ResponseField>
+
+<ResponseField name="created" type="integer">
+  Creation time, Unix timestamp (seconds)
+</ResponseField>
+
+<ResponseField name="model" type="string">
+  Model name passed in the request
+</ResponseField>
+
+<ResponseField name="task_id" type="string">
+  Billing task ID (project extended field), used to track the point consumption record for this call
+</ResponseField>
+
+<ResponseField name="choices" type="array">
+  Array of generated results (always only one item)
+
+  <Expandable title="Field Description">
+    <ResponseField name="index" type="integer">
+      Result index, fixed as `0`
+    </ResponseField>
+
+    <ResponseField name="message" type="object">
+      Complete message object in **non-streaming response**
+
+      * `role` — fixed as `"assistant"`
+      * `content` — Text content (null when tool calls are used)
+      * `tool_calls` — List of tool calls (present if tools were called)
+    </ResponseField>
+
+    <ResponseField name="delta" type="object">
+      Incremental content in **streaming response**
+
+      * First frame: `{"role": "assistant"}`
+      * Text frame: `{"content": "..."}`
+      * Tool call frame: `{"tool_calls": [{"index": 0, "id": "...", "type": "function", "function": {"name": "...", "arguments": ""}}]}`
+      * End frame: `{}`
+    </ResponseField>
+
+    <ResponseField name="finish_reason" type="string">
+      Stop reason
+
+      * `"stop"` — Natural end
+      * `"length"` — Reached `max_tokens` limit
+      * `"tool_calls"` — Model requested tool call
+      * `"content_filter"` — Content filtered
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="usage" type="object">
+  Token usage statistics (at the top level of response in non-streaming, in the last frame in streaming)
+
+  <Expandable title="Field Description">
+    <ResponseField name="prompt_tokens" type="integer">
+      Number of input tokens (including system prompt)
+    </ResponseField>
+
+    <ResponseField name="completion_tokens" type="integer">
+      Number of output tokens
+    </ResponseField>
+
+    <ResponseField name="total_tokens" type="integer">
+      Total number of tokens
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+  ```bash cURL theme={null}
+  curl https://aireiter.com/api/v1/chat/completions \
+    -H "Authorization: Bearer $API_KEY" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "model": "claude-sonnet-4-5-20250929",
+      "messages": [
+        {"role": "user", "content": "Hello, world"}
+      ]
+    }'
+  ```
+
+  ```python Python theme={null}
+  from openai import OpenAI
+
+  client = OpenAI(
+      api_key="YOUR_API_KEY",
+      base_url="https://aireiter.com/api/v1"
+  )
+
+  response = client.chat.completions.create(
+      model="claude-sonnet-4-5-20250929",
+      messages=[
+          {"role": "user", "content": "Hello, world"}
+      ]
+  )
+
+  print(response.choices[0].message.content)
+  ```
+
+  ```javascript JavaScript theme={null}
+  import OpenAI from 'openai';
+
+  const client = new OpenAI({
+    apiKey: process.env.API_KEY,
+    baseURL: 'https://aireiter.com/api/v1'
+  });
+
+  const response = await client.chat.completions.create({
+    model: 'claude-sonnet-4-5-20250929',
+    messages: [
+      { role: 'user', content: 'Hello, world' }
+    ]
+  });
+
+  console.log(response.choices[0].message.content);
+  ```
+
+  ```go Go theme={null}
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+      "os"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/v1/chat/completions"
+
+      payload := map[string]interface{}{
+          "model": "claude-sonnet-4-5-20250929",
+          "messages": []map[string]string{
+              {"role": "user", "content": "Hello, world"},
+          },
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer "+os.Getenv("API_KEY"))
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java theme={null}
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url    = "https://aireiter.com/api/v1/chat/completions";
+          String apiKey = System.getenv("API_KEY");
+
+          String payload = """
+          {
+            "model": "claude-sonnet-4-5-20250929",
+            "messages": [
+              {"role": "user", "content": "Hello, world"}
+            ]
+          }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer " + apiKey)
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP theme={null}
+  <?php
+
+  $url    = "https://aireiter.com/api/v1/chat/completions";
+  $apiKey = getenv('API_KEY');
+
+  $payload = [
+      "model"    => "claude-sonnet-4-5-20250929",
+      "messages" => [
+          ["role" => "user", "content" => "Hello, world"]
+      ]
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer " . $apiKey,
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby theme={null}
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url     = URI("https://aireiter.com/api/v1/chat/completions")
+  api_key = ENV['API_KEY']
+
+  payload = {
+    model:    "claude-sonnet-4-5-20250929",
+    messages: [{ role: "user", content: "Hello, world" }]
+  }
+
+  http         = Net::HTTP.new(url.host, url.port)
+  http.use_ssl = true
+
+  request                   = Net::HTTP::Post.new(url)
+  request["Authorization"]  = "Bearer #{api_key}"
+  request["Content-Type"]   = "application/json"
+  request.body              = payload.to_json
+
+  puts http.request(request).body
+  ```
+
+  ```swift Swift theme={null}
+  import Foundation
+
+  let url    = URL(string: "https://aireiter.com/api/v1/chat/completions")!
+  let apiKey = ProcessInfo.processInfo.environment["API_KEY"] ?? ""
+
+  let payload: [String: Any] = [
+      "model":    "claude-sonnet-4-5-20250929",
+      "messages": [["role": "user", "content": "Hello, world"]]
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json",  forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  URLSession.shared.dataTask(with: request) { data, _, _ in
+      if let data = data {
+          print(String(data: data, encoding: .utf8) ?? "")
+      }
+  }.resume()
+  ```
+
+  ```csharp C# theme={null}
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url    = "https://aireiter.com/api/v1/chat/completions";
+          var apiKey = Environment.GetEnvironmentVariable("API_KEY");
+
+          var payload = @"{
+              ""model"": ""claude-sonnet-4-5-20250929"",
+              ""messages"": [
+                  {""role"": ""user"", ""content"": ""Hello, world""}
+              ]
+          }";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
+
+          var content  = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          Console.WriteLine(await response.Content.ReadAsStringAsync());
+      }
+  }
+  ```
+
+  ```c C theme={null}
+  #include <stdio.h>
+  #include <curl/curl.h>
+  #include <stdlib.h>
+  #include <string.h>
+
+  int main(void) {
+      CURL *curl;
+      const char *api_key = getenv("API_KEY");
+
+      curl_global_init(CURL_GLOBAL_DEFAULT);
+      curl = curl_easy_init();
+
+      if (curl) {
+          const char *payload =
+              "{\"model\":\"claude-sonnet-4-5-20250929\","
+              "\"messages\":[{\"role\":\"user\",\"content\":\"Hello, world\"}]}";
+
+          char auth_header[256];
+          snprintf(auth_header, sizeof(auth_header), "Authorization: Bearer %s", api_key);
+
+          struct curl_slist *headers = NULL;
+          headers = curl_slist_append(headers, auth_header);
+          headers = curl_slist_append(headers, "Content-Type: application/json");
+
+          curl_easy_setopt(curl, CURLOPT_URL, "https://aireiter.com/api/v1/chat/completions");
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
+          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+          curl_easy_perform(curl);
+          curl_slist_free_all(headers);
+          curl_easy_cleanup(curl);
+      }
+
+      curl_global_cleanup();
+      return 0;
+  }
+  ```
+
+  ```dart Dart theme={null}
+  import 'dart:convert';
+  import 'dart:io';
+  import 'package:http/http.dart' as http;
+
+  void main() async {
+    final url    = Uri.parse('https://aireiter.com/api/v1/chat/completions');
+    final apiKey = Platform.environment['API_KEY']!;
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer $apiKey',
+        'Content-Type':  'application/json',
+      },
+      body: jsonEncode({
+        'model':    'claude-sonnet-4-5-20250929',
+        'messages': [{'role': 'user', 'content': 'Hello, world'}],
+      }),
+    );
+
+    print(response.body);
+  }
+  ```
+
+  ```r R theme={null}
+  library(httr)
+  library(jsonlite)
+
+  url     <- "https://aireiter.com/api/v1/chat/completions"
+  api_key <- Sys.getenv("API_KEY")
+
+  response <- POST(
+    url,
+    add_headers(
+      `Authorization` = paste("Bearer", api_key),
+      `Content-Type`  = "application/json"
+    ),
+    body = toJSON(list(
+      model    = "claude-sonnet-4-5-20250929",
+      messages = list(list(role = "user", content = "Hello, world"))
+    ), auto_unbox = TRUE),
+    encode = "raw"
+  )
+
+  cat(content(response, "text"))
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200 Non-streaming theme={null}
+  {
+    "id": "chatcmpl-9vKqnMf3Ax8ZpRdTw2LsYe7b",
+    "object": "chat.completion",
+    "created": 1741680000,
+    "model": "claude-sonnet-4-5-20250929",
+    "task_id": "task_abc123",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "Hello! How can I assist you today?"
+        },
+        "finish_reason": "stop"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 12,
+      "completion_tokens": 15,
+      "total_tokens": 27
+    }
+  }
+  ```
+
+  ```json 200 Tool Call theme={null}
+  {
+    "id": "chatcmpl-9vKqnMf3Ax8ZpRdTw2LsYe7b",
+    "object": "chat.completion",
+    "created": 1741680000,
+    "model": "claude-sonnet-4-5-20250929",
+    "task_id": "task_abc123",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": null,
+          "tool_calls": [
+            {
+              "id": "call_01A09q90qw90lq917835lq9",
+              "type": "function",
+              "function": {
+                "name": "get_weather",
+                "arguments": "{\"city\": \"Beijing\"}"
+              }
+            }
+          ]
+        },
+        "finish_reason": "tool_calls"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 85,
+      "completion_tokens": 22,
+      "total_tokens": 107
+    }
+  }
+  ```
+
+  ```json 400 theme={null}
+  {
+    "error": {
+      "message": "messages is required and must not be empty",
+      "type": "invalid_request_error",
+      "param": null,
+      "code": null
+    }
+  }
+  ```
+
+  ```json 401 theme={null}
+  {
+    "error": {
+      "message": "Invalid API key",
+      "type": "invalid_request_error",
+      "param": null,
+      "code": null
+    }
+  }
+  ```
+
+  ```json 402 theme={null}
+  {
+    "error": {
+      "message": "Insufficient credits",
+      "type": "invalid_request_error",
+      "param": null,
+      "code": null
+    }
+  }
+  ```
+
+  ```json 404 theme={null}
+  {
+    "error": {
+      "message": "Model 'xxx' not found",
+      "type": "invalid_request_error",
+      "param": null,
+      "code": null
+    }
+  }
+  ```
+
+  ```json 502 theme={null}
+  {
+    "error": {
+      "message": "All providers failed",
+      "type": "invalid_request_error",
+      "param": null,
+      "code": null
+    }
+  }
+  ```
+</ResponseExample>
+
+## Usage Examples
+
+### Basic Conversation
+
+```python theme={null}
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://aireiter.com/api/v1"
+)
+
+response = client.chat.completions.create(
+    model="claude-sonnet-4-5-20250929",
+    messages=[
+        {"role": "user", "content": "Implement quicksort in Python"}
+    ]
+)
+
+print(response.choices[0].message.content)
+```
+
+### System Prompt + Multi-turn Conversation
+
+```python theme={null}
+response = client.chat.completions.create(
+    model="claude-sonnet-4-5-20250929",
+    messages=[
+        {"role": "system",    "content": "You are a senior Python developer expert, skilled in code review and performance optimization."},
+        {"role": "user",      "content": "What is the GIL?"},
+        {"role": "assistant", "content": "GIL (Global Interpreter Lock) is..."},
+        {"role": "user",      "content": "How to bypass the GIL to achieve true parallelism?"}
+    ],
+    temperature=0.3
+)
+```
+
+### Streaming Response
+
+```python theme={null}
+stream = client.chat.completions.create(
+    model="claude-sonnet-4-5-20250929",
+    messages=[{"role": "user", "content": "Write a technical blog about quantum computing"}],
+    stream=True
+)
+
+for chunk in stream:
+    delta = chunk.choices[0].delta
+    if delta.content:
+        print(delta.content, end="", flush=True)
+```
+
+### Tool Calls (Complete Multi-turn Process)
+
+```python theme={null}
+import json
+
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "get_stock_price",
+            "description": "Get real-time stock price",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "ticker": {"type": "string", "description": "Stock ticker symbol, e.g., AAPL"}
+                },
+                "required": ["ticker"]
+            }
+        }
+    }
+]
+
+messages = [{"role": "user", "content": "What is Tesla's stock price?"}]
+
+# First round: model decides to call the tool
+response = client.chat.completions.create(
+    model="claude-sonnet-4-5-20250929",
+    messages=messages,
+    tools=tools
+)
+
+# Handle tool call
+if response.choices[0].finish_reason == "tool_calls":
+    tool_call = response.choices[0].message.tool_calls[0]
+
+    # Execute the tool (business logic)
+    tool_result = {"price": 245.80, "currency": "USD"}
+
+    # Second round: return the result to the model
+    messages += [
+        response.choices[0].message,
+        {
+            "role": "tool",
+            "tool_call_id": tool_call.id,
+            "content": json.dumps(tool_result)
+        }
+    ]
+
+    final = client.chat.completions.create(
+        model="claude-sonnet-4-5-20250929",
+        messages=messages,
+        tools=tools
+    )
+    print(final.choices[0].message.content)
+```
+
+### Structured Output (JSON Schema)
+
+```python theme={null}
+response = client.chat.completions.create(
+    model="claude-sonnet-4-5-20250929",
+    messages=[
+        {"role": "user", "content": "Analyze the sentiment of the following product review: 'This headset has excellent sound quality, but average battery life'"}
+    ],
+    response_format={
+        "type": "json_schema",
+        "json_schema": {
+            "name": "sentiment_analysis",
+            "strict": True,
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "sentiment":   {"type": "string", "enum": ["positive", "negative", "mixed"]},
+                    "score":       {"type": "number", "description": "Sentiment score from -1.0 to 1.0"},
+                    "highlights":  {"type": "array", "items": {"type": "string"}}
+                },
+                "required": ["sentiment", "score", "highlights"]
+            }
+        }
+    }
+)
+
+result = json.loads(response.choices[0].message.content)
+print(result)
+# {"sentiment": "mixed", "score": 0.2, "highlights": ["excellent sound quality", "average battery life"]}
+```
+
+### Sampling Parameter Control
+
+```python theme={null}
+# Creative writing: high temperature + frequency penalty
+response = client.chat.completions.create(
+    model="claude-sonnet-4-5-20250929",
+    messages=[{"role": "user", "content": "Write a modern poem about autumn"}],
+    temperature=0.9,
+    frequency_penalty=0.5,
+    presence_penalty=0.3
+)
+
+# Precise output: low temperature + fixed seed
+response = client.chat.completions.create(
+    model="claude-sonnet-4-5-20250929",
+    messages=[{"role": "user", "content": "Calculate the result of 1234 × 5678"}],
+    temperature=0.0,
+    seed=42
+)
+```
+
+## Streaming Response Event Format
+
+```text theme={null}
+data: {"id":"chatcmpl-xxx","object":"chat.completion.chunk","created":1741680000,"model":"claude-sonnet-4-5-20250929","task_id":"task_abc123","choices":[{"index":0,"delta":{"role":"assistant"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-xxx","object":"chat.completion.chunk","created":1741680000,"model":"claude-sonnet-4-5-20250929","choices":[{"index":0,"delta":{"content":"Hello"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-xxx","object":"chat.completion.chunk","created":1741680000,"model":"claude-sonnet-4-5-20250929","choices":[{"index":0,"delta":{"content":"!"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-xxx","object":"chat.completion.chunk","created":1741680000,"model":"claude-sonnet-4-5-20250929","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"usage":{"prompt_tokens":12,"completion_tokens":5,"total_tokens":17}}
+
+data: [DONE]
+```
+
+Tool Call Streaming Events:
+
+```text theme={null}
+data: {"id":"chatcmpl-xxx","object":"chat.completion.chunk","created":1741680000,"model":"claude-sonnet-4-5-20250929","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"id":"call_abc","type":"function","function":{"name":"get_weather","arguments":""}}]},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-xxx","object":"chat.completion.chunk","created":1741680000,"model":"claude-sonnet-4-5-20250929","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"{\"city\""}}]},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-xxx","object":"chat.completion.chunk","created":1741680000,"model":"claude-sonnet-4-5-20250929","choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":": \"Beijing\"}"}}]},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-xxx","object":"chat.completion.chunk","created":1741680000,"model":"claude-sonnet-4-5-20250929","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":85,"completion_tokens":22,"total_tokens":107}}
+
+data: [DONE]
+```
+
+## Notes
+
+1. **Authorization method**: Only supports the format `Authorization: Bearer <api_key>`. When using the OpenAI SDK, simply set the `api_key`.
+
+2. **Streaming by default**: The `stream` parameter defaults to `true`. For non-streaming responses, explicitly pass `"stream": false`.
+
+3. **Insufficient balance**: Returns HTTP `402` when the balance is insufficient. Please recharge and try again.
+
+4. **stop and stop sequences**: The `stop` parameter is currently ineffective. The underlying providers do not support this feature yet; passing the parameter will not cause errors but will not stop generation at specified sequences.
+
+5. **Note on response_format**: Current underlying providers have limited support for `response_format`—in `json_object` mode, the model may still output Markdown code blocks instead of pure JSON; in `json_schema` mode, the schema constraints may not be enforced. For structured output, it is recommended to clearly specify the required format in the prompt.
+
+6. **Tool parameters**: The `parameters` field must be a valid JSON Schema, and the `required` array determines which parameters are mandatory.
+
+7. **Model selection recommendations**:
+   * Haiku — high-frequency simple Q&A, lowest cost
+   * Sonnet — code generation, document processing, generally recommended
+   * Opus — complex reasoning, long text analysis, strongest capabilities
+   * `-thinking` series — for scenarios requiring deep thinking such as mathematical proofs and logical deductions

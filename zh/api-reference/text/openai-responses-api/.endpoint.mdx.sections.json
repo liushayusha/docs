@@ -1,0 +1,47 @@
+[
+  {
+    "id": "__frontmatter__",
+    "hash": "ec7518bc",
+    "index": 0
+  },
+  {
+    "id": "__prologue__",
+    "hash": "5c3ee9f8",
+    "index": 1
+  },
+  {
+    "id": "section-0-认证",
+    "hash": "66af046e",
+    "index": 2
+  },
+  {
+    "id": "section-1-请求体参数",
+    "hash": "fac1e998",
+    "index": 3
+  },
+  {
+    "id": "section-2-响应字段",
+    "hash": "e756c397",
+    "index": 4
+  },
+  {
+    "id": "section-3-流式响应事件",
+    "hash": "cf1e4801",
+    "index": 5
+  },
+  {
+    "id": "section-4-使用示例",
+    "hash": "74532e6b",
+    "index": 6
+  },
+  {
+    "id": "section-5-注意事项",
+    "hash": "782526f5",
+    "index": 7
+  },
+  {
+    "id": "section-6-错误码说明",
+    "hash": "d0a61e8b",
+    "index": 8
+  }
+]

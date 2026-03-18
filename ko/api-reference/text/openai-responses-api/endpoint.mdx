@@ -1,0 +1,974 @@
+---
+title: 'OpenAI Responses API'
+description: |
+    - OpenAI Responses API 프로토콜과 호환되며, 텍스트 대화, 이미지 이해, 도구 호출, 구조화된 출력 및 추론 모드를 지원합니다.
+    - 주로 Codex CLI 및 AI SDK 등의 도구에서 사용됩니다.
+api: 'POST https://aireiter.com/api/v1/responses'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## 인증
+
+<ParamField header="Authorization" type="string" required>
+  Bearer 토큰 인증입니다. 형식: `Authorization: Bearer <api-key>`
+
+  API Key 받기:
+
+  <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a>에 접속하여 API Key를 받으세요.
+</ParamField>
+
+<ParamField header="x-api-key" type="string">
+  대체 인증 방법으로, `Authorization`과 둘 중 하나를 선택합니다. 형식: `x-api-key: <api-key>`
+</ParamField>
+
+## 요청 본문 파라미터
+
+<ParamField body="model" type="string" required>
+  사용할 모델 이름입니다. 예: `claude-sonnet-4-5-20250929`, `gpt-4o`.
+
+  전체 모델 목록은 `GET /api/v1/models`를 통해 조회할 수 있습니다.
+</ParamField>
+
+<ParamField body="input" type="string | array" required>
+  대화 입력 내용으로 두 가지 형식을 지원합니다:
+
+  - **문자열**: 사용자 메시지 텍스트를 직접 전달
+  - **메시지 배열**: 여러 메시지를 포함하여 다중 턴 대화 지원
+
+  <Expandable title="메시지 배열 형식">
+    각 메시지는 다음 필드를 포함하는 객체입니다:
+
+    <ParamField body="role" type="string" required>
+      메시지 역할: `user`, `assistant`, `system`
+    </ParamField>
+
+    <ParamField body="content" type="string | array" required>
+      메시지 내용으로, 텍스트 문자열 또는 내용 블록 배열(이미지 등 멀티모달 컨텐츠 지원)이 될 수 있습니다:
+
+      ```json
+      [
+        { "type": "input_text", "text": "이 이미지를 설명하세요." },
+        { "type": "input_image", "image_url": { "url": "https://..." } }
+      ]
+      ```
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="instructions" type="string">
+  시스템 프롬프트(System Prompt)입니다. 모델의 행동 지침, 역할 아이덴티티 또는 컨텍스트 배경을 설정하는 데 사용됩니다.
+
+  메시지 배열 내 `role: "system"` 메시지와 동일한 효과입니다.
+</ParamField>
+
+<ParamField body="stream" type="boolean" default="true">
+  스트리밍 출력 활성화 여부입니다.
+
+  - `true`(기본): SSE 이벤트 스트림 방식으로 토큰 단위 반환, 실시간 표시 적합
+  - `false`: 전체 응답 완료 후 한 번에 반환, 배치 처리에 적합
+</ParamField>
+
+<ParamField body="max_output_tokens" type="integer">
+  생성할 응답의 최대 토큰 수입니다. 제한 초과 시 `status`가 `"incomplete"`, `incomplete_details.reason`이 `"max_output_tokens"`가 됩니다.
+</ParamField>
+
+<ParamField body="temperature" type="number">
+  샘플링 온도 범위는 `0` ~ `2`입니다. 값이 높을수록 출력은 더 무작위적이고, 낮을수록 더 결정적입니다. `temperature`와 `top_p`를 동시에 변경하는 것은 권장하지 않습니다.
+</ParamField>
+
+<ParamField body="top_p" type="number">
+  핵심 샘플링 확률로, 범위는 `0` ~ `1`입니다. 모델은 누적 확률이 `top_p`에 도달한 토큰 중에서만 샘플링합니다.
+</ParamField>
+
+<ParamField body="tools" type="array">
+  모델이 호출할 수 있는 도구 목록입니다. 현재는 `type: "function"` 유형만 지원하며, `web_search`, `file_search`, `computer_use` 같은 내장 도구는 지원하지 않습니다.
+
+  <Expandable title="function 도구 형식">
+    <ParamField body="type" type="string" required>
+      고정값 `"function"`
+    </ParamField>
+
+    <ParamField body="name" type="string" required>
+      함수 이름으로, 정규식 `^[a-zA-Z0-9_-]{1,64}$`를 만족해야 합니다.
+    </ParamField>
+
+    <ParamField body="description" type="string">
+      함수 설명으로, 모델이 언제 이 도구를 호출할지 판단하는 데 도움을 줍니다.
+    </ParamField>
+
+    <ParamField body="parameters" type="object">
+      파라미터 정의로, JSON Schema 형식을 따릅니다.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="tool_choice" type="string | object" default="auto">
+  도구 호출 정책입니다:
+
+  - `"auto"`: 모델이 자동으로 도구 호출 여부 결정
+  - `"none"`: 도구 호출 금지
+  - `"required"`: 최소 한 개 도구 반드시 호출
+  - `{ "type": "function", "name": "function_name" }`: 특정 도구 강제 호출
+</ParamField>
+
+<ParamField body="parallel_tool_calls" type="boolean" default="true">
+  모델이 여러 도구를 병렬로 호출할 수 있는지 여부입니다. `tools`가 제공된 경우에만 유효합니다.
+</ParamField>
+
+<ParamField body="text" type="object">
+  출력 형식 제어입니다.
+
+  <Expandable title="text 객체">
+    <ParamField body="format" type="object">
+      <Expandable title="format 객체">
+        <ParamField body="type" type="string" required>
+          출력 형식 타입:
+          - `"text"`: 일반 텍스트 (기본값)
+          - `"json_object"`: JSON 형식
+          - `"json_schema"`: 지정한 스키마에 부합하는 JSON
+        </ParamField>
+
+        <ParamField body="name" type="string">
+          스키마 이름 (`json_schema`일 때만 적용)
+        </ParamField>
+
+        <ParamField body="description" type="string">
+          스키마 설명 (`json_schema`일 때만 적용)
+        </ParamField>
+
+        <ParamField body="strict" type="boolean" default="true">
+          스키마를 엄격히 준수할지 여부 (`json_schema`일 때만 적용)
+        </ParamField>
+
+        <ParamField body="schema" type="object">
+          JSON 스키마 정의 (`json_schema`일 때 필수)
+        </ParamField>
+      </Expandable>
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="reasoning" type="object">
+  추론 모드 설정으로, 추론을 지원하는 모델(e.g., `gpt-5.2` 이상)에서 사용됩니다.
+
+  <Expandable title="reasoning 객체">
+    <ParamField body="effort" type="string">
+      추론 강도: `"low"` | `"medium"` | `"high"`
+    </ParamField>
+
+  </Expandable>
+</ParamField>
+
+## 응답 필드
+
+<ResponseField name="id" type="string">
+  응답 고유 식별자, 형식: `resp_` + 24자리 임의 문자열
+</ResponseField>
+
+<ResponseField name="object" type="string">
+  고정값 `"response"`
+</ResponseField>
+
+<ResponseField name="created_at" type="number">
+  응답 생성 시간, Unix 타임스탬프(초, 밀리초 정밀도 포함)
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  응답 상태:
+  - `"completed"`: 정상 완료
+  - `"incomplete"`: `max_output_tokens`로 인해 조기 종료
+  - `"in_progress"`: 스트리밍 출력 진행 중(스트리밍 이벤트에서만 나타남)
+  - `"failed"`: 생성 실패
+</ResponseField>
+
+<ResponseField name="model" type="string">
+  실제 사용된 모델 이름
+</ResponseField>
+
+<ResponseField name="task_id" type="string">
+  플랫폼 확장 필드입니다. 이번 호출의 과금 작업 ID로, 정산 및 사용량 조회에 활용할 수 있습니다.
+
+  **주의**:
+  - **비스트리밍**: `task_id`가 응답 JSON 최상위에 직접 위치함
+  - **스트리밍**: `task_id`가 `response.created`(첫 번째 이벤트) 및 `response.completed`(마지막 이벤트)의 `response` 객체 안에 중첩되어 있으며, 원본 SSE 이벤트를 파싱해서 얻어야 합니다. OpenAI SDK의 스트리밍 인터페이스는 이 필드를 자동으로 노출하지 않습니다.
+</ResponseField>
+
+<ResponseField name="output" type="array">
+  출력 내용 배열로, 텍스트 메시지 및 도구 호출 두 가지 유형을 포함할 수 있습니다.
+
+  <Expandable title="message 타입">
+    <ResponseField name="id" type="string">
+      메시지 ID, 형식: `msg_` + 16자리 임의 문자열
+    </ResponseField>
+
+    <ResponseField name="type" type="string">
+      고정값 `"message"`
+    </ResponseField>
+
+    <ResponseField name="role" type="string">
+      고정값 `"assistant"`
+    </ResponseField>
+
+    <ResponseField name="status" type="string">
+      `"completed"` | `"in_progress"`
+    </ResponseField>
+
+    <ResponseField name="content" type="array">
+      내용 블록 배열:
+
+      <Expandable title="output_text 내용 블록">
+        <ResponseField name="type" type="string">
+          고정값 `"output_text"`
+        </ResponseField>
+
+        <ResponseField name="text" type="string">
+          모델이 생성한 텍스트 내용
+        </ResponseField>
+
+        <ResponseField name="annotations" type="array">
+          텍스트 주석, 보통 빈 배열 `[]`
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+
+  <Expandable title="function_call 타입">
+    <ResponseField name="id" type="string">
+      도구 호출 항목 ID, 형식: `fc_` + 16자리 임의 문자열
+    </ResponseField>
+
+    <ResponseField name="type" type="string">
+      고정값 `"function_call"`
+    </ResponseField>
+
+    <ResponseField name="call_id" type="string">
+      도구 호출 ID로, 도구 실행 결과 제출 시 참조용
+    </ResponseField>
+
+    <ResponseField name="name" type="string">
+      호출된 함수 이름
+    </ResponseField>
+
+    <ResponseField name="arguments" type="string">
+      함수 파라미터(JSON 직렬화된 문자열)
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="output_text" type="string">
+  간편 필드로, `output[0].content[0].text`와 동일(순수 텍스트 상황). 도구 호출 상황에서는 빈 문자열.
+</ResponseField>
+
+<ResponseField name="usage" type="object">
+  토큰 사용량 통계.
+
+  <Expandable title="usage 객체">
+    <ResponseField name="input_tokens" type="integer">
+      입력 토큰 수(system prompt 포함)
+    </ResponseField>
+
+    <ResponseField name="output_tokens" type="integer">
+      출력 토큰 수
+    </ResponseField>
+
+    <ResponseField name="total_tokens" type="integer">
+      총 토큰 수 = 입력 + 출력
+    </ResponseField>
+
+    <ResponseField name="output_tokens_details" type="object">
+      <Expandable title="세부 사항">
+        <ResponseField name="reasoning_tokens" type="integer">
+          추론/사고 토큰 수(일반 모델은 `0`)
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="incomplete_details" type="object | null">
+  `status`가 `"incomplete"`일 때 null이 아님.
+
+  <Expandable title="incomplete_details 객체">
+    <ResponseField name="reason" type="string">
+      중단 사유. 현재는 `"max_output_tokens"`만 존재
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST https://aireiter.com/api/v1/responses \
+  -H "Authorization: Bearer $API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "claude-sonnet-4-5-20250929",
+    "input": "Write a one-sentence bedtime story about a unicorn.",
+    "stream": true
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://aireiter.com/api/v1"
+)
+
+response = client.responses.create(
+    model="claude-sonnet-4-5-20250929",
+    input="Write a one-sentence bedtime story about a unicorn."
+)
+
+print(response.output_text)
+```
+
+```javascript JavaScript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://aireiter.com/api/v1",
+});
+
+const response = await client.responses.create({
+  model: "claude-sonnet-4-5-20250929",
+  input: "Write a one-sentence bedtime story about a unicorn.",
+});
+
+console.log(response.output_text);
+```
+
+```go Go
+package main
+
+import (
+  "bytes"
+  "encoding/json"
+  "fmt"
+  "net/http"
+)
+
+func main() {
+  payload := map[string]interface{}{
+    "model":  "claude-sonnet-4-5-20250929",
+    "input":  "Write a one-sentence bedtime story about a unicorn.",
+    "stream": false,
+  }
+  body, _ := json.Marshal(payload)
+
+  req, _ := http.NewRequest("POST", "https://aireiter.com/api/v1/responses", bytes.NewBuffer(body))
+  req.Header.Set("Authorization", "Bearer YOUR_API_KEY")
+  req.Header.Set("Content-Type", "application/json")
+
+  resp, _ := http.DefaultClient.Do(req)
+  defer resp.Body.Close()
+
+  var result map[string]interface{}
+  json.NewDecoder(resp.Body).Decode(&result)
+  fmt.Println(result)
+}
+```
+
+```java Java
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.URI;
+import java.net.http.*;
+import java.util.Map;
+
+public class ResponsesExample {
+  public static void main(String[] args) throws Exception {
+    var payload = Map.of(
+      "model", "claude-sonnet-4-5-20250929",
+      "input", "Write a one-sentence bedtime story about a unicorn.",
+      "stream", false
+    );
+    var body = new ObjectMapper().writeValueAsString(payload);
+    var request = HttpRequest.newBuilder()
+      .uri(URI.create("https://aireiter.com/api/v1/responses"))
+      .header("Authorization", "Bearer YOUR_API_KEY")
+      .header("Content-Type", "application/json")
+      .POST(HttpRequest.BodyPublishers.ofString(body))
+      .build();
+    var response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+    System.out.println(response.body());
+  }
+}
+```
+
+```php PHP
+<?php
+$client = new GuzzleHttp\Client();
+$response = $client->post('https://aireiter.com/api/v1/responses', [
+  'headers' => [
+    'Authorization' => 'Bearer YOUR_API_KEY',
+    'Content-Type'  => 'application/json',
+  ],
+  'json' => [
+    'model'  => 'claude-sonnet-4-5-20250929',
+    'input'  => 'Write a one-sentence bedtime story about a unicorn.',
+    'stream' => false,
+  ],
+]);
+echo $response->getBody();
+```
+
+```ruby Ruby
+require 'net/http'
+require 'json'
+
+uri = URI('https://aireiter.com/api/v1/responses')
+req = Net::HTTP::Post.new(uri, {
+  'Authorization' => 'Bearer YOUR_API_KEY',
+  'Content-Type'  => 'application/json'
+})
+req.body = {
+  model:  'claude-sonnet-4-5-20250929',
+  input:  'Write a one-sentence bedtime story about a unicorn.',
+  stream: false
+}.to_json
+
+res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) { |h| h.request(req) }
+puts res.body
+```
+
+```swift Swift
+import Foundation
+
+let payload: [String: Any] = [
+  "model":  "claude-sonnet-4-5-20250929",
+  "input":  "Write a one-sentence bedtime story about a unicorn.",
+  "stream": false
+]
+
+var request = URLRequest(url: URL(string: "https://aireiter.com/api/v1/responses")!)
+request.httpMethod = "POST"
+request.setValue("Bearer YOUR_API_KEY", forHTTPHeaderField: "Authorization")
+request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+request.httpBody = try! JSONSerialization.data(withJSONObject: payload)
+
+URLSession.shared.dataTask(with: request) { data, _, _ in
+  if let data = data { print(String(data: data, encoding: .utf8)!) }
+}.resume()
+```
+
+```csharp C#
+using System.Net.Http;
+using System.Net.Http.Json;
+
+var client = new HttpClient();
+client.DefaultRequestHeaders.Add("Authorization", "Bearer YOUR_API_KEY");
+
+var response = await client.PostAsJsonAsync("https://aireiter.com/api/v1/responses", new {
+  model  = "claude-sonnet-4-5-20250929",
+  input  = "Write a one-sentence bedtime story about a unicorn.",
+  stream = false
+});
+Console.WriteLine(await response.Content.ReadAsStringAsync());
+```
+
+```c C
+#include <stdio.h>
+#include <curl/curl.h>
+
+int main() {
+  CURL *curl = curl_easy_init();
+  struct curl_slist *headers = NULL;
+  headers = curl_slist_append(headers, "Authorization: Bearer YOUR_API_KEY");
+  headers = curl_slist_append(headers, "Content-Type: application/json");
+
+  const char *data = "{\"model\":\"claude-sonnet-4-5-20250929\","
+                     "\"input\":\"Write a one-sentence bedtime story about a unicorn.\","
+                     "\"stream\":false}";
+
+  curl_easy_setopt(curl, CURLOPT_URL, "https://aireiter.com/api/v1/responses");
+  curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+  curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
+  curl_easy_perform(curl);
+  curl_easy_cleanup(curl);
+  return 0;
+}
+```
+
+```dart Dart
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+void main() async {
+  final response = await http.post(
+    Uri.parse('https://aireiter.com/api/v1/responses'),
+    headers: {
+      'Authorization': 'Bearer YOUR_API_KEY',
+      'Content-Type':  'application/json',
+    },
+    body: jsonEncode({
+      'model':  'claude-sonnet-4-5-20250929',
+      'input':  'Write a one-sentence bedtime story about a unicorn.',
+      'stream': false,
+    }),
+  );
+  print(response.body);
+}
+```
+
+```r R
+library(httr)
+library(jsonlite)
+
+response <- POST(
+  "https://aireiter.com/api/v1/responses",
+  add_headers(
+    Authorization = "Bearer YOUR_API_KEY",
+    `Content-Type` = "application/json"
+  ),
+  body = toJSON(list(
+    model  = "claude-sonnet-4-5-20250929",
+    input  = "Write a one-sentence bedtime story about a unicorn.",
+    stream = FALSE
+  ), auto_unbox = TRUE)
+)
+content(response, "text")
+```
+
+</RequestExample>
+
+<ResponseExample>
+
+```json 200 성공(비스트리밍)
+{
+  "id": "resp_AbCdEfGhIjKlMnOpQrSt0123",
+  "object": "response",
+  "created_at": 1742000000.123,
+  "status": "completed",
+  "model": "claude-sonnet-4-5-20250929",
+  "task_id": "task_xyz123",
+  "output": [
+    {
+      "id": "msg_AbCdEfGhIjKl0123",
+      "type": "message",
+      "role": "assistant",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "text": "작은 유니콘이 달빛이 비치는 초원을 살금살금 걸으며, 아늑한 구름집으로 달려가 반짝이는 별가루 자취를 남겼습니다.",
+          "annotations": []
+        }
+      ]
+    }
+  ],
+  "output_text": "작은 유니콘이 달빛이 비치는 초원을 살금살금 걸으며, 아늑한 구름집으로 달려가 반짝이는 별가루 자취를 남겼습니다.",
+  "usage": {
+    "input_tokens": 20,
+    "output_tokens": 35,
+    "total_tokens": 55,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  }
+}
+```
+
+```json 200 도구 호출 응답
+{
+  "id": "resp_AbCdEfGhIjKlMnOpQrSt0456",
+  "object": "response",
+  "created_at": 1742000100.456,
+  "status": "completed",
+  "model": "claude-sonnet-4-5-20250929",
+  "task_id": "task_abc456",
+  "output": [
+    {
+      "id": "fc_AbCdEfGhIjKl0456",
+      "type": "function_call",
+      "call_id": "call_AbCdEfGh",
+      "name": "get_weather",
+      "arguments": "{\"location\":\"San Francisco\",\"unit\":\"celsius\"}"
+    }
+  ],
+  "output_text": "",
+  "usage": {
+    "input_tokens": 80,
+    "output_tokens": 25,
+    "total_tokens": 105,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  }
+}
+```
+
+```json 200 중단 응답(incomplete)
+{
+  "id": "resp_AbCdEfGhIjKlMnOpQrSt0789",
+  "object": "response",
+  "created_at": 1742000200.789,
+  "status": "incomplete",
+  "model": "claude-sonnet-4-5-20250929",
+  "task_id": "task_def789",
+  "output": [
+    {
+      "id": "msg_AbCdEfGhIjKl0789",
+      "type": "message",
+      "role": "assistant",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "text": "max_output_tokens로 인해 잘린 매우 긴 이야기입니다...",
+          "annotations": []
+        }
+      ]
+    }
+  ],
+  "output_text": "max_output_tokens로 인해 잘린 매우 긴 이야기입니다...",
+  "incomplete_details": {
+    "reason": "max_output_tokens"
+  },
+  "usage": {
+    "input_tokens": 15,
+    "output_tokens": 256,
+    "total_tokens": 271,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  }
+}
+```
+
+```json 400 요청 파라미터 오류
+{
+  "type": "error",
+  "error": {
+    "type": "invalid_request_error",
+    "message": "model이 필요합니다"
+  }
+}
+```
+
+```json 401 인증 실패
+{
+  "type": "error",
+  "error": {
+    "type": "authentication_error",
+    "message": "잘못된 API 키"
+  }
+}
+```
+
+```json 402 포인트 부족
+{
+  "type": "error",
+  "error": {
+    "type": "invalid_request_error",
+    "message": "포인트가 부족합니다"
+  }
+}
+```
+
+```json 404 모델 없음
+{
+  "type": "error",
+  "error": {
+    "type": "not_found_error",
+    "message": "Model 'unknown-model'을 찾을 수 없습니다"
+  }
+}
+```
+
+```json 502 업스트림 서비스 오류
+{
+  "type": "error",
+  "error": {
+    "type": "api_error",
+    "message": "모든 공급자 실패"
+  }
+}
+```
+
+</ResponseExample>
+
+---
+
+## 스트리밍 응답 이벤트
+
+`stream: true`인 경우, API는 `text/event-stream` 형식으로 SSE 이벤트 스트림을 반환합니다. 각 이벤트 형식은 다음과 같습니다:
+
+```
+event: <event_type>
+data: <JSON_payload>
+
+```
+
+모든 이벤트 payload는 클라이언트가 순서대로 이벤트를 처리할 수 있도록 `sequence_number` 필드(0부터 증가)를 포함합니다.
+
+> **`task_id` 얻기**: 스트리밍 모드에서 과금 작업 ID를 얻으려면 첫 번째 `response.created` 이벤트를 수신하고 `event.response.task_id`를 읽으세요.
+
+### 이벤트 시퀀스 (텍스트 응답)
+
+| 번호 | 이벤트 타입 | 설명 |
+|------|---------|------|
+| 1 | `response.created` | 응답 객체 생성, `status: "in_progress"` |
+| 2 | `response.in_progress` | 응답 생성 시작 |
+| 3 | `response.output_item.added` | 출력 메시지 항목 추가 |
+| 4 | `response.content_part.added` | 텍스트 콘텐츠 블록 추가, `text: ""` |
+| 5 | `response.output_text.delta` | *(반복)* 토큰 단위 텍스트 증분 |
+| 6 | `response.output_text.done` | 텍스트 콘텐츠 완료, 전체 텍스트 포함 |
+| 7 | `response.content_part.done` | 콘텐츠 블록 완료 |
+| 8 | `response.output_item.done` | 메시지 항목 완료 |
+| 9 | `response.completed` | 응답 완료, 전체 응답 객체 및 usage 포함 |
+
+### 이벤트 시퀀스 (도구 호출)
+
+| 번호 | 이벤트 타입 | 설명 |
+|------|---------|------|
+| … | `response.output_item.added` | 함수 호출 항목 추가 |
+| … | `response.function_call_arguments.delta` | *(반복)* 함수 파라미터 증분 |
+| … | `response.function_call_arguments.done` | 함수 파라미터 완료 |
+| … | `response.output_item.done` | 함수 호출 항목 완료 |
+| 마지막 | `response.completed` | 응답 완료 |
+
+### 이벤트 예시
+
+<CodeGroup>
+
+```json response.created
+{
+  "type": "response.created",
+  "sequence_number": 0,
+  "response": {
+    "id": "resp_AbCdEfGhIjKlMnOpQrSt0123",
+    "object": "response",
+    "created_at": 1742000000.123,
+    "status": "in_progress",
+    "model": "claude-sonnet-4-5-20250929",
+    "task_id": "task_xyz123",
+    "output": [],
+    "output_text": ""
+  }
+}
+```
+
+```json response.output_text.delta
+{
+  "type": "response.output_text.delta",
+  "sequence_number": 5,
+  "item_id": "msg_AbCdEfGhIjKl0123",
+  "output_index": 0,
+  "content_index": 0,
+  "delta": "The little"
+}
+```
+
+```json response.completed
+{
+  "type": "response.completed",
+  "sequence_number": 9,
+  "response": {
+    "id": "resp_AbCdEfGhIjKlMnOpQrSt0123",
+    "object": "response",
+    "created_at": 1742000000.123,
+    "status": "completed",
+    "model": "claude-sonnet-4-5-20250929",
+    "task_id": "task_xyz123",
+    "output": [
+      {
+        "id": "msg_AbCdEfGhIjKl0123",
+        "type": "message",
+        "role": "assistant",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "text": "The little unicorn tiptoed through the moonlit meadow.",
+            "annotations": []
+          }
+        ]
+      }
+    ],
+    "output_text": "The little unicorn tiptoed through the moonlit meadow.",
+    "usage": {
+      "input_tokens": 20,
+      "output_tokens": 12,
+      "total_tokens": 32,
+      "output_tokens_details": { "reasoning_tokens": 0 }
+    }
+  }
+}
+```
+
+```json response.function_call_arguments.delta
+{
+  "type": "response.function_call_arguments.delta",
+  "sequence_number": 7,
+  "output_index": 0,
+  "delta": "{\"location\":"
+}
+```
+
+</CodeGroup>
+
+---
+
+## 사용 예제
+
+### 기본 텍스트 대화
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://aireiter.com/api/v1"
+)
+
+response = client.responses.create(
+    model="claude-sonnet-4-5-20250929",
+    instructions="You are a helpful coding assistant.",
+    input="How do I reverse a string in Python?",
+)
+
+print(response.output_text)
+```
+
+### 이미지 이해
+
+```python
+response = client.responses.create(
+    model="claude-sonnet-4-5-20250929",
+    input=[
+        {
+            "role": "user",
+            "content": [
+                {"type": "input_text",  "text": "이 이미지에는 무엇이 있나요?"},
+                {"type": "input_image", "image_url": {"url": "https://example.com/photo.jpg"}},
+            ],
+        }
+    ],
+)
+
+print(response.output_text)
+```
+
+### 도구 호출
+
+```python
+tools = [
+    {
+        "type": "function",
+        "name": "get_weather",
+        "description": "특정 위치의 현재 날씨를 가져옵니다",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "location": {"type": "string", "description": "도시 이름"},
+                "unit":     {"type": "string", "enum": ["celsius", "fahrenheit"]},
+            },
+            "required": ["location"],
+        },
+    }
+]
+
+response = client.responses.create(
+    model="gpt-5.2",
+    input="도쿄의 날씨가 어떤가요?",
+    tools=tools,
+    tool_choice="auto",
+)
+
+# 도구 호출 여부 확인
+for item in response.output:
+    if item.type == "function_call":
+        print(f"Tool: {item.name}, Args: {item.arguments}")
+```
+
+### 구조화 출력 (JSON Schema)
+
+```python
+import json
+
+schema = {
+    "type": "object",
+    "properties": {
+        "name":    {"type": "string"},
+        "age":     {"type": "integer"},
+        "hobbies": {"type": "array", "items": {"type": "string"}},
+    },
+    "required": ["name", "age", "hobbies"],
+    "additionalProperties": False,
+}
+
+response = client.responses.create(
+    model="claude-sonnet-4-5-20250929",
+    input="정보 추출: 앨리스는 30세이고 하이킹과 요리를 좋아합니다.",
+    text={
+        "format": {
+            "type":   "json_schema",
+            "name":   "person_info",
+            "strict": True,
+            "schema": schema,
+        }
+    },
+)
+
+data = json.loads(response.output_text)
+print(data)  # {"name": "Alice", "age": 30, "hobbies": ["hiking", "cooking"]}
+```
+
+### 추론 모드
+
+```python
+response = client.responses.create(
+    model="claude-3-7-sonnet-20250219",  # 추론 지원 모델
+    input="풀이: 만약 x + y = 10이고 x * y = 21이면, x와 y는 무엇인가요?",
+    reasoning={"effort": "high"},
+)
+
+print(response.output_text)
+```
+
+### 다중 대화
+
+`previous_response_id` 는 현재 작동하지 않으며, 과거 메시지는 `input`에 수동으로 연결해야 합니다:
+
+```python
+# 1회차
+response1 = client.responses.create(
+    model="claude-sonnet-4-5-20250929",
+    input="내 이름은 Bob입니다.",
+)
+
+# 2회차: 수동으로 과거 메시지 연결
+response2 = client.responses.create(
+    model="claude-sonnet-4-5-20250929",
+    input=[
+        {"role": "user",      "content": "내 이름은 Bob입니다."},
+        {"role": "assistant", "content": response1.output_text},
+        {"role": "user",      "content": "내 이름이 뭐였지요?"},
+    ],
+)
+
+print(response2.output_text)  # "당신의 이름은 Bob입니다."
+```
+
+## 주의사항
+
+1. **기본값은 스트리밍**：`stream` 매개변수의 기본값은 `true`입니다. 비스트리밍 응답이 필요할 경우 명시적으로 `"stream": false`를 전달해야 합니다.
+
+2. **포인트 부족**：잔액이 부족할 경우 HTTP `402`가 반환되며, 충전 후 다시 시도하시기 바랍니다.
+
+3. **text.format 지원 제한**：현재 기본 공급자는 구조화된 출력 지원이 제한적입니다 — `json_object` 모드에서는 모델이 여전히 순수 JSON 대신 Markdown 코드 블록을 출력할 수 있으며, `json_schema` 모드에서는 스키마 제약이 준수되지 않을 수 있습니다. 구조화된 출력을 원할 경우 `instructions` 또는 `input`에 원하는 형식을 명확하게 기술하시기 바랍니다.
+
+4. **툴 매개변수**：`parameters` 필드는 유효한 JSON Schema이어야 하며, `required` 배열이 필수 매개변수를 결정합니다.
+
+## 오류 코드 설명
+
+| HTTP 상태 코드 | error.type | 설명 |
+|------------|-----------|------|
+| 400 | `invalid_request_error` | 요청 파라미터가 유효하지 않음(필수 필드 누락, JSON 파싱 실패 등) |
+| 401 | `authentication_error` | API 키가 유효하지 않거나 만료됨 |
+| 402 | `invalid_request_error` | 계정 포인트가 부족함 |
+| 404 | `not_found_error` | 지정한 모델이 존재하지 않음 |
+| 502 | `api_error` | 상위 AI 서비스 제공자가 모두 사용할 수 없음 |
+| 503 | `api_error` | 사용 가능한 공급자 구성 없음 |

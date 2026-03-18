@@ -1,0 +1,42 @@
+[
+  {
+    "id": "__frontmatter__",
+    "hash": "ece20e99",
+    "index": 0
+  },
+  {
+    "id": "__prologue__",
+    "hash": "5c3ee9f8",
+    "index": 1
+  },
+  {
+    "id": "section-0-authorizations",
+    "hash": "7cd418e9",
+    "index": 2
+  },
+  {
+    "id": "section-1-body",
+    "hash": "478f6463",
+    "index": 3
+  },
+  {
+    "id": "section-2-response",
+    "hash": "f1c4ee86",
+    "index": 4
+  },
+  {
+    "id": "section-3-使用示例",
+    "hash": "f0d1cd2b",
+    "index": 5
+  },
+  {
+    "id": "section-4-流式响应事件格式",
+    "hash": "2e9ad9aa",
+    "index": 6
+  },
+  {
+    "id": "section-5-注意事项",
+    "hash": "513a96cf",
+    "index": 7
+  }
+]

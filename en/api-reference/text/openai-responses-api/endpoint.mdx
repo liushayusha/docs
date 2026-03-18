@@ -1,0 +1,974 @@
+---
+title: 'OpenAI Responses API'
+description: |
+    - Compatible with OpenAI Responses API protocol, supports text conversation, image understanding, tool invocation, structured output, and reasoning modes
+    - Mainly used by tools such as Codex CLI and AI SDK
+api: 'POST https://aireiter.com/api/v1/responses'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorization
+
+<ParamField header="Authorization" type="string" required>
+  Bearer Token authentication. Format: `Authorization: Bearer <api-key>`
+
+  Get API Key:
+
+  Visit the <a href={apiKeyUrl} target="_blank">API Key management page</a> to get your API Key
+</ParamField>
+
+<ParamField header="x-api-key" type="string">
+  Alternative authentication method, choose either this or `Authorization`. Format: `x-api-key: <api-key>`
+</ParamField>
+
+## Request Body Parameters
+
+<ParamField body="model" type="string" required>
+  The name of the model to use. Examples: `claude-sonnet-4-5-20250929`, `gpt-4o`.
+
+  The complete model list can be retrieved via `GET /api/v1/models`.
+</ParamField>
+
+<ParamField body="input" type="string | array" required>
+  The conversation input content supports two formats:
+
+  - **String**: directly pass the user message text
+  - **Array of messages**: contains multiple messages, supporting multi-turn conversations
+
+  <Expandable title="Array of Messages Format">
+    Each message is an object with the following fields:
+
+    <ParamField body="role" type="string" required>
+      Message role: `user`, `assistant`, or `system`
+    </ParamField>
+
+    <ParamField body="content" type="string | array" required>
+      Message content, which can be a text string or an array of content blocks (supporting multimodal content such as images):
+
+      ```json
+      [
+        { "type": "input_text", "text": "Describe this image." },
+        { "type": "input_image", "image_url": { "url": "https://..." } }
+      ]
+      ```
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="instructions" type="string">
+  System prompt. Used to set the model's behavior guidelines, role identity, or contextual background.
+
+  Equivalent to a message with `role: "system"` in the array of messages.
+</ParamField>
+
+<ParamField body="stream" type="boolean" default="true">
+  Whether to enable streaming output.
+
+  - `true` (default): returns tokens progressively as SSE event streams, suitable for real-time display
+  - `false`: returns the full response at once after completion, suitable for batch processing
+</ParamField>
+
+<ParamField body="max_output_tokens" type="integer">
+  The maximum number of tokens to generate in the reply. If exceeded, the response `status` will be `"incomplete"` and `incomplete_details.reason` will be `"max_output_tokens"`.
+</ParamField>
+
+<ParamField body="temperature" type="number">
+  Sampling temperature, range `0` to `2`. Higher values produce more random output; lower values produce more deterministic output. It is not recommended to modify both `temperature` and `top_p` simultaneously.
+</ParamField>
+
+<ParamField body="top_p" type="number">
+  Nucleus sampling probability, range `0` to `1`. The model samples only from tokens whose cumulative probability reaches `top_p`.
+</ParamField>
+
+<ParamField body="tools" type="array">
+  List of tools available for the model to call. Currently only supports tools of type `"function"`; built-in tools such as `web_search`, `file_search`, and `computer_use` are not supported.
+
+  <Expandable title="Function Tool Format">
+    <ParamField body="type" type="string" required>
+      Fixed as `"function"`
+    </ParamField>
+
+    <ParamField body="name" type="string" required>
+      Function name, must match the regex `^[a-zA-Z0-9_-]{1,64}$`
+    </ParamField>
+
+    <ParamField body="description" type="string">
+      Function description, helps the model decide when to call this tool
+    </ParamField>
+
+    <ParamField body="parameters" type="object">
+      Parameter definitions, following JSON Schema format
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="tool_choice" type="string | object" default="auto">
+  Tool invocation strategy:
+
+  - `"auto"`: model decides automatically whether to call tools
+  - `"none"`: prohibits calling tools
+  - `"required"`: forces calling at least one tool
+  - `{ "type": "function", "name": "function_name" }`: forces calling a specified tool
+</ParamField>
+
+<ParamField body="parallel_tool_calls" type="boolean" default="true">
+  Whether to allow the model to call multiple tools in parallel. Effective only when `tools` are provided.
+</ParamField>
+
+<ParamField body="text" type="object">
+  Output format control.
+
+  <Expandable title="Text Object">
+    <ParamField body="format" type="object">
+      <Expandable title="Format Object">
+        <ParamField body="type" type="string" required>
+          Output format type:
+          - `"text"`: plain text (default)
+          - `"json_object"`: JSON format
+          - `"json_schema"`: JSON conforming to a specified schema
+        </ParamField>
+
+        <ParamField body="name" type="string">
+          Schema name (only effective for `json_schema`)
+        </ParamField>
+
+        <ParamField body="description" type="string">
+          Schema description (only effective for `json_schema`)
+        </ParamField>
+
+        <ParamField body="strict" type="boolean" default="true">
+          Whether to strictly follow the schema (only effective for `json_schema`)
+        </ParamField>
+
+        <ParamField body="schema" type="object">
+          JSON Schema definition (required only for `json_schema`)
+        </ParamField>
+      </Expandable>
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="reasoning" type="object">
+  Reasoning mode configuration (applicable for models that support reasoning, such as `gpt-5.2` and above).
+
+  <Expandable title="Reasoning Object">
+    <ParamField body="effort" type="string">
+      Reasoning effort: `"low"` | `"medium"` | `"high"`
+    </ParamField>
+
+  </Expandable>
+</ParamField>
+
+## Response Fields
+
+<ResponseField name="id" type="string">
+  Unique response identifier, format: `resp_` + 24-character random string
+</ResponseField>
+
+<ResponseField name="object" type="string">
+  Fixed value `"response"`
+</ResponseField>
+
+<ResponseField name="created_at" type="number">
+  Response creation time, Unix timestamp (seconds, including millisecond precision)
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Response status:
+  - `"completed"`: successfully completed
+  - `"incomplete"`: cut off early due to `max_output_tokens`
+  - `"in_progress"`: streaming output in progress (only appears in streaming events)
+  - `"failed"`: generation failed
+</ResponseField>
+
+<ResponseField name="model" type="string">
+  Actual model name used
+</ResponseField>
+
+<ResponseField name="task_id" type="string">
+  Platform extension field. Billing task ID for this call, used for reconciliation and consumption queries.
+
+  **Note**:
+  - **Non-streaming**: `task_id` is located directly at the top level of the response JSON
+  - **Streaming**: `task_id` is nested inside the `response.created` (first event) and `response.completed` (last event) `response` objects, needs to be extracted from raw SSE events; OpenAI SDK streaming interfaces do not expose this field automatically
+</ResponseField>
+
+<ResponseField name="output" type="array">
+  Array of output contents, can include both text messages and function call types.
+
+  <Expandable title="message type">
+    <ResponseField name="id" type="string">
+      Message ID, format: `msg_` + 16-character random string
+    </ResponseField>
+
+    <ResponseField name="type" type="string">
+      Fixed value `"message"`
+    </ResponseField>
+
+    <ResponseField name="role" type="string">
+      Fixed value `"assistant"`
+    </ResponseField>
+
+    <ResponseField name="status" type="string">
+      `"completed"` | `"in_progress"`
+    </ResponseField>
+
+    <ResponseField name="content" type="array">
+      Array of content blocks:
+
+      <Expandable title="output_text content block">
+        <ResponseField name="type" type="string">
+          Fixed value `"output_text"`
+        </ResponseField>
+
+        <ResponseField name="text" type="string">
+          Text content generated by the model
+        </ResponseField>
+
+        <ResponseField name="annotations" type="array">
+          Text annotations, usually an empty array `[]`
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+
+  <Expandable title="function_call type">
+    <ResponseField name="id" type="string">
+      Function call entry ID, format: `fc_` + 16-character random string
+    </ResponseField>
+
+    <ResponseField name="type" type="string">
+      Fixed value `"function_call"`
+    </ResponseField>
+
+    <ResponseField name="call_id" type="string">
+      Function call ID, referenced when submitting function execution results
+    </ResponseField>
+
+    <ResponseField name="name" type="string">
+      Name of the called function
+    </ResponseField>
+
+    <ResponseField name="arguments" type="string">
+      Function parameters, JSON serialized string
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="output_text" type="string">
+  Shortcut field, equivalent to `output[0].content[0].text` (in pure text scenarios). Empty string in function call scenarios.
+</ResponseField>
+
+<ResponseField name="usage" type="object">
+  Token usage statistics.
+
+  <Expandable title="usage object">
+    <ResponseField name="input_tokens" type="integer">
+      Number of input tokens (including system prompt)
+    </ResponseField>
+
+    <ResponseField name="output_tokens" type="integer">
+      Number of output tokens
+    </ResponseField>
+
+    <ResponseField name="total_tokens" type="integer">
+      Total tokens = input + output
+    </ResponseField>
+
+    <ResponseField name="output_tokens_details" type="object">
+      <Expandable title="Details">
+        <ResponseField name="reasoning_tokens" type="integer">
+          Number of reasoning/thinking tokens (0 for regular models)
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="incomplete_details" type="object | null">
+  Non-null when `status` is `"incomplete"`.
+
+  <Expandable title="incomplete_details object">
+    <ResponseField name="reason" type="string">
+      Truncation reason. Currently only `"max_output_tokens"`
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST https://aireiter.com/api/v1/responses \
+  -H "Authorization: Bearer $API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "claude-sonnet-4-5-20250929",
+    "input": "Write a one-sentence bedtime story about a unicorn.",
+    "stream": true
+  }'
+```
+
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://aireiter.com/api/v1"
+)
+
+response = client.responses.create(
+    model="claude-sonnet-4-5-20250929",
+    input="Write a one-sentence bedtime story about a unicorn."
+)
+
+print(response.output_text)
+```
+
+```javascript JavaScript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "YOUR_API_KEY",
+  baseURL: "https://aireiter.com/api/v1",
+});
+
+const response = await client.responses.create({
+  model: "claude-sonnet-4-5-20250929",
+  input: "Write a one-sentence bedtime story about a unicorn.",
+});
+
+console.log(response.output_text);
+```
+
+```go Go
+package main
+
+import (
+  "bytes"
+  "encoding/json"
+  "fmt"
+  "net/http"
+)
+
+func main() {
+  payload := map[string]interface{}{
+    "model":  "claude-sonnet-4-5-20250929",
+    "input":  "Write a one-sentence bedtime story about a unicorn.",
+    "stream": false,
+  }
+  body, _ := json.Marshal(payload)
+
+  req, _ := http.NewRequest("POST", "https://aireiter.com/api/v1/responses", bytes.NewBuffer(body))
+  req.Header.Set("Authorization", "Bearer YOUR_API_KEY")
+  req.Header.Set("Content-Type", "application/json")
+
+  resp, _ := http.DefaultClient.Do(req)
+  defer resp.Body.Close()
+
+  var result map[string]interface{}
+  json.NewDecoder(resp.Body).Decode(&result)
+  fmt.Println(result)
+}
+```
+
+```java Java
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.URI;
+import java.net.http.*;
+import java.util.Map;
+
+public class ResponsesExample {
+  public static void main(String[] args) throws Exception {
+    var payload = Map.of(
+      "model", "claude-sonnet-4-5-20250929",
+      "input", "Write a one-sentence bedtime story about a unicorn.",
+      "stream", false
+    );
+    var body = new ObjectMapper().writeValueAsString(payload);
+    var request = HttpRequest.newBuilder()
+      .uri(URI.create("https://aireiter.com/api/v1/responses"))
+      .header("Authorization", "Bearer YOUR_API_KEY")
+      .header("Content-Type", "application/json")
+      .POST(HttpRequest.BodyPublishers.ofString(body))
+      .build();
+    var response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+    System.out.println(response.body());
+  }
+}
+```
+
+```php PHP
+<?php
+$client = new GuzzleHttp\Client();
+$response = $client->post('https://aireiter.com/api/v1/responses', [
+  'headers' => [
+    'Authorization' => 'Bearer YOUR_API_KEY',
+    'Content-Type'  => 'application/json',
+  ],
+  'json' => [
+    'model'  => 'claude-sonnet-4-5-20250929',
+    'input'  => 'Write a one-sentence bedtime story about a unicorn.',
+    'stream' => false,
+  ],
+]);
+echo $response->getBody();
+```
+
+```ruby Ruby
+require 'net/http'
+require 'json'
+
+uri = URI('https://aireiter.com/api/v1/responses')
+req = Net::HTTP::Post.new(uri, {
+  'Authorization' => 'Bearer YOUR_API_KEY',
+  'Content-Type'  => 'application/json'
+})
+req.body = {
+  model:  'claude-sonnet-4-5-20250929',
+  input:  'Write a one-sentence bedtime story about a unicorn.',
+  stream: false
+}.to_json
+
+res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) { |h| h.request(req) }
+puts res.body
+```
+
+```swift Swift
+import Foundation
+
+let payload: [String: Any] = [
+  "model":  "claude-sonnet-4-5-20250929",
+  "input":  "Write a one-sentence bedtime story about a unicorn.",
+  "stream": false
+]
+
+var request = URLRequest(url: URL(string: "https://aireiter.com/api/v1/responses")!)
+request.httpMethod = "POST"
+request.setValue("Bearer YOUR_API_KEY", forHTTPHeaderField: "Authorization")
+request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+request.httpBody = try! JSONSerialization.data(withJSONObject: payload)
+
+URLSession.shared.dataTask(with: request) { data, _, _ in
+  if let data = data { print(String(data: data, encoding: .utf8)!) }
+}.resume()
+```
+
+```csharp C#
+using System.Net.Http;
+using System.Net.Http.Json;
+
+var client = new HttpClient();
+client.DefaultRequestHeaders.Add("Authorization", "Bearer YOUR_API_KEY");
+
+var response = await client.PostAsJsonAsync("https://aireiter.com/api/v1/responses", new {
+  model  = "claude-sonnet-4-5-20250929",
+  input  = "Write a one-sentence bedtime story about a unicorn.",
+  stream = false
+});
+Console.WriteLine(await response.Content.ReadAsStringAsync());
+```
+
+```c C
+#include <stdio.h>
+#include <curl/curl.h>
+
+int main() {
+  CURL *curl = curl_easy_init();
+  struct curl_slist *headers = NULL;
+  headers = curl_slist_append(headers, "Authorization: Bearer YOUR_API_KEY");
+  headers = curl_slist_append(headers, "Content-Type: application/json");
+
+  const char *data = "{\"model\":\"claude-sonnet-4-5-20250929\","
+                     "\"input\":\"Write a one-sentence bedtime story about a unicorn.\","
+                     "\"stream\":false}";
+
+  curl_easy_setopt(curl, CURLOPT_URL, "https://aireiter.com/api/v1/responses");
+  curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+  curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
+  curl_easy_perform(curl);
+  curl_easy_cleanup(curl);
+  return 0;
+}
+```
+
+```dart Dart
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+void main() async {
+  final response = await http.post(
+    Uri.parse('https://aireiter.com/api/v1/responses'),
+    headers: {
+      'Authorization': 'Bearer YOUR_API_KEY',
+      'Content-Type':  'application/json',
+    },
+    body: jsonEncode({
+      'model':  'claude-sonnet-4-5-20250929',
+      'input':  'Write a one-sentence bedtime story about a unicorn.',
+      'stream': false,
+    }),
+  );
+  print(response.body);
+}
+```
+
+```r R
+library(httr)
+library(jsonlite)
+
+response <- POST(
+  "https://aireiter.com/api/v1/responses",
+  add_headers(
+    Authorization = "Bearer YOUR_API_KEY",
+    `Content-Type` = "application/json"
+  ),
+  body = toJSON(list(
+    model  = "claude-sonnet-4-5-20250929",
+    input  = "Write a one-sentence bedtime story about a unicorn.",
+    stream = FALSE
+  ), auto_unbox = TRUE)
+)
+content(response, "text")
+```
+
+</RequestExample>
+
+<ResponseExample>
+
+```json 200 Success (non-streaming)
+{
+  "id": "resp_AbCdEfGhIjKlMnOpQrSt0123",
+  "object": "response",
+  "created_at": 1742000000.123,
+  "status": "completed",
+  "model": "claude-sonnet-4-5-20250929",
+  "task_id": "task_xyz123",
+  "output": [
+    {
+      "id": "msg_AbCdEfGhIjKl0123",
+      "type": "message",
+      "role": "assistant",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "text": "The little unicorn tiptoed through the moonlit meadow, leaving a trail of shimmering stardust as she galloped home to her cozy cloud.",
+          "annotations": []
+        }
+      ]
+    }
+  ],
+  "output_text": "The little unicorn tiptoed through the moonlit meadow, leaving a trail of shimmering stardust as she galloped home to her cozy cloud.",
+  "usage": {
+    "input_tokens": 20,
+    "output_tokens": 35,
+    "total_tokens": 55,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  }
+}
+```
+
+```json 200 Function call response
+{
+  "id": "resp_AbCdEfGhIjKlMnOpQrSt0456",
+  "object": "response",
+  "created_at": 1742000100.456,
+  "status": "completed",
+  "model": "claude-sonnet-4-5-20250929",
+  "task_id": "task_abc456",
+  "output": [
+    {
+      "id": "fc_AbCdEfGhIjKl0456",
+      "type": "function_call",
+      "call_id": "call_AbCdEfGh",
+      "name": "get_weather",
+      "arguments": "{\"location\":\"San Francisco\",\"unit\":\"celsius\"}"
+    }
+  ],
+  "output_text": "",
+  "usage": {
+    "input_tokens": 80,
+    "output_tokens": 25,
+    "total_tokens": 105,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  }
+}
+```
+
+```json 200 Truncated response (incomplete)
+{
+  "id": "resp_AbCdEfGhIjKlMnOpQrSt0789",
+  "object": "response",
+  "created_at": 1742000200.789,
+  "status": "incomplete",
+  "model": "claude-sonnet-4-5-20250929",
+  "task_id": "task_def789",
+  "output": [
+    {
+      "id": "msg_AbCdEfGhIjKl0789",
+      "type": "message",
+      "role": "assistant",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "text": "Here is a very long story that was cut off due to max_output_tokens...",
+          "annotations": []
+        }
+      ]
+    }
+  ],
+  "output_text": "Here is a very long story that was cut off due to max_output_tokens...",
+  "incomplete_details": {
+    "reason": "max_output_tokens"
+  },
+  "usage": {
+    "input_tokens": 15,
+    "output_tokens": 256,
+    "total_tokens": 271,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  }
+}
+```
+
+```json 400 Request parameter error
+{
+  "type": "error",
+  "error": {
+    "type": "invalid_request_error",
+    "message": "model is required"
+  }
+}
+```
+
+```json 401 Authentication failed
+{
+  "type": "error",
+  "error": {
+    "type": "authentication_error",
+    "message": "Invalid API key"
+  }
+}
+```
+
+```json 402 Insufficient credits
+{
+  "type": "error",
+  "error": {
+    "type": "invalid_request_error",
+    "message": "Insufficient credits"
+  }
+}
+```
+
+```json 404 Model not found
+{
+  "type": "error",
+  "error": {
+    "type": "not_found_error",
+    "message": "Model 'unknown-model' not found"
+  }
+}
+```
+
+```json 502 Upstream service error
+{
+  "type": "error",
+  "error": {
+    "type": "api_error",
+    "message": "All providers failed"
+  }
+}
+```
+
+</ResponseExample>
+
+---
+
+## Streaming Response Events
+
+When `stream: true`, the API returns an SSE event stream in `text/event-stream` format. Each event has the following format:
+
+```
+event: <event_type>
+data: <JSON_payload>
+
+```
+
+All event payloads include a `sequence_number` field (incrementing from `0`) to ensure clients process events in order.
+
+> **Obtaining `task_id`**: To get the billing task ID in streaming mode, listen for the first `response.created` event and read `event.response.task_id`.
+
+### Event Sequence (Text Response)
+
+| No. | Event Type | Description |
+|-----|------------|-------------|
+| 1 | `response.created` | Response object created, `status: "in_progress"` |
+| 2 | `response.in_progress` | Response generation started |
+| 3 | `response.output_item.added` | Output message item added |
+| 4 | `response.content_part.added` | Text content chunk added, `text: ""` |
+| 5 | `response.output_text.delta` | *(Repeated)* Incremental text per token |
+| 6 | `response.output_text.done` | Text content completed with full text |
+| 7 | `response.content_part.done` | Content chunk completed |
+| 8 | `response.output_item.done` | Message item completed |
+| 9 | `response.completed` | Response completed with full response object and usage |
+
+### Event Sequence (Tool Invocation)
+
+| No. | Event Type | Description |
+|-----|------------|-------------|
+| … | `response.output_item.added` | Function call item added |
+| … | `response.function_call_arguments.delta` | *(Repeated)* Function arguments incremental |
+| … | `response.function_call_arguments.done` | Function arguments completed |
+| … | `response.output_item.done` | Function call item completed |
+| Last | `response.completed` | Response completed |
+
+### Event Examples
+
+<CodeGroup>
+
+```json response.created
+{
+  "type": "response.created",
+  "sequence_number": 0,
+  "response": {
+    "id": "resp_AbCdEfGhIjKlMnOpQrSt0123",
+    "object": "response",
+    "created_at": 1742000000.123,
+    "status": "in_progress",
+    "model": "claude-sonnet-4-5-20250929",
+    "task_id": "task_xyz123",
+    "output": [],
+    "output_text": ""
+  }
+}
+```
+
+```json response.output_text.delta
+{
+  "type": "response.output_text.delta",
+  "sequence_number": 5,
+  "item_id": "msg_AbCdEfGhIjKl0123",
+  "output_index": 0,
+  "content_index": 0,
+  "delta": "The little"
+}
+```
+
+```json response.completed
+{
+  "type": "response.completed",
+  "sequence_number": 9,
+  "response": {
+    "id": "resp_AbCdEfGhIjKlMnOpQrSt0123",
+    "object": "response",
+    "created_at": 1742000000.123,
+    "status": "completed",
+    "model": "claude-sonnet-4-5-20250929",
+    "task_id": "task_xyz123",
+    "output": [
+      {
+        "id": "msg_AbCdEfGhIjKl0123",
+        "type": "message",
+        "role": "assistant",
+        "status": "completed",
+        "content": [
+          {
+            "type": "output_text",
+            "text": "The little unicorn tiptoed through the moonlit meadow.",
+            "annotations": []
+          }
+        ]
+      }
+    ],
+    "output_text": "The little unicorn tiptoed through the moonlit meadow.",
+    "usage": {
+      "input_tokens": 20,
+      "output_tokens": 12,
+      "total_tokens": 32,
+      "output_tokens_details": { "reasoning_tokens": 0 }
+    }
+  }
+}
+```
+
+```json response.function_call_arguments.delta
+{
+  "type": "response.function_call_arguments.delta",
+  "sequence_number": 7,
+  "output_index": 0,
+  "delta": "{\"location\":"
+}
+```
+
+</CodeGroup>
+
+---
+
+## Usage Examples
+
+### Basic Text Conversation
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_API_KEY",
+    base_url="https://aireiter.com/api/v1"
+)
+
+response = client.responses.create(
+    model="claude-sonnet-4-5-20250929",
+    instructions="You are a helpful coding assistant.",
+    input="How do I reverse a string in Python?",
+)
+
+print(response.output_text)
+```
+
+### Image Understanding
+
+```python
+response = client.responses.create(
+    model="claude-sonnet-4-5-20250929",
+    input=[
+        {
+            "role": "user",
+            "content": [
+                {"type": "input_text",  "text": "What's in this image?"},
+                {"type": "input_image", "image_url": {"url": "https://example.com/photo.jpg"}},
+            ],
+        }
+    ],
+)
+
+print(response.output_text)
+```
+
+### Tool Invocation
+
+```python
+tools = [
+    {
+        "type": "function",
+        "name": "get_weather",
+        "description": "Get current weather for a location",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "location": {"type": "string", "description": "City name"},
+                "unit":     {"type": "string", "enum": ["celsius", "fahrenheit"]},
+            },
+            "required": ["location"],
+        },
+    }
+]
+
+response = client.responses.create(
+    model="gpt-5.2",
+    input="What's the weather like in Tokyo?",
+    tools=tools,
+    tool_choice="auto",
+)
+
+# Check if there is a tool call
+for item in response.output:
+    if item.type == "function_call":
+        print(f"Tool: {item.name}, Args: {item.arguments}")
+```
+
+### Structured Output (JSON Schema)
+
+```python
+import json
+
+schema = {
+    "type": "object",
+    "properties": {
+        "name":    {"type": "string"},
+        "age":     {"type": "integer"},
+        "hobbies": {"type": "array", "items": {"type": "string"}},
+    },
+    "required": ["name", "age", "hobbies"],
+    "additionalProperties": False,
+}
+
+response = client.responses.create(
+    model="claude-sonnet-4-5-20250929",
+    input="Extract info: Alice is 30 years old and loves hiking and cooking.",
+    text={
+        "format": {
+            "type":   "json_schema",
+            "name":   "person_info",
+            "strict": True,
+            "schema": schema,
+        }
+    },
+)
+
+data = json.loads(response.output_text)
+print(data)  # {"name": "Alice", "age": 30, "hobbies": ["hiking", "cooking"]}
+```
+
+### Reasoning Mode
+
+```python
+response = client.responses.create(
+    model="claude-3-7-sonnet-20250219",  # Model supporting reasoning
+    input="Solve: If x + y = 10 and x * y = 21, what are x and y?",
+    reasoning={"effort": "high"},
+)
+
+print(response.output_text)
+```
+
+### Multi-turn Conversation
+
+`previous_response_id` is currently ineffective; you need to manually concatenate history messages in `input`:
+
+```python
+# First turn
+response1 = client.responses.create(
+    model="claude-sonnet-4-5-20250929",
+    input="My name is Bob.",
+)
+
+# Second turn: manually concatenate history messages
+response2 = client.responses.create(
+    model="claude-sonnet-4-5-20250929",
+    input=[
+        {"role": "user",      "content": "My name is Bob."},
+        {"role": "assistant", "content": response1.output_text},
+        {"role": "user",      "content": "What's my name?"},
+    ],
+)
+
+print(response2.output_text)  # "Your name is Bob."
+```
+
+## Notes
+
+1. **Streaming by Default**: The `stream` parameter defaults to `true`. To receive a non-streaming response, explicitly pass `"stream": false`.
+
+2. **Insufficient Credits**: An HTTP `402` is returned when the balance is insufficient. Please recharge and try again.
+
+3. **Limited Support for text.format**: The underlying provider currently has limited support for structured output—models may still output Markdown code blocks instead of pure JSON in `json_object` mode; Schema constraints may not be enforced in `json_schema` mode. For structured output, it is recommended to clearly describe the required format in `instructions` or `input`.
+
+4. **Tool Parameters**: The `parameters` field must be a valid JSON Schema, and the `required` array specifies which parameters are mandatory.
+
+## Error Code Description
+
+| HTTP Status Code | error.type | Description |
+|------------|-----------|------|
+| 400 | `invalid_request_error` | Invalid request parameters (missing required fields, JSON parsing failure, etc.) |
+| 401 | `authentication_error` | API Key is invalid or expired |
+| 402 | `invalid_request_error` | Insufficient account balance |
+| 404 | `not_found_error` | Specified model does not exist |
+| 502 | `api_error` | All upstream AI providers are unavailable |
+| 503 | `api_error` | No available provider configuration |

@@ -1,0 +1,793 @@
+---
+title: 'Claude メッセージインターフェース'
+description: |
+    - Anthropic Messages API フォーマットと完全互換
+    - マルチターン対話、視覚理解対応
+    - ストリーミングおよび非ストリーミングの2つの出力モードに対応
+api: 'POST https://aireiter.com/api/v1/messages'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="x-api-key" type="string" required>
+  APIキー。認証に使用します（Anthropic SDKの標準方式）
+
+  APIキーの取得方法：
+
+  <a href={apiKeyUrl} target="_blank">APIキー管理ページ</a>にアクセスしてAPIキーを取得してください
+
+  ```
+  x-api-key: YOUR_API_KEY
+  ```
+
+  Bearerトークン形式もサポートしています：
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  モデル名
+
+  * `claude-haiku-4-5-20251001` — 軽量で高速、高頻度のシンプルなタスクに適しています
+  * `claude-sonnet-4-5-20250929` — 性能とコストのバランスが良く、総合的に推奨
+  * `claude-sonnet-4-6` — Sonnet 新バージョンで、より高い性能
+  * `claude-opus-4-5-20251101` — フラッグシップ推論モデルで複雑な分析に適する
+  * `claude-opus-4-6` — Opus 新バージョンで最も強力な能力
+
+  完全なモデルリストは `GET /api/v1/models` を参照してください。
+</ParamField>
+
+<ParamField body="messages" type="array" required>
+  メッセージリスト
+
+  モデルはメッセージ履歴をもとに次の応答を生成します。各メッセージは `role` と `content` を含みます。
+
+  <Expandable title="フィールドの説明">
+    <ParamField body="role" type="string" required>
+      ロールタイプ
+
+      * `user` — ユーザーメッセージ
+      * `assistant` — AI応答（マルチターン対話やプリフィル用）
+    </ParamField>
+
+    <ParamField body="content" type="string | array" required>
+      メッセージ内容
+
+      文字列単体、またはテキストと画像を含むコンテンツブロックの配列も可能です。
+    </ParamField>
+  </Expandable>
+
+  **テキストのみのメッセージ：**
+
+  ```json theme={null}
+  [{"role": "user", "content": "こんにちは"}]
+  ```
+
+  **マルチターン対話：**
+
+  ```json theme={null}
+  [
+    {"role": "user",      "content": "機械学習とは何ですか？"},
+    {"role": "assistant", "content": "機械学習は..."},
+    {"role": "user",      "content": "例を挙げられますか？"}
+  ]
+  ```
+
+  **マルチモーダル（画像 + テキスト）：**
+
+  ```json theme={null}
+  [
+    {
+      "role": "user",
+      "content": [
+        {
+          "type": "image",
+          "source": {
+            "type": "url",
+            "url": "https://example.com/chart.png"
+          }
+        },
+        {"type": "text", "text": "このグラフを分析してください"}
+      ]
+    }
+  ]
+  ```
+
+  **プリフィルされたアシスタント応答：**
+
+  ```json theme={null}
+  [
+    {"role": "user",      "content": "JSON形式で分析結果を返してください"},
+    {"role": "assistant", "content": "{"}
+  ]
+  ```
+</ParamField>
+
+<ParamField body="max_tokens" type="integer" required>
+  最大出力トークン数
+
+  モデルが生成できる最大トークン数を制御します。モデルは上限に達する前に自然に終了する場合があります。最小値は `1` です。
+
+  モデルによってコンテキストウィンドウの上限が異なります。モデルドキュメントを参照してください。
+</ParamField>
+
+<ParamField body="system" type="string | array">
+  システムプロンプト
+
+  モデルのロール、指示、背景情報を設定します。
+
+  **文字列形式（推奨）：**
+
+  ```json theme={null}
+  {"system": "あなたはプロのPythonプログラミングメンターで、すべての質問に中国語で答えます。"}
+  ```
+
+  **構造化形式（cache_control対応）：**
+
+  ```json theme={null}
+  {
+    "system": [
+      {
+        "type": "text",
+        "text": "あなたはプロのPythonプログラミングメンターです。",
+        "cache_control": {"type": "ephemeral"}
+      }
+    ]
+  }
+  ```
+</ParamField>
+
+<ParamField body="stream" type="boolean">
+  ストリーム出力を有効にするかどうか
+
+  `true` に設定すると、SSE（Server-Sent Events）を通じてリアルタイムでストリーム返却します。**デフォルトは `true` です。** 非ストリーム応答にするには明示的に `"stream": false` を渡す必要があります。
+
+  ストリームイベントの順序：
+  `ping` → `message_start` → `content_block_start` → `content_block_delta` × N → `content_block_stop` → `message_delta` → `message_stop`
+</ParamField>
+
+<ParamField body="temperature" type="number">
+  温度、範囲は `0–1`
+
+  * 低値（例：`0.2`）：より確定的で保守的な出力
+  * 高値（例：`0.8`）：よりランダムで創造的な出力
+
+  デフォルトは `1.0`。`top_p` と同時使用は推奨されません。
+</ParamField>
+
+<ParamField body="top_p" type="number">
+  核サンプリングパラメータ、範囲は `0–1`
+
+  累積確率が `top_p` に達するトークン集合からサンプリングします。デフォルトは `1.0`。
+  `temperature` と同時使用は推奨されません。
+</ParamField>
+
+<ParamField body="top_k" type="integer">
+  Top-K サンプリング
+
+  確率の高いK個のトークンからのみサンプリングし、低確率のロングテールを除外します。高度なユースケースの調整に適しています。
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">
+  メッセージの一意識別子
+
+  例：`"msg_01XFDUDYJgAACzvnptvVoYEL"`
+</ResponseField>
+
+<ResponseField name="type" type="string">
+  オブジェクトの種類、固定で `"message"`
+</ResponseField>
+
+<ResponseField name="role" type="string">
+  役割、固定で `"assistant"`
+</ResponseField>
+
+<ResponseField name="content" type="array">
+  コンテンツブロックの配列
+
+  **テキストコンテンツ：**
+
+  ```json theme={null}
+  [{"type": "text", "text": "こんにちは！私はClaudeです。"}]
+  ```
+
+  コンテンツの種類：`text`（テキスト）
+</ResponseField>
+
+<ResponseField name="model" type="string">
+  実際にリクエストを処理したモデル名
+</ResponseField>
+
+<ResponseField name="stop_reason" type="string">
+  停止理由
+
+  * `end_turn` — 自然終了
+  * `max_tokens` — `max_tokens` の上限に達した
+  * `stop_sequence` — カスタム停止シーケンスがトリガーされた
+</ResponseField>
+
+<ResponseField name="stop_sequence" type="string | null">
+  停止シーケンスによる停止の場合、トリガーされたシーケンスの内容が返される。そうでなければ `null`
+</ResponseField>
+
+<ResponseField name="usage" type="object">
+  トークン使用統計
+
+  <Expandable title="フィールド説明">
+    <ResponseField name="input_tokens" type="integer">
+      入力トークン数（システムプロンプト含む）
+    </ResponseField>
+
+    <ResponseField name="output_tokens" type="integer">
+      出力トークン数
+    </ResponseField>
+
+    <ResponseField name="cache_creation_input_tokens" type="integer">
+      今回キャッシュに書き込んだトークン数（Prompt Caching）
+    </ResponseField>
+
+    <ResponseField name="cache_read_input_tokens" type="integer">
+      今回キャッシュから読み取ったトークン数（キャッシュヒット時のみ値あり）
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+  ```bash cURL theme={null}
+  curl https://aireiter.com/api/v1/messages \
+    -H "x-api-key: $API_KEY" \
+    -H "anthropic-version: 2023-06-01" \
+    -H "content-type: application/json" \
+    -d '{
+      "model": "claude-sonnet-4-5-20250929",
+      "max_tokens": 1024,
+      "messages": [
+        {"role": "user", "content": "こんにちは、世界"}
+      ]
+    }'
+  ```
+
+  ```python Python theme={null}
+  import anthropic
+
+  client = anthropic.Anthropic(
+      api_key="YOUR_API_KEY",
+      base_url="https://aireiter.com/api"
+  )
+
+  message = client.messages.create(
+      model="claude-sonnet-4-5-20250929",
+      max_tokens=1024,
+      messages=[
+          {"role": "user", "content": "こんにちは、世界"}
+      ]
+  )
+
+  print(message.content[0].text)
+  ```
+
+  ```javascript JavaScript theme={null}
+  import Anthropic from '@anthropic-ai/sdk';
+
+  const client = new Anthropic({
+    apiKey: process.env.API_KEY,
+    baseURL: 'https://aireiter.com/api'
+  });
+
+  const message = await client.messages.create({
+    model: 'claude-sonnet-4-5-20250929',
+    max_tokens: 1024,
+    messages: [
+      { role: 'user', content: 'こんにちは、世界' }
+    ]
+  });
+
+  console.log(message.content[0].text);
+  ```
+
+  ```go Go theme={null}
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+      "os"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/v1/messages"
+
+      payload := map[string]interface{}{
+          "model":      "claude-sonnet-4-5-20250929",
+          "max_tokens": 1024,
+          "messages": []map[string]string{
+              {"role": "user", "content": "こんにちは、世界"},
+          },
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("x-api-key", os.Getenv("API_KEY"))
+      req.Header.Set("anthropic-version", "2023-06-01")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java theme={null}
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/v1/messages";
+          String apiKey = System.getenv("API_KEY");
+
+          String payload = """
+          {
+            "model": "claude-sonnet-4-5-20250929",
+            "max_tokens": 1024,
+            "messages": [
+              {"role": "user", "content": "こんにちは、世界"}
+            ]
+          }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("x-api-key", apiKey)
+              .header("anthropic-version", "2023-06-01")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP theme={null}
+  <?php
+
+  $url = "https://aireiter.com/api/v1/messages";
+  $apiKey = getenv('API_KEY');
+
+  $payload = [
+      "model"      => "claude-sonnet-4-5-20250929",
+      "max_tokens" => 1024,
+      "messages"   => [
+          ["role" => "user", "content" => "こんにちは、世界"]
+      ]
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "x-api-key: " . $apiKey,
+      "anthropic-version: 2023-06-01",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby theme={null}
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url     = URI("https://aireiter.com/api/v1/messages")
+  api_key = ENV['API_KEY']
+
+  payload = {
+    model:      "claude-sonnet-4-5-20250929",
+    max_tokens: 1024,
+    messages:   [{ role: "user", content: "こんにちは、世界" }]
+  }
+
+  http         = Net::HTTP.new(url.host, url.port)
+  http.use_ssl = true
+
+  request                    = Net::HTTP::Post.new(url)
+  request["x-api-key"]       = api_key
+  request["anthropic-version"] = "2023-06-01"
+  request["Content-Type"]    = "application/json"
+  request.body               = payload.to_json
+
+  puts http.request(request).body
+  ```
+
+  ```swift Swift theme={null}
+  import Foundation
+
+  let url    = URL(string: "https://aireiter.com/api/v1/messages")!
+  let apiKey = ProcessInfo.processInfo.environment["API_KEY"] ?? ""
+
+  let payload: [String: Any] = [
+      "model":      "claude-sonnet-4-5-20250929",
+      "max_tokens": 1024,
+      "messages":   [["role": "user", "content": "こんにちは、世界"]]
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue(apiKey,        forHTTPHeaderField: "x-api-key")
+  request.setValue("2023-06-01",  forHTTPHeaderField: "anthropic-version")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  URLSession.shared.dataTask(with: request) { data, _, _ in
+      if let data = data {
+          print(String(data: data, encoding: .utf8) ?? "")
+      }
+  }.resume()
+  ```
+
+  ```csharp C# theme={null}
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url    = "https://aireiter.com/api/v1/messages";
+          var apiKey = Environment.GetEnvironmentVariable("API_KEY");
+
+          var payload = @"{
+              ""model"": ""claude-sonnet-4-5-20250929"",
+              ""max_tokens"": 1024,
+              ""messages"": [
+                  {""role"": ""user"", ""content"": ""こんにちは、世界""}
+              ]
+          }";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("x-api-key", apiKey);
+          client.DefaultRequestHeaders.Add("anthropic-version", "2023-06-01");
+
+          var content  = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          Console.WriteLine(await response.Content.ReadAsStringAsync());
+      }
+  }
+  ```
+
+  ```c C theme={null}
+  #include <stdio.h>
+  #include <curl/curl.h>
+  #include <stdlib.h>
+  #include <string.h>
+
+  int main(void) {
+      CURL *curl;
+      const char *api_key = getenv("API_KEY");
+
+      curl_global_init(CURL_GLOBAL_DEFAULT);
+      curl = curl_easy_init();
+
+      if (curl) {
+          const char *payload =
+              "{\"model\":\"claude-sonnet-4-5-20250929\","
+              "\"max_tokens\":1024,"
+              "\"messages\":[{\"role\":\"user\",\"content\":\"こんにちは、世界\"}]}";
+
+          char auth_header[256];
+          snprintf(auth_header, sizeof(auth_header), "x-api-key: %s", api_key);
+
+          struct curl_slist *headers = NULL;
+          headers = curl_slist_append(headers, auth_header);
+          headers = curl_slist_append(headers, "anthropic-version: 2023-06-01");
+          headers = curl_slist_append(headers, "Content-Type: application/json");
+
+          curl_easy_setopt(curl, CURLOPT_URL, "https://aireiter.com/api/v1/messages");
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
+          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+          curl_easy_perform(curl);
+          curl_slist_free_all(headers);
+          curl_easy_cleanup(curl);
+      }
+
+      curl_global_cleanup();
+      return 0;
+  }
+  ```
+
+  ```dart Dart theme={null}
+  import 'dart:convert';
+  import 'dart:io';
+  import 'package:http/http.dart' as http;
+
+  void main() async {
+    final url    = Uri.parse('https://aireiter.com/api/v1/messages');
+    final apiKey = Platform.environment['API_KEY']!;
+
+    final response = await http.post(
+      url,
+      headers: {
+        'x-api-key':          apiKey,
+        'anthropic-version':  '2023-06-01',
+        'Content-Type':       'application/json',
+      },
+      body: jsonEncode({
+        'model':      'claude-sonnet-4-5-20250929',
+        'max_tokens': 1024,
+        'messages':   [{'role': 'user', 'content': 'こんにちは、世界'}],
+      }),
+    );
+
+    print(response.body);
+  }
+  ```
+
+  ```r R theme={null}
+  library(httr)
+  library(jsonlite)
+
+  url     <- "https://aireiter.com/api/v1/messages"
+  api_key <- Sys.getenv("API_KEY")
+
+  response <- POST(
+    url,
+    add_headers(
+      `x-api-key`         = api_key,
+      `anthropic-version` = "2023-06-01",
+      `Content-Type`      = "application/json"
+    ),
+    body = toJSON(list(
+      model      = "claude-sonnet-4-5-20250929",
+      max_tokens = 1024,
+      messages   = list(list(role = "user", content = "こんにちは、世界"))
+    ), auto_unbox = TRUE),
+    encode = "raw"
+  )
+
+  cat(content(response, "text"))
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200 theme={null}
+  {
+    "id": "msg_01XFDUDYJgAACzvnptvVoYEL",
+    "type": "message",
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "こんにちは！私はClaudeです。お会いできてうれしいです。"
+      }
+    ],
+    "model": "claude-sonnet-4-5-20250929",
+    "task_id": "v1api_01XFDUDYJgAACzvnptvVoYEL",
+    "stop_reason": "end_turn",
+    "stop_sequence": null,
+    "usage": {
+      "input_tokens": 12,
+      "output_tokens": 18,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  }
+  ```
+
+  ```json 400 theme={null}
+  {
+    "type": "error",
+    "error": {
+      "type": "invalid_request_error",
+      "message": "messages は必須であり、空であってはなりません"
+    }
+  }
+  ```
+
+  ```json 401 theme={null}
+  {
+    "type": "error",
+    "error": {
+      "type": "authentication_error",
+      "message": "無効な API キー"
+    }
+  }
+  ```
+
+  ```json 402 theme={null}
+  {
+    "type": "error",
+    "error": {
+      "type": "insufficient_credits_error",
+      "message": "クレジットが不足しています"
+    }
+  }
+  ```
+
+  ```json 404 theme={null}
+  {
+    "type": "error",
+    "error": {
+      "type": "not_found_error",
+      "message": "モデル 'xxx' が見つかりません"
+    }
+  }
+  ```
+
+  ```json 500 theme={null}
+  {
+    "type": "error",
+    "error": {
+      "type": "api_error",
+      "message": "すべてのプロバイダが失敗しました"
+    }
+  }
+  ```
+</ResponseExample>
+
+## 使用例
+
+### 基本対話
+
+```python theme={null}
+import anthropic
+
+client = anthropic.Anthropic(
+    api_key="YOUR_API_KEY",
+    base_url="https://aireiter.com/api"
+)
+
+message = client.messages.create(
+    model="claude-sonnet-4-5-20250929",
+    max_tokens=1024,
+    messages=[
+        {"role": "user", "content": "量子コンピューティングの基本原理を説明してください"}
+    ]
+)
+
+print(message.content[0].text)
+```
+
+### システムプロンプト + 複数ターン会話
+
+```python theme={null}
+message = client.messages.create(
+    model="claude-sonnet-4-5-20250929",
+    max_tokens=1024,
+    system="あなたは経験豊富なPython開発専門家であり、コードレビューと最適化の提案が得意です。",
+    messages=[
+        {"role": "user",      "content": "デコレーターとは何ですか？"},
+        {"role": "assistant", "content": "デコレーターはPythonの構文糖であり、..."},
+        {"role": "user",      "content": "実際のプロジェクトでの例を教えてもらえますか？"}
+    ]
+)
+```
+
+### ストリーミングレスポンス
+
+```python theme={null}
+with client.messages.stream(
+    model="claude-sonnet-4-5-20250929",
+    max_tokens=1024,
+    messages=[{"role": "user", "content": "AIについての短い文章を書いてください"}]
+) as stream:
+    for text in stream.text_stream:
+        print(text, end="", flush=True)
+```
+
+### 視覚的理解
+
+```python theme={null}
+# URL画像
+message = client.messages.create(
+    model="claude-sonnet-4-5-20250929",
+    max_tokens=1024,
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "image",
+                    "source": {"type": "url", "url": "https://example.com/chart.png"}
+                },
+                {"type": "text", "text": "このグラフのトレンドを説明してください"}
+            ]
+        }
+    ]
+)
+
+# Base64画像
+import base64
+
+with open("image.jpg", "rb") as f:
+    image_data = base64.b64encode(f.read()).decode("utf-8")
+
+message = client.messages.create(
+    model="claude-sonnet-4-5-20250929",
+    max_tokens=1024,
+    messages=[
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "image",
+                    "source": {
+                        "type": "base64",
+                        "media_type": "image/jpeg",
+                        "data": image_data
+                    }
+                },
+                {"type": "text", "text": "この画像を分析してください"}
+            ]
+        }
+    ]
+)
+```
+
+## ストリーミングレスポンスイベント形式
+
+```text theme={null}
+event: ping
+data: {"type":"ping"}
+
+event: message_start
+data: {"type":"message_start","message":{"id":"msg_xxx","type":"message","role":"assistant","content":[],"model":"claude-sonnet-4-5-20250929","stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":25,"output_tokens":0}}}
+
+event: content_block_start
+data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"こんにちは"}}
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":0}
+
+event: message_delta
+data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"output_tokens":18}}
+
+event: message_stop
+data: {"type":"message_stop"}
+```
+
+## 注意事項
+
+1. **認証方法**：`x-api-key` リクエストヘッダーまたは `Authorization: Bearer` の2種類をサポートし、Anthropic公式SDKはデフォルトで前者を使用します。
+
+2. **残高不足**：残高が不足している場合、HTTP `402` を返します。チャージ後に再試行してください。
+
+3. **ストリーミング切断時の再接続**：クライアントは SSE の再接続メカニズムを実装する必要があり、接続が断たれた場合は、受信済みの内容に基づいて再リクエストが必要かどうか判断します。
+
+4. **モデル選択の推奨**：
+   * Haiku — 高頻度の簡単なQ&A、コスト最小
+   * Sonnet — コード生成、ドキュメント処理、総合的なおすすめ
+   * Opus — 複雑な推論、長文分析、最強の能力

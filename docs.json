@@ -130,6 +130,33 @@
             ]
           },
           {
+            "group": "文字系列",
+            "icon": "message",
+            "pages": [
+              {
+                "group": "Claude Messages API",
+                "icon": "message",
+                "pages": [
+                  "zh/api-reference/text/claude-messages-api/endpoint"
+                ]
+              },
+              {
+                "group": "OpenAI Chat Completions API",
+                "icon": "message",
+                "pages": [
+                  "zh/api-reference/text/openai-chat-completions-api/endpoint"
+                ]
+              },
+              {
+                "group": "OpenAI Responses API",
+                "icon": "message",
+                "pages": [
+                  "zh/api-reference/text/openai-responses-api/endpoint"
+                ]
+              }
+            ]
+          },
+          {
             "group": "任务管理",
             "icon": "list-check",
             "pages": [
