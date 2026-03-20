@@ -1,8 +1,8 @@
 ---
 title: 'OpenAI Chat Completions API'
 description: |
-    - Fully compatible with the OpenAI Chat Completions API format
-    - Supports multi-turn dialogues, tool calling, structured output, and streaming responses
+    - Fully compatible with OpenAI Chat Completions API format
+    - Supports multi-turn conversations, tool calls, structured output, and streaming responses
     - Can directly replace the `baseURL` of the OpenAI SDK without modifying other code
 api: 'POST https://aireiter.com/api/v1/chat/completions'
 ---
@@ -302,7 +302,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <ResponseField name="object" type="string">
-  Object type, fixed as `"chat.completion"` (non-streaming) or `"chat.completion.chunk"` (streaming)
+  Object type, fixed to `"chat.completion"` (non-streaming) or `"chat.completion.chunk"` (streaming)
 </ResponseField>
 
 <ResponseField name="created" type="integer">
@@ -314,23 +314,23 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <ResponseField name="task_id" type="string">
-  Billing task ID (project extended field), used to track the point consumption record for this call
+  Billing task ID (project extension field), used to track the credit consumption record for this call
 </ResponseField>
 
 <ResponseField name="choices" type="array">
-  Array of generated results (always only one item)
+  Array of generated results (always only 1 item)
 
   <Expandable title="Field Description">
     <ResponseField name="index" type="integer">
-      Result index, fixed as `0`
+      Result index, always `0`
     </ResponseField>
 
     <ResponseField name="message" type="object">
       Complete message object in **non-streaming response**
 
-      * `role` — fixed as `"assistant"`
-      * `content` — Text content (null when tool calls are used)
-      * `tool_calls` — List of tool calls (present if tools were called)
+      * `role` — fixed to `"assistant"`
+      * `content` — text content (`null` when tool calls are made)
+      * `tool_calls` — list of tool calls (present if there are tool calls)
     </ResponseField>
 
     <ResponseField name="delta" type="object">
@@ -339,26 +339,26 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       * First frame: `{"role": "assistant"}`
       * Text frame: `{"content": "..."}`
       * Tool call frame: `{"tool_calls": [{"index": 0, "id": "...", "type": "function", "function": {"name": "...", "arguments": ""}}]}`
-      * End frame: `{}`
+      * Final frame: `{}`
     </ResponseField>
 
     <ResponseField name="finish_reason" type="string">
-      Stop reason
+      Reason for stopping
 
-      * `"stop"` — Natural end
-      * `"length"` — Reached `max_tokens` limit
-      * `"tool_calls"` — Model requested tool call
-      * `"content_filter"` — Content filtered
+      * `"stop"` — natural end
+      * `"length"` — reached `max_tokens` limit
+      * `"tool_calls"` — model requested a tool call
+      * `"content_filter"` — content filtering
     </ResponseField>
   </Expandable>
 </ResponseField>
 
 <ResponseField name="usage" type="object">
-  Token usage statistics (at the top level of response in non-streaming, in the last frame in streaming)
+  Token usage statistics (in non-streaming at the top-level of the response, in streaming in the final frame)
 
   <Expandable title="Field Description">
     <ResponseField name="prompt_tokens" type="integer">
-      Number of input tokens (including system prompt)
+      Number of input tokens (including system prompts)
     </ResponseField>
 
     <ResponseField name="completion_tokens" type="integer">
@@ -366,7 +366,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ResponseField>
 
     <ResponseField name="total_tokens" type="integer">
-      Total number of tokens
+      Total tokens
     </ResponseField>
   </Expandable>
 </ResponseField>
@@ -834,10 +834,10 @@ print(response.choices[0].message.content)
 response = client.chat.completions.create(
     model="claude-sonnet-4-5-20250929",
     messages=[
-        {"role": "system",    "content": "You are a senior Python developer expert, skilled in code review and performance optimization."},
+        {"role": "system",    "content": "You are a senior Python developer expert specializing in code review and performance optimization."},
         {"role": "user",      "content": "What is the GIL?"},
         {"role": "assistant", "content": "GIL (Global Interpreter Lock) is..."},
-        {"role": "user",      "content": "How to bypass the GIL to achieve true parallelism?"}
+        {"role": "user",      "content": "How to bypass the GIL for true parallelism?"}
     ],
     temperature=0.3
 )
@@ -858,7 +858,7 @@ for chunk in stream:
         print(delta.content, end="", flush=True)
 ```
 
-### Tool Calls (Complete Multi-turn Process)
+### Tool Invocation (Complete Multi-turn Flow)
 
 ```python theme={null}
 import json
@@ -872,7 +872,7 @@ tools = [
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "ticker": {"type": "string", "description": "Stock ticker symbol, e.g., AAPL"}
+                    "ticker": {"type": "string", "description": "Stock symbol, e.g., AAPL"}
                 },
                 "required": ["ticker"]
             }
@@ -882,14 +882,14 @@ tools = [
 
 messages = [{"role": "user", "content": "What is Tesla's stock price?"}]
 
-# First round: model decides to call the tool
+# First round: model decides to call a tool
 response = client.chat.completions.create(
     model="claude-sonnet-4-5-20250929",
     messages=messages,
     tools=tools
 )
 
-# Handle tool call
+# Handle tool invocation
 if response.choices[0].finish_reason == "tool_calls":
     tool_call = response.choices[0].message.tool_calls[0]
 
@@ -920,7 +920,7 @@ if response.choices[0].finish_reason == "tool_calls":
 response = client.chat.completions.create(
     model="claude-sonnet-4-5-20250929",
     messages=[
-        {"role": "user", "content": "Analyze the sentiment of the following product review: 'This headset has excellent sound quality, but average battery life'"}
+        {"role": "user", "content": "Analyze the sentiment of the following product review: 'These headphones have great sound quality but average battery life'"}
     ],
     response_format={
         "type": "json_schema",
@@ -942,7 +942,7 @@ response = client.chat.completions.create(
 
 result = json.loads(response.choices[0].message.content)
 print(result)
-# {"sentiment": "mixed", "score": 0.2, "highlights": ["excellent sound quality", "average battery life"]}
+# {"sentiment": "mixed", "score": 0.2, "highlights": ["great sound quality", "average battery life"]}
 ```
 
 ### Sampling Parameter Control

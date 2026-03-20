@@ -1,8 +1,8 @@
 ---
 title: 'Claude 메시지 인터페이스'
 description: |
-    - Anthropic Messages API 형식과 완전 호환
-    - 다중 라운드 대화, 시각적 이해 지원
+    - Anthropic Messages API 형식 완전 호환
+    - 다중 회차 대화 및 시각적 이해 지원
     - 스트리밍 및 비스트리밍 두 가지 출력 모드 지원
 api: 'POST https://aireiter.com/api/v1/messages'
 ---
@@ -33,77 +33,64 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="model" type="string" required>
   모델 이름
 
-  * `claude-haiku-4-5-20251001` — 경량 빠름, 고빈도 간단한 작업에 적합
+  * `claude-haiku-4-5-20251001` — 경량화 및 고속, 고빈도 단순 작업에 적합
   * `claude-sonnet-4-5-20250929` — 성능과 비용의 균형, 종합 추천
   * `claude-sonnet-4-6` — Sonnet 신버전, 더 강력한 성능
   * `claude-opus-4-5-20251101` — 플래그십 추론 모델, 복잡한 분석에 적합
   * `claude-opus-4-6` — Opus 신버전, 가장 강력한 능력
 
-  전체 모델 목록은 다음을 참조하십시오: `GET /api/v1/models`
+  전체 모델 목록은 다음을 참조하세요: `GET /api/v1/models`
 </ParamField>
 
 <ParamField body="messages" type="array" required>
   메시지 목록
 
-  모델은 메시지 히스토리를 기반으로 다음 응답을 생성합니다. 각 메시지는 `role` 과 `content`를 포함합니다.
+  메시지 배열, 모델은 이 메시지를 바탕으로 다음 응답을 생성합니다. 각 메시지는 `role` 과 `content` 두 개의 필드를 포함합니다.
 
-  <Expandable title="필드 설명">
-    <ParamField body="role" type="string" required>
+  **빠른 입력 (Try it 영역):**
+
+  1. "+ Add an item"를 클릭하여 메시지를 추가합니다
+  2. `role` 에 `user` (사용자 메시지) 또는 `assistant` (AI 응답, 다중 대화용)를 입력합니다
+  3. `content` 에 하고 싶은 말을 입력합니다
+
+  <Expandable title="상세 필드 설명">
+    <ParamField body="role" type="string" required default="user">
       역할 유형
 
-      * `user` — 사용자 메시지
-      * `assistant` — AI 응답 (다중 대화 또는 사전 채우기용)
+      선택 가능 값: `user` (사용자 메시지), `assistant` (AI 응답, 다중 대화 및 사전 채우기용)
+
+      참고: Claude API의 system 프롬프트는 별도의 `system` 파라미터로 처리하며 messages에 포함되지 않습니다
     </ParamField>
 
-    <ParamField body="content" type="string | array" required>
+    <ParamField body="content" type="string" required>
       메시지 내용
 
-      순수 문자열이거나, 콘텐츠 블록 배열(텍스트, 이미지 지원)일 수 있습니다.
+      메시지의 텍스트 내용을 작성합니다
     </ParamField>
   </Expandable>
 
-  **순수 텍스트 메시지:**
+  **단일 사용자 메시지 예시:**
 
   ```json theme={null}
-  [{"role": "user", "content": "안녕하세요"}]
+  [{"role": "user", "content": "안녕하세요, Claude"}]
   ```
 
-  **다중 대화:**
+  **다중 대화 예시:**
 
   ```json theme={null}
   [
-    {"role": "user",      "content": "머신러닝이란 무엇인가요?"},
-    {"role": "assistant", "content": "머신러닝은..."},
-    {"role": "user",      "content": "예를 들어 줄 수 있나요?"}
+    {"role": "user",      "content": "안녕하세요"},
+    {"role": "assistant", "content": "안녕하세요! 저는 Claude입니다."},
+    {"role": "user",      "content": "AI에 대해 설명해줄 수 있나요?"}
   ]
   ```
 
-  **멀티모달(이미지 + 텍스트):**
+  **사전 채우기된 조수 응답:**
 
   ```json theme={null}
   [
-    {
-      "role": "user",
-      "content": [
-        {
-          "type": "image",
-          "source": {
-            "type": "url",
-            "url": "https://example.com/chart.png"
-          }
-        },
-        {"type": "text", "text": "이 차트를 분석해 주세요"}
-      ]
-    }
-  ]
-  ```
-
-  **사전 채우기된 어시스턴트 응답:**
-
-  ```json theme={null}
-  [
-    {"role": "user",      "content": "JSON 형식으로 분석 결과를 반환해 주세요"},
-    {"role": "assistant", "content": "{"}
+    {"role": "user",      "content": "태양의 그리스 이름은? (A) Sol (B) Helios (C) Sun"},
+    {"role": "assistant", "content": "정답은 ("}
   ]
   ```
 </ParamField>
@@ -111,30 +98,30 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="max_tokens" type="integer" required>
   최대 출력 토큰 수
 
-  모델이 생성할 최대 토큰 수를 제어하며, 모델은 상한에 도달하기 전에 자연스럽게 종료할 수 있습니다. 최소값: `1`.
+  모델이 최대 생성할 수 있는 토큰 수를 제어하며, 모델은 상한에 도달하기 전에 자연스럽게 종료할 수 있습니다. 최소값: `1`.
 
-  모델별로 다른 컨텍스트 윈도우 상한이 있으니 모델 문서를 참고하세요.
+  모델마다 다른 컨텍스트 윈도우 상한이 있으니 모델 문서를 참고하세요.
 </ParamField>
 
 <ParamField body="system" type="string | array">
   시스템 프롬프트
 
-  모델의 역할, 지시사항, 배경 정보를 설정합니다.
+  모델의 역할, 지시문 및 배경 정보를 설정합니다.
 
-  **문자열 형식(추천):**
+  **문자열 형식 (권장):**
 
   ```json theme={null}
-  {"system": "당신은 전문 Python 프로그래밍 멘토이며, 모든 질문에 한국어로 답변합니다."}
+  {"system": "당신은 전문 Python 프로그래밍 강사이며 모든 질문에 한국어로 답변합니다."}
   ```
 
-  **구조화 형식(cache_control 지원):**
+  **구조화 형식 (cache_control 지원):**
 
   ```json theme={null}
   {
     "system": [
       {
         "type": "text",
-        "text": "당신은 전문 Python 프로그래밍 멘토입니다.",
+        "text": "당신은 전문 Python 프로그래밍 강사입니다.",
         "cache_control": {"type": "ephemeral"}
       }
     ]
@@ -143,37 +130,37 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="stream" type="boolean">
-  스트리밍 출력 활성화 여부
+  스트리밍 출력 사용 여부
 
-  `true`로 설정하면 SSE(Server-Sent Events)를 통해 실시간 스트리밍 반환합니다. **기본값 `true`**. 비스트리밍 응답이 필요하면 명시적으로 `"stream": false`를 전달해야 합니다.
+  `true`로 설정하면 SSE(Server-Sent Events)를 통해 실시간 스트리밍으로 응답을 반환합니다. **기본값 `true`**입니다. 비스트리밍 응답을 원할 경우 명시적으로 `"stream": false`를 전송해야 합니다.
 
   스트리밍 이벤트 순서:
   `ping` → `message_start` → `content_block_start` → `content_block_delta` × N → `content_block_stop` → `message_delta` → `message_stop`
 </ParamField>
 
 <ParamField body="temperature" type="number">
-  온도, 범위 `0–1`
+  온도 값, 범위 `0–1`
 
-  * 낮은 값(예: `0.2`): 출력이 더 확실하고 보수적
-  * 높은 값(예: `0.8`): 출력이 더 무작위적이고 창의적
+  * 낮은 값 (예: `0.2`): 더 확정적이고 보수적인 출력
+  * 높은 값 (예: `0.8`): 더 무작위적이고 창의적인 출력
 
-  기본값 `1.0`. `top_p`와 함께 사용하지 않는 것을 권장합니다.
+  기본값 `1.0`. `top_p`와 동시에 사용하지 않는 것이 좋습니다.
 </ParamField>
 
 <ParamField body="top_p" type="number">
-  누적 확률 샘플링 파라미터, 범위 `0–1`
+  핵심 샘플링 파라미터, 범위 `0–1`
 
-  누적 확률이 `top_p`에 도달하는 토큰 집합에서 샘플링합니다. 기본값 `1.0`.
-  `temperature`와 함께 사용하지 않는 것을 권장합니다.
+  누적 확률이 `top_p`에 도달할 때까지의 토큰 집합에서 샘플링합니다. 기본값 `1.0`.
+  `temperature`와 동시에 사용하지 않는 것이 좋습니다.
 </ParamField>
 
 <ParamField body="top_k" type="integer">
   Top-K 샘플링
 
-  확률이 가장 높은 K개의 토큰에서만 샘플링하고, 낮은 확률의 롱테일을 필터링합니다. 고급 튜닝에 적합합니다.
+  확률이 가장 높은 K개의 토큰 중에서만 샘플링하여 낮은 확률의 롱테일을 필터링합니다. 고급 사용 사례 튜닝에 적합합니다.
 </ParamField>
 
-## 응답
+## Response
 
 <ResponseField name="id" type="string">
   메시지 고유 식별자
@@ -202,19 +189,19 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <ResponseField name="model" type="string">
-  실제 요청을 처리한 모델 이름
+  실제 요청을 처리하는 모델 이름
 </ResponseField>
 
 <ResponseField name="stop_reason" type="string">
-  중단 이유
+  중단 사유
 
   * `end_turn` — 자연 종료
-  * `max_tokens` — `max_tokens` 한도 도달
-  * `stop_sequence` — 커스텀 중단 시퀀스가 트리거됨
+  * `max_tokens` — `max_tokens` 제한 도달
+  * `stop_sequence` — 사용자 지정 중단 시퀀스 발동
 </ResponseField>
 
 <ResponseField name="stop_sequence" type="string | null">
-  중단 시퀀스에 의해 중단된 경우, 트리거된 시퀀스 내용 반환; 그렇지 않으면 `null`
+  중단 시퀀스에 의해 중단된 경우 트리거된 시퀀스 내용 반환; 그렇지 않으면 `null`
 </ResponseField>
 
 <ResponseField name="usage" type="object">
@@ -230,11 +217,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ResponseField>
 
     <ResponseField name="cache_creation_input_tokens" type="integer">
-      이번 캐시 작성에 사용된 토큰 수 (프롬프트 캐싱)
+      이번에 캐시에 작성된 토큰 수 (프롬프트 캐싱)
     </ResponseField>
 
     <ResponseField name="cache_read_input_tokens" type="integer">
-      이번 캐시에서 읽은 토큰 수 (캐시 적중 시 값 존재)
+      이번에 캐시에서 읽은 토큰 수 (캐시 적중 시 값 있음)
     </ResponseField>
   </Expandable>
 </ResponseField>
@@ -249,7 +236,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       "model": "claude-sonnet-4-5-20250929",
       "max_tokens": 1024,
       "messages": [
-        {"role": "user", "content": "안녕하세요, 세상"}
+        {"role": "user", "content": "안녕하세요, 세계"}
       ]
     }'
   ```
@@ -266,7 +253,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       model="claude-sonnet-4-5-20250929",
       max_tokens=1024,
       messages=[
-          {"role": "user", "content": "안녕하세요, 세상"}
+          {"role": "user", "content": "안녕하세요, 세계"}
       ]
   )
 
@@ -285,7 +272,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     model: 'claude-sonnet-4-5-20250929',
     max_tokens: 1024,
     messages: [
-      { role: 'user', content: '안녕하세요, 세상' }
+      { role: 'user', content: '안녕하세요, 세계' }
     ]
   });
 
@@ -311,7 +298,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           "model":      "claude-sonnet-4-5-20250929",
           "max_tokens": 1024,
           "messages": []map[string]string{
-              {"role": "user", "content": "안녕하세요, 세상"},
+              {"role": "user", "content": "안녕하세요, 세계"},
           },
       }
 
@@ -350,7 +337,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
             "model": "claude-sonnet-4-5-20250929",
             "max_tokens": 1024,
             "messages": [
-              {"role": "user", "content": "안녕하세요, 세상"}
+              {"role": "user", "content": "안녕하세요, 세계"}
             ]
           }
           """;
@@ -381,7 +368,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       "model"      => "claude-sonnet-4-5-20250929",
       "max_tokens" => 1024,
       "messages"   => [
-          ["role" => "user", "content" => "안녕하세요, 세상"]
+          ["role" => "user", "content" => "안녕하세요, 세계"]
       ]
   ];
 
@@ -412,7 +399,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
     model:      "claude-sonnet-4-5-20250929",
     max_tokens: 1024,
-    messages:   [{ role: "user", content: "안녕하세요, 세상" }]
+    messages:   [{ role: "user", content: "안녕하세요, 세계" }]
   }
 
   http         = Net::HTTP.new(url.host, url.port)
@@ -436,7 +423,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload: [String: Any] = [
       "model":      "claude-sonnet-4-5-20250929",
       "max_tokens": 1024,
-      "messages":   [["role": "user", "content": "안녕하세요, 세상"]]
+      "messages":   [["role": "user", "content": "안녕하세요, 세계"]]
   ]
 
   var request = URLRequest(url: url)
@@ -470,7 +457,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
               ""model"": ""claude-sonnet-4-5-20250929"",
               ""max_tokens"": 1024,
               ""messages"": [
-                  {""role"": ""user"", ""content"": ""안녕하세요, 세상""}
+                  {""role"": ""user"", ""content"": ""안녕하세요, 세계""}
               ]
           }";
 
@@ -502,7 +489,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           const char *payload =
               "{\"model\":\"claude-sonnet-4-5-20250929\","
               "\"max_tokens\":1024,"
-              "\"messages\":[{\"role\":\"user\",\"content\":\"안녕하세요, 세상\"}]}";
+              "\"messages\":[{\"role\":\"user\",\"content\":\"안녕하세요, 세계\"}]}";
 
           char auth_header[256];
           snprintf(auth_header, sizeof(auth_header), "x-api-key: %s", api_key);
@@ -545,7 +532,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       body: jsonEncode({
         'model':      'claude-sonnet-4-5-20250929',
         'max_tokens': 1024,
-        'messages':   [{'role': 'user', 'content': '안녕하세요, 세상'}],
+        'messages':   [{'role': 'user', 'content': '안녕하세요, 세계'}],
       }),
     );
 
@@ -570,7 +557,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     body = toJSON(list(
       model      = "claude-sonnet-4-5-20250929",
       max_tokens = 1024,
-      messages   = list(list(role = "user", content = "안녕하세요, 세상"))
+      messages   = list(list(role = "user", content = "안녕하세요, 세계"))
     ), auto_unbox = TRUE),
     encode = "raw"
   )
@@ -649,7 +636,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     "type": "error",
     "error": {
       "type": "api_error",
-      "message": "모든 공급자가 실패했습니다"
+      "message": "모든 제공자가 실패했습니다"
     }
   }
   ```
@@ -671,7 +658,7 @@ message = client.messages.create(
     model="claude-sonnet-4-5-20250929",
     max_tokens=1024,
     messages=[
-        {"role": "user", "content": "양자 계산의 기본 원리를 설명해줘"}
+        {"role": "user", "content": "양자 컴퓨팅의 기본 원리를 설명해 주세요"}
     ]
 )
 
@@ -684,11 +671,11 @@ print(message.content[0].text)
 message = client.messages.create(
     model="claude-sonnet-4-5-20250929",
     max_tokens=1024,
-    system="당신은 숙련된 Python 개발 전문가이며, 코드 리뷰와 최적화 제안을 잘합니다.",
+    system="당신은 코드 리뷰와 최적화 제안에 능한 숙련된 Python 개발 전문가입니다.",
     messages=[
-        {"role": "user",      "content": "데코레이터가 무엇인가요?"},
-        {"role": "assistant", "content": "데코레이터는 Python의 문법 설탕으로, ...에 사용됩니다."},
-        {"role": "user",      "content": "실제 프로젝트에서 예시를 줄 수 있나요?"}
+        {"role": "user",      "content": "데코레이터란 무엇인가요?"},
+        {"role": "assistant", "content": "데코레이터는 Python의 문법 설탕으로, ..."},
+        {"role": "user",      "content": "실제 프로젝트 예제를 하나 보여줄 수 있나요?"}
     ]
 )
 ```
@@ -699,7 +686,7 @@ message = client.messages.create(
 with client.messages.stream(
     model="claude-sonnet-4-5-20250929",
     max_tokens=1024,
-    messages=[{"role": "user", "content": "AI에 관한 짧은 글을 써줘"}]
+    messages=[{"role": "user", "content": "AI에 관한 짧은 글을 써주세요"}]
 ) as stream:
     for text in stream.text_stream:
         print(text, end="", flush=True)
@@ -720,7 +707,7 @@ message = client.messages.create(
                     "type": "image",
                     "source": {"type": "url", "url": "https://example.com/chart.png"}
                 },
-                {"type": "text", "text": "이 차트의 추세를 설명해줘"}
+                {"type": "text", "text": "이 차트의 추세를 설명해주세요"}
             ]
         }
     ]
@@ -747,7 +734,7 @@ message = client.messages.create(
                         "data": image_data
                     }
                 },
-                {"type": "text", "text": "이 이미지를 분석해줘"}
+                {"type": "text", "text": "이 이미지를 분석해주세요"}
             ]
         }
     ]

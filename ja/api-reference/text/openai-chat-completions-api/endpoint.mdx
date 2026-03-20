@@ -2,8 +2,8 @@
 title: 'OpenAI チャット補完API'
 description: |
     - OpenAI Chat Completions API フォーマットと完全互換
-    - マルチターン会話、ツール呼び出し、構造化出力、ストリーミング応答をサポート
-    - OpenAI SDK の `baseURL` を直接置き換え可能、他のコード修正不要
+    - 複数ターンの対話、ツール呼び出し、構造化出力、ストリーミングレスポンスに対応
+    - OpenAI SDK の `baseURL` を直接置き換え可能で、他のコードの修正は不要
 api: 'POST https://aireiter.com/api/v1/chat/completions'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -302,7 +302,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <ResponseField name="object" type="string">
-  オブジェクトタイプ、固定で `"chat.completion"`（非ストリーミング）または `"chat.completion.chunk"`（ストリーミング）
+  オブジェクトタイプで、固定値は `"chat.completion"`（非ストリーミング）または `"chat.completion.chunk"`（ストリーミング）
 </ResponseField>
 
 <ResponseField name="created" type="integer">
@@ -314,7 +314,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <ResponseField name="task_id" type="string">
-  課金タスクID（プロジェクト拡張フィールド）、今回の呼び出しのポイント消費記録を追跡するため
+  請求タスクID（プロジェクトの拡張フィールド）、今回の呼び出しにおけるポイント消費記録の追跡に使用
 </ResponseField>
 
 <ResponseField name="choices" type="array">
@@ -322,19 +322,19 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   <Expandable title="フィールド説明">
     <ResponseField name="index" type="integer">
-      結果のインデックス、固定で `0`
+      結果のインデックス、固定値 `0`
     </ResponseField>
 
     <ResponseField name="message" type="object">
-      **非ストリーミング応答** の完全なメッセージオブジェクト
+      **非ストリーミングレスポンス**における完全なメッセージオブジェクト
 
-      * `role` — 固定で `"assistant"`
+      * `role` — 固定値 `"assistant"`
       * `content` — テキスト内容（ツール呼び出し時は `null`）
-      * `tool_calls` — ツール呼び出しリスト（ツール呼び出しがある場合に存在）
+      * `tool_calls` — ツール呼び出しのリスト（ツール呼び出しがある場合に存在）
     </ResponseField>
 
     <ResponseField name="delta" type="object">
-      **ストリーミング応答** の増分内容
+      **ストリーミングレスポンス**における増分内容
 
       * 最初のフレーム：`{"role": "assistant"}`
       * テキストフレーム：`{"content": "..."}`
@@ -346,19 +346,19 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       停止理由
 
       * `"stop"` — 自然終了
-      * `"length"` — `max_tokens` 上限に到達
+      * `"length"` — `max_tokens` 上限に達した
       * `"tool_calls"` — モデルがツール呼び出しを要求
-      * `"content_filter"` — コンテンツフィルタリング
+      * `"content_filter"` — コンテンツフィルタ
     </ResponseField>
   </Expandable>
 </ResponseField>
 
 <ResponseField name="usage" type="object">
-  トークン使用統計（非ストリーミングは応答ボディのトップレベル、ストリーミングは最後のフレームに位置）
+  Token使用統計（非ストリーミングではレスポンスボディトップレベル、ストリーミングでは最終フレームに含む）
 
   <Expandable title="フィールド説明">
     <ResponseField name="prompt_tokens" type="integer">
-      入力トークン数（システムプロンプトを含む）
+      入力トークン数（システムプロンプト含む）
     </ResponseField>
 
     <ResponseField name="completion_tokens" type="integer">
@@ -366,7 +366,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ResponseField>
 
     <ResponseField name="total_tokens" type="integer">
-      合計トークン数
+      総トークン数
     </ResponseField>
   </Expandable>
 </ResponseField>
@@ -753,7 +753,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```json 400 theme={null}
   {
     "error": {
-      "message": "messagesは必須であり、空ではいけません",
+      "message": "messages は必須で空ではいけません",
       "type": "invalid_request_error",
       "param": null,
       "code": null
@@ -797,7 +797,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```json 502 theme={null}
   {
     "error": {
-      "message": "すべてのプロバイダーで失敗しました",
+      "message": "すべてのプロバイダーが失敗しました",
       "type": "invalid_request_error",
       "param": null,
       "code": null
@@ -808,7 +808,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 ## 使用例
 
-### 基本対話
+### 基本的な対話
 
 ```python theme={null}
 from openai import OpenAI
@@ -834,21 +834,21 @@ print(response.choices[0].message.content)
 response = client.chat.completions.create(
     model="claude-sonnet-4-5-20250929",
     messages=[
-        {"role": "system",    "content": "あなたは経験豊富なPython開発エキスパートで、コードレビューとパフォーマンス最適化が得意です。"},
+        {"role": "system",    "content": "あなたは経験豊富なPython開発者で、コードレビューとパフォーマンス最適化に長けています。"},
         {"role": "user",      "content": "GILとは何ですか？"},
         {"role": "assistant", "content": "GIL（グローバルインタプリタロック）は..."},
-        {"role": "user",      "content": "GILを回避して真の並列処理を実現する方法は？"}
+        {"role": "user",      "content": "どうすればGILを回避して真の並列処理が可能ですか？"}
     ],
     temperature=0.3
 )
 ```
 
-### ストリームレスポンス
+### ストリーミングレスポンス
 
 ```python theme={null}
 stream = client.chat.completions.create(
     model="claude-sonnet-4-5-20250929",
-    messages=[{"role": "user", "content": "量子コンピューティングに関する技術ブログを書いてください"}],
+    messages=[{"role": "user", "content": "量子計算に関する技術ブログを書いてください"}],
     stream=True
 )
 
@@ -858,7 +858,7 @@ for chunk in stream:
         print(delta.content, end="", flush=True)
 ```
 
-### ツール呼び出し（完全な複数ターンのプロセス）
+### ツール呼び出し（完全な複数ターンプロセス）
 
 ```python theme={null}
 import json
@@ -868,11 +868,11 @@ tools = [
         "type": "function",
         "function": {
             "name": "get_stock_price",
-            "description": "株価のリアルタイム価格を取得する",
+            "description": "株式のリアルタイム価格を取得する",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "ticker": {"type": "string", "description": "株式コード、例えば：AAPL"}
+                    "ticker": {"type": "string", "description": "銘柄コード、例：AAPL"}
                 },
                 "required": ["ticker"]
             }
@@ -882,21 +882,21 @@ tools = [
 
 messages = [{"role": "user", "content": "テスラの株価はいくらですか？"}]
 
-# 1ターン目：モデルがツール呼び出しを決定
+# 第1ラウンド：モデルがツール呼び出しを決定
 response = client.chat.completions.create(
     model="claude-sonnet-4-5-20250929",
     messages=messages,
     tools=tools
 )
 
-# ツール呼び出しを処理
+# ツール呼び出しの処理
 if response.choices[0].finish_reason == "tool_calls":
     tool_call = response.choices[0].message.tool_calls[0]
 
-    # ツールを実行（ビジネスロジック）
+    # ツール実行（ビジネスロジック）
     tool_result = {"price": 245.80, "currency": "USD"}
 
-    # 2ターン目：結果をモデルに返す
+    # 第2ラウンド：結果をモデルに返す
     messages += [
         response.choices[0].message,
         {
@@ -920,7 +920,7 @@ if response.choices[0].finish_reason == "tool_calls":
 response = client.chat.completions.create(
     model="claude-sonnet-4-5-20250929",
     messages=[
-        {"role": "user", "content": "以下の製品レビューの感情分析をしてください：'このイヤホンは音質が優れているが、バッテリー持ちは普通だ'"}
+        {"role": "user", "content": "以下の製品レビューの感情分析をしてください：'このヘッドフォンは音質が優れているが、バッテリー持ちは普通だ'"}
     ],
     response_format={
         "type": "json_schema",
@@ -931,7 +931,7 @@ response = client.chat.completions.create(
                 "type": "object",
                 "properties": {
                     "sentiment":   {"type": "string", "enum": ["positive", "negative", "mixed"]},
-                    "score":       {"type": "number", "description": "感情スコア -1.0から1.0まで"},
+                    "score":       {"type": "number", "description": "感情スコア -1.0 から 1.0"},
                     "highlights":  {"type": "array", "items": {"type": "string"}}
                 },
                 "required": ["sentiment", "score", "highlights"]
@@ -945,10 +945,10 @@ print(result)
 # {"sentiment": "mixed", "score": 0.2, "highlights": ["音質が優れている", "バッテリー持ちは普通"]}
 ```
 
-### サンプリングパラメータ制御
+### サンプリングパラメータの制御
 
 ```python theme={null}
-# 創造的な執筆：高温度 + 頻度ペナルティ
+# 創造的な文章作成：高温度 + 頻度ペナルティ
 response = client.chat.completions.create(
     model="claude-sonnet-4-5-20250929",
     messages=[{"role": "user", "content": "秋についての現代詩を書いてください"}],
@@ -960,7 +960,7 @@ response = client.chat.completions.create(
 # 正確な出力：低温度 + 固定シード
 response = client.chat.completions.create(
     model="claude-sonnet-4-5-20250929",
-    messages=[{"role": "user", "content": "1234 × 5678 の結果を計算してください"}],
+    messages=[{"role": "user", "content": "1234 × 5678 の計算結果"}],
     temperature=0.0,
     seed=42
 )

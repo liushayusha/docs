@@ -46,56 +46,43 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="messages" type="array" required>
   消息列表
 
-  模型根据消息历史生成下一条回复。每条消息包含 `role` 和 `content`。
+  消息数组，模型会基于这些消息生成下一条回复。每条消息包含 `role` 和 `content` 两个字段。
 
-  <Expandable title="字段说明">
-    <ParamField body="role" type="string" required>
+  **快速填写（Try it 区域）：**
+
+  1. 点击 "+ Add an item" 添加一条消息
+  2. `role` 输入：`user`（用户消息）或 `assistant`（AI回复，用于多轮对话）
+  3. `content` 输入：你想说的话
+
+  <Expandable title="详细字段说明">
+    <ParamField body="role" type="string" required default="user">
       角色类型
 
-      * `user` — 用户消息
-      * `assistant` — AI 回复（用于多轮对话或预填充）
+      可选值：`user`（用户消息）、`assistant`（AI回复，用于多轮对话和预填充）
+
+      注：Claude API 的 system 提示词使用单独的 `system` 参数，不在 messages 中
     </ParamField>
 
-    <ParamField body="content" type="string | array" required>
+    <ParamField body="content" type="string" required>
       消息内容
 
-      可以是纯字符串，也可以是内容块数组（支持文本、图像）。
+      填写消息的文本内容
     </ParamField>
   </Expandable>
 
-  **纯文本消息：**
+  **单条用户消息示例：**
 
   ```json theme={null}
-  [{"role": "user", "content": "你好"}]
+  [{"role": "user", "content": "你好，Claude"}]
   ```
 
-  **多轮对话：**
+  **多轮对话示例：**
 
   ```json theme={null}
   [
-    {"role": "user",      "content": "什么是机器学习？"},
-    {"role": "assistant", "content": "机器学习是..."},
-    {"role": "user",      "content": "能举个例子吗？"}
-  ]
-  ```
-
-  **多模态（图像 + 文本）：**
-
-  ```json theme={null}
-  [
-    {
-      "role": "user",
-      "content": [
-        {
-          "type": "image",
-          "source": {
-            "type": "url",
-            "url": "https://example.com/chart.png"
-          }
-        },
-        {"type": "text", "text": "分析这张图表"}
-      ]
-    }
+    {"role": "user",      "content": "你好"},
+    {"role": "assistant", "content": "你好！我是Claude。"},
+    {"role": "user",      "content": "能解释一下AI吗？"}
   ]
   ```
 
@@ -103,8 +90,8 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   ```json theme={null}
   [
-    {"role": "user",      "content": "用 JSON 格式返回分析结果"},
-    {"role": "assistant", "content": "{"}
+    {"role": "user",      "content": "太阳的希腊名称是？(A) Sol (B) Helios (C) Sun"},
+    {"role": "assistant", "content": "答案是 ("}
   ]
   ```
 </ParamField>

@@ -1,9 +1,9 @@
 ---
-title: 'Claude Messages API'
+title: 'Claude Messaging API'
 description: |
     - Fully compatible with Anthropic Messages API format
-    - Supports multi-turn conversation and visual understanding
-    - Supports streaming and non-streaming output modes
+    - Supports multi-turn conversations and visual understanding
+    - Supports both streaming and non-streaming output modes
 api: 'POST https://aireiter.com/api/v1/messages'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -34,10 +34,10 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   Model Name
 
   * `claude-haiku-4-5-20251001` — Lightweight and fast, suitable for high-frequency simple tasks
-  * `claude-sonnet-4-5-20250929` — Balanced performance and cost, overall recommended
-  * `claude-sonnet-4-6` — New version of Sonnet, more powerful
+  * `claude-sonnet-4-5-20250929` — Balanced performance and cost, generally recommended
+  * `claude-sonnet-4-6` — New version of Sonnet, stronger performance
   * `claude-opus-4-5-20251101` — Flagship inference model, suitable for complex analysis
-  * `claude-opus-4-6` — New version of Opus, most capable
+  * `claude-opus-4-6` — New version of Opus, most powerful
 
   For the full list of models, please refer to: `GET /api/v1/models`
 </ParamField>
@@ -45,89 +45,76 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="messages" type="array" required>
   Message List
 
-  The model generates the next reply based on message history. Each message contains `role` and `content`.
+  An array of messages. The model will generate the next reply based on these messages. Each message contains two fields: `role` and `content`.
 
-  <Expandable title="Field Description">
-    <ParamField body="role" type="string" required>
+  **Quick Fill (Try it area):**
+
+  1. Click "+ Add an item" to add a message
+  2. Enter `role`: `user` (user message) or `assistant` (AI reply, for multi-turn conversations)
+  3. Enter `content`: what you want to say
+
+  <Expandable title="Detailed Field Description">
+    <ParamField body="role" type="string" required default="user">
       Role Type
 
-      * `user` — User message
-      * `assistant` — AI reply (used for multi-turn dialogue or pre-filling)
+      Options: `user` (user message), `assistant` (AI reply, for multi-turn conversations and pre-filling)
+
+      Note: Claude API's system prompt uses a separate `system` parameter and is not included in messages
     </ParamField>
 
-    <ParamField body="content" type="string | array" required>
+    <ParamField body="content" type="string" required>
       Message Content
 
-      Can be a plain string or an array of content blocks (supports text and images).
+      The text content of the message
     </ParamField>
   </Expandable>
 
-  **Plain text message:**
+  **Single User Message Example:**
 
   ```json theme={null}
-  [{"role": "user", "content": "Hello"}]
+  [{"role": "user", "content": "Hello, Claude"}]
   ```
 
-  **Multi-turn conversation:**
+  **Multi-turn Conversation Example:**
 
   ```json theme={null}
   [
-    {"role": "user",      "content": "What is machine learning?"},
-    {"role": "assistant", "content": "Machine learning is..."},
-    {"role": "user",      "content": "Can you give an example?"}
+    {"role": "user",      "content": "Hello"},
+    {"role": "assistant", "content": "Hello! I am Claude."},
+    {"role": "user",      "content": "Can you explain AI?"}
   ]
   ```
 
-  **Multimodal (image + text):**
+  **Pre-filled Assistant Reply:**
 
   ```json theme={null}
   [
-    {
-      "role": "user",
-      "content": [
-        {
-          "type": "image",
-          "source": {
-            "type": "url",
-            "url": "https://example.com/chart.png"
-          }
-        },
-        {"type": "text", "text": "Analyze this chart"}
-      ]
-    }
-  ]
-  ```
-
-  **Pre-filled assistant reply:**
-
-  ```json theme={null}
-  [
-    {"role": "user",      "content": "Return the analysis result in JSON format"},
-    {"role": "assistant", "content": "{"}
+    {"role": "user",      "content": "What is the Greek name for the Sun? (A) Sol (B) Helios (C) Sun"},
+    {"role": "assistant", "content": "The answer is ("}
   ]
   ```
 </ParamField>
 
 <ParamField body="max_tokens" type="integer" required>
-  Maximum output tokens
+  Maximum Output Token Count
 
-  Controls the maximum number of tokens the model can generate; the model may naturally end before reaching the limit. Minimum value: `1`.
+  Controls the maximum number of tokens the model can generate. The model may end naturally before reaching this limit. Minimum value: `1`.
 
-  Different models have different context window limits, please refer to the model documentation.
+  Different models have different context window limits; please refer to the model documentation.
 </ParamField>
 
 <ParamField body="system" type="string | array">
-  System prompt
+  System Prompt
 
-  Sets the model’s role, instructions, and background information.
+  Sets the model's role, instructions, and background information.
 
-  **String format (recommended):**
+  **String Format (recommended):**
 
   ```json theme={null}
   {"system": "You are a professional Python programming tutor. Answer all questions in Chinese."}
   ```
 
-  **Structured format (supports cache_control):**
+  **Structured Format (supports cache_control):**
 
   ```json theme={null}
   {
@@ -143,34 +130,34 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="stream" type="boolean">
-  Enable streaming output
+  Enable Streamed Output
 
-  Set to `true` to return data in real-time via SSE (Server-Sent Events). **Default is `true`**. To disable streaming, explicitly pass `"stream": false`.
+  Set to `true` to return streamed output through SSE (Server-Sent Events) in real time. **Default is `true`**. To receive a non-streamed response, explicitly pass `"stream": false`.
 
-  Streaming event order:
+  Stream event sequence:
   `ping` → `message_start` → `content_block_start` → `content_block_delta` × N → `content_block_stop` → `message_delta` → `message_stop`
 </ParamField>
 
 <ParamField body="temperature" type="number">
   Temperature, range `0–1`
 
-  * Low value (e.g., `0.2`): output more certain and conservative
-  * High value (e.g., `0.8`): output more random and creative
+  * Low values (e.g. `0.2`): output is more certain and conservative
+  * High values (e.g. `0.8`): output is more random and creative
 
   Default is `1.0`. Not recommended to use with `top_p` simultaneously.
 </ParamField>
 
 <ParamField body="top_p" type="number">
-  Nucleus sampling parameter, range `0–1`
+  Nucleus Sampling Parameter, range `0–1`
 
-  Samples from the set of tokens whose cumulative probability reaches `top_p`. Default is `1.0`.
+  Sampling from the smallest token set whose cumulative probability exceeds `top_p`. Default is `1.0`.
   Not recommended to use with `temperature` simultaneously.
 </ParamField>
 
 <ParamField body="top_k" type="integer">
-  Top-K sampling
+  Top-K Sampling
 
-  Samples only from the top K tokens with the highest probability, filtering low-probability long tail. Suitable for advanced use case tuning.
+  Samples only from the top K tokens with highest probability, filtering out low-probability long tails. Suitable for advanced tuning.
 </ParamField>
 
 ## Response
@@ -202,11 +189,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <ResponseField name="model" type="string">
-  Name of the model that actually processed the request
+  The model name that actually processed the request
 </ResponseField>
 
 <ResponseField name="stop_reason" type="string">
-  Reason for stopping
+  Stop reason
 
   * `end_turn` — natural end
   * `max_tokens` — reached the `max_tokens` limit
@@ -220,9 +207,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ResponseField name="usage" type="object">
   Token usage statistics
 
-  <Expandable title="Field Explanation">
+  <Expandable title="Field Descriptions">
     <ResponseField name="input_tokens" type="integer">
-      Number of input tokens (including system prompts)
+      Number of input tokens (including system prompt tokens)
     </ResponseField>
 
     <ResponseField name="output_tokens" type="integer">
@@ -230,11 +217,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ResponseField>
 
     <ResponseField name="cache_creation_input_tokens" type="integer">
-      Number of tokens written into the cache this time (Prompt Caching)
+      Number of tokens written to cache this time (Prompt Caching)
     </ResponseField>
 
     <ResponseField name="cache_read_input_tokens" type="integer">
-      Number of tokens read from the cache this time (present when cache hit occurs)
+      Number of tokens read from cache this time (non-null if cache hit)
     </ResponseField>
   </Expandable>
 </ResponseField>
@@ -687,7 +674,7 @@ message = client.messages.create(
     system="You are a senior Python developer expert, skilled in code review and optimization suggestions.",
     messages=[
         {"role": "user",      "content": "What is a decorator?"},
-        {"role": "assistant", "content": "A decorator is Python syntactic sugar used for..."},
+        {"role": "assistant", "content": "A decorator is syntactic sugar in Python, used for..."},
         {"role": "user",      "content": "Can you give me an example from a real project?"}
     ]
 )
@@ -708,7 +695,7 @@ with client.messages.stream(
 ### Visual Understanding
 
 ```python theme={null}
-# URL Images
+# URL Image
 message = client.messages.create(
     model="claude-sonnet-4-5-20250929",
     max_tokens=1024,
@@ -720,13 +707,13 @@ message = client.messages.create(
                     "type": "image",
                     "source": {"type": "url", "url": "https://example.com/chart.png"}
                 },
-                {"type": "text", "text": "Describe the trends in this chart"}
+                {"type": "text", "text": "Describe the trend shown in this chart"}
             ]
         }
     ]
 )
 
-# Base64 Images
+# Base64 Image
 import base64
 
 with open("image.jpg", "rb") as f:

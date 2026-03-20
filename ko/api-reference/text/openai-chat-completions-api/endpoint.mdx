@@ -1,9 +1,9 @@
 ---
-title: 'OpenAI 채팅 보완 인터페이스'
+title: 'OpenAI 채팅 완료 API'
 description: |
-    - OpenAI Chat Completions API 형식과 완전 호환
-    - 다중 회차 대화, 도구 호출, 구조화 출력, 스트리밍 응답 지원
-    - OpenAI SDK의 `baseURL`을 바로 교체 가능하며, 다른 코드는 수정할 필요 없음
+    - OpenAI Chat Completions API 형식과 완벽 호환
+    - 다중 대화, 도구 호출, 구조화 출력, 스트리밍 응답 지원
+    - OpenAI SDK의 `baseURL`을 직접 교체 가능하며, 다른 코드는 수정할 필요 없음
 api: 'POST https://aireiter.com/api/v1/chat/completions'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -296,13 +296,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Response
 
 <ResponseField name="id" type="string">
-  완성의 고유 식별자
+  완성 유니크 식별자
 
   예시: `"chatcmpl-9vKqnMf3Ax8ZpRdTw2LsYe7b"`
 </ResponseField>
 
 <ResponseField name="object" type="string">
-  객체 유형, 고정값은 `"chat.completion"`(비스트리밍) 또는 `"chat.completion.chunk"`(스트리밍)
+  객체 타입, 고정 값은 `"chat.completion"`(비스트리밍) 또는 `"chat.completion.chunk"`(스트리밍)
 </ResponseField>
 
 <ResponseField name="created" type="integer">
@@ -310,11 +310,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <ResponseField name="model" type="string">
-  요청 시 전달한 모델 이름
+  요청 시 전달된 모델 이름
 </ResponseField>
 
 <ResponseField name="task_id" type="string">
-  청구 작업 ID(프로젝트 확장 필드), 이번 호출의 포인트 사용 기록 추적용
+  과금 작업 ID(프로젝트 확장 필드), 이 호출의 포인트 소비 내역 추적용
 </ResponseField>
 
 <ResponseField name="choices" type="array">
@@ -322,39 +322,39 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   <Expandable title="필드 설명">
     <ResponseField name="index" type="integer">
-      결과 인덱스, 고정값 `0`
+      결과 인덱스, 고정 값은 `0`
     </ResponseField>
 
     <ResponseField name="message" type="object">
-      **비스트리밍 응답**에서의 완전한 메시지 객체
+      **비스트리밍 응답** 내의 완전한 메시지 객체
 
-      * `role` — 고정값 `"assistant"`
-      * `content` — 텍스트 내용(툴 호출 시는 `null`)
-      * `tool_calls` — 툴 호출 목록(툴 호출이 있을 때 존재)
+      * `role` — 고정 값 `"assistant"`
+      * `content` — 텍스트 내용(도구 호출 시 `null`)
+      * `tool_calls` — 도구 호출 목록(도구 호출 있을 때 존재)
     </ResponseField>
 
     <ResponseField name="delta" type="object">
-      **스트리밍 응답**에서의 증분 내용
+      **스트리밍 응답** 내의 증분 내용
 
       * 첫 프레임: `{"role": "assistant"}`
       * 텍스트 프레임: `{"content": "..."}`
-      * 툴 호출 프레임: `{"tool_calls": [{"index": 0, "id": "...", "type": "function", "function": {"name": "...", "arguments": ""}}]}`
+      * 도구 호출 프레임: `{"tool_calls": [{"index": 0, "id": "...", "type": "function", "function": {"name": "...", "arguments": ""}}]}`
       * 종료 프레임: `{}`
     </ResponseField>
 
     <ResponseField name="finish_reason" type="string">
-      중단 이유
+      중단 사유
 
       * `"stop"` — 자연 종료
-      * `"length"` — `max_tokens` 한도 도달
-      * `"tool_calls"` — 모델이 툴 호출 요청
+      * `"length"` — `max_tokens` 상한 도달
+      * `"tool_calls"` — 모델이 도구 호출 요청
       * `"content_filter"` — 내용 필터링
     </ResponseField>
   </Expandable>
 </ResponseField>
 
 <ResponseField name="usage" type="object">
-  토큰 사용 통계(비스트리밍은 응답 본문 최상단, 스트리밍은 마지막 프레임)
+  토큰 사용 통계(비스트리밍은 응답바디 최상위, 스트리밍은 마지막 프레임 내)
 
   <Expandable title="필드 설명">
     <ResponseField name="prompt_tokens" type="integer">
@@ -366,7 +366,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ResponseField>
 
     <ResponseField name="total_tokens" type="integer">
-      총 토큰 수
+      토큰 총 수
     </ResponseField>
   </Expandable>
 </ResponseField>
@@ -715,7 +715,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   }
   ```
 
-  ```json 200 툴 호출 theme={null}
+  ```json 200 도구 호출 theme={null}
   {
     "id": "chatcmpl-9vKqnMf3Ax8ZpRdTw2LsYe7b",
     "object": "chat.completion",
@@ -734,7 +734,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
               "type": "function",
               "function": {
                 "name": "get_weather",
-                "arguments": "{\"city\": \"베이징\"}"
+                "arguments": "{\"city\": \"北京\"}"
               }
             }
           ]
@@ -753,7 +753,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```json 400 theme={null}
   {
     "error": {
-      "message": "messages는 필수이며 비어있을 수 없습니다",
+      "message": "messages는 필수이며 비어있으면 안 됩니다",
       "type": "invalid_request_error",
       "param": null,
       "code": null
@@ -764,7 +764,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```json 401 theme={null}
   {
     "error": {
-      "message": "유효하지 않은 API 키",
+      "message": "잘못된 API 키",
       "type": "invalid_request_error",
       "param": null,
       "code": null
@@ -775,7 +775,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```json 402 theme={null}
   {
     "error": {
-      "message": "포인트 부족",
+      "message": "크레딧 부족",
       "type": "invalid_request_error",
       "param": null,
       "code": null
@@ -786,7 +786,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```json 404 theme={null}
   {
     "error": {
-      "message": "모델 'xxx'을(를) 찾을 수 없습니다",
+      "message": "모델 'xxx'를 찾을 수 없습니다",
       "type": "invalid_request_error",
       "param": null,
       "code": null
@@ -797,7 +797,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```json 502 theme={null}
   {
     "error": {
-      "message": "모든 공급자 실패",
+      "message": "모든 공급자가 실패했습니다",
       "type": "invalid_request_error",
       "param": null,
       "code": null
@@ -821,7 +821,7 @@ client = OpenAI(
 response = client.chat.completions.create(
     model="claude-sonnet-4-5-20250929",
     messages=[
-        {"role": "user", "content": "Python으로 퀵정렬 구현하기"}
+        {"role": "user", "content": "Python으로 빠른 정렬 구현하기"}
     ]
 )
 
@@ -834,10 +834,10 @@ print(response.choices[0].message.content)
 response = client.chat.completions.create(
     model="claude-sonnet-4-5-20250929",
     messages=[
-        {"role": "system",    "content": "당신은 숙련된 Python 개발 전문가로, 코드 리뷰와 성능 최적화에 능숙합니다."},
+        {"role": "system",    "content": "당신은 숙련된 Python 개발 전문가이며, 코드 리뷰와 성능 최적화에 능숙합니다."},
         {"role": "user",      "content": "GIL이란 무엇인가요?"},
-        {"role": "assistant", "content": "GIL(글로벌 인터프리터 락)은..."},
-        {"role": "user",      "content": "GIL을 우회해 진정한 병렬 처리를 구현하는 방법은?"}
+        {"role": "assistant", "content": "GIL(전역 인터프리터 락)은..."},
+        {"role": "user",      "content": "GIL을 우회하여 진정한 병렬 처리를 어떻게 구현하나요?"}
     ],
     temperature=0.3
 )
@@ -858,7 +858,7 @@ for chunk in stream:
         print(delta.content, end="", flush=True)
 ```
 
-### 도구 호출 (완전한 다중 라운드 프로세스)
+### 도구 호출(전체 다중 라운드 프로세스)
 
 ```python theme={null}
 import json
@@ -872,7 +872,7 @@ tools = [
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "ticker": {"type": "string", "description": "주식 코드 예: AAPL"}
+                    "ticker": {"type": "string", "description": "주식 코드, 예: AAPL"}
                 },
                 "required": ["ticker"]
             }
@@ -880,7 +880,7 @@ tools = [
     }
 ]
 
-messages = [{"role": "user", "content": "테슬라 주가가 얼마인가요?"}]
+messages = [{"role": "user", "content": "테슬라 주가는 얼마인가요?"}]
 
 # 1라운드: 모델이 도구 호출 결정
 response = client.chat.completions.create(
@@ -893,10 +893,10 @@ response = client.chat.completions.create(
 if response.choices[0].finish_reason == "tool_calls":
     tool_call = response.choices[0].message.tool_calls[0]
 
-    # 도구 실행(비즈니스 로직)
+    # 도구(비즈니스 로직) 실행
     tool_result = {"price": 245.80, "currency": "USD"}
 
-    # 2라운드: 결과를 모델에 반환
+    # 2라운드: 결과를 모델로 반환
     messages += [
         response.choices[0].message,
         {
@@ -914,13 +914,13 @@ if response.choices[0].finish_reason == "tool_calls":
     print(final.choices[0].message.content)
 ```
 
-### 구조화된 출력 (JSON 스키마)
+### 구조화 출력(JSON Schema)
 
 ```python theme={null}
 response = client.chat.completions.create(
     model="claude-sonnet-4-5-20250929",
     messages=[
-        {"role": "user", "content": "다음 제품 리뷰 감정 분석: '이 이어폰 음질이 훌륭하지만, 배터리 지속시간은 보통입니다'"}
+        {"role": "user", "content": "다음 제품 리뷰의 감정을 분석하세요: '이 이어폰은 음질이 뛰어나지만, 배터리 지속시간은 평범하다'"}
     ],
     response_format={
         "type": "json_schema",
@@ -942,22 +942,22 @@ response = client.chat.completions.create(
 
 result = json.loads(response.choices[0].message.content)
 print(result)
-# {"sentiment": "mixed", "score": 0.2, "highlights": ["음질 훌륭", "배터리 지속시간 보통"]}
+# {"sentiment": "mixed", "score": 0.2, "highlights": ["음질이 뛰어남", "배터리 지속시간 평범"]}
 ```
 
-### 샘플링 매개변수 제어
+### 샘플링 파라미터 제어
 
 ```python theme={null}
 # 창의적 글쓰기: 높은 온도 + 빈도 페널티
 response = client.chat.completions.create(
     model="claude-sonnet-4-5-20250929",
-    messages=[{"role": "user", "content": "가을에 관한 현대시 한 편 써줘"}],
+    messages=[{"role": "user", "content": "가을에 관한 현대시 한 편 작성"}],
     temperature=0.9,
     frequency_penalty=0.5,
     presence_penalty=0.3
 )
 
-# 정확한 출력: 낮은 온도 + 고정 시드
+# 정밀 출력: 낮은 온도 + 고정 시드
 response = client.chat.completions.create(
     model="claude-sonnet-4-5-20250929",
     messages=[{"role": "user", "content": "1234 × 5678 계산 결과"}],

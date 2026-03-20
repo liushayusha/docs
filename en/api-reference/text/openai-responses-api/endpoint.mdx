@@ -1,7 +1,7 @@
 ---
 title: 'OpenAI Responses API'
 description: |
-    - Compatible with OpenAI Responses API protocol, supports text conversation, image understanding, tool invocation, structured output, and reasoning modes
+    - Compatible with OpenAI Responses API protocol, supporting text conversation, image understanding, tool invocation, structured output, and reasoning mode
     - Mainly used by tools such as Codex CLI and AI SDK
 api: 'POST https://aireiter.com/api/v1/responses'
 ---
@@ -26,78 +26,110 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="model" type="string" required>
   The name of the model to use. Examples: `claude-sonnet-4-5-20250929`, `gpt-4o`.
 
-  The complete model list can be retrieved via `GET /api/v1/models`.
+  The full list of models can be retrieved via `GET /api/v1/models`.
 </ParamField>
 
-<ParamField body="input" type="string | array" required>
-  The conversation input content supports two formats:
+<ParamField body="input" type="array" required>
+  List of input contents
 
-  - **String**: directly pass the user message text
-  - **Array of messages**: contains multiple messages, supporting multi-turn conversations
+  An array of inputs, each containing the fields `role` and `content`. Supports multi-turn conversations and multimodal content (text + images).
 
-  <Expandable title="Array of Messages Format">
-    Each message is an object with the following fields:
+  <Expandable title="Detailed Field Description">
+    <ParamField body="role" type="string" required default="user">
+      Message role
 
-    <ParamField body="role" type="string" required>
-      Message role: `user`, `assistant`, or `system`
+      Options: `user` (user message), `assistant` (AI reply, for multi-turn conversation), `system` (system prompt)
     </ParamField>
 
-    <ParamField body="content" type="string | array" required>
-      Message content, which can be a text string or an array of content blocks (supporting multimodal content such as images):
+    <ParamField body="content" type="array" required>
+      Content array
 
-      ```json
-      [
-        { "type": "input_text", "text": "Describe this image." },
-        { "type": "input_image", "image_url": { "url": "https://..." } }
-      ]
-      ```
+      Supports multiple types of content blocks, which can include text and images.
+
+      <Expandable title="Content Block Types">
+        <ParamField body="type" type="string" required>
+          Content type
+
+          Options:
+
+          * `input_text`: Text input
+          * `input_image`: Image input
+        </ParamField>
+
+        <ParamField body="text" type="string">
+          Text content
+
+          Used when `type` is `input_text`, fill in the text content
+        </ParamField>
+
+        <ParamField body="image_url" type="string">
+          Image URL
+
+          Used when `type` is `input_image`
+
+          Supports two formats:
+
+          **1. Full image URL**
+
+          * Publicly accessible image URL (http\:// or https\://)
+          * Example: `https://example.com/image.jpg`
+
+          **2. Base64 encoded format**
+
+          * **Must use the full Data URI format**
+          * Format: `data:image/{format};base64,{base64_data}`
+          * Supported image formats: jpeg, png, gif, webp
+          * Example: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+          * Note: The prefix `data:image/jpeg;base64,` must be included
+        </ParamField>
+      </Expandable>
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="instructions" type="string">
-  System prompt. Used to set the model's behavior guidelines, role identity, or contextual background.
+  System prompt. Used to set the model's behavior guidelines, role identity, or context.
 
-  Equivalent to a message with `role: "system"` in the array of messages.
+  Equivalent to a message in the array with `role: "system"`.
 </ParamField>
 
 <ParamField body="stream" type="boolean" default="true">
   Whether to enable streaming output.
 
-  - `true` (default): returns tokens progressively as SSE event streams, suitable for real-time display
-  - `false`: returns the full response at once after completion, suitable for batch processing
+  - `true` (default): Returns tokens incrementally via SSE event stream, suitable for real-time display
+  - `false`: Returns the full response at once, suitable for batch processing
 </ParamField>
 
 <ParamField body="max_output_tokens" type="integer">
-  The maximum number of tokens to generate in the reply. If exceeded, the response `status` will be `"incomplete"` and `incomplete_details.reason` will be `"max_output_tokens"`.
+  Maximum number of tokens to generate in the reply. If exceeded, response `status` will be `"incomplete"` with `incomplete_details.reason` as `"max_output_tokens"`.
 </ParamField>
 
 <ParamField body="temperature" type="number">
-  Sampling temperature, range `0` to `2`. Higher values produce more random output; lower values produce more deterministic output. It is not recommended to modify both `temperature` and `top_p` simultaneously.
+  Sampling temperature, range `0` ~ `2`. Higher values increase randomness, lower values increase determinism. It is not recommended to modify both `temperature` and `top_p` simultaneously.
 </ParamField>
 
 <ParamField body="top_p" type="number">
-  Nucleus sampling probability, range `0` to `1`. The model samples only from tokens whose cumulative probability reaches `top_p`.
+  Nucleus sampling probability, range `0` ~ `1`. The model samples tokens only from the subset whose cumulative probability reaches `top_p`.
 </ParamField>
 
 <ParamField body="tools" type="array">
-  List of tools available for the model to call. Currently only supports tools of type `"function"`; built-in tools such as `web_search`, `file_search`, and `computer_use` are not supported.
+  List of tools that the model can invoke. Currently only supports `type: "function"`, does not support built-in tools like `web_search`, `file_search`, `computer_use`, etc.
 
   <Expandable title="Function Tool Format">
     <ParamField body="type" type="string" required>
-      Fixed as `"function"`
+      Fixed value `"function"`
     </ParamField>
 
     <ParamField body="name" type="string" required>
-      Function name, must match the regex `^[a-zA-Z0-9_-]{1,64}$`
+      Function name, must match `^[a-zA-Z0-9_-]{1,64}$`
     </ParamField>
 
     <ParamField body="description" type="string">
-      Function description, helps the model decide when to call this tool
+      Function description to help the model determine when to call this tool
     </ParamField>
 
     <ParamField body="parameters" type="object">
-      Parameter definitions, following JSON Schema format
+      Parameter definitions following JSON Schema format
     </ParamField>
   </Expandable>
 </ParamField>
@@ -105,14 +137,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="tool_choice" type="string | object" default="auto">
   Tool invocation strategy:
 
-  - `"auto"`: model decides automatically whether to call tools
-  - `"none"`: prohibits calling tools
-  - `"required"`: forces calling at least one tool
-  - `{ "type": "function", "name": "function_name" }`: forces calling a specified tool
+  - `"auto"`: model decides automatically whether to invoke tools
+  - `"none"`: disallow tool invocation
+  - `"required"`: force invocation of at least one tool
+  - `{ "type": "function", "name": "function_name" }`: force invoke specific tool
 </ParamField>
 
 <ParamField body="parallel_tool_calls" type="boolean" default="true">
-  Whether to allow the model to call multiple tools in parallel. Effective only when `tools` are provided.
+  Whether to allow the model to invoke multiple tools in parallel. Effective only when `tools` are provided.
 </ParamField>
 
 <ParamField body="text" type="object">
@@ -125,19 +157,19 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           Output format type:
           - `"text"`: plain text (default)
           - `"json_object"`: JSON format
-          - `"json_schema"`: JSON conforming to a specified schema
+          - `"json_schema"`: JSON conforming to specified Schema
         </ParamField>
 
         <ParamField body="name" type="string">
-          Schema name (only effective for `json_schema`)
+          Schema name (effective only for `json_schema`)
         </ParamField>
 
         <ParamField body="description" type="string">
-          Schema description (only effective for `json_schema`)
+          Schema description (effective only for `json_schema`)
         </ParamField>
 
         <ParamField body="strict" type="boolean" default="true">
-          Whether to strictly follow the schema (only effective for `json_schema`)
+          Whether to strictly follow the Schema (effective only for `json_schema`)
         </ParamField>
 
         <ParamField body="schema" type="object">
@@ -149,11 +181,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="reasoning" type="object">
-  Reasoning mode configuration (applicable for models that support reasoning, such as `gpt-5.2` and above).
+  Reasoning mode configuration (applicable to models supporting reasoning, such as `gpt-5.2` and above).
 
   <Expandable title="Reasoning Object">
     <ParamField body="effort" type="string">
-      Reasoning effort: `"low"` | `"medium"` | `"high"`
+      Reasoning intensity: `"low"` | `"medium"` | `"high"`
     </ParamField>
 
   </Expandable>
@@ -166,19 +198,19 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <ResponseField name="object" type="string">
-  Fixed value `"response"`
+  Fixed as `"response"`
 </ResponseField>
 
 <ResponseField name="created_at" type="number">
-  Response creation time, Unix timestamp (seconds, including millisecond precision)
+  Response creation time, Unix timestamp (seconds, with millisecond precision)
 </ResponseField>
 
 <ResponseField name="status" type="string">
   Response status:
-  - `"completed"`: successfully completed
-  - `"incomplete"`: cut off early due to `max_output_tokens`
-  - `"in_progress"`: streaming output in progress (only appears in streaming events)
-  - `"failed"`: generation failed
+  - `"completed"`: Completed successfully
+  - `"incomplete"`: Cut off early due to `max_output_tokens`
+  - `"in_progress"`: Streaming output in progress (only in streaming events)
+  - `"failed"`: Generation failed
 </ResponseField>
 
 <ResponseField name="model" type="string">
@@ -190,11 +222,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   **Note**:
   - **Non-streaming**: `task_id` is located directly at the top level of the response JSON
-  - **Streaming**: `task_id` is nested inside the `response.created` (first event) and `response.completed` (last event) `response` objects, needs to be extracted from raw SSE events; OpenAI SDK streaming interfaces do not expose this field automatically
+  - **Streaming**: `task_id` is nested inside the `response` object of `response.created` (first event) and `response.completed` (last event). It needs to be parsed from the raw SSE event. The OpenAI SDK streaming interface does not automatically expose this field
 </ResponseField>
 
 <ResponseField name="output" type="array">
-  Array of output contents, can include both text messages and function call types.
+  Array of output items, which may contain two types: text messages and tool calls.
 
   <Expandable title="message type">
     <ResponseField name="id" type="string">
@@ -202,11 +234,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ResponseField>
 
     <ResponseField name="type" type="string">
-      Fixed value `"message"`
+      Fixed as `"message"`
     </ResponseField>
 
     <ResponseField name="role" type="string">
-      Fixed value `"assistant"`
+      Fixed as `"assistant"`
     </ResponseField>
 
     <ResponseField name="status" type="string">
@@ -218,11 +250,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
       <Expandable title="output_text content block">
         <ResponseField name="type" type="string">
-          Fixed value `"output_text"`
+          Fixed as `"output_text"`
         </ResponseField>
 
         <ResponseField name="text" type="string">
-          Text content generated by the model
+          Model-generated text content
         </ResponseField>
 
         <ResponseField name="annotations" type="array">
@@ -234,15 +266,15 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   <Expandable title="function_call type">
     <ResponseField name="id" type="string">
-      Function call entry ID, format: `fc_` + 16-character random string
+      Tool call entry ID, format: `fc_` + 16-character random string
     </ResponseField>
 
     <ResponseField name="type" type="string">
-      Fixed value `"function_call"`
+      Fixed as `"function_call"`
     </ResponseField>
 
     <ResponseField name="call_id" type="string">
-      Function call ID, referenced when submitting function execution results
+      Tool call ID, used to reference when submitting tool execution results
     </ResponseField>
 
     <ResponseField name="name" type="string">
@@ -250,13 +282,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ResponseField>
 
     <ResponseField name="arguments" type="string">
-      Function parameters, JSON serialized string
+      Function arguments, JSON serialized string
     </ResponseField>
   </Expandable>
 </ResponseField>
 
 <ResponseField name="output_text" type="string">
-  Shortcut field, equivalent to `output[0].content[0].text` (in pure text scenarios). Empty string in function call scenarios.
+  Shortcut field, equivalent to `output[0].content[0].text` (in plain text scenarios). Empty string in tool call scenarios.
 </ResponseField>
 
 <ResponseField name="usage" type="object">
@@ -278,7 +310,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     <ResponseField name="output_tokens_details" type="object">
       <Expandable title="Details">
         <ResponseField name="reasoning_tokens" type="integer">
-          Number of reasoning/thinking tokens (0 for regular models)
+          Reasoning/thinking tokens (usually `0` for general models)
         </ResponseField>
       </Expandable>
     </ResponseField>
@@ -286,11 +318,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <ResponseField name="incomplete_details" type="object | null">
-  Non-null when `status` is `"incomplete"`.
+  Not null when `status` is `"incomplete"`.
 
   <Expandable title="incomplete_details object">
     <ResponseField name="reason" type="string">
-      Truncation reason. Currently only `"max_output_tokens"`
+      Cutoff reason. Currently only `"max_output_tokens"`
     </ResponseField>
   </Expandable>
 </ResponseField>
@@ -535,7 +567,7 @@ content(response, "text")
 
 <ResponseExample>
 
-```json 200 Success (non-streaming)
+```json 200 Success (Non-streaming)
 {
   "id": "resp_AbCdEfGhIjKlMnOpQrSt0123",
   "object": "response",
@@ -570,7 +602,7 @@ content(response, "text")
 }
 ```
 
-```json 200 Function call response
+```json 200 Tool Call Response
 {
   "id": "resp_AbCdEfGhIjKlMnOpQrSt0456",
   "object": "response",
@@ -599,7 +631,7 @@ content(response, "text")
 }
 ```
 
-```json 200 Truncated response (incomplete)
+```json 200 Truncated Response (incomplete)
 {
   "id": "resp_AbCdEfGhIjKlMnOpQrSt0789",
   "object": "response",
@@ -637,7 +669,7 @@ content(response, "text")
 }
 ```
 
-```json 400 Request parameter error
+```json 400 Invalid Request Parameters
 {
   "type": "error",
   "error": {
@@ -647,7 +679,7 @@ content(response, "text")
 }
 ```
 
-```json 401 Authentication failed
+```json 401 Authentication Failed
 {
   "type": "error",
   "error": {
@@ -657,7 +689,7 @@ content(response, "text")
 }
 ```
 
-```json 402 Insufficient credits
+```json 402 Insufficient Credits
 {
   "type": "error",
   "error": {
@@ -667,7 +699,7 @@ content(response, "text")
 }
 ```
 
-```json 404 Model not found
+```json 404 Model Not Found
 {
   "type": "error",
   "error": {
@@ -677,7 +709,7 @@ content(response, "text")
 }
 ```
 
-```json 502 Upstream service error
+```json 502 Upstream Service Error
 {
   "type": "error",
   "error": {
@@ -877,7 +909,7 @@ response = client.responses.create(
     tool_choice="auto",
 )
 
-# Check if there is a tool call
+# Check for tool calls
 for item in response.output:
     if item.type == "function_call":
         print(f"Tool: {item.name}, Args: {item.arguments}")
@@ -930,7 +962,7 @@ print(response.output_text)
 
 ### Multi-turn Conversation
 
-`previous_response_id` is currently ineffective; you need to manually concatenate history messages in `input`:
+`previous_response_id` is currently ineffective; you need to manually concatenate historical messages in `input`:
 
 ```python
 # First turn
@@ -939,7 +971,7 @@ response1 = client.responses.create(
     input="My name is Bob.",
 )
 
-# Second turn: manually concatenate history messages
+# Second turn: manually concatenate history
 response2 = client.responses.create(
     model="claude-sonnet-4-5-20250929",
     input=[

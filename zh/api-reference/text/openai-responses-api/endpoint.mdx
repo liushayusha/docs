@@ -30,28 +30,60 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   可通过 `GET /api/v1/models` 获取完整模型列表。
 </ParamField>
 
-<ParamField body="input" type="string | array" required>
-  对话输入内容，支持两种格式：
+<ParamField body="input" type="array" required>
+  输入内容列表
 
-  - **字符串**：直接传入用户消息文本
-  - **消息数组**：包含多条消息，支持多轮对话
+  输入数组，每个输入项包含 `role` 和 `content` 两个字段。支持多轮对话和多模态内容（文本+图像）。
 
-  <Expandable title="消息数组格式">
-    每条消息为对象，包含以下字段：
+  <Expandable title="详细字段说明">
+    <ParamField body="role" type="string" required default="user">
+      消息角色
 
-    <ParamField body="role" type="string" required>
-      消息角色：`user`、`assistant`、`system`
+      可选值：`user`（用户消息）、`assistant`（AI回复，用于多轮对话）、`system`（系统提示词）
     </ParamField>
 
-    <ParamField body="content" type="string | array" required>
-      消息内容，可以是文本字符串，也可以是内容块数组（支持图像等多模态内容）：
+    <ParamField body="content" type="array" required>
+      内容数组
 
-      ```json
-      [
-        { "type": "input_text", "text": "Describe this image." },
-        { "type": "input_image", "image_url": { "url": "https://..." } }
-      ]
-      ```
+      支持多种类型的内容块，可以包含文本和图像。
+
+      <Expandable title="内容块类型">
+        <ParamField body="type" type="string" required>
+          内容类型
+
+          可选值：
+
+          * `input_text`: 文本输入
+          * `input_image`: 图像输入
+        </ParamField>
+
+        <ParamField body="text" type="string">
+          文本内容
+
+          当 `type` 为 `input_text` 时使用，填写文本内容
+        </ParamField>
+
+        <ParamField body="image_url" type="string">
+          图像URL
+
+          当 `type` 为 `input_image` 时使用
+
+          支持两种格式：
+
+          **1. 完整的图像URL地址**
+
+          * 公开可访问的图像URL（http\:// 或 https\://）
+          * 示例：`https://example.com/image.jpg`
+
+          **2. Base64 编码格式**
+
+          * **必须使用完整的 Data URI 格式**
+          * 格式：`data:image/{格式};base64,{base64数据}`
+          * 支持的图片格式：jpeg、png、gif、webp
+          * 示例：`data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+          * 注意：必须包含 `data:image/jpeg;base64,` 前缀部分
+        </ParamField>
+      </Expandable>
     </ParamField>
   </Expandable>
 </ParamField>

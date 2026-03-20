@@ -1,8 +1,8 @@
 ---
 title: 'OpenAI Responses API'
 description: |
-    - OpenAI Responses API 프로토콜과 호환되며, 텍스트 대화, 이미지 이해, 도구 호출, 구조화된 출력 및 추론 모드를 지원합니다.
-    - 주로 Codex CLI 및 AI SDK 등의 도구에서 사용됩니다.
+    - OpenAI Responses API 프로토콜과 호환되며, 텍스트 대화, 이미지 이해, 도구 호출, 구조화 출력 및 추론 모드를 지원합니다.
+    - 주로 Codex CLI 및 AI SDK와 같은 도구에서 사용됩니다.
 api: 'POST https://aireiter.com/api/v1/responses'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -24,72 +24,104 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## 요청 본문 파라미터
 
 <ParamField body="model" type="string" required>
-  사용할 모델 이름입니다. 예: `claude-sonnet-4-5-20250929`, `gpt-4o`.
+  사용하려는 모델 이름입니다. 예: `claude-sonnet-4-5-20250929`, `gpt-4o`.
 
-  전체 모델 목록은 `GET /api/v1/models`를 통해 조회할 수 있습니다.
+  전체 모델 목록은 `GET /api/v1/models`를 통해 확인할 수 있습니다.
 </ParamField>
 
-<ParamField body="input" type="string | array" required>
-  대화 입력 내용으로 두 가지 형식을 지원합니다:
+<ParamField body="input" type="array" required>
+  입력 내용 목록
 
-  - **문자열**: 사용자 메시지 텍스트를 직접 전달
-  - **메시지 배열**: 여러 메시지를 포함하여 다중 턴 대화 지원
+  입력 배열이며, 각 입력 항목은 `role`과 `content` 두 필드를 포함합니다. 다중 회차 대화 및 다중 모달(텍스트+이미지) 내용을 지원합니다.
 
-  <Expandable title="메시지 배열 형식">
-    각 메시지는 다음 필드를 포함하는 객체입니다:
+  <Expandable title="상세 필드 설명">
+    <ParamField body="role" type="string" required default="user">
+      메시지 역할
 
-    <ParamField body="role" type="string" required>
-      메시지 역할: `user`, `assistant`, `system`
+      선택 값: `user`(사용자 메시지), `assistant`(AI 응답, 다중 회차 대화용), `system`(시스템 프롬프트)
     </ParamField>
 
-    <ParamField body="content" type="string | array" required>
-      메시지 내용으로, 텍스트 문자열 또는 내용 블록 배열(이미지 등 멀티모달 컨텐츠 지원)이 될 수 있습니다:
+    <ParamField body="content" type="array" required>
+      내용 배열
 
-      ```json
-      [
-        { "type": "input_text", "text": "이 이미지를 설명하세요." },
-        { "type": "input_image", "image_url": { "url": "https://..." } }
-      ]
-      ```
+      다양한 유형의 콘텐츠 블록을 포함할 수 있으며, 텍스트와 이미지를 포함할 수 있습니다.
+
+      <Expandable title="내용 블록 타입">
+        <ParamField body="type" type="string" required>
+          내용 유형
+
+          선택 값:
+
+          * `input_text`: 텍스트 입력
+          * `input_image`: 이미지 입력
+        </ParamField>
+
+        <ParamField body="text" type="string">
+          텍스트 내용
+
+          `type`이 `input_text`일 때 사용하며, 텍스트 내용을 작성합니다.
+        </ParamField>
+
+        <ParamField body="image_url" type="string">
+          이미지 URL
+
+          `type`이 `input_image`일 때 사용합니다.
+
+          두 가지 형식을 지원합니다:
+
+          **1. 전체 이미지 URL 주소**
+
+          * 공개 접근 가능한 이미지 URL(http\:// 또는 https\://)
+          * 예시: `https://example.com/image.jpg`
+
+          **2. Base64 인코딩 형식**
+
+          * **완전한 Data URI 형식을 반드시 사용해야 합니다**
+          * 형식: `data:image/{포맷};base64,{base64 데이터}`
+          * 지원하는 이미지 포맷: jpeg, png, gif, webp
+          * 예시: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+          * 주의: `data:image/jpeg;base64,` 접두사가 반드시 포함되어야 합니다.
+        </ParamField>
+      </Expandable>
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="instructions" type="string">
-  시스템 프롬프트(System Prompt)입니다. 모델의 행동 지침, 역할 아이덴티티 또는 컨텍스트 배경을 설정하는 데 사용됩니다.
+  시스템 프롬프트(System Prompt)입니다. 모델의 동작 원칙, 역할 또는 문맥 배경을 설정하는 데 사용됩니다.
 
-  메시지 배열 내 `role: "system"` 메시지와 동일한 효과입니다.
+  메시지 배열 중 `role: "system"` 메시지와 동일한 역할을 합니다.
 </ParamField>
 
 <ParamField body="stream" type="boolean" default="true">
-  스트리밍 출력 활성화 여부입니다.
+  스트리밍 출력 활성화 여부.
 
-  - `true`(기본): SSE 이벤트 스트림 방식으로 토큰 단위 반환, 실시간 표시 적합
-  - `false`: 전체 응답 완료 후 한 번에 반환, 배치 처리에 적합
+  - `true`(기본값): SSE 이벤트 스트림 방식으로 토큰 별로 반환되어 실시간 표시용으로 적합
+  - `false`: 전체 응답을 대기 후 한 번에 반환, 배치 처리에 적합
 </ParamField>
 
 <ParamField body="max_output_tokens" type="integer">
-  생성할 응답의 최대 토큰 수입니다. 제한 초과 시 `status`가 `"incomplete"`, `incomplete_details.reason`이 `"max_output_tokens"`가 됩니다.
+  생성할 응답의 최대 토큰 수입니다. 제한을 초과하면 응답 `status`가 `"incomplete"`, `incomplete_details.reason`이 `"max_output_tokens"`로 반환됩니다.
 </ParamField>
 
 <ParamField body="temperature" type="number">
-  샘플링 온도 범위는 `0` ~ `2`입니다. 값이 높을수록 출력은 더 무작위적이고, 낮을수록 더 결정적입니다. `temperature`와 `top_p`를 동시에 변경하는 것은 권장하지 않습니다.
+  샘플링 온도, 범위 `0` ~ `2`입니다. 값이 높을수록 출력이 더 무작위적이고, 낮을수록 더 결정적입니다. `temperature`와 `top_p`를 동시에 변경하는 것은 권장하지 않습니다.
 </ParamField>
 
 <ParamField body="top_p" type="number">
-  핵심 샘플링 확률로, 범위는 `0` ~ `1`입니다. 모델은 누적 확률이 `top_p`에 도달한 토큰 중에서만 샘플링합니다.
+  핵 샘플링 확률, 범위 `0` ~ `1`입니다. 모델은 누적 확률이 `top_p`에 도달한 토큰 집합에서만 샘플링합니다.
 </ParamField>
 
 <ParamField body="tools" type="array">
-  모델이 호출할 수 있는 도구 목록입니다. 현재는 `type: "function"` 유형만 지원하며, `web_search`, `file_search`, `computer_use` 같은 내장 도구는 지원하지 않습니다.
+  모델이 호출할 수 있는 도구 목록입니다. 현재는 `type: "function"` 유형만 지원하며, `web_search`, `file_search`, `computer_use` 등의 내장 도구는 지원하지 않습니다.
 
   <Expandable title="function 도구 형식">
     <ParamField body="type" type="string" required>
-      고정값 `"function"`
+      고정 값 `"function"`
     </ParamField>
 
     <ParamField body="name" type="string" required>
-      함수 이름으로, 정규식 `^[a-zA-Z0-9_-]{1,64}$`를 만족해야 합니다.
+      함수 이름으로, `^[a-zA-Z0-9_-]{1,64}$` 패턴을 따라야 합니다.
     </ParamField>
 
     <ParamField body="description" type="string">
@@ -97,22 +129,22 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="parameters" type="object">
-      파라미터 정의로, JSON Schema 형식을 따릅니다.
+      파라미터 정의로, JSON Schema 형식을 준수합니다.
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="tool_choice" type="string | object" default="auto">
-  도구 호출 정책입니다:
+  도구 호출 정책:
 
-  - `"auto"`: 모델이 자동으로 도구 호출 여부 결정
+  - `"auto"`: 모델이 도구 호출 여부를 자동 결정함
   - `"none"`: 도구 호출 금지
-  - `"required"`: 최소 한 개 도구 반드시 호출
-  - `{ "type": "function", "name": "function_name" }`: 특정 도구 강제 호출
+  - `"required"`: 최소 한 개 도구를 반드시 호출
+  - `{ "type": "function", "name": "function_name" }`: 지정한 도구를 강제로 호출
 </ParamField>
 
 <ParamField body="parallel_tool_calls" type="boolean" default="true">
-  모델이 여러 도구를 병렬로 호출할 수 있는지 여부입니다. `tools`가 제공된 경우에만 유효합니다.
+  모델이 여러 도구를 병렬로 호출할 수 있는지 여부. `tools`가 제공된 경우에만 유효합니다.
 </ParamField>
 
 <ParamField body="text" type="object">
@@ -122,22 +154,22 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     <ParamField body="format" type="object">
       <Expandable title="format 객체">
         <ParamField body="type" type="string" required>
-          출력 형식 타입:
-          - `"text"`: 일반 텍스트 (기본값)
+          출력 형식 유형:
+          - `"text"`: 일반 텍스트(기본값)
           - `"json_object"`: JSON 형식
-          - `"json_schema"`: 지정한 스키마에 부합하는 JSON
+          - `"json_schema"`: 지정된 스키마에 부합하는 JSON
         </ParamField>
 
         <ParamField body="name" type="string">
-          스키마 이름 (`json_schema`일 때만 적용)
+          스키마 이름 (`json_schema`일 때만 유효)
         </ParamField>
 
         <ParamField body="description" type="string">
-          스키마 설명 (`json_schema`일 때만 적용)
+          스키마 설명 (`json_schema`일 때만 유효)
         </ParamField>
 
         <ParamField body="strict" type="boolean" default="true">
-          스키마를 엄격히 준수할지 여부 (`json_schema`일 때만 적용)
+          스키마 준수 엄격 여부 (`json_schema`일 때만 유효)
         </ParamField>
 
         <ParamField body="schema" type="object">
@@ -149,7 +181,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="reasoning" type="object">
-  추론 모드 설정으로, 추론을 지원하는 모델(e.g., `gpt-5.2` 이상)에서 사용됩니다.
+  추론 모드 구성 (추론을 지원하는 모델, 예: `gpt-5.2` 이상에 적용).
 
   <Expandable title="reasoning 객체">
     <ParamField body="effort" type="string">
@@ -176,7 +208,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ResponseField name="status" type="string">
   응답 상태:
   - `"completed"`: 정상 완료
-  - `"incomplete"`: `max_output_tokens`로 인해 조기 종료
+  - `"incomplete"`: `max_output_tokens`로 인한 조기 종료
   - `"in_progress"`: 스트리밍 출력 진행 중(스트리밍 이벤트에서만 나타남)
   - `"failed"`: 생성 실패
 </ResponseField>
@@ -186,15 +218,15 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <ResponseField name="task_id" type="string">
-  플랫폼 확장 필드입니다. 이번 호출의 과금 작업 ID로, 정산 및 사용량 조회에 활용할 수 있습니다.
+  플랫폼 확장 필드. 이번 호출의 청구 작업 ID로, 결산 및 소모 조회에 사용 가능.
 
   **주의**:
-  - **비스트리밍**: `task_id`가 응답 JSON 최상위에 직접 위치함
-  - **스트리밍**: `task_id`가 `response.created`(첫 번째 이벤트) 및 `response.completed`(마지막 이벤트)의 `response` 객체 안에 중첩되어 있으며, 원본 SSE 이벤트를 파싱해서 얻어야 합니다. OpenAI SDK의 스트리밍 인터페이스는 이 필드를 자동으로 노출하지 않습니다.
+  - **비스트리밍**: `task_id`가 응답 JSON 최상위에 직접 위치
+  - **스트리밍**: `task_id`가 `response.created`(첫 이벤트) 및 `response.completed`(마지막 이벤트)의 `response` 객체 안에 중첩, 원본 SSE 이벤트를 파싱해 획득해야 하며, OpenAI SDK의 스트리밍 인터페이스는 이 필드를 자동으로 노출하지 않음
 </ResponseField>
 
 <ResponseField name="output" type="array">
-  출력 내용 배열로, 텍스트 메시지 및 도구 호출 두 가지 유형을 포함할 수 있습니다.
+  출력 내용 배열로, 텍스트 메시지와 도구 호출 두 가지 유형을 포함할 수 있음.
 
   <Expandable title="message 타입">
     <ResponseField name="id" type="string">
@@ -226,7 +258,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
         </ResponseField>
 
         <ResponseField name="annotations" type="array">
-          텍스트 주석, 보통 빈 배열 `[]`
+          텍스트 주석, 일반적으로 빈 배열 `[]`
         </ResponseField>
       </Expandable>
     </ResponseField>
@@ -242,7 +274,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ResponseField>
 
     <ResponseField name="call_id" type="string">
-      도구 호출 ID로, 도구 실행 결과 제출 시 참조용
+      도구 호출 ID, 도구 실행 결과 제출 시 참조용
     </ResponseField>
 
     <ResponseField name="name" type="string">
@@ -250,13 +282,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ResponseField>
 
     <ResponseField name="arguments" type="string">
-      함수 파라미터(JSON 직렬화된 문자열)
+      함수 파라미터, JSON 직렬화된 문자열
     </ResponseField>
   </Expandable>
 </ResponseField>
 
 <ResponseField name="output_text" type="string">
-  간편 필드로, `output[0].content[0].text`와 동일(순수 텍스트 상황). 도구 호출 상황에서는 빈 문자열.
+  편리 필드, `output[0].content[0].text`와 동일(순수 텍스트 시나리오). 도구 호출 시에는 빈 문자열.
 </ResponseField>
 
 <ResponseField name="usage" type="object">
@@ -276,7 +308,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ResponseField>
 
     <ResponseField name="output_tokens_details" type="object">
-      <Expandable title="세부 사항">
+      <Expandable title="상세 정보">
         <ResponseField name="reasoning_tokens" type="integer">
           추론/사고 토큰 수(일반 모델은 `0`)
         </ResponseField>
@@ -290,7 +322,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   <Expandable title="incomplete_details 객체">
     <ResponseField name="reason" type="string">
-      중단 사유. 현재는 `"max_output_tokens"`만 존재
+      잘린 이유. 현재는 `"max_output_tokens"`뿐임
     </ResponseField>
   </Expandable>
 </ResponseField>
@@ -552,13 +584,13 @@ content(response, "text")
       "content": [
         {
           "type": "output_text",
-          "text": "작은 유니콘이 달빛이 비치는 초원을 살금살금 걸으며, 아늑한 구름집으로 달려가 반짝이는 별가루 자취를 남겼습니다.",
+          "text": "작은 유니콘은 달빛 아래 초원을 살금살금 걸으며 반짝이는 별가루 자국을 남기고 포근한 구름집으로 달려갔습니다.",
           "annotations": []
         }
       ]
     }
   ],
-  "output_text": "작은 유니콘이 달빛이 비치는 초원을 살금살금 걸으며, 아늑한 구름집으로 달려가 반짝이는 별가루 자취를 남겼습니다.",
+  "output_text": "작은 유니콘은 달빛 아래 초원을 살금살금 걸으며 반짝이는 별가루 자국을 남기고 포근한 구름집으로 달려갔습니다.",
   "usage": {
     "input_tokens": 20,
     "output_tokens": 35,
@@ -599,7 +631,7 @@ content(response, "text")
 }
 ```
 
-```json 200 중단 응답(incomplete)
+```json 200 잘린 응답 (incomplete)
 {
   "id": "resp_AbCdEfGhIjKlMnOpQrSt0789",
   "object": "response",
@@ -616,13 +648,13 @@ content(response, "text")
       "content": [
         {
           "type": "output_text",
-          "text": "max_output_tokens로 인해 잘린 매우 긴 이야기입니다...",
+          "text": "max_output_tokens 때문에 중단된 매우 긴 이야기입니다...",
           "annotations": []
         }
       ]
     }
   ],
-  "output_text": "max_output_tokens로 인해 잘린 매우 긴 이야기입니다...",
+  "output_text": "max_output_tokens 때문에 중단된 매우 긴 이야기입니다...",
   "incomplete_details": {
     "reason": "max_output_tokens"
   },
@@ -642,7 +674,7 @@ content(response, "text")
   "type": "error",
   "error": {
     "type": "invalid_request_error",
-    "message": "model이 필요합니다"
+    "message": "model is required"
   }
 }
 ```
@@ -652,17 +684,17 @@ content(response, "text")
   "type": "error",
   "error": {
     "type": "authentication_error",
-    "message": "잘못된 API 키"
+    "message": "Invalid API key"
   }
 }
 ```
 
-```json 402 포인트 부족
+```json 402 크레딧 부족
 {
   "type": "error",
   "error": {
     "type": "invalid_request_error",
-    "message": "포인트가 부족합니다"
+    "message": "Insufficient credits"
   }
 }
 ```
@@ -672,7 +704,7 @@ content(response, "text")
   "type": "error",
   "error": {
     "type": "not_found_error",
-    "message": "Model 'unknown-model'을 찾을 수 없습니다"
+    "message": "Model 'unknown-model' not found"
   }
 }
 ```
@@ -682,7 +714,7 @@ content(response, "text")
   "type": "error",
   "error": {
     "type": "api_error",
-    "message": "모든 공급자 실패"
+    "message": "All providers failed"
   }
 }
 ```
@@ -841,7 +873,7 @@ response = client.responses.create(
         {
             "role": "user",
             "content": [
-                {"type": "input_text",  "text": "이 이미지에는 무엇이 있나요?"},
+                {"type": "input_text",  "text": "What's in this image?"},
                 {"type": "input_image", "image_url": {"url": "https://example.com/photo.jpg"}},
             ],
         }
@@ -858,11 +890,11 @@ tools = [
     {
         "type": "function",
         "name": "get_weather",
-        "description": "특정 위치의 현재 날씨를 가져옵니다",
+        "description": "Get current weather for a location",
         "parameters": {
             "type": "object",
             "properties": {
-                "location": {"type": "string", "description": "도시 이름"},
+                "location": {"type": "string", "description": "City name"},
                 "unit":     {"type": "string", "enum": ["celsius", "fahrenheit"]},
             },
             "required": ["location"],
@@ -872,7 +904,7 @@ tools = [
 
 response = client.responses.create(
     model="gpt-5.2",
-    input="도쿄의 날씨가 어떤가요?",
+    input="What's the weather like in Tokyo?",
     tools=tools,
     tool_choice="auto",
 )
@@ -883,7 +915,7 @@ for item in response.output:
         print(f"Tool: {item.name}, Args: {item.arguments}")
 ```
 
-### 구조화 출력 (JSON Schema)
+### 구조화된 출력 (JSON Schema)
 
 ```python
 import json
@@ -901,7 +933,7 @@ schema = {
 
 response = client.responses.create(
     model="claude-sonnet-4-5-20250929",
-    input="정보 추출: 앨리스는 30세이고 하이킹과 요리를 좋아합니다.",
+    input="Extract info: Alice is 30 years old and loves hiking and cooking.",
     text={
         "format": {
             "type":   "json_schema",
@@ -920,36 +952,36 @@ print(data)  # {"name": "Alice", "age": 30, "hobbies": ["hiking", "cooking"]}
 
 ```python
 response = client.responses.create(
-    model="claude-3-7-sonnet-20250219",  # 추론 지원 모델
-    input="풀이: 만약 x + y = 10이고 x * y = 21이면, x와 y는 무엇인가요?",
+    model="claude-3-7-sonnet-20250219",  # 추론이 지원되는 모델
+    input="Solve: If x + y = 10 and x * y = 21, what are x and y?",
     reasoning={"effort": "high"},
 )
 
 print(response.output_text)
 ```
 
-### 다중 대화
+### 다회차 대화
 
-`previous_response_id` 는 현재 작동하지 않으며, 과거 메시지는 `input`에 수동으로 연결해야 합니다:
+`previous_response_id`는 현재 작동하지 않으며, 히스토리 메시지를 `input`에 직접 연결해야 합니다:
 
 ```python
-# 1회차
+# 첫 번째 라운드
 response1 = client.responses.create(
     model="claude-sonnet-4-5-20250929",
-    input="내 이름은 Bob입니다.",
+    input="My name is Bob.",
 )
 
-# 2회차: 수동으로 과거 메시지 연결
+# 두 번째 라운드: 수동으로 히스토리 메시지 연결
 response2 = client.responses.create(
     model="claude-sonnet-4-5-20250929",
     input=[
-        {"role": "user",      "content": "내 이름은 Bob입니다."},
+        {"role": "user",      "content": "My name is Bob."},
         {"role": "assistant", "content": response1.output_text},
-        {"role": "user",      "content": "내 이름이 뭐였지요?"},
+        {"role": "user",      "content": "What's my name?"},
     ],
 )
 
-print(response2.output_text)  # "당신의 이름은 Bob입니다."
+print(response2.output_text)  # "Your name is Bob."
 ```
 
 ## 주의사항

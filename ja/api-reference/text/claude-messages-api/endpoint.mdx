@@ -2,8 +2,8 @@
 title: 'Claude メッセージインターフェース'
 description: |
     - Anthropic Messages API フォーマットと完全互換
-    - マルチターン対話、視覚理解対応
-    - ストリーミングおよび非ストリーミングの2つの出力モードに対応
+    - 複数ターンの対話、視覚理解をサポート
+    - ストリーミングと非ストリーミングの両方の出力モードをサポート
 api: 'POST https://aireiter.com/api/v1/messages'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -33,77 +33,64 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="model" type="string" required>
   モデル名
 
-  * `claude-haiku-4-5-20251001` — 軽量で高速、高頻度のシンプルなタスクに適しています
-  * `claude-sonnet-4-5-20250929` — 性能とコストのバランスが良く、総合的に推奨
-  * `claude-sonnet-4-6` — Sonnet 新バージョンで、より高い性能
-  * `claude-opus-4-5-20251101` — フラッグシップ推論モデルで複雑な分析に適する
-  * `claude-opus-4-6` — Opus 新バージョンで最も強力な能力
+  * `claude-haiku-4-5-20251001` — 軽量で高速、高頻度で単純なタスクに適しています
+  * `claude-sonnet-4-5-20250929` — 性能とコストのバランスが良く、総合的に推奨されます
+  * `claude-sonnet-4-6` — Sonnetの新バージョンで、性能が向上しています
+  * `claude-opus-4-5-20251101` — フラグシップ推論モデルで、複雑な分析に適しています
+  * `claude-opus-4-6` — Opusの新バージョンで、最も高性能です
 
-  完全なモデルリストは `GET /api/v1/models` を参照してください。
+  完全なモデルリストは `GET /api/v1/models` を参照してください
 </ParamField>
 
 <ParamField body="messages" type="array" required>
   メッセージリスト
 
-  モデルはメッセージ履歴をもとに次の応答を生成します。各メッセージは `role` と `content` を含みます。
+  モデルはこのメッセージ配列を基に次の応答を生成します。各メッセージは `role` と `content` の2つのフィールドを含みます。
 
-  <Expandable title="フィールドの説明">
-    <ParamField body="role" type="string" required>
+  **クイック入力（Try it エリア）：**
+
+  1. "+ Add an item" をクリックしてメッセージを追加
+  2. `role` に `user`（ユーザーメッセージ）または `assistant`（AIの応答、多段対話用）を入力
+  3. `content` に話したい内容を入力
+
+  <Expandable title="詳細なフィールド説明">
+    <ParamField body="role" type="string" required default="user">
       ロールタイプ
 
-      * `user` — ユーザーメッセージ
-      * `assistant` — AI応答（マルチターン対話やプリフィル用）
+      選択可能な値：`user`（ユーザーメッセージ）、`assistant`（AIの応答、多段対話および事前充填用）
+
+      注：Claude APIのsystemプロンプトは別の`system`パラメータで指定し、messagesには含まれません
     </ParamField>
 
-    <ParamField body="content" type="string | array" required>
+    <ParamField body="content" type="string" required>
       メッセージ内容
 
-      文字列単体、またはテキストと画像を含むコンテンツブロックの配列も可能です。
+      メッセージのテキスト内容を記入します
     </ParamField>
   </Expandable>
 
-  **テキストのみのメッセージ：**
+  **単一ユーザーメッセージの例：**
 
   ```json theme={null}
-  [{"role": "user", "content": "こんにちは"}]
+  [{"role": "user", "content": "こんにちは、Claude"}]
   ```
 
-  **マルチターン対話：**
+  **多段対話の例：**
 
   ```json theme={null}
   [
-    {"role": "user",      "content": "機械学習とは何ですか？"},
-    {"role": "assistant", "content": "機械学習は..."},
-    {"role": "user",      "content": "例を挙げられますか？"}
+    {"role": "user",      "content": "こんにちは"},
+    {"role": "assistant", "content": "こんにちは！私はClaudeです。"},
+    {"role": "user",      "content": "AIについて説明してもらえますか？"}
   ]
   ```
 
-  **マルチモーダル（画像 + テキスト）：**
+  **事前充填されたアシスタントの応答：**
 
   ```json theme={null}
   [
-    {
-      "role": "user",
-      "content": [
-        {
-          "type": "image",
-          "source": {
-            "type": "url",
-            "url": "https://example.com/chart.png"
-          }
-        },
-        {"type": "text", "text": "このグラフを分析してください"}
-      ]
-    }
-  ]
-  ```
-
-  **プリフィルされたアシスタント応答：**
-
-  ```json theme={null}
-  [
-    {"role": "user",      "content": "JSON形式で分析結果を返してください"},
-    {"role": "assistant", "content": "{"}
+    {"role": "user",      "content": "太陽のギリシャ語名は？(A) Sol (B) Helios (C) Sun"},
+    {"role": "assistant", "content": "答えは ("}
   ]
   ```
 </ParamField>
@@ -111,9 +98,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="max_tokens" type="integer" required>
   最大出力トークン数
 
-  モデルが生成できる最大トークン数を制御します。モデルは上限に達する前に自然に終了する場合があります。最小値は `1` です。
+  モデルが生成するトークンの最大数を制御します。モデルは上限に達する前に自然に終了する場合があります。最小値は `1` です。
 
-  モデルによってコンテキストウィンドウの上限が異なります。モデルドキュメントを参照してください。
+  モデルによってコンテキストウィンドウの上限は異なります。モデルドキュメントを参照してください。
 </ParamField>
 
 <ParamField body="system" type="string | array">
@@ -124,7 +111,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   **文字列形式（推奨）：**
 
   ```json theme={null}
-  {"system": "あなたはプロのPythonプログラミングメンターで、すべての質問に中国語で答えます。"}
+  {"system": "あなたはプロのPythonプログラミングメンターです。すべての質問に日本語で答えてください。"}
   ```
 
   **構造化形式（cache_control対応）：**
@@ -143,19 +130,19 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="stream" type="boolean">
-  ストリーム出力を有効にするかどうか
+  ストリーミング出力の有効化
 
-  `true` に設定すると、SSE（Server-Sent Events）を通じてリアルタイムでストリーム返却します。**デフォルトは `true` です。** 非ストリーム応答にするには明示的に `"stream": false` を渡す必要があります。
+  `true` に設定すると、SSE（Server-Sent Events）を使ってリアルタイムにストリーミングで返します。**デフォルトは `true`**。非ストリーミング応答を希望する場合は `"stream": false` を明示的に指定してください。
 
-  ストリームイベントの順序：
+  ストリーミングイベントの順序：
   `ping` → `message_start` → `content_block_start` → `content_block_delta` × N → `content_block_stop` → `message_delta` → `message_stop`
 </ParamField>
 
 <ParamField body="temperature" type="number">
-  温度、範囲は `0–1`
+  温度パラメータ、範囲は `0–1`
 
-  * 低値（例：`0.2`）：より確定的で保守的な出力
-  * 高値（例：`0.8`）：よりランダムで創造的な出力
+  * 低い値（例：`0.2`）：より確実で保守的な出力
+  * 高い値（例：`0.8`）：よりランダムで創造的な出力
 
   デフォルトは `1.0`。`top_p` と同時使用は推奨されません。
 </ParamField>
@@ -163,14 +150,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="top_p" type="number">
   核サンプリングパラメータ、範囲は `0–1`
 
-  累積確率が `top_p` に達するトークン集合からサンプリングします。デフォルトは `1.0`。
-  `temperature` と同時使用は推奨されません。
+  累積確率が `top_p` に達するトークンの集合からサンプリングします。デフォルトは `1.0`。
+  `temperature` と同時に使うことは推奨されません。
 </ParamField>
 
 <ParamField body="top_k" type="integer">
-  Top-K サンプリング
+  Top-Kサンプリング
 
-  確率の高いK個のトークンからのみサンプリングし、低確率のロングテールを除外します。高度なユースケースの調整に適しています。
+  確率が高い上位K個のトークンからのみサンプリングし、低確率の長いテールを除外します。高度なユースケースのチューニングに適しています。
 </ParamField>
 
 ## Response
@@ -182,7 +169,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <ResponseField name="type" type="string">
-  オブジェクトの種類、固定で `"message"`
+  オブジェクトタイプ、固定で `"message"`
 </ResponseField>
 
 <ResponseField name="role" type="string">
@@ -198,7 +185,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   [{"type": "text", "text": "こんにちは！私はClaudeです。"}]
   ```
 
-  コンテンツの種類：`text`（テキスト）
+  コンテンツタイプ：`text`（テキスト）
 </ResponseField>
 
 <ResponseField name="model" type="string">
@@ -208,13 +195,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ResponseField name="stop_reason" type="string">
   停止理由
 
-  * `end_turn` — 自然終了
+  * `end_turn` — 自然な終了
   * `max_tokens` — `max_tokens` の上限に達した
   * `stop_sequence` — カスタム停止シーケンスがトリガーされた
 </ResponseField>
 
 <ResponseField name="stop_sequence" type="string | null">
-  停止シーケンスによる停止の場合、トリガーされたシーケンスの内容が返される。そうでなければ `null`
+  停止シーケンスで停止した場合、トリガーされたシーケンス内容を返す。そうでなければ `null`
 </ResponseField>
 
 <ResponseField name="usage" type="object">
@@ -222,7 +209,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   <Expandable title="フィールド説明">
     <ResponseField name="input_tokens" type="integer">
-      入力トークン数（システムプロンプト含む）
+      入力トークン数（システムプロンプトを含む）
     </ResponseField>
 
     <ResponseField name="output_tokens" type="integer">
@@ -234,7 +221,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ResponseField>
 
     <ResponseField name="cache_read_input_tokens" type="integer">
-      今回キャッシュから読み取ったトークン数（キャッシュヒット時のみ値あり）
+      今回キャッシュから読み取ったトークン数（キャッシュヒット時に値あり）
     </ResponseField>
   </Expandable>
 </ResponseField>
@@ -609,7 +596,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     "type": "error",
     "error": {
       "type": "invalid_request_error",
-      "message": "messages は必須であり、空であってはなりません"
+      "message": "messages が必須で、空であってはなりません"
     }
   }
   ```
@@ -629,7 +616,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     "type": "error",
     "error": {
       "type": "insufficient_credits_error",
-      "message": "クレジットが不足しています"
+      "message": "クレジット不足"
     }
   }
   ```
@@ -649,7 +636,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     "type": "error",
     "error": {
       "type": "api_error",
-      "message": "すべてのプロバイダが失敗しました"
+      "message": "すべてのプロバイダーが失敗しました"
     }
   }
   ```
@@ -657,7 +644,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 ## 使用例
 
-### 基本対話
+### 基本的な対話
 
 ```python theme={null}
 import anthropic
@@ -671,23 +658,23 @@ message = client.messages.create(
     model="claude-sonnet-4-5-20250929",
     max_tokens=1024,
     messages=[
-        {"role": "user", "content": "量子コンピューティングの基本原理を説明してください"}
+        {"role": "user", "content": "量子計算の基本原理を説明してください"}
     ]
 )
 
 print(message.content[0].text)
 ```
 
-### システムプロンプト + 複数ターン会話
+### システムプロンプト + 多段対話
 
 ```python theme={null}
 message = client.messages.create(
     model="claude-sonnet-4-5-20250929",
     max_tokens=1024,
-    system="あなたは経験豊富なPython開発専門家であり、コードレビューと最適化の提案が得意です。",
+    system="あなたは経験豊富なPython開発の専門家で、コードレビューと最適化の提案に優れています。",
     messages=[
         {"role": "user",      "content": "デコレーターとは何ですか？"},
-        {"role": "assistant", "content": "デコレーターはPythonの構文糖であり、..."},
+        {"role": "assistant", "content": "デコレーターはPythonの構文糖で、..."},
         {"role": "user",      "content": "実際のプロジェクトでの例を教えてもらえますか？"}
     ]
 )
@@ -705,7 +692,7 @@ with client.messages.stream(
         print(text, end="", flush=True)
 ```
 
-### 視覚的理解
+### ビジュアル理解
 
 ```python theme={null}
 # URL画像
