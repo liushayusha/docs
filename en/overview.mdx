@@ -84,6 +84,23 @@ After the task is completed, the response will include URLs of the generated ima
 }
 ```
 
+## Model Channels
+
+Model channels represent different service tiers. Each model offers multiple channel versions divided into four levels:
+
+| Channel | Description |
+|------|------|
+| `base` | Basic version, lowest price |
+| `plus` | Enhanced version |
+| `advanced` | Advanced version |
+| `max` | Flagship version, highest stability |
+
+<Note>
+Channels only affect service stability and do not impact output quality. All channels use the same underlying model, ensuring identical quality of generated results. Generally, higher-priced channels provide better service stability.
+</Note>
+
+When using, simply replace the model name with the corresponding channel version, for example, replace `"sora2"` with `"sora2_plus"`, while keeping other parameters unchanged.
+
 ## Supported Models
 
 ### Text Conversation Series

@@ -28,15 +28,18 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  Model name
+  Model name, supporting the following channel versions (channels only affect service stability and do not affect output quality):
 
-  Fixed value: `"veo3_1_fast"`
+  * `"veo3_1_fast"` - Default
+  * `"veo3_1_fast_base"` - Basic Edition
+  * `"veo3_1_fast_plus"` - Enhanced Edition
+  * `"veo3_1_fast_advanced"` - Advanced Edition
 </ParamField>
 
 <ParamField body="params" type="object" required>
   Model parameters object
 
-  <Expandable title="params object properties">
+  <Expandable title="params Object Properties">
     <ParamField body="prompt" type="string" required>
       Text description for video generation
 
@@ -44,16 +47,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      Reference image URL for image-to-video (first frame)
+      URL of the reference image for image-to-video generation (first frame)
 
-      * Only single image supported
+      * Only supports a single image
       * Supports publicly accessible URLs
     </ParamField>
 
     <ParamField body="end_image_url" type="string">
-      Reference image URL for the last frame
+      URL of the reference image for the end frame
 
-      * Only single image supported
+      * Only supports a single image
       * Supports publicly accessible URLs
     </ParamField>
 
@@ -69,7 +72,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  Initiator task ID
+  Initiator's task ID
 
   User-defined task identifier, required
 </ParamField>

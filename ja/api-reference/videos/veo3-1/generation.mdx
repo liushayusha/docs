@@ -27,9 +27,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  モデル名
+  モデル名、以下のチャネルバージョンをサポートしています（チャネルはサービスの安定性にのみ影響し、出力品質には影響しません）：
 
-  固定値：`"veo3_1"`
+  * `"veo3_1"` - デフォルト
+  * `"veo3_1_base"` - ベーシック版
+  * `"veo3_1_plus"` - 強化版
 </ParamField>
 
 <ParamField body="params" type="object" required>
@@ -43,17 +45,17 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      画像生成動画用（最初のフレーム）の参照画像のURL
+      画像生成の参考画像のURL（初フレーム）
 
       * 単一画像のみ対応
-      * 公開されているアクセス可能なURLをサポート
+      * 公開アクセス可能なURLをサポート
     </ParamField>
 
     <ParamField body="end_image_url" type="string">
-      最終フレームの参照画像URL
+      末フレームの参考画像のURL
 
       * 単一画像のみ対応
-      * 公開されているアクセス可能なURLをサポート
+      * 公開アクセス可能なURLをサポート
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="16:9">
@@ -68,7 +70,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発信側タスクID
+  発信元タスクID
 
   ユーザー定義のタスク識別子、必須
 </ParamField>

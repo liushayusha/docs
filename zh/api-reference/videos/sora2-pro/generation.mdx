@@ -28,9 +28,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  模型名称
+  模型名称，支持以下通道版本（通道只影响服务稳定性，不影响输出质量）：
 
-  固定值：`"sora2_pro"`
+  * `"sora2_pro"` - 默认
+  * `"sora2_pro_base"` - 基础版
+  * `"sora2_pro_plus"` - 增强版
 </ParamField>
 
 <ParamField body="params" type="object" required>

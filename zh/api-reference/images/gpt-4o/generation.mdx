@@ -27,9 +27,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  模型名称
+  模型名称，支持以下通道版本（通道只影响服务稳定性，不影响输出质量）：
 
-  固定值：`"gpt_4o"`
+  * `"gpt_4o"` - 默认
+  * `"gpt_4o_base"` - 基础版
+  * `"gpt_4o_plus"` - 增强版
+  * `"gpt_4o_advanced"` - 高级版
 </ParamField>
 
 <ParamField body="params" type="object" required>

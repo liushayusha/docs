@@ -2,7 +2,7 @@
  * @Author: yusha
  * @Date: 2025-12-17 14:16:31
  * @LastEditors: yusha
- * @LastEditTime: 2025-12-17 14:16:45
+ * @LastEditTime: 2026-03-31 16:30:18
  * @Description: 
  */
 /**
@@ -78,8 +78,8 @@ const languageMap: Record<string, string> = {
 languageMap.tw = "Traditional Chinese";
 
 const openai = new OpenAI({
-  baseURL: process.env.OPENAI_BASE_URL || "https://ismaque.org/v1",
-  apiKey: process.env.OPENAI_API_KEY || "sk-yuxwdMSXor5s2wUjHu3dUwrgkuYuLNbEWFf7acOIXbdQQ5eb",
+  baseURL: "https://api.tu-zi.com/v1",
+  apiKey: "sk-OxiNcFAfHhG0SVfZA3PCzeqjCk73oXxoO3Jsq0gQ3YpIfngJ",
 });
 
 // 生成翻译系统提示词（包含配置文件中的不翻译词汇）

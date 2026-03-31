@@ -28,39 +28,42 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  モデル名
+  モデル名、以下のチャネルバージョンをサポートしています（チャネルはサービスの安定性にのみ影響し、出力の品質には影響しません）：
 
-  固定値：`"veo3_1_fast"`
+  * `"veo3_1_fast"` - デフォルト
+  * `"veo3_1_fast_base"` - ベーシック版
+  * `"veo3_1_fast_plus"` - 拡張版
+  * `"veo3_1_fast_advanced"` - 高度版
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  モデルパラメーターオブジェクト
+  モデルパラメータオブジェクト
 
   <Expandable title="params オブジェクトのプロパティ">
     <ParamField body="prompt" type="string" required>
-      動画生成のテキスト説明
+      ビデオ生成のテキスト説明
 
       制限なし
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      参考画像のURL、動画生成のための（最初のフレーム）
+      参考画像のURL、画像からビデオ生成（最初のフレーム）に使用
 
       * 単一画像のみ対応
       * 公開アクセス可能なURLをサポート
     </ParamField>
 
     <ParamField body="end_image_url" type="string">
-      最終フレームの参考画像のURL
+      最終フレーム参考画像のURL
 
       * 単一画像のみ対応
       * 公開アクセス可能なURLをサポート
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="16:9">
-      動画のアスペクト比
+      ビデオのアスペクト比
 
-      対応しているアスペクト比：
+      対応アスペクト比：
 
       * `16:9` - 横向き（デフォルト）
       * `9:16` - 縦向き
@@ -69,7 +72,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発起者タスクID
+  発注者タスクID
 
   ユーザー定義のタスク識別子、必須
 </ParamField>

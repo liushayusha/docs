@@ -27,9 +27,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  모델 이름
+  모델 이름, 다음 채널 버전을 지원합니다(채널은 서비스 안정성에만 영향을 미치며 출력 품질에는 영향을 주지 않습니다):
 
-  고정 값: `"veo3_1"`
+  * `"veo3_1"` - 기본
+  * `"veo3_1_base"` - 베이직 버전
+  * `"veo3_1_plus"` - 확장 버전
 </ParamField>
 
 <ParamField body="params" type="object" required>
@@ -43,14 +45,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      참고 이미지 URL, 영상 생성(첫 프레임)용
+      참조 이미지의 URL, 영상 생성(첫 번째 프레임)용
 
       * 단일 이미지만 지원
       * 공개 접근 가능한 URL 지원
     </ParamField>
 
     <ParamField body="end_image_url" type="string">
-      마지막 프레임 참고 이미지 URL
+      마지막 프레임 참조 이미지의 URL
 
       * 단일 이미지만 지원
       * 공개 접근 가능한 URL 지원
@@ -61,16 +63,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
       지원 가로 세로 비율:
 
-      * `16:9` - 가로 (기본값)
+      * `16:9` - 가로 (기본)
       * `9:16` - 세로
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  요청자 작업 ID
+  발신자 작업 ID
 
-  사용자 정의 작업 식별자, 필수
+  사용자가 정의한 작업 식별자, 필수 입력
 </ParamField>
 
 ## Response

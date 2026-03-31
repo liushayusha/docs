@@ -26,15 +26,18 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  モデル名
+  モデル名。以下のチャネルバージョンをサポートします（チャネルはサービスの安定性にのみ影響し、出力品質には影響しません）：
 
-  固定値：`"gpt_4o"`
+  * `"gpt_4o"` - デフォルト
+  * `"gpt_4o_base"` - ベーシック版
+  * `"gpt_4o_plus"` - 強化版
+  * `"gpt_4o_advanced"` - アドバンス版
 </ParamField>
 
 <ParamField body="params" type="object" required>
   モデルパラメータオブジェクト
 
-  <Expandable title="params オブジェクトの属性">
+  <Expandable title="params オブジェクトのプロパティ">
     <ParamField body="prompt" type="string" required>
       画像生成のテキスト説明
 
@@ -42,26 +45,26 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      画像生成の参考画像のURL
+      画像生成に使用する参考画像のURL
 
-      * 単一画像のみサポート
-      * 公開アクセス可能なURLに対応
+      * 単一画像のみ対応
+      * 公開アクセス可能なURLをサポート
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string">
       画像生成のアスペクト比
 
-      対応アスペクト比：
+      サポートされるアスペクト比：
 
       * `1:1` - 正方形
-      * `3:2` - 横向き 3:2
-      * `2:3` - 縦向き 2:3
+      * `3:2` - 横向き3:2
+      * `2:3` - 縦向き2:3
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発注者のタスクID
+  発起者のタスクID
 
   ユーザー定義のタスク識別子、必須
 </ParamField>

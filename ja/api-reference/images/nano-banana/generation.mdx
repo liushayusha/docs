@@ -26,53 +26,56 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  モデル名
+  モデル名。以下のチャンネルバージョンをサポートしています（チャンネルはサービスの安定性にのみ影響し、出力品質には影響しません）：
 
-  固定値：`"nano_banana"`
+  * `"nano_banana"` - デフォルト
+  * `"nano_banana_base"` - ベーシック版
+  * `"nano_banana_plus"` - 強化版
+  * `"nano_banana_max"` - フラッグシップ版
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  モデルのパラメータオブジェクト
+  モデルパラメータのオブジェクト
 
   <Expandable title="params オブジェクトのプロパティ">
     <ParamField body="prompt" type="string" required>
-      画像生成のテキスト説明
+      画像生成のテキストの説明
 
       制限なし
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      参照画像のURLリスト、画像から画像への生成に使用
+      画像生成の参考用画像のURLリスト
 
       * 最大9枚の画像
-      * 公開アクセス可能なURLをサポート
+      * 公開アクセス可能なURLのみ対応
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string">
       画像生成のアスペクト比
 
-      サポートされるアスペクト比：
+      対応アスペクト比：
 
       * `auto` - 自動
       * `1:1` - 正方形
-      * `3:2` - 横長3:2
-      * `2:3` - 縦長2:3
-      * `4:3` - 横長4:3
-      * `3:4` - 縦長3:4
-      * `5:4` - 横長5:4
-      * `4:5` - 縦長4:5
+      * `3:2` - 横長 3:2
+      * `2:3` - 縦長 2:3
+      * `4:3` - 横長 4:3
+      * `3:4` - 縦長 3:4
+      * `5:4` - 横長 5:4
+      * `4:5` - 縦長 4:5
       * `16:9` - 横長ワイドスクリーン
-      * `9:16` - 縦長ポートレート
-      * `21:9` - 超横長ワイドスクリーン
+      * `9:16` - 縦長スクリーン
+      * `21:9` - 超ワイドスクリーン
     </ParamField>
 
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発起者タスクID
+  発起者のタスクID
 
-  ユーザー定義のタスク識別子、必須
+  ユーザー定義のタスク識別子で、必須
 </ParamField>
 
 ## Response

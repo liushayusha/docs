@@ -26,51 +26,54 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  Model Name
+  Model name, supporting the following channel versions (channels only affect service stability, not output quality):
 
-  Fixed value: `"nano_banana"`
+  * `"nano_banana"` - Default
+  * `"nano_banana_base"` - Basic version
+  * `"nano_banana_plus"` - Enhanced version
+  * `"nano_banana_max"` - Flagship version
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  Model Parameters Object
+  Model parameters object
 
-  <Expandable title="params Object Properties">
+  <Expandable title="params object properties">
     <ParamField body="prompt" type="string" required>
-      Text Description for Image Generation
+      Text description for image generation
 
       No limitations
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      List of Reference Image URLs for Image-to-Image
+      List of reference image URLs for image-to-image generation
 
       * Up to 9 images
       * Supports publicly accessible URLs
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string">
-      Aspect Ratio for Image Generation
+      Aspect ratio of the generated image
 
       Supported aspect ratios:
 
       * `auto` - Automatic
       * `1:1` - Square
-      * `3:2` - Landscape 3:2
-      * `2:3` - Portrait 2:3
-      * `4:3` - Landscape 4:3
-      * `3:4` - Portrait 3:4
-      * `5:4` - Landscape 5:4
-      * `4:5` - Portrait 4:5
-      * `16:9` - Landscape widescreen
-      * `9:16` - Portrait vertical screen
-      * `21:9` - Ultra widescreen
+      * `3:2` - 3:2 Landscape
+      * `2:3` - 2:3 Portrait
+      * `4:3` - 4:3 Landscape
+      * `3:4` - 3:4 Portrait
+      * `5:4` - 5:4 Landscape
+      * `4:5` - 4:5 Portrait
+      * `16:9` - 16:9 Wide Screen Landscape
+      * `9:16` - 9:16 Portrait
+      * `21:9` - Ultra Wide Screen
     </ParamField>
 
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  Initiator Task ID
+  Initiator's Task ID
 
   User-defined task identifier, required
 </ParamField>

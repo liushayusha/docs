@@ -27,9 +27,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  Model name
+  Model name, supporting the following channel versions (channels affect service stability only, not output quality):
 
-  Fixed value: `"sora2_pro"`
+  * `"sora2_pro"` - Default
+  * `"sora2_pro_base"` - Base version
+  * `"sora2_pro_plus"` - Enhanced version
 </ParamField>
 
 <ParamField body="params" type="object" required>
@@ -39,13 +41,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     <ParamField body="prompt" type="string" required>
       Text description for video generation
 
-      Unlimited
+      No limit
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      Reference image URL used for image-to-video (first frame)
+      URL of the reference image for image-to-video (first frame)
 
-      * Supports only a single image
+      * Only supports a single image
       * Supports publicly accessible URLs
     </ParamField>
 

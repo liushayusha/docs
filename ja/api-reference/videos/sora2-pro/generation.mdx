@@ -27,41 +27,43 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  モデル名
+  モデル名。以下のチャネルバージョンをサポートしています（チャネルはサービスの安定性にのみ影響し、出力品質には影響しません）：
 
-  固定値：`"sora2_pro"`
+  * `"sora2_pro"` - デフォルト
+  * `"sora2_pro_base"` - ベーシック版
+  * `"sora2_pro_plus"` - 強化版
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  モデルパラメータオブジェクト
+  モデルのパラメーターオブジェクト
 
   <Expandable title="params オブジェクトのプロパティ">
     <ParamField body="prompt" type="string" required>
-      ビデオ生成のテキスト説明
+      動画生成のテキスト説明
 
       制限なし
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      参考画像のURL（テキストから動画生成のための最初のフレーム）
+      参考画像のURL（動画生成の最初のフレームに使用）
 
       * 単一画像のみ対応
-      * 公開されてアクセス可能なURLがサポートされる
+      * 公開されアクセス可能なURLをサポート
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="16:9">
-      ビデオのアスペクト比
+      動画のアスペクト比
 
-      対応アスペクト比：
+      サポートされるアスペクト比：
 
       * `16:9` - 横向き（デフォルト）
       * `9:16` - 縦向き
     </ParamField>
 
     <ParamField body="video_length" type="string">
-      ビデオの長さ（秒）
+      動画の長さ（秒）
 
-      対応長さ：
+      サポートされる長さ：
 
       * `15` - 15秒（デフォルト）（HD）
       * `25` - 25秒
@@ -71,9 +73,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発起者のタスクID
+  発注者のタスクID
 
-  ユーザーがカスタマイズするタスク識別子、必須
+  ユーザーが指定するタスク識別子。必須です
 </ParamField>
 
 ## Response

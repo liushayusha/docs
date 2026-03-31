@@ -26,26 +26,30 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  モデル名
+  モデル名、以下のチャンネルバージョンをサポートしています（チャンネルはサービスの安定性にのみ影響し、出力品質には影響しません）：
 
-  固定値：`"nano_banana_pro"`
+  * `"nano_banana_pro"` - デフォルト
+  * `"nano_banana_pro_base"` - ベース版
+  * `"nano_banana_pro_plus"` - 強化版
+  * `"nano_banana_pro_advanced"` - 高度版
+  * `"nano_banana_pro_max"` - フラッグシップ版
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  モデルパラメーターオブジェクト
+  モデルパラメータオブジェクト
 
   <Expandable title="params オブジェクトのプロパティ">
     <ParamField body="prompt" type="string" required>
       画像生成のテキスト説明
 
-      制限なし
+      無制限
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      画像生成のための参照画像のURLリスト
+      画像生成の参照用画像のURLリスト
 
       * 最大8枚の画像
-      * 公にアクセス可能なURLのみ対応
+      * 公開アクセス可能なURLをサポート
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string">
@@ -55,14 +59,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
       * `auto` - 自動
       * `1:1` - 正方形
-      * `3:2` - 横長3:2
-      * `2:3` - 縦長2:3
-      * `4:3` - 横長4:3
-      * `3:4` - 縦長3:4
-      * `5:4` - 横長5:4
-      * `4:5` - 縦長4:5
-      * `16:9` - 横長ワイドスクリーン
-      * `9:16` - 縦長縦スクリーン
+      * `3:2` - 横向き3:2
+      * `2:3` - 縦向き2:3
+      * `4:3` - 横向き4:3
+      * `3:4` - 縦向き3:4
+      * `5:4` - 横向き5:4
+      * `4:5` - 縦向き4:5
+      * `16:9` - 横向きワイドスクリーン
+      * `9:16` - 縦向き縦画面
       * `21:9` - 超ワイドスクリーン
     </ParamField>
 
@@ -71,16 +75,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
       サポートされている解像度：
 
-      * `1K` - ベーシック解像度（デフォルト）
-      * `2K` - スタンダード解像度
-      * `4K` - ハイディフィニション解像度
+      * `1K` - 基本解像度（デフォルト）
+      * `2K` - 標準解像度
+      * `4K` - 高画質解像度
     </ParamField>
     
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発注者タスクID
+  発行者のタスクID
 
   ユーザー定義のタスク識別子、必須
 </ParamField>

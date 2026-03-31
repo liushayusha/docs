@@ -27,9 +27,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  Model name
+  Model name, supporting the following channel versions (channels only affect service stability, not output quality):
 
-  Fixed value: `"veo3_1"`
+  * `"veo3_1"` - Default
+  * `"veo3_1_base"` - Basic version
+  * `"veo3_1_plus"` - Enhanced version
 </ParamField>
 
 <ParamField body="params" type="object" required>
@@ -39,7 +41,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     <ParamField body="prompt" type="string" required>
       Text description for video generation
 
-      No limit
+      No limitation
     </ParamField>
 
     <ParamField body="image_url" type="string">
@@ -50,7 +52,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="end_image_url" type="string">
-      URL of the reference image for the last frame
+      URL of the reference image for the end frame
 
       * Only supports a single image
       * Supports publicly accessible URLs
@@ -68,7 +70,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  Initiator task ID
+  Initiator's task ID
 
   User-defined task identifier, required
 </ParamField>
