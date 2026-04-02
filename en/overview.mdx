@@ -1,28 +1,28 @@
 ---
 title: 'AIReiter — AI Text, Image, and Video Generation API Platform'
-description: 'A unified AI text, image, and video generation API platform. Supports multiple mainstream models including Claude, GPT, Gemini, Sora2, VEO3, and more. Compatible with OpenAI SDK, asynchronous task processing, transparent pricing, and easy to use.'
+description: 'A unified AI text, image, and video generation API platform. Supports multiple mainstream models including Claude, GPT, Gemini, Sora2, VEO3, Seedance2, etc. Compatible with OpenAI SDK, asynchronous task processing, transparent pricing, and easy to use.'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
-AIReiter is a unified AI content generation API platform offering text conversation, image generation, and video generation services. By simple REST API calls, you can use various mainstream AI models such as Claude, GPT, Gemini, Sora2, and VEO3. The text interface is fully compatible with the OpenAI SDK and can be used by directly replacing the `baseURL`.
+AIReiter is a unified AI content generation API platform that provides text dialogue, image generation, and video generation services. By simple REST API calls, you can use mainstream AI models such as Claude, GPT, Gemini, Sora2, VEO3, Seedance2, and others. The text interface is fully compatible with the OpenAI SDK and can be used by directly replacing the `baseURL`.
 
 ## Quick Start
 
 <CardGroup cols={2}>
   <Card title="Text Chat" icon="message" href="/en/api-reference/text/openai-chat-completions-api/endpoint">
-    Compatible with OpenAI SDK, supports Claude, GPT and other models
+    Compatible with OpenAI SDK, supports Claude, GPT, and other models
   </Card>
   <Card title="Image Generation" icon="image" href="/en/api-reference/images/gpt-4o/generation">
-    Generate images using GPT-4o, Gemini, Seedream and other models
+    Generate images using GPT-4o, Gemini, Seedream, and other models
   </Card>
   <Card title="Video Generation" icon="video" href="/en/api-reference/videos/sora2/generation">
-    Generate video content using Sora2, VEO3 and other models
+    Generate video content using Sora2, VEO3, Seedance2, and other models
   </Card>
   <Card title="Task Status Query" icon="list-check" href="/en/api-reference/tasks/status">
     Query execution status and results of asynchronous tasks
   </Card>
   <Card title="Check Balance" icon="wallet" href="/en/api-reference/tasks/balance">
-    Check credit balance and remaining free usage counts for each model
+    Check points balance and remaining free quota for each model
   </Card>
   <Card title="Get API Key" icon="key" href={apiKeyUrl}>
     Access the console to get your API Key
@@ -103,16 +103,16 @@ When using, simply replace the model name with the corresponding channel version
 
 ## Supported Models
 
-### Text Conversation Series
+### Text Chat Series
 
-Compatible with OpenAI Chat Completions API and Responses API, supporting multi-turn conversations, tool calls, structured output, and streaming responses:
+Compatible with OpenAI Chat Completions API and Responses API, supporting multi-turn conversations, tool calls, structured outputs, and streaming responses:
 
 <CardGroup cols={2}>
   <Card title="OpenAI Chat Completions API" icon="message" href="/en/api-reference/text/openai-chat-completions-api/endpoint">
-    Compatible with OpenAI SDK, supporting models like GPT, Claude, etc.
+    Compatible with OpenAI SDK, supports GPT, Claude, and other models
   </Card>
   <Card title="OpenAI Responses API" icon="message" href="/en/api-reference/text/openai-responses-api/endpoint">
-    OpenAI's latest Responses format
+    OpenAI’s latest Responses format
   </Card>
   <Card title="Claude Messages API" icon="message" href="/en/api-reference/text/claude-messages-api/endpoint">
     Anthropic native Messages API format
@@ -125,13 +125,13 @@ AIReiter provides various image generation models, supporting text-to-image and 
 
 <CardGroup cols={2}>
   <Card title="GPT-4o Image" icon="image" href="/en/api-reference/images/gpt-4o/generation">
-    OpenAI's high-quality image generation model
+    OpenAI’s high-quality image generation model
   </Card>
   <Card title="Gemini-2.5-Flash (Nano banana)" icon="image" href="/en/api-reference/images/nano-banana/generation">
-    Google's latest fast image generation model
+    Google’s latest fast image generation model
   </Card>
   <Card title="Gemini-3-Pro (Nano banana pro)" icon="image" href="/en/api-reference/images/gemini-3-pro/generation">
-    Google's professional-grade image generation model
+    Google professional-grade image generation model
   </Card>
   <Card title="Nano Banana V2" icon="image" href="/en/api-reference/images/nano-banana-v2/generation">
     Supports multiple generation modes including text-to-image, image-to-image, and image editing
@@ -143,7 +143,7 @@ AIReiter provides various image generation models, supporting text-to-image and 
     Seedream version 4.5
   </Card>
   <Card title="Seedream V5 lite" icon="image" href="/en/api-reference/images/seedream-v5-lite/generation">
-    Seedream latest version, supporting internet search enhanced generation
+    Seedream latest version, supports internet-enhanced generation
   </Card>
 </CardGroup>
 
@@ -156,7 +156,7 @@ Supports text-to-video and image-to-video generation, offering multiple resoluti
     OpenAI Sora2 video generation model (10-15 seconds)
   </Card>
   <Card title="Sora2 Pro" icon="video" href="/en/api-reference/videos/sora2-pro/generation">
-    Sora2 Pro version, supporting HD resolution
+    Sora2 professional edition, supports HD resolution
   </Card>
   <Card title="VEO3.1" icon="video" href="/en/api-reference/videos/veo3-1/generation">
     Google VEO3.1 video generation model
@@ -165,13 +165,19 @@ Supports text-to-video and image-to-video generation, offering multiple resoluti
     VEO3.1 fast version
   </Card>
   <Card title="Seedance-1.5-pro" icon="video" href="/en/api-reference/videos/seedance-1-5-pro/generation">
-    Supports control of start/end frames and audio generation (4-12 seconds)
+    Supports start and end frame control and audio generation (4-12 seconds)
   </Card>
   <Card title="Seedance Pro Fast" icon="video" href="/en/api-reference/videos/seedance_pro_fast/generation">
-    Seedance fast version, supporting first frame control
+    Seedance fast version, supports start frame control
   </Card>
   <Card title="Seedance Pro" icon="video" href="/en/api-reference/videos/seedance_pro/generation">
-    Seedance professional version, supporting start and end frame control
+    Seedance professional edition, supports start and end frame control
+  </Card>
+  <Card title="Seedance 2.0" icon="video" href="/en/api-reference/videos/seedance2/generation">
+    Supports multiple reference images, reference videos, and start/end frame control (4-15 seconds)
+  </Card>
+  <Card title="Seedance 2.0 Fast" icon="video" href="/en/api-reference/videos/seedance2_fast/generation">
+    Seedance 2.0 fast version, supports multiple reference images and start/end frame control
   </Card>
 </CardGroup>
 

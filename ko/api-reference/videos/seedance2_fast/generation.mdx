@@ -1,0 +1,492 @@
+---
+title: 'Seedance 2.0 빠른 비디오 생성'
+description: |
+   - 비동기 처리 모드, 작업 ID 반환으로 후속 조회 가능
+   - 텍스트 → 비디오, 이미지로부터 비디오(첫 프레임/마지막 프레임/다중 참조 이미지) 지원
+   - 가로, 세로 다양한 비율 지원
+   - 빠른 버전, 생성 속도 향상
+   - 오디오 생성 지원
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  모든 엔드포인트는 Bearer Token 인증이 필요합니다
+
+  API Key 받기:
+
+  <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a>에 접속하여 API Key를 받으세요
+
+  사용 시 요청 헤더에 다음을 추가하세요:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  모델 이름
+
+  고정값: `"seedance2_fast"`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  모델 파라미터 객체
+
+  <Expandable title="params 객체 속성">
+    <ParamField body="prompt" type="string" required>
+      비디오 생성을 위한 텍스트 설명으로, 비어 있을 수 없습니다
+    </ParamField>
+
+    <ParamField body="type" type="string" required>
+      참조 모드로, 이미지/비디오 파라미터 사용 방식을 결정합니다
+
+      * `all_reference` — 스마트 참조 모드: `image_url`은 캐릭터/스타일 참조 이미지(최대 9장), `video_url`은 참조 비디오(최대 3개)
+      * `first_last_frame` — 시작과 끝 프레임 모드: `image_url`은 시작 프레임(1장만), `end_image_url`은 끝 프레임이며, `video_url`은 지원하지 않음
+
+      필수이며, 선택 가능 값: `all_reference`, `first_last_frame`
+    </ParamField>
+
+    <ParamField body="image_url" type="string[]">
+      참조 이미지 URL
+
+      * `all_reference` 모드: 최대 9장, 각 파일 최대 50MB, 최소 가로세로 300px
+      * `first_last_frame` 모드: 1장(시작 프레임만), 최대 10MB, 최소 가로세로 300px
+    </ParamField>
+
+    <ParamField body="video_url" type="string[]">
+      참조 비디오 URL
+
+      `all_reference` 모드만 지원. 최대 3개; 형식 `mp4`, `mov` 지원; 개별 비디오 길이 2-15초, 전체 참조 비디오 총 길이 15초 이하; 개별 비디오 최대 50MB; 프레임 속도 24-60 FPS; 해상도 `480p`, `720p` 지원; 가로세로 비율 0.4~2.5; 가로세로 픽셀 범위 300-6000px; 전체 픽셀 수는 409600-927408 사이여야 함
+
+      <Warning>`all_reference` 모드에서만 유효하며, `type`이 `first_last_frame`일 때는 이 파라미터를 전달하지 마세요</Warning>
+    </ParamField>
+
+    <ParamField body="end_image_url" type="string">
+      끝 프레임 이미지 URL
+
+      최대 10MB
+
+      <Note>`first_last_frame` 모드에서만 유효</Note>
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="16:9">
+      비디오 가로세로 비율
+
+      지원 가로세로 비율:
+      * `16:9` - 가로 화면(기본값)
+      * `9:16` - 세로 화면
+      * `1:1` - 정사각형
+      * `4:3` - 표준
+      * `3:4` - 세로 표준
+      * `21:9` - 울트라와이드
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="720p">
+      비디오 해상도
+
+      지원 해상도:
+      * `480p`
+      * `720p`(기본값)
+    </ParamField>
+
+    <ParamField body="video_length" type="string" default="5">
+      비디오 길이(초)
+
+      지원 길이 범위: 4~15초, 기본값 5초
+    </ParamField>
+
+    <ParamField body="generate_audio" type="boolean" default="true">
+      오디오 생성 여부, 기본값 `true`
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  요청자 작업 ID
+
+  사용자가 정의하는 작업 식별자, 필수
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  요청자 작업 ID이며 결과 조회에 사용됩니다.
+</ResponseField>
+<ResponseField name="status" type="string">
+  초기 상태로 고정 값 `"pending"`
+</ResponseField>
+
+<ResponseField name="estimated_credits" type="number">
+  예상 소비 크레딧
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  생성 시간(ISO 형식)
+</ResponseField>
+
+<RequestExample>
+  ```bash cURL（all_reference 모드）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "seedance2_fast",
+      "params": {
+        "prompt": "작업실에서 춤추는 사람",
+        "type": "all_reference",
+        "image_url": ["https://example.com/character.jpg"],
+        "video_url": ["https://example.com/dance.mp4"],
+        "aspect_ratio": "16:9",
+        "resolution": "720p",
+        "video_length": "5",
+        "generate_audio": true
+      },
+      "out_task_id": "my_task_123456"
+    }'
+  ```
+
+  ```bash cURL（first_last_frame 모드）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "seedance2_fast",
+      "params": {
+        "prompt": "일출에서 일몰로 전환",
+        "type": "first_last_frame",
+        "image_url": ["https://example.com/start.jpg"],
+        "end_image_url": "https://example.com/end.jpg",
+        "aspect_ratio": "16:9",
+        "resolution": "720p",
+        "video_length": "5"
+      },
+      "out_task_id": "my_task_123457"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "seedance2_fast",
+      "params": {
+          "prompt": "작업실에서 춤추는 사람",
+          "type": "all_reference",
+          "image_url": ["https://example.com/character.jpg"],
+          "aspect_ratio": "16:9",
+          "resolution": "720p",
+          "video_length": "5",
+          "generate_audio": True
+      },
+      "out_task_id": "my_task_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "seedance2_fast",
+    params: {
+      prompt: "작업실에서 춤추는 사람",
+      type: "all_reference",
+      image_url: ["https://example.com/character.jpg"],
+      aspect_ratio: "16:9",
+      resolution: "720p",
+      video_length: "5",
+      generate_audio: true
+    },
+    out_task_id: "my_task_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "seedance2_fast",
+          "params": map[string]interface{}{
+              "prompt":         "작업실에서 춤추는 사람",
+              "type":           "all_reference",
+              "image_url":      []string{"https://example.com/character.jpg"},
+              "aspect_ratio":   "16:9",
+              "resolution":     "720p",
+              "video_length":   "5",
+              "generate_audio": true,
+          },
+          "out_task_id": "my_task_123456",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.io.BufferedReader;
+  import java.io.InputStreamReader;
+  import java.io.OutputStream;
+  import java.net.HttpURLConnection;
+  import java.net.URL;
+
+  public class Main {
+      public static void main(String[] args) {
+          try {
+              URL url = new URL("https://aireiter.com/api/openapi/submit");
+              HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+              conn.setRequestMethod("POST");
+              conn.setRequestProperty("Authorization", "Bearer <token>");
+              conn.setRequestProperty("Content-Type", "application/json");
+              conn.setDoOutput(true);
+
+              String jsonPayload = "{\"model\":\"seedance2_fast\",\"params\":{\"prompt\":\"작업실에서 춤추는 사람\",\"type\":\"all_reference\",\"image_url\":[\"https://example.com/character.jpg\"],\"aspect_ratio\":\"16:9\",\"resolution\":\"720p\",\"video_length\":\"5\",\"generate_audio\":true},\"out_task_id\":\"my_task_123456\"}";
+
+              OutputStream os = conn.getOutputStream();
+              os.write(jsonPayload.getBytes());
+              os.flush();
+              os.close();
+
+              BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+              String line;
+              StringBuilder response = new StringBuilder();
+              while ((line = br.readLine()) != null) {
+                  response.append(line);
+              }
+              br.close();
+
+              System.out.println(response.toString());
+          } catch (Exception e) {
+              e.printStackTrace();
+          }
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = array(
+      "model" => "seedance2_fast",
+      "params" => array(
+          "prompt" => "작업실에서 춤추는 사람",
+          "type" => "all_reference",
+          "image_url" => array("https://example.com/character.jpg"),
+          "aspect_ratio" => "16:9",
+          "resolution" => "720p",
+          "video_length" => "5",
+          "generate_audio" => true
+      ),
+      "out_task_id" => "my_task_123456"
+  );
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ));
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url = URI.parse("https://aireiter.com/api/openapi/submit")
+
+  payload = {
+    model: "seedance2_fast",
+    params: {
+      prompt: "작업실에서 춤추는 사람",
+      type: "all_reference",
+      image_url: ["https://example.com/character.jpg"],
+      aspect_ratio: "16:9",
+      resolution: "720p",
+      video_length: "5",
+      generate_audio: true
+    },
+    out_task_id: "my_task_123456"
+  }
+
+  http = Net::HTTP.new(url.host, url.port)
+  http.use_ssl = true
+  request = Net::HTTP::Post.new(url.path)
+  request["Authorization"] = "Bearer <token>"
+  request["Content-Type"] = "application/json"
+  request.body = payload.to_json
+
+  response = http.request(request)
+  puts response.body
+  ```
+
+  ```swift Swift
+  import Foundation
+
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+  let payload: [String: Any] = [
+      "model": "seedance2_fast",
+      "params": [
+          "prompt": "작업실에서 춤추는 사람",
+          "type": "all_reference",
+          "image_url": ["https://example.com/character.jpg"],
+          "aspect_ratio": "16:9",
+          "resolution": "720p",
+          "video_length": "5",
+          "generate_audio": true
+      ],
+      "out_task_id": "my_task_123456"
+  ]
+
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      if let data = data {
+          print(String(data: data, encoding: .utf8) ?? "")
+      }
+  }
+  task.resume()
+  ```
+
+  ```csharp C#
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url = "https://aireiter.com/api/openapi/submit";
+          var payload = "{\"model\":\"seedance2_fast\",\"params\":{\"prompt\":\"작업실에서 춤추는 사람\",\"type\":\"all_reference\",\"image_url\":[\"https://example.com/character.jpg\"],\"aspect_ratio\":\"16:9\",\"resolution\":\"720p\",\"video_length\":\"5\",\"generate_audio\":true},\"out_task_id\":\"my_task_123456\"}";
+
+          using (var client = new HttpClient())
+          {
+              client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+              var content = new StringContent(payload, Encoding.UTF8, "application/json");
+              var response = await client.PostAsync(url, content);
+              var result = await response.Content.ReadAsStringAsync();
+              Console.WriteLine(result);
+          }
+      }
+  }
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+{
+    "code": "200",
+    "success": true,
+    "data": {
+        "out_task_id": "my_task_123456",
+        "status": "pending",
+        "estimated_credits": 67.5,
+        "created_at": "2026-04-02T08:00:00.000Z"
+    }
+}
+  ```
+
+  ```json 400
+    {
+        "statusCode": 400,
+        "message": "요청 파라미터가 유효하지 않습니다",
+        "ok": false
+    }
+  ```
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "인증 실패입니다. API 키를 확인해 주세요"
+    }
+  }
+  ```
+```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "계정 잔액 부족입니다. 충전 후 다시 시도해 주세요"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "서버 내부 오류입니다. 잠시 후 다시 시도해 주세요"
+    }
+  }
+  ```
+</ResponseExample>

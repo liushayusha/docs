@@ -1,0 +1,492 @@
+---
+title: 'Seedance 2.0 视频生成'
+description: |
+   - 异步处理模式，返回任务ID用于后续查询
+   - 支持文本转视频、图生视频（首帧/尾帧/多参考图）
+   - 支持横屏、竖屏多种比例
+   - 支持生成音频
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  所有接口均需要使用Bearer Token进行认证
+
+  获取 API Key：
+
+  访问 <a href={apiKeyUrl} target="_blank">API Key 管理页面</a> 获取您的 API Key
+
+  使用时在请求头中添加：
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  模型名称
+
+  固定值：`"seedance2"`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  模型参数对象
+
+  <Expandable title="params 对象属性">
+    <ParamField body="prompt" type="string" required>
+      视频生成的文本描述，不能为空
+    </ParamField>
+
+    <ParamField body="type" type="string" required>
+      参考模式，决定图片/视频参数的使用方式
+
+      * `all_reference` — 智能参考模式：`image_url` 作为角色/风格参考图（最多 9 张），`video_url` 作为参考视频（最多 3 个）
+      * `first_last_frame` — 首尾帧模式：`image_url` 为首帧（仅 1 张），`end_image_url` 为末帧，不支持 `video_url`
+
+      必填，可选值：`all_reference`、`first_last_frame`
+    </ParamField>
+
+    <ParamField body="image_url" type="string[]">
+      参考图片 URL
+
+      * `all_reference` 模式：最多 9 张，每张最大 50MB，最小边长 300px
+      * `first_last_frame` 模式：仅 1 张（首帧），最大 10MB，最小边长 300px
+    </ParamField>
+
+    <ParamField body="video_url" type="string[]">
+      参考视频 URL
+
+      仅 `all_reference` 模式支持。最多 3 个；支持 `mp4`、`mov`；单个视频时长 2-15 秒，所有参考视频总时长不超过 15 秒；单个视频不超过 50MB；帧率 24-60 FPS；分辨率支持 `480p`、`720p`；宽高比 0.4-2.5；宽高范围 300-6000px；总像素数需在 409600-927408 之间
+
+      <Warning>仅 `all_reference` 模式有效，`type` 为 `first_last_frame` 时请勿传此参数</Warning>
+    </ParamField>
+
+    <ParamField body="end_image_url" type="string">
+      末帧图片 URL
+
+      最大 10MB
+
+      <Note>仅 `first_last_frame` 模式有效</Note>
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="16:9">
+      视频宽高比
+
+      支持的宽高比：
+      * `16:9` - 横屏（默认）
+      * `9:16` - 竖屏
+      * `1:1` - 方形
+      * `4:3` - 标准
+      * `3:4` - 竖版标准
+      * `21:9` - 超宽屏
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="720p">
+      视频分辨率
+
+      支持的分辨率：
+      * `480p`
+      * `720p`（默认）
+    </ParamField>
+
+    <ParamField body="video_length" type="string" default="5">
+      视频时长（秒）
+
+      支持的时长范围：4~15 秒，默认 5 秒
+    </ParamField>
+
+    <ParamField body="generate_audio" type="boolean" default="true">
+      是否生成音频，默认 `true`
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  发起方任务ID
+
+  用户自定义的任务标识，必填
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  发起方任务ID，可用于查询结果
+</ResponseField>
+<ResponseField name="status" type="string">
+  初始状态，固定为 `"pending"`
+</ResponseField>
+
+<ResponseField name="estimated_credits" type="number">
+  预估消耗积分
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  创建时间（ISO 格式）
+</ResponseField>
+
+<RequestExample>
+  ```bash cURL（all_reference 模式）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "seedance2",
+      "params": {
+        "prompt": "一个人在工作室里跳舞",
+        "type": "all_reference",
+        "image_url": ["https://example.com/character.jpg"],
+        "video_url": ["https://example.com/dance.mp4"],
+        "aspect_ratio": "16:9",
+        "resolution": "720p",
+        "video_length": "5",
+        "generate_audio": true
+      },
+      "out_task_id": "my_task_123456"
+    }'
+  ```
+
+  ```bash cURL（first_last_frame 模式）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "seedance2",
+      "params": {
+        "prompt": "从日出过渡到日落",
+        "type": "first_last_frame",
+        "image_url": ["https://example.com/start.jpg"],
+        "end_image_url": "https://example.com/end.jpg",
+        "aspect_ratio": "16:9",
+        "resolution": "720p",
+        "video_length": "5"
+      },
+      "out_task_id": "my_task_123457"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "seedance2",
+      "params": {
+          "prompt": "一个人在工作室里跳舞",
+          "type": "all_reference",
+          "image_url": ["https://example.com/character.jpg"],
+          "aspect_ratio": "16:9",
+          "resolution": "720p",
+          "video_length": "5",
+          "generate_audio": True
+      },
+      "out_task_id": "my_task_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "seedance2",
+    params: {
+      prompt: "一个人在工作室里跳舞",
+      type: "all_reference",
+      image_url: ["https://example.com/character.jpg"],
+      aspect_ratio: "16:9",
+      resolution: "720p",
+      video_length: "5",
+      generate_audio: true
+    },
+    out_task_id: "my_task_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "seedance2",
+          "params": map[string]interface{}{
+              "prompt":         "一个人在工作室里跳舞",
+              "type":           "all_reference",
+              "image_url":      []string{"https://example.com/character.jpg"},
+              "aspect_ratio":   "16:9",
+              "resolution":     "720p",
+              "video_length":   "5",
+              "generate_audio": true,
+          },
+          "out_task_id": "my_task_123456",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.io.BufferedReader;
+  import java.io.InputStreamReader;
+  import java.io.OutputStream;
+  import java.net.HttpURLConnection;
+  import java.net.URL;
+
+  public class Main {
+      public static void main(String[] args) {
+          try {
+              URL url = new URL("https://aireiter.com/api/openapi/submit");
+              HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+              conn.setRequestMethod("POST");
+              conn.setRequestProperty("Authorization", "Bearer <token>");
+              conn.setRequestProperty("Content-Type", "application/json");
+              conn.setDoOutput(true);
+
+              String jsonPayload = "{\"model\":\"seedance2\",\"params\":{\"prompt\":\"一个人在工作室里跳舞\",\"type\":\"all_reference\",\"image_url\":[\"https://example.com/character.jpg\"],\"aspect_ratio\":\"16:9\",\"resolution\":\"720p\",\"video_length\":\"5\",\"generate_audio\":true},\"out_task_id\":\"my_task_123456\"}";
+
+              OutputStream os = conn.getOutputStream();
+              os.write(jsonPayload.getBytes());
+              os.flush();
+              os.close();
+
+              BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+              String line;
+              StringBuilder response = new StringBuilder();
+              while ((line = br.readLine()) != null) {
+                  response.append(line);
+              }
+              br.close();
+
+              System.out.println(response.toString());
+          } catch (Exception e) {
+              e.printStackTrace();
+          }
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = array(
+      "model" => "seedance2",
+      "params" => array(
+          "prompt" => "一个人在工作室里跳舞",
+          "type" => "all_reference",
+          "image_url" => array("https://example.com/character.jpg"),
+          "aspect_ratio" => "16:9",
+          "resolution" => "720p",
+          "video_length" => "5",
+          "generate_audio" => true
+      ),
+      "out_task_id" => "my_task_123456"
+  );
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ));
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url = URI.parse("https://aireiter.com/api/openapi/submit")
+
+  payload = {
+    model: "seedance2",
+    params: {
+      prompt: "一个人在工作室里跳舞",
+      type: "all_reference",
+      image_url: ["https://example.com/character.jpg"],
+      aspect_ratio: "16:9",
+      resolution: "720p",
+      video_length: "5",
+      generate_audio: true
+    },
+    out_task_id: "my_task_123456"
+  }
+
+  http = Net::HTTP.new(url.host, url.port)
+  http.use_ssl = true
+  request = Net::HTTP::Post.new(url.path)
+  request["Authorization"] = "Bearer <token>"
+  request["Content-Type"] = "application/json"
+  request.body = payload.to_json
+
+  response = http.request(request)
+  puts response.body
+  ```
+
+  ```swift Swift
+  import Foundation
+
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+  let payload: [String: Any] = [
+      "model": "seedance2",
+      "params": [
+          "prompt": "一个人在工作室里跳舞",
+          "type": "all_reference",
+          "image_url": ["https://example.com/character.jpg"],
+          "aspect_ratio": "16:9",
+          "resolution": "720p",
+          "video_length": "5",
+          "generate_audio": true
+      ],
+      "out_task_id": "my_task_123456"
+  ]
+
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      if let data = data {
+          print(String(data: data, encoding: .utf8) ?? "")
+      }
+  }
+  task.resume()
+  ```
+
+  ```csharp C#
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url = "https://aireiter.com/api/openapi/submit";
+          var payload = "{\"model\":\"seedance2\",\"params\":{\"prompt\":\"一个人在工作室里跳舞\",\"type\":\"all_reference\",\"image_url\":[\"https://example.com/character.jpg\"],\"aspect_ratio\":\"16:9\",\"resolution\":\"720p\",\"video_length\":\"5\",\"generate_audio\":true},\"out_task_id\":\"my_task_123456\"}";
+
+          using (var client = new HttpClient())
+          {
+              client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+              var content = new StringContent(payload, Encoding.UTF8, "application/json");
+              var response = await client.PostAsync(url, content);
+              var result = await response.Content.ReadAsStringAsync();
+              Console.WriteLine(result);
+          }
+      }
+  }
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+{
+    "code": "200",
+    "success": true,
+    "data": {
+        "out_task_id": "my_task_123456",
+        "status": "pending",
+        "estimated_credits": 82.5,
+        "created_at": "2026-04-02T08:00:00.000Z"
+    }
+}
+  ```
+
+  ```json 400
+    {
+        "statusCode": 400,
+        "message": "请求参数无效",
+        "ok": false
+    }
+  ```
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "身份验证失败，请检查您的API密钥"
+    }
+  }
+  ```
+```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "账户余额不足，请充值后再试"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "服务器内部错误，请稍后重试"
+    }
+  }
+  ```
+</ResponseExample>

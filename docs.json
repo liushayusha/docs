@@ -126,6 +126,20 @@
                 "pages": [
                   "zh/api-reference/videos/seedance_pro/generation"
                 ]
+              },
+              {
+                "group": "Seedance 2.0",
+                "icon": "video",
+                "pages": [
+                  "zh/api-reference/videos/seedance2/generation"
+                ]
+              },
+              {
+                "group": "Seedance 2.0 Fast",
+                "icon": "video",
+                "pages": [
+                  "zh/api-reference/videos/seedance2_fast/generation"
+                ]
               }
             ]
           },
