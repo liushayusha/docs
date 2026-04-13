@@ -28,11 +28,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="model" type="string" required>
   모델 이름
 
-  고정값: `"seedream_v4"`
+  고정 값: `"seedream_v4"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  모델 파라미터 객체
+  모델 매개변수 객체
 
   <Expandable title="params 객체 속성">
     <ParamField body="prompt" type="string" required>
@@ -42,16 +42,22 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      참조 이미지 URL 목록, 이미지 생성에 사용
+      이미지 생성 참고용 URL 목록
 
-      * 최대 9장 이미지
-      * 공개 접속 가능한 URL 지원
+      * 최대 9개의 이미지
+      * 다음 두 가지 형식 지원:
+        1. 공개 접근 가능한 URL
+        2. Base64 인코딩 형식
+           * 반드시 전체 Data URI 형식 사용: `data:image/{포맷};base64,{base64데이터}`
+           * 지원 이미지 포맷: jpeg, png, webp
+           * 예시: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+           * ⚠️ 주의: `data:image/jpeg;base64,` 접두사를 반드시 포함해야 하며, base64 이미지 크기는 10MB를 넘지 않아야 합니다
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string">
       이미지 생성의 가로 세로 비율
 
-      지원하는 비율:
+      지원 가로 세로 비율:
 
       * `1:1` - 정사각형
       * `16:9` - 가로 와이드스크린
@@ -65,17 +71,17 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
       지원 해상도:
 
-      * `1K` - 기본 해상도 (기본값)
+      * `1K` - 기본 해상도(기본값)
       * `2K` - 표준 해상도
       * `4K` - 고해상도
     </ParamField>
 
     <ParamField body="output_n" type="string" default="1">
-      생성할 이미지 수
+      생성할 이미지 수량
 
       지원 값:
 
-      * `1` - 1장 생성 (기본값)
+      * `1` - 1장 생성(기본값)
       * `2` - 2장 생성
       * `4` - 4장 생성
     </ParamField>
@@ -83,9 +89,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  발신 측 작업 ID
+  발신자 작업 ID
 
-  사용자 정의 작업 식별자, 필수
+  사용자가 정의하는 작업 식별자, 필수
 </ParamField>
 
 ## Response

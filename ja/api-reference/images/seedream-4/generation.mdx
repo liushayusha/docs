@@ -28,7 +28,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="model" type="string" required>
   モデル名
 
-  固定値: `"seedream_v4"`
+  固定値：`"seedream_v4"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
@@ -36,44 +36,50 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   <Expandable title="params オブジェクトのプロパティ">
     <ParamField body="prompt" type="string" required>
-      画像生成用テキスト記述
+      画像生成のテキスト説明
 
       制限なし
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      参照画像のURLリスト（画像から画像へ変換用）
+      画像生成用の参照画像のURLリスト
 
       * 最大9枚の画像
-      * 公開アクセス可能なURLをサポート
+      * 以下の2種類の形式をサポート：
+        1. 公開アクセス可能なURL
+        2. Base64エンコード形式
+           * 完全なData URI形式を使用する必要があります：`data:image/{フォーマット};base64,{base64データ}`
+           * 対応画像フォーマット：jpeg、png、webp
+           * 例：`data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+           * ⚠️ 注意：`data:image/jpeg;base64,`という接頭辞が必要で、base64画像のサイズは10MBを超えてはいけません
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string">
       画像生成のアスペクト比
 
-      対応アスペクト比:
+      対応するアスペクト比：
 
       * `1:1` - 正方形
       * `16:9` - 横長ワイドスクリーン
-      * `9:16` - 縦長縦画面
-      * `4:3` - 横長 4:3
-      * `3:4` - 縦長 3:4
+      * `9:16` - 縦長スクリーン
+      * `4:3` - 横長4:3
+      * `3:4` - 縦長3:4
     </ParamField>
 
     <ParamField body="resolution" type="string" default="1K">
-      画像の解像度
+      画像解像度
 
-      対応解像度:
+      対応解像度：
 
-      * `1K` - ベース解像度（デフォルト）
+      * `1K` - ベーシック解像度（デフォルト）
       * `2K` - 標準解像度
-      * `4K` - 高解像度
+      * `4K` - ハイビジョン解像度
     </ParamField>
 
     <ParamField body="output_n" type="string" default="1">
-      生成する画像の数
+      生成する画像の枚数
 
-      対応値:
+      対応値：
 
       * `1` - 1枚生成（デフォルト）
       * `2` - 2枚生成
@@ -83,7 +89,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発信側タスクID
+  要求側タスクID
 
   ユーザー定義のタスク識別子、必須
 </ParamField>

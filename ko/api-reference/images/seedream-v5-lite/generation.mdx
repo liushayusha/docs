@@ -29,39 +29,45 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="model" type="string" required>
   모델 이름
 
-  고정 값: `"seedream_v5_lite"`
+  고정값: `"seedream_v5_lite"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  모델 파라미터 객체
+  모델 매개변수 객체
 
   <Expandable title="params 객체 속성">
     <ParamField body="prompt" type="string" required>
-      이미지 생성 텍스트 설명
+      이미지 생성을 위한 텍스트 설명
 
       제한 없음
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      참고 이미지 URL 목록, 이미지-기반 이미지 생성에 사용
+      참조 이미지 URL 목록, 이미지 생성에 사용
 
-      * 최대 9장 이미지
-      * 공개적으로 접근 가능한 URL 지원
+      * 최대 9장의 이미지
+      * 다음 두 가지 형식 지원:
+        1. 공개 접근 가능한 URL
+        2. Base64 인코딩 형식
+           * 전체 Data URI 형식 사용 필수: `data:image/{형식};base64,{base64데이터}`
+           * 지원 이미지 형식: jpeg, png, webp
+           * 예시: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+           * ⚠️ 주의: `data:image/jpeg;base64,` 접두사 포함 필수, base64 이미지 크기는 10MB 이하
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string">
       이미지 생성 가로세로 비율
 
-      지원하는 가로세로 비율:
+      지원하는 비율:
 
       * `1:1` - 정사각형
       * `3:2` - 가로 3:2
       * `2:3` - 세로 2:3
       * `4:3` - 가로 4:3
       * `3:4` - 세로 3:4
-      * `16:9` - 가로 와이드스크린
-      * `9:16` - 세로 세로 화면
-      * `21:9` - 울트라 와이드스크린
+      * `16:9` - 와이드스크린 가로
+      * `9:16` - 와이드스크린 세로
+      * `21:9` - 울트라 와이드
     </ParamField>
 
     <ParamField body="resolution" type="string" default="2K">
@@ -69,29 +75,29 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
       지원 해상도:
 
-      * `2K` - 2K 해상도(기본값)
-      * `3K` - 3K 고화질 해상도
+      * `2K` - 2K 해상도 (기본값)
+      * `3K` - 3K 고해상도
     </ParamField>
 
     {/* <ParamField body="output_format" type="string" default="jpeg">
-      출력 이미지 포맷
+      출력 이미지 형식
 
-      지원 포맷:
+      지원 형식:
 
-      * `jpeg` - JPEG 포맷(기본값)
-      * `png` - PNG 포맷
+      * `jpeg` - JPEG 형식 (기본값)
+      * `png` - PNG 형식
     </ParamField> */}
 
     <ParamField body="web_search" type="boolean" default="false">
       인터넷 검색 활성화 스위치
 
-      활성화 시 모델이 프롬프트에 따라 인터넷 내용(상품, 날씨 등)을 검색할지 판단하여 생성 품질 향상, 하지만 지연 시간 증가
+      활성화 시 모델이 프롬프트에 따라 스스로 인터넷 내용을 검색(예: 상품, 날씨 등)해 생성 품질 향상, 다만 지연 시간 증가
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="callback_url" type="string">
-  작업 완료 후 콜백 주소
+  작업 완료 후 콜백 URL
 </ParamField>
 
 <ParamField body="metadata" type="object">
@@ -101,7 +107,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="out_task_id" type="string" required>
   요청자 작업 ID
 
-  사용자가 정의한 작업 식별자, 필수
+  사용자 정의 작업 식별자, 필수 입력
 </ParamField>
 
 ## Response

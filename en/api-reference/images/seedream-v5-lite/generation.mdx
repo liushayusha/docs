@@ -27,54 +27,60 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  Model Name
+  Model name
 
   Fixed value: `"seedream_v5_lite"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  Model Parameter Object
+  Model parameters object
 
-  <Expandable title="params Object Properties">
+  <Expandable title="params object properties">
     <ParamField body="prompt" type="string" required>
-      Text Description for Image Generation
+      Text description for image generation
 
-      Unlimited
+      No limitation
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      List of Reference Image URLs for Image-to-Image
+      List of reference image URLs for image-to-image generation
 
-      * Up to 9 images
-      * Supports publicly accessible URLs
+      * Maximum 9 images
+      * Supports the following two formats:
+        1. Publicly accessible URLs
+        2. Base64 encoded format
+           * Must use the full Data URI format: `data:image/{format};base64,{base64 data}`
+           * Supported image formats: jpeg, png, webp
+           * Example: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+           * ⚠️ Note: The prefix `data:image/jpeg;base64,` must be included, base64 image size must not exceed 10MB
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string">
-      Aspect Ratio for Image Generation
+      Aspect ratio for image generation
 
       Supported aspect ratios:
 
       * `1:1` - Square
-      * `3:2` - Horizontal 3:2
-      * `2:3` - Vertical 2:3
-      * `4:3` - Horizontal 4:3
-      * `3:4` - Vertical 3:4
-      * `16:9` - Horizontal widescreen
-      * `9:16` - Vertical portrait
-      * `21:9` - Ultrawide
+      * `3:2` - Landscape 3:2
+      * `2:3` - Portrait 2:3
+      * `4:3` - Landscape 4:3
+      * `3:4` - Portrait 3:4
+      * `16:9` - Landscape widescreen
+      * `9:16` - Portrait vertical
+      * `21:9` - Ultra widescreen
     </ParamField>
 
     <ParamField body="resolution" type="string" default="2K">
-      Image Resolution
+      Image resolution
 
       Supported resolutions:
 
       * `2K` - 2K resolution (default)
-      * `3K` - 3K HD resolution
+      * `3K` - 3K high definition resolution
     </ParamField>
 
     {/* <ParamField body="output_format" type="string" default="jpeg">
-      Output Image Format
+      Output image format
 
       Supported formats:
 
@@ -83,9 +89,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField> */}
 
     <ParamField body="web_search" type="boolean" default="false">
-      Web Search Toggle
+      Web search toggle
 
-      When enabled, the model autonomously decides whether to search the internet for content (e.g., products, weather) based on the prompt, enhancing generation quality but increasing latency
+      When enabled, the model autonomously decides based on the prompt whether to search internet content (such as products, weather, etc.) to enhance generation quality, but this increases latency
     </ParamField>
   </Expandable>
 </ParamField>
@@ -99,7 +105,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  Initiator's Task ID
+  Initiator task ID
 
   User-defined task identifier, required
 </ParamField>

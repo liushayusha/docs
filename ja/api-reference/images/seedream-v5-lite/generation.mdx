@@ -33,44 +33,50 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  モデルパラメータオブジェクト
+  モデルパラメーターオブジェクト
 
   <Expandable title="params オブジェクトのプロパティ">
     <ParamField body="prompt" type="string" required>
-      画像生成用のテキスト説明
+      画像生成のためのテキスト説明
 
       制限なし
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      参照画像の URL リスト、画像生成に使用
+      参考画像のURLリスト、画像から画像への生成に使用
 
-      * 最大 9 枚の画像
-      * 公開アクセス可能な URL に対応
+      * 最大9枚の画像
+      * 以下の2つの形式をサポート：
+        1. 公開アクセス可能なURL
+        2. Base64エンコード形式
+           * 完全なData URI形式を使用する必要があります：`data:image/{フォーマット};base64,{base64データ}`
+           * 対応画像フォーマット：jpeg、png、webp
+           * 例：`data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+           * ⚠️ 注意：`data:image/jpeg;base64,`のプレフィックス部分を必ず含め、base64画像のサイズは10MBを超えないこと
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string">
       画像生成のアスペクト比
 
-      対応するアスペクト比：
+      対応可能なアスペクト比：
 
       * `1:1` - 正方形
-      * `3:2` - 横向き 3:2
-      * `2:3` - 縦向き 2:3
-      * `4:3` - 横向き 4:3
-      * `3:4` - 縦向き 3:4
-      * `16:9` - 横向きワイドスクリーン
-      * `9:16` - 縦向き縦長スクリーン
+      * `3:2` - 横向き3:2
+      * `2:3` - 縦向き2:3
+      * `4:3` - 横向き4:3
+      * `3:4` - 縦向き3:4
+      * `16:9` - 横長ワイドスクリーン
+      * `9:16` - 縦長スクリーン
       * `21:9` - 超ワイドスクリーン
     </ParamField>
 
     <ParamField body="resolution" type="string" default="2K">
-      画像解像度
+      画像の解像度
 
       対応解像度：
 
-      * `2K` - 2K 解像度（デフォルト）
-      * `3K` - 3K 高解像度
+      * `2K` - 2K解像度（デフォルト）
+      * `3K` - 3K高解像度
     </ParamField>
 
     {/* <ParamField body="output_format" type="string" default="jpeg">
@@ -78,20 +84,20 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
       対応フォーマット：
 
-      * `jpeg` - JPEG フォーマット（デフォルト）
-      * `png` - PNG フォーマット
+      * `jpeg` - JPEGフォーマット（デフォルト）
+      * `png` - PNGフォーマット
     </ParamField> */}
 
     <ParamField body="web_search" type="boolean" default="false">
-      インターネット検索のオン/オフ
+      ウェブ検索のオン/オフ
 
-      有効にすると、モデルはプロンプトに基づいてインターネット内容（商品、天気など）の検索を自動判断し、生成の質を向上させますが、遅延が増加します
+      有効にするとモデルはプロンプトに基づきインターネットの内容（商品、天気など）を自動で検索するか判断し、生成結果を向上させますが、処理遅延が増えます
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="callback_url" type="string">
-  タスク完了後のコールバック URL
+  タスク完了後のコールバックURL
 </ParamField>
 
 <ParamField body="metadata" type="object">
@@ -99,9 +105,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発信者タスク ID
+  発行者側タスクID
 
-  ユーザー定義のタスク識別子、必須
+  ユーザー定義のタスク識別子で必須項目
 </ParamField>
 
 ## Response

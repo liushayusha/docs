@@ -26,10 +26,10 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  モデル名。以下のチャネルバージョンをサポートします（チャネルはサービスの安定性にのみ影響し、出力品質には影響しません）：
+  モデル名。以下のチャネルバージョンをサポートしています（チャネルはサービスの安定性にのみ影響し、出力品質には影響しません）：
 
   * `"gpt_4o"` - デフォルト
-  * `"gpt_4o_base"` - ベーシック版
+  * `"gpt_4o_base"` - ベース版
   * `"gpt_4o_plus"` - 強化版
   * `"gpt_4o_advanced"` - アドバンス版
 </ParamField>
@@ -37,7 +37,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="params" type="object" required>
   モデルパラメータオブジェクト
 
-  <Expandable title="params オブジェクトのプロパティ">
+  <Expandable title="params オブジェクトの属性">
     <ParamField body="prompt" type="string" required>
       画像生成のテキスト説明
 
@@ -45,28 +45,34 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      画像生成に使用する参考画像のURL
+      参考画像の URL。画像から画像を生成するために使用します。
 
-      * 単一画像のみ対応
-      * 公開アクセス可能なURLをサポート
+      * 単一の画像のみ対応
+      * 以下の2つのフォーマットをサポート：
+        1. 公開アクセス可能な URL
+        2. Base64 エンコードフォーマット
+           * 完全な Data URI 形式である必要があります：`data:image/{フォーマット};base64,{base64データ}`
+           * 対応画像フォーマット：jpeg、png、webp
+           * 例：`data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+           * ⚠️ 注意：`data:image/jpeg;base64,` プレフィックスを必ず含むこと。base64 画像サイズは 10MB を超えないこと
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string">
       画像生成のアスペクト比
 
-      サポートされるアスペクト比：
+      対応アスペクト比：
 
       * `1:1` - 正方形
-      * `3:2` - 横向き3:2
-      * `2:3` - 縦向き2:3
+      * `3:2` - 横向き 3:2
+      * `2:3` - 縦向き 2:3
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発起者のタスクID
+  発信側タスクID
 
-  ユーザー定義のタスク識別子、必須
+  ユーザー定義のタスク識別子。必須
 </ParamField>
 
 ## Response

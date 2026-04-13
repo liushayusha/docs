@@ -26,12 +26,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  モデル名、以下のチャンネルバージョンをサポートしています（チャンネルはサービスの安定性にのみ影響し、出力品質には影響しません）：
+  モデル名。以下のチャンネルバージョンをサポートします（チャンネルはサービスの安定性にのみ影響し、出力の品質には影響しません）：
 
   * `"nano_banana_v2"` - デフォルト
-  * `"nano_banana_v2_base"` - ベース版
-  * `"nano_banana_v2_plus"` - 強化版
-  * `"nano_banana_v2_max"` - フラグシップ版
+  * `"nano_banana_v2_base"` - 基本版
+  * `"nano_banana_v2_plus"` - 拡張版
+  * `"nano_banana_v2_max"` - フラッグシップ版
 </ParamField>
 
 <ParamField body="params" type="object" required>
@@ -45,10 +45,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      画像生成の参照用画像のURLリスト
+      参考画像のURLリスト。画像から画像への生成に使用
 
       * 最大8枚の画像
-      * 公開アクセス可能なURLをサポート
+      * 以下の2つの形式をサポート：
+        1. 公開アクセス可能なURL
+        2. Base64エンコード形式
+           * 完全なData URI形式を使用する必要があります：`data:image/{フォーマット};base64,{base64データ}`
+           * 対応画像フォーマット：jpeg、png、webp
+           * 例：`data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+           * ⚠️ 注意：`data:image/jpeg;base64,`のプレフィックス部分を含める必要があります。base64画像のサイズは10MBを超えないこと
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string">
@@ -58,14 +64,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
       * `auto` - 自動
       * `1:1` - 正方形
-      * `3:2` - 横向き3:2
-      * `2:3` - 縦向き2:3
-      * `4:3` - 横向き4:3
-      * `3:4` - 縦向き3:4
-      * `5:4` - 横向き5:4
-      * `4:5` - 縦向き4:5
-      * `16:9` - 横向きワイドスクリーン
-      * `9:16` - 縦向き縦型スクリーン
+      * `3:2` - 横長3:2
+      * `2:3` - 縦長2:3
+      * `4:3` - 横長4:3
+      * `3:4` - 縦長3:4
+      * `5:4` - 横長5:4
+      * `4:5` - 縦長4:5
+      * `16:9` - 横長ワイドスクリーン
+      * `9:16` - 縦長ポートレート
       * `21:9` - 超ワイドスクリーン
     </ParamField>
 
@@ -83,9 +89,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発注者のタスクID
+  発注側タスクID
 
-  ユーザー定義のタスク識別子、必須
+  ユーザーがカスタムで指定するタスク識別子。必須
 </ParamField>
 
 ## Response

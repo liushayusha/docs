@@ -28,7 +28,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="model" type="string" required>
   모델 이름
 
-  고정값: `"seedream_v4_5"`
+  고정 값: `"seedream_v4_5"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
@@ -42,16 +42,22 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      참고 이미지 URL 목록, 이미지 변환용
+      참조 이미지 URL 리스트, 이미지 생성용
 
       * 최대 9장 이미지
-      * 공개 접근 가능한 URL 지원
+      * 다음 두 가지 형식 지원:
+        1. 공개 접근 가능한 URL
+        2. Base64 인코딩 형식
+           * 반드시 완전한 Data URI 형식을 사용해야 함: `data:image/{포맷};base64,{base64데이터}`
+           * 지원 이미지 포맷: jpeg, png, webp
+           * 예시: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+           * ⚠️ 주의: `data:image/jpeg;base64,` 접두사를 반드시 포함해야 하며, base64 이미지 크기는 10MB 이하로 제한됨
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string">
       이미지 생성 가로세로 비율
 
-      지원하는 비율:
+      지원되는 비율:
 
       * `1:1` - 정사각형
       * `3:2` - 가로 3:2
@@ -60,9 +66,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       * `3:4` - 세로 3:4
       * `5:4` - 가로 5:4
       * `4:5` - 세로 4:5
-      * `16:9` - 가로 와이드스크린
-      * `9:16` - 세로 와이드스크린
-      * `21:9` - 울트라 와이드스크린
+      * `16:9` - 와이드 가로 화면
+      * `9:16` - 세로 화면
+      * `21:9` - 울트라 와이드 화면
     </ParamField>
 
     <ParamField body="resolution" type="string" default="basic">

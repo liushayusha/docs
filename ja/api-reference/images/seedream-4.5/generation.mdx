@@ -42,10 +42,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      画像生成のためのリファレンス画像のURLリスト
+      参照画像のURLリスト（画像から画像への生成用）
 
       * 最大9枚の画像
-      * 公開アクセス可能なURLをサポート
+      * 以下の2つの形式をサポート：
+        1. 公開アクセス可能なURL
+        2. Base64エンコード形式
+           * 完全なData URI形式を使用する必要があります：`data:image/{format};base64,{base64_data}`
+           * サポートされる画像フォーマット：jpeg、png、webp
+           * 例：`data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+           * ⚠️ 注意：`data:image/jpeg;base64,`というプレフィックスが必須で、base64画像サイズは10MB以下であること
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string">
@@ -54,14 +60,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       サポートされるアスペクト比：
 
       * `1:1` - 正方形
-      * `3:2` - 横向き3:2
-      * `2:3` - 縦向き2:3
-      * `4:3` - 横向き4:3
-      * `3:4` - 縦向き3:4
-      * `5:4` - 横向き5:4
-      * `4:5` - 縦向き4:5
-      * `16:9` - 横向きワイドスクリーン
-      * `9:16` - 縦向き縦長画面
+      * `3:2` - 横長 3:2
+      * `2:3` - 縦長 2:3
+      * `4:3` - 横長 4:3
+      * `3:4` - 縦長 3:4
+      * `5:4` - 横長 5:4
+      * `4:5` - 縦長 4:5
+      * `16:9` - 横長ワイドスクリーン
+      * `9:16` - 縦長ワイドスクリーン
       * `21:9` - 超ワイドスクリーン
     </ParamField>
 
@@ -77,7 +83,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発行者タスクID
+  発行元タスクID
 
   ユーザー定義のタスク識別子、必須
 </ParamField>

@@ -38,26 +38,32 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     <ParamField body="prompt" type="string" required>
       Text description for image generation
 
-      No limitations
+      No limit
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      List of reference image URLs for image-to-image
+      List of URLs for reference images, used for image-to-image generation
 
       * Up to 9 images
-      * Supports publicly accessible URLs
+      * Supports the following two formats:
+        1. Publicly accessible URLs
+        2. Base64 encoded format
+           * Must use complete Data URI format: `data:image/{format};base64,{base64 data}`
+           * Supported image formats: jpeg, png, webp
+           * Example: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+           * ⚠️ Note: Must include the prefix `data:image/jpeg;base64,`, base64 image size must not exceed 10MB
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string">
       Aspect ratio for image generation
 
-      Supported ratios:
+      Supported aspect ratios:
 
-      * `1:1` - Square
-      * `16:9` - Landscape widescreen
-      * `9:16` - Portrait vertical
-      * `4:3` - Landscape 4:3
-      * `3:4` - Portrait 3:4
+      * `1:1` - square
+      * `16:9` - horizontal widescreen
+      * `9:16` - vertical portrait
+      * `4:3` - horizontal 4:3
+      * `3:4` - vertical 3:4
     </ParamField>
 
     <ParamField body="resolution" type="string" default="1K">
@@ -65,9 +71,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
       Supported resolutions:
 
-      * `1K` - Basic resolution (default)
-      * `2K` - Standard resolution
-      * `4K` - High definition resolution
+      * `1K` - basic resolution (default)
+      * `2K` - standard resolution
+      * `4K` - high definition resolution
     </ParamField>
 
     <ParamField body="output_n" type="string" default="1">
@@ -75,9 +81,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
       Supported values:
 
-      * `1` - Generate 1 image (default)
-      * `2` - Generate 2 images
-      * `4` - Generate 4 images
+      * `1` - generate 1 image (default)
+      * `2` - generate 2 images
+      * `4` - generate 4 images
     </ParamField>
   </Expandable>
 </ParamField>

@@ -26,7 +26,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  Model name, supporting the following channel versions (channels only affect service stability, not output quality):
+  The model name, supporting the following channel versions (channels only affect service stability, not output quality):
 
   * `"nano_banana_pro"` - Default
   * `"nano_banana_pro_base"` - Basic version
@@ -36,7 +36,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  Model parameters object
+  Model parameter object
 
   <Expandable title="params Object Properties">
     <ParamField body="prompt" type="string" required>
@@ -46,14 +46,20 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      List of URLs for reference images, used for image-to-image
+      List of reference image URLs for image-to-image generation
 
       * Up to 8 images
-      * Support publicly accessible URLs
+      * Supports the following two formats:
+        1. Publicly accessible URLs
+        2. Base64 encoded format
+           * Must use full Data URI format: `data:image/{format};base64,{base64 data}`
+           * Supported image formats: jpeg, png, webp
+           * Example: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+           * ⚠️ Note: The `data:image/jpeg;base64,` prefix is required, base64 image size must not exceed 10MB
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string">
-      Aspect ratio for image generation
+      Aspect ratio of the generated image
 
       Supported aspect ratios:
 
@@ -65,9 +71,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       * `3:4` - Portrait 3:4
       * `5:4` - Landscape 5:4
       * `4:5` - Portrait 4:5
-      * `16:9` - Landscape widescreen
-      * `9:16` - Portrait vertical screen
-      * `21:9` - Ultra widescreen
+      * `16:9` - Widescreen landscape
+      * `9:16` - Widescreen portrait
+      * `21:9` - Ultra wide screen
     </ParamField>
 
     <ParamField body="resolution" type="string" default="1K">

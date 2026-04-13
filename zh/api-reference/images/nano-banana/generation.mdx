@@ -49,7 +49,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       参考图像的 URL 列表，用于图生图
 
       * 最多 9 张图片
-      * 支持公开可访问的 URL
+      * 支持以下两种格式：
+        1. 公开可访问的 URL
+        2. Base64 编码格式
+           * 必须使用完整的 Data URI 格式：`data:image/{格式};base64,{base64数据}`
+           * 支持的图片格式：jpeg、png、webp
+           * 示例：`data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+           * ⚠️ 注意：必须包含 `data:image/jpeg;base64,` 前缀部分，base64 图片大小不超过 10MB
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string">

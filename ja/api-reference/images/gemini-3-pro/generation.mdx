@@ -26,13 +26,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  モデル名、以下のチャンネルバージョンをサポートしています（チャンネルはサービスの安定性にのみ影響し、出力品質には影響しません）：
+  モデル名。以下のチャネルバージョンをサポート（チャネルはサービスの安定性にのみ影響し、出力品質には影響しません）：
 
   * `"nano_banana_pro"` - デフォルト
-  * `"nano_banana_pro_base"` - ベース版
-  * `"nano_banana_pro_plus"` - 強化版
-  * `"nano_banana_pro_advanced"` - 高度版
-  * `"nano_banana_pro_max"` - フラッグシップ版
+  * `"nano_banana_pro_base"` - ベーシックバージョン
+  * `"nano_banana_pro_plus"` - 拡張バージョン
+  * `"nano_banana_pro_advanced"` - アドバンストバージョン
+  * `"nano_banana_pro_max"` - フラッグシップバージョン
 </ParamField>
 
 <ParamField body="params" type="object" required>
@@ -40,53 +40,59 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   <Expandable title="params オブジェクトのプロパティ">
     <ParamField body="prompt" type="string" required>
-      画像生成のテキスト説明
+      画像生成のテキスト記述
 
-      無制限
+      制限なし
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      画像生成の参照用画像のURLリスト
+      参考画像のURLリスト。画像生成用
 
       * 最大8枚の画像
-      * 公開アクセス可能なURLをサポート
+      * 以下の2形式をサポート：
+        1. 公開アクセス可能なURL
+        2. Base64エンコード形式
+           * 完全なData URI形式を使用する必要があります：`data:image/{フォーマット};base64,{base64データ}`
+           * 対応画像フォーマット：jpeg、png、webp
+           * 例：`data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+           * ⚠️ 注意：`data:image/jpeg;base64,`のプレフィックスを含める必要があり、base64画像のサイズは10MBを超えないこと
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string">
       画像生成のアスペクト比
 
-      サポートされているアスペクト比：
+      対応アスペクト比：
 
       * `auto` - 自動
       * `1:1` - 正方形
-      * `3:2` - 横向き3:2
-      * `2:3` - 縦向き2:3
-      * `4:3` - 横向き4:3
-      * `3:4` - 縦向き3:4
-      * `5:4` - 横向き5:4
-      * `4:5` - 縦向き4:5
-      * `16:9` - 横向きワイドスクリーン
-      * `9:16` - 縦向き縦画面
+      * `3:2` - 横方向 3:2
+      * `2:3` - 縦方向 2:3
+      * `4:3` - 横方向 4:3
+      * `3:4` - 縦方向 3:4
+      * `5:4` - 横方向 5:4
+      * `4:5` - 縦方向 4:5
+      * `16:9` - 横長ワイドスクリーン
+      * `9:16` - 縦長スクリーン
       * `21:9` - 超ワイドスクリーン
     </ParamField>
 
     <ParamField body="resolution" type="string" default="1K">
       画像解像度
 
-      サポートされている解像度：
+      対応解像度：
 
       * `1K` - 基本解像度（デフォルト）
       * `2K` - 標準解像度
-      * `4K` - 高画質解像度
+      * `4K` - 高解像度
     </ParamField>
     
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発行者のタスクID
+  発信者タスクID
 
-  ユーザー定義のタスク識別子、必須
+  ユーザーが定義するタスク識別子、必須
 </ParamField>
 
 ## Response
