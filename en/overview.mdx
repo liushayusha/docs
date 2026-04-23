@@ -103,16 +103,16 @@ When using, simply replace the model name with the corresponding channel version
 
 ## Supported Models
 
-### Text Chat Series
+### Text Dialogue Series
 
-Compatible with OpenAI Chat Completions API and Responses API, supporting multi-turn conversations, tool calls, structured outputs, and streaming responses:
+Compatible with OpenAI Chat Completions API and Responses API, supports multi-turn dialogues, tool calls, structured outputs, and streaming responses:
 
 <CardGroup cols={2}>
   <Card title="OpenAI Chat Completions API" icon="message" href="/en/api-reference/text/openai-chat-completions-api/endpoint">
     Compatible with OpenAI SDK, supports GPT, Claude, and other models
   </Card>
   <Card title="OpenAI Responses API" icon="message" href="/en/api-reference/text/openai-responses-api/endpoint">
-    OpenAI’s latest Responses format
+    OpenAI's latest Responses format
   </Card>
   <Card title="Claude Messages API" icon="message" href="/en/api-reference/text/claude-messages-api/endpoint">
     Anthropic native Messages API format
@@ -125,13 +125,16 @@ AIReiter provides various image generation models, supporting text-to-image and 
 
 <CardGroup cols={2}>
   <Card title="GPT-4o Image" icon="image" href="/en/api-reference/images/gpt-4o/generation">
-    OpenAI’s high-quality image generation model
+    OpenAI's high-quality image generation model
+  </Card>
+  <Card title="GPT-Image-2" icon="image" href="/en/api-reference/images/gpt-image-2/generation">
+    Supports text-to-image / image-to-image, 13 aspect ratios, up to 16 reference images
   </Card>
   <Card title="Gemini-2.5-Flash (Nano banana)" icon="image" href="/en/api-reference/images/nano-banana/generation">
-    Google’s latest fast image generation model
+    Google's latest fast image generation model
   </Card>
   <Card title="Gemini-3-Pro (Nano banana pro)" icon="image" href="/en/api-reference/images/gemini-3-pro/generation">
-    Google professional-grade image generation model
+    Google's professional-grade image generation model
   </Card>
   <Card title="Nano Banana V2" icon="image" href="/en/api-reference/images/nano-banana-v2/generation">
     Supports multiple generation modes including text-to-image, image-to-image, and image editing
@@ -143,7 +146,7 @@ AIReiter provides various image generation models, supporting text-to-image and 
     Seedream version 4.5
   </Card>
   <Card title="Seedream V5 lite" icon="image" href="/en/api-reference/images/seedream-v5-lite/generation">
-    Seedream latest version, supports internet-enhanced generation
+    Latest Seedream version, supports web-enhanced generation
   </Card>
 </CardGroup>
 
@@ -165,13 +168,13 @@ Supports text-to-video and image-to-video generation, offering multiple resoluti
     VEO3.1 fast version
   </Card>
   <Card title="Seedance-1.5-pro" icon="video" href="/en/api-reference/videos/seedance-1-5-pro/generation">
-    Supports start and end frame control and audio generation (4-12 seconds)
+    Supports start/end frame control and audio generation (4-12 seconds)
   </Card>
   <Card title="Seedance Pro Fast" icon="video" href="/en/api-reference/videos/seedance_pro_fast/generation">
     Seedance fast version, supports start frame control
   </Card>
   <Card title="Seedance Pro" icon="video" href="/en/api-reference/videos/seedance_pro/generation">
-    Seedance professional edition, supports start and end frame control
+    Seedance professional edition, supports start/end frame control
   </Card>
   <Card title="Seedance 2.0" icon="video" href="/en/api-reference/videos/seedance2/generation">
     Supports multiple reference images, reference videos, and start/end frame control (4-15 seconds)

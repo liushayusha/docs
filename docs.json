@@ -52,6 +52,13 @@
                 ]
               },
               {
+                "group": "GPT-Image-2",
+                "icon": "image",
+                "pages": [
+                  "zh/api-reference/images/gpt-image-2/generation"
+                ]
+              },
+              {
                 "group": "Seedream-4.0",
                 "icon": "image",
                 "pages": [
@@ -222,6 +229,13 @@
                 ]
               },
               {
+                "group": "GPT-Image-2",
+                "icon": "image",
+                "pages": [
+                  "en/api-reference/images/gpt-image-2/generation"
+                ]
+              },
+              {
                 "group": "Seedream-4.0",
                 "icon": "image",
                 "pages": [
@@ -351,6 +365,13 @@
                 ]
               },
               {
+                "group": "GPT-Image-2",
+                "icon": "image",
+                "pages": [
+                  "ja/api-reference/images/gpt-image-2/generation"
+                ]
+              },
+              {
                 "group": "Seedream-4.0",
                 "icon": "image",
                 "pages": [
@@ -477,6 +498,13 @@
                 "icon": "image",
                 "pages": [
                   "ko/api-reference/images/gpt-4o/generation"
+                ]
+              },
+              {
+                "group": "GPT-Image-2",
+                "icon": "image",
+                "pages": [
+                  "ko/api-reference/images/gpt-image-2/generation"
                 ]
               },
               {

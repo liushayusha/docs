@@ -24,33 +24,33 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## 요청 본문 파라미터
 
 <ParamField body="model" type="string" required>
-  사용하려는 모델 이름입니다. 예: `claude-sonnet-4-5-20250929`, `gpt-4o`.
+  사용할 모델 이름입니다. 예: `gpt-4o`, `gpt-5.4` 등.
 
-  전체 모델 목록은 `GET /api/v1/models`를 통해 확인할 수 있습니다.
+  전체 모델 목록은 `GET /api/v1/models`로 확인할 수 있습니다.
 </ParamField>
 
 <ParamField body="input" type="array" required>
   입력 내용 목록
 
-  입력 배열이며, 각 입력 항목은 `role`과 `content` 두 필드를 포함합니다. 다중 회차 대화 및 다중 모달(텍스트+이미지) 내용을 지원합니다.
+  입력 배열로, 각 항목은 `role`과 `content` 두 필드를 포함합니다. 다중 대화 및 다중 모달 콘텐츠(텍스트+이미지)를 지원합니다.
 
   <Expandable title="상세 필드 설명">
     <ParamField body="role" type="string" required default="user">
       메시지 역할
 
-      선택 값: `user`(사용자 메시지), `assistant`(AI 응답, 다중 회차 대화용), `system`(시스템 프롬프트)
+      선택 가능한 값: `user`(사용자 메시지), `assistant`(AI 답변, 다중 대화용), `system`(시스템 프롬프트)
     </ParamField>
 
     <ParamField body="content" type="array" required>
-      내용 배열
+      콘텐츠 배열
 
-      다양한 유형의 콘텐츠 블록을 포함할 수 있으며, 텍스트와 이미지를 포함할 수 있습니다.
+      다양한 유형의 콘텐츠 블록을 지원하며 텍스트와 이미지를 포함할 수 있습니다.
 
-      <Expandable title="내용 블록 타입">
+      <Expandable title="콘텐츠 블록 유형">
         <ParamField body="type" type="string" required>
-          내용 유형
+          콘텐츠 유형
 
-          선택 값:
+          선택 가능한 값:
 
           * `input_text`: 텍스트 입력
           * `input_image`: 이미지 입력
@@ -69,16 +69,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
           두 가지 형식을 지원합니다:
 
-          **1. 전체 이미지 URL 주소**
+          **1. 완전한 이미지 URL 주소**
 
-          * 공개 접근 가능한 이미지 URL(http\:// 또는 https\://)
+          * 공개 액세스 가능한 이미지 URL(http\:// 또는 https\://)
           * 예시: `https://example.com/image.jpg`
 
           **2. Base64 인코딩 형식**
 
           * **완전한 Data URI 형식을 반드시 사용해야 합니다**
-          * 형식: `data:image/{포맷};base64,{base64 데이터}`
-          * 지원하는 이미지 포맷: jpeg, png, gif, webp
+          * 형식: `data:image/{형식};base64,{base64 데이터}`
+          * 지원 이미지 형식: jpeg, png, gif, webp
           * 예시: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
           * 주의: `data:image/jpeg;base64,` 접두사가 반드시 포함되어야 합니다.
         </ParamField>
@@ -88,40 +88,40 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="instructions" type="string">
-  시스템 프롬프트(System Prompt)입니다. 모델의 동작 원칙, 역할 또는 문맥 배경을 설정하는 데 사용됩니다.
+  시스템 프롬프트(System Prompt)입니다. 모델의 동작 원칙, 역할 아이덴티티 또는 컨텍스트 배경을 설정하는 데 사용됩니다.
 
-  메시지 배열 중 `role: "system"` 메시지와 동일한 역할을 합니다.
+  메시지 배열 내에서 `role: "system"`에 해당하는 메시지와 동일합니다.
 </ParamField>
 
 <ParamField body="stream" type="boolean" default="true">
-  스트리밍 출력 활성화 여부.
+  스트리밍 출력을 활성화할지 여부입니다.
 
-  - `true`(기본값): SSE 이벤트 스트림 방식으로 토큰 별로 반환되어 실시간 표시용으로 적합
-  - `false`: 전체 응답을 대기 후 한 번에 반환, 배치 처리에 적합
+  - `true`(기본값): SSE 이벤트 스트림 방식으로 토큰 단위로 반환되어 실시간 표시용으로 적합합니다.
+  - `false`: 전체 응답을 기다렸다가 한 번에 반환하며, 배치 처리에 적합합니다.
 </ParamField>
 
 <ParamField body="max_output_tokens" type="integer">
-  생성할 응답의 최대 토큰 수입니다. 제한을 초과하면 응답 `status`가 `"incomplete"`, `incomplete_details.reason`이 `"max_output_tokens"`로 반환됩니다.
+  생성되는 응답의 최대 토큰 수입니다. 제한을 초과하면 응답 `status`가 `"incomplete"`가 되고, `incomplete_details.reason`은 `"max_output_tokens"`가 됩니다.
 </ParamField>
 
 <ParamField body="temperature" type="number">
-  샘플링 온도, 범위 `0` ~ `2`입니다. 값이 높을수록 출력이 더 무작위적이고, 낮을수록 더 결정적입니다. `temperature`와 `top_p`를 동시에 변경하는 것은 권장하지 않습니다.
+  샘플링 온도, 범위 `0` ~ `2`. 값이 높을수록 출력이 더 무작위적이며, 값이 낮을수록 결정적입니다. `temperature`와 `top_p`를 동시에 수정하는 것은 권장하지 않습니다.
 </ParamField>
 
 <ParamField body="top_p" type="number">
-  핵 샘플링 확률, 범위 `0` ~ `1`입니다. 모델은 누적 확률이 `top_p`에 도달한 토큰 집합에서만 샘플링합니다.
+  핵심 샘플링 확률, 범위 `0` ~ `1`. 모델은 누적 확률이 `top_p`에 도달하는 토큰 범위 내에서만 샘플링합니다.
 </ParamField>
 
 <ParamField body="tools" type="array">
-  모델이 호출할 수 있는 도구 목록입니다. 현재는 `type: "function"` 유형만 지원하며, `web_search`, `file_search`, `computer_use` 등의 내장 도구는 지원하지 않습니다.
+  모델이 호출 가능한 도구 목록입니다. 현재 `type: "function"` 유형만 지원하며, `web_search`, `file_search`, `computer_use` 등 내장 도구는 지원하지 않습니다.
 
   <Expandable title="function 도구 형식">
     <ParamField body="type" type="string" required>
-      고정 값 `"function"`
+      고정값 `"function"`
     </ParamField>
 
     <ParamField body="name" type="string" required>
-      함수 이름으로, `^[a-zA-Z0-9_-]{1,64}$` 패턴을 따라야 합니다.
+      함수 이름이며, `^[a-zA-Z0-9_-]{1,64}$` 형식을 준수해야 합니다.
     </ParamField>
 
     <ParamField body="description" type="string">
@@ -129,7 +129,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="parameters" type="object">
-      파라미터 정의로, JSON Schema 형식을 준수합니다.
+      파라미터 정의이며, JSON Schema 형식을 준수합니다.
     </ParamField>
   </Expandable>
 </ParamField>
@@ -137,18 +137,18 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="tool_choice" type="string | object" default="auto">
   도구 호출 정책:
 
-  - `"auto"`: 모델이 도구 호출 여부를 자동 결정함
+  - `"auto"`: 모델이 자동으로 도구 호출 여부를 결정합니다.
   - `"none"`: 도구 호출 금지
-  - `"required"`: 최소 한 개 도구를 반드시 호출
-  - `{ "type": "function", "name": "function_name" }`: 지정한 도구를 강제로 호출
+  - `"required"`: 최소 한 개 도구 호출 강제
+  - `{ "type": "function", "name": "function_name" }`: 지정한 도구 호출 강제
 </ParamField>
 
 <ParamField body="parallel_tool_calls" type="boolean" default="true">
-  모델이 여러 도구를 병렬로 호출할 수 있는지 여부. `tools`가 제공된 경우에만 유효합니다.
+  모델이 여러 도구를 병렬로 호출할 수 있는지 여부입니다. `tools`가 제공된 경우에만 유효합니다.
 </ParamField>
 
 <ParamField body="text" type="object">
-  출력 형식 제어입니다.
+  출력 형식 제어.
 
   <Expandable title="text 객체">
     <ParamField body="format" type="object">
@@ -157,23 +157,23 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           출력 형식 유형:
           - `"text"`: 일반 텍스트(기본값)
           - `"json_object"`: JSON 형식
-          - `"json_schema"`: 지정된 스키마에 부합하는 JSON
+          - `"json_schema"`: 지정된 스키마를 준수하는 JSON
         </ParamField>
 
         <ParamField body="name" type="string">
-          스키마 이름 (`json_schema`일 때만 유효)
+          스키마 이름(`json_schema`일 때만 유효)
         </ParamField>
 
         <ParamField body="description" type="string">
-          스키마 설명 (`json_schema`일 때만 유효)
+          스키마 설명(`json_schema`일 때만 유효)
         </ParamField>
 
         <ParamField body="strict" type="boolean" default="true">
-          스키마 준수 엄격 여부 (`json_schema`일 때만 유효)
+          스키마 엄격 준수 여부(`json_schema`일 때만 유효)
         </ParamField>
 
         <ParamField body="schema" type="object">
-          JSON 스키마 정의 (`json_schema`일 때 필수)
+          JSON Schema 정의(`json_schema`일 때 필수)
         </ParamField>
       </Expandable>
     </ParamField>
@@ -181,7 +181,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="reasoning" type="object">
-  추론 모드 구성 (추론을 지원하는 모델, 예: `gpt-5.2` 이상에 적용).
+  추론 모드 구성(예: `gpt-5.2` 이상 지원 모델에 적용).
 
   <Expandable title="reasoning 객체">
     <ParamField body="effort" type="string">

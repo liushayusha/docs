@@ -105,27 +105,30 @@ curl --request POST \
 
 ### テキスト対話シリーズ
 
-OpenAI Chat Completions API と Responses API に対応し、多段対話、ツール呼び出し、構造化出力、ストリーミングレスポンスをサポート：
+OpenAI Chat Completions APIおよびResponses APIに対応し、多段階対話、ツール呼び出し、構造化出力、ストリーミングレスポンスをサポート：
 
 <CardGroup cols={2}>
   <Card title="OpenAI Chat Completions API" icon="message" href="/en/api-reference/text/openai-chat-completions-api/endpoint">
-    OpenAI SDK に対応し、GPT、Claude などのモデルをサポート
+    OpenAI SDKに対応し、GPT、Claudeなどのモデルをサポート
   </Card>
   <Card title="OpenAI Responses API" icon="message" href="/en/api-reference/text/openai-responses-api/endpoint">
     OpenAI最新のResponsesフォーマット
   </Card>
   <Card title="Claude Messages API" icon="message" href="/en/api-reference/text/claude-messages-api/endpoint">
-    Anthropic ネイティブのMessages APIフォーマット
+    AnthropicネイティブのMessages APIフォーマット
   </Card>
 </CardGroup>
 
 ### 画像生成シリーズ
 
-AIReiterは複数の画像生成モデルを提供し、テキストから画像生成や画像から画像生成機能をサポート：
+AIReiterは様々な画像生成モデルを提供し、テキスト画像生成と画像から画像生成の機能をサポート：
 
 <CardGroup cols={2}>
   <Card title="GPT-4o Image" icon="image" href="/en/api-reference/images/gpt-4o/generation">
     OpenAIの高品質画像生成モデル
+  </Card>
+  <Card title="GPT-Image-2" icon="image" href="/en/api-reference/images/gpt-image-2/generation">
+    テキストから画像、画像から画像をサポート、13種類の比率、参考画像最大16枚
   </Card>
   <Card title="Gemini-2.5-Flash (Nano banana)" icon="image" href="/en/api-reference/images/nano-banana/generation">
     Googleの最新高速画像生成モデル
@@ -140,44 +143,44 @@ AIReiterは複数の画像生成モデルを提供し、テキストから画像
     効率的な画像生成ソリューション
   </Card>
   <Card title="Seedream-4.5" icon="image" href="/en/api-reference/images/seedream-4.5/generation">
-    Seedream 4.5 バージョン
+    Seedream 4.5バージョン
   </Card>
   <Card title="Seedream V5 lite" icon="image" href="/en/api-reference/images/seedream-v5-lite/generation">
-    Seedream最新バージョン、ネット検索による生成強化をサポート
+    Seedream最新バージョン、ネット検索による強化生成をサポート
   </Card>
 </CardGroup>
 
 ### 動画生成シリーズ
 
-テキストから動画生成と画像から動画生成をサポートし、複数の解像度や長さのオプションを提供：
+テキストから動画生成および画像から動画生成をサポートし、多様な解像度と長さの選択肢を提供：
 
 <CardGroup cols={2}>
   <Card title="Sora2" icon="video" href="/en/api-reference/videos/sora2/generation">
-    OpenAI Sora2 動画生成モデル（10〜15秒）
+    OpenAI Sora2動画生成モデル（10～15秒）
   </Card>
   <Card title="Sora2 Pro" icon="video" href="/en/api-reference/videos/sora2-pro/generation">
-    Sora2 プロ版、HD解像度をサポート
+    Sora2プロ版、高解像度をサポート
   </Card>
   <Card title="VEO3.1" icon="video" href="/en/api-reference/videos/veo3-1/generation">
-    Google VEO3.1 動画生成モデル
+    Google VEO3.1動画生成モデル
   </Card>
   <Card title="VEO3.1 Fast" icon="video" href="/en/api-reference/videos/veo3-1-fast/generation">
-    VEO3.1 高速版
+    VEO3.1高速版
   </Card>
   <Card title="Seedance-1.5-pro" icon="video" href="/en/api-reference/videos/seedance-1-5-pro/generation">
-    最初と最後のフレーム制御及び音声生成をサポート（4〜12秒）
+    前後フレーム制御と音声生成をサポート（4～12秒）
   </Card>
   <Card title="Seedance Pro Fast" icon="video" href="/en/api-reference/videos/seedance_pro_fast/generation">
-    Seedance 高速版、最初のフレーム制御をサポート
+    Seedance高速版、初フレーム制御をサポート
   </Card>
   <Card title="Seedance Pro" icon="video" href="/en/api-reference/videos/seedance_pro/generation">
-    Seedance プロ版、最初と最後のフレーム制御をサポート
+    Seedanceプロ版、前後フレーム制御をサポート
   </Card>
   <Card title="Seedance 2.0" icon="video" href="/en/api-reference/videos/seedance2/generation">
-    複数参照画像、参照動画、最初と最後のフレーム制御をサポート（4〜15秒）
+    複数参考画像、参考動画、前後フレーム制御をサポート（4～15秒）
   </Card>
   <Card title="Seedance 2.0 Fast" icon="video" href="/en/api-reference/videos/seedance2_fast/generation">
-    Seedance 2.0 高速版、複数参照画像と最初と最後のフレーム制御をサポート
+    Seedance 2.0高速版、複数参考画像と前後フレーム制御をサポート
   </Card>
 </CardGroup>
 

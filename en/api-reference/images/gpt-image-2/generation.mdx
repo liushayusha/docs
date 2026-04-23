@@ -1,0 +1,603 @@
+---
+title: 'GPT-Image-2 Image Generation'
+description: |
+    - Asynchronous processing mode, returns a task ID for subsequent queries
+    - Based on OpenAI Images compatibility protocol, supports text-to-image and image-to-image
+    - Supports 13 image aspect ratios, passed via the aspect_ratio field
+    - Up to 16 reference images, supports mixed input of URLs and base64
+    - Submitted prompts undergo platform sensitive word and security review; violating content will be rejected directly
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  All endpoints require authentication using a Bearer Token.
+
+  Get the API Key:
+
+  Visit the <a href={apiKeyUrl} target="_blank">API Key Management Page</a> to obtain your API Key.
+
+  Add the following header in the request:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  Model name
+
+  Fixed value: `"gpt_image_2"`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  Model parameter object
+
+  <Expandable title="params object properties">
+    <ParamField body="prompt" type="string" required>
+      Text description for image generation
+
+      * Supports Chinese and English, detailed description is recommended
+      * Will be reviewed for sensitive words / safety before submission; if violations are detected, an error will be returned immediately
+    </ParamField>
+
+    <ParamField body="image_url" type="string[]">
+      Reference image array; if provided, image-to-image generation mode is activated
+
+      * Up to 16 reference images
+      * Supports the following two formats:
+        1. Publicly accessible URL
+        2. Base64 encoded format
+           * Must use the full Data URI format: `data:image/{format};base64,{base64 data}`
+           * Supported image formats: jpeg, png, webp
+           * Example: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+           * ⚠️ Note: must include the prefix `data:image/jpeg;base64,`
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="1:1">
+      Image generation aspect ratio
+
+      Supports 13 ratios:
+
+      * `1:1` - Square (default)
+      * `16:9` / `9:16` - Wide horizontal / vertical
+      * `4:3` / `3:4` - Standard horizontal / vertical
+      * `3:2` / `2:3` - Classic horizontal / vertical
+      * `5:4` / `4:5` - Nearly square horizontal / vertical
+      * `2:1` / `1:2` - Wide horizontal / long vertical
+      * `21:9` / `9:21` - Ultra wide horizontal / ultra long vertical
+
+      <Warning>
+        Only ratio formats are supported; providing pixel dimensions (e.g. `1024x1024`) will cause an error
+      </Warning>
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  Initiator task ID
+
+  User-defined task identifier, required
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  Initiator task ID, can be used to query the result
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Initial status, fixed as `"pending"`
+</ResponseField>
+
+<ResponseField name="estimated_credits" type="number">
+  Estimated credits consumption
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  Creation time (ISO format)
+</ResponseField>
+
+<RequestExample>
+  ```bash cURL
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gpt_image_2",
+      "params": {
+        "prompt": "An orange cat sitting on the windowsill watching the sunset, watercolor style",
+        "aspect_ratio": "16:9"
+      },
+      "out_task_id": "my_task_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "gpt_image_2",
+      "params": {
+          "prompt": "An orange cat sitting on the windowsill watching the sunset, watercolor style",
+          "aspect_ratio": "16:9"
+      },
+      "out_task_id": "my_task_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "gpt_image_2",
+    params: {
+      prompt: "An orange cat sitting on the windowsill watching the sunset, watercolor style",
+      aspect_ratio: "16:9"
+    },
+    out_task_id: "my_task_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "gpt_image_2",
+          "params": map[string]interface{}{
+              "prompt":       "An orange cat sitting on the windowsill watching the sunset, watercolor style",
+              "aspect_ratio": "16:9",
+          },
+          "out_task_id": "my_task_123456",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/openapi/submit";
+
+          String payload = """
+          {
+            "model": "gpt_image_2",
+            "params": {
+              "prompt": "An orange cat sitting on the windowsill watching the sunset, watercolor style",
+              "aspect_ratio": "16:9"
+            },
+            "out_task_id": "my_task_123456"
+          }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = [
+      "model" => "gpt_image_2",
+      "params" => [
+          "prompt" => "An orange cat sitting on the windowsill watching the sunset, watercolor style",
+          "aspect_ratio" => "16:9"
+      ],
+      "out_task_id" => "my_task_123456"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url = URI("https://aireiter.com/api/openapi/submit")
+
+  payload = {
+    model: "gpt_image_2",
+    params: {
+      prompt: "An orange cat sitting on the windowsill watching the sunset, watercolor style",
+      aspect_ratio: "16:9"
+    },
+    out_task_id: "my_task_123456"
+  }
+
+  http = Net::HTTP.new(url.host, url.port)
+
+  request = Net::HTTP::Post.new(url)
+  request["Authorization"] = "Bearer <token>"
+  request["Content-Type"] = "application/json"
+  request.body = payload.to_json
+
+  response = http.request(request)
+  puts response.body
+  ```
+
+  ```swift Swift
+  import Foundation
+
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
+
+  let payload: [String: Any] = [
+      "model": "gpt_image_2",
+      "params": [
+          "prompt": "An orange cat sitting on the windowsill watching the sunset, watercolor style",
+          "aspect_ratio": "16:9"
+      ],
+      "out_task_id": "my_task_123456"
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      if let error = error {
+          print("Error: \(error)")
+          return
+      }
+
+      if let data = data, let responseString = String(data: data, encoding: .utf8) {
+          print(responseString)
+      }
+  }
+
+  task.resume()
+  ```
+
+  ```csharp C#
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url = "https://aireiter.com/api/openapi/submit";
+
+          var payload = @"{
+              ""model"": ""gpt_image_2"",
+              ""params"": {
+                  ""prompt"": ""An orange cat sitting on the windowsill watching the sunset, watercolor style"",
+                  ""aspect_ratio"": ""16:9""
+              },
+              ""out_task_id"": ""my_task_123456""
+          }";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+
+          var content = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          var result = await response.Content.ReadAsStringAsync();
+
+          Console.WriteLine(result);
+      }
+  }
+  ```
+
+  ```c C
+  #include <stdio.h>
+  #include <curl/curl.h>
+
+  int main(void) {
+      CURL *curl;
+      CURLcode res;
+
+      curl_global_init(CURL_GLOBAL_DEFAULT);
+      curl = curl_easy_init();
+
+      if(curl) {
+          const char *url = "https://aireiter.com/api/openapi/submit";
+          const char *payload = "{"
+              "\"model\":\"gpt_image_2\","
+              "\"params\":{"
+                  "\"prompt\":\"An orange cat sitting on the windowsill watching the sunset, watercolor style\","
+                  "\"aspect_ratio\":\"16:9\""
+              "},"
+              "\"out_task_id\":\"my_task_123456\""
+          "}";
+
+          struct curl_slist *headers = NULL;
+          headers = curl_slist_append(headers, "Authorization: Bearer <token>");
+          headers = curl_slist_append(headers, "Content-Type: application/json");
+
+          curl_easy_setopt(curl, CURLOPT_URL, url);
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
+          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+          res = curl_easy_perform(curl);
+
+          if(res != CURLE_OK) {
+              fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                      curl_easy_strerror(res));
+          }
+
+          curl_slist_free_all(headers);
+          curl_easy_cleanup(curl);
+      }
+
+      curl_global_cleanup();
+      return 0;
+  }
+  ```
+
+  ```objectivec Objective-C
+  #import <Foundation/Foundation.h>
+
+  int main(int argc, const char * argv[]) {
+      @autoreleasepool {
+          NSURL *url = [NSURL URLWithString:@"https://aireiter.com/api/openapi/submit"];
+
+          NSDictionary *payload = @{
+              @"model": @"gpt_image_2",
+              @"params": @{
+                  @"prompt": @"An orange cat sitting on the windowsill watching the sunset, watercolor style",
+                  @"aspect_ratio": @"16:9"
+              },
+              @"out_task_id": @"my_task_123456"
+          };
+
+          NSError *error;
+          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
+                                                            options:0
+                                                              error:&error];
+
+          NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+          [request setHTTPMethod:@"POST"];
+          [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
+          [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+          [request setHTTPBody:jsonData];
+
+          NSURLSessionDataTask *task = [[NSURLSession sharedSession]
+              dataTaskWithRequest:request
+              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+                  if (error) {
+                      NSLog(@"Error: %@", error);
+                      return;
+                  }
+                  NSString *result = [[NSString alloc] initWithData:data
+                                                          encoding:NSUTF8StringEncoding];
+                  NSLog(@"%@", result);
+              }];
+
+          [task resume];
+          [[NSRunLoop mainRunLoop] run];
+      }
+      return 0;
+  }
+  ```
+
+  ```ocaml OCaml
+  (* Requires cohttp and yojson libraries *)
+  open Lwt
+  open Cohttp
+  open Cohttp_lwt_unix
+
+  let url = "https://aireiter.com/api/openapi/submit"
+
+  let payload = {|{
+    "model": "gpt_image_2",
+    "params": {
+      "prompt": "An orange cat sitting on the windowsill watching the sunset, watercolor style",
+      "aspect_ratio": "16:9"
+    },
+    "out_task_id": "my_task_123456"
+  }|}
+
+  let () =
+    let headers = Header.init ()
+      |> fun h -> Header.add h "Authorization" "Bearer <token>"
+      |> fun h -> Header.add h "Content-Type" "application/json"
+    in
+    let body = Cohttp_lwt.Body.of_string payload in
+
+    let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
+      body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
+      print_endline body_str
+    in
+    Lwt_main.run response
+  ```
+
+  ```dart Dart
+  import 'dart:convert';
+  import 'package:http/http.dart' as http;
+
+  void main() async {
+    final url = Uri.parse('https://aireiter.com/api/openapi/submit');
+
+    final payload = {
+      'model': 'gpt_image_2',
+      'params': {
+        'prompt': 'An orange cat sitting on the windowsill watching the sunset, watercolor style',
+        'aspect_ratio': '16:9'
+      },
+      'out_task_id': 'my_task_123456'
+    };
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer <token>',
+        'Content-Type': 'application/json'
+      },
+      body: jsonEncode(payload),
+    );
+
+    print(response.body);
+  }
+  ```
+
+  ```r R
+  library(httr)
+  library(jsonlite)
+
+  url <- "https://aireiter.com/api/openapi/submit"
+
+  payload <- list(
+    model = "gpt_image_2",
+    params = list(
+      prompt = "An orange cat sitting on the windowsill watching the sunset, watercolor style",
+      aspect_ratio = "16:9"
+    ),
+    out_task_id = "my_task_123456"
+  )
+
+  response <- POST(
+    url,
+    add_headers(
+      Authorization = "Bearer <token>",
+      `Content-Type` = "application/json"
+    ),
+    body = toJSON(payload, auto_unbox = TRUE),
+    encode = "raw"
+  )
+
+  cat(content(response, "text"))
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+  {
+      "statusCode": 200,
+      "message": "",
+      "data": {
+          "out_task_id": "my_task_123456",
+          "status": "pending",
+          "estimated_credits": 100,
+          "created_at": "2025-12-22T06:03:28.242Z"
+      }
+  }
+  ```
+
+  ```json 400
+  {
+      "statusCode": 400,
+      "message": "Invalid request parameters",
+      "ok": false
+  }
+  ```
+
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "Authentication failed, please check your API key"
+    }
+  }
+  ```
+
+  ```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "Insufficient account balance, please recharge and try again"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "Internal server error, please try again later"
+    }
+  }
+  ```
+</ResponseExample>
