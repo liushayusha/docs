@@ -105,82 +105,82 @@ curl --request POST \
 
 ### テキスト対話シリーズ
 
-OpenAI Chat Completions APIおよびResponses APIに対応し、多段階対話、ツール呼び出し、構造化出力、ストリーミングレスポンスをサポート：
+OpenAI Chat Completions API と Responses API に対応し、マルチターン対話、ツール呼び出し、構造化出力、ストリーミング応答に対応しています:
 
 <CardGroup cols={2}>
   <Card title="OpenAI Chat Completions API" icon="message" href="/en/api-reference/text/openai-chat-completions-api/endpoint">
-    OpenAI SDKに対応し、GPT、Claudeなどのモデルをサポート
+    OpenAI SDK に対応し、GPT、Claude などのモデルをサポート
   </Card>
   <Card title="OpenAI Responses API" icon="message" href="/en/api-reference/text/openai-responses-api/endpoint">
-    OpenAI最新のResponsesフォーマット
+    OpenAI の最新 Responses フォーマット
   </Card>
   <Card title="Claude Messages API" icon="message" href="/en/api-reference/text/claude-messages-api/endpoint">
-    AnthropicネイティブのMessages APIフォーマット
+    Anthropic ネイティブの Messages API フォーマット
   </Card>
 </CardGroup>
 
 ### 画像生成シリーズ
 
-AIReiterは様々な画像生成モデルを提供し、テキスト画像生成と画像から画像生成の機能をサポート：
+AIReiter は多様な画像生成モデルを提供し、テキストから画像生成および画像から画像生成機能をサポートしています:
 
 <CardGroup cols={2}>
   <Card title="GPT-4o Image" icon="image" href="/en/api-reference/images/gpt-4o/generation">
-    OpenAIの高品質画像生成モデル
+    OpenAI の高品質画像生成モデル
   </Card>
   <Card title="GPT-Image-2" icon="image" href="/en/api-reference/images/gpt-image-2/generation">
-    テキストから画像、画像から画像をサポート、13種類の比率、参考画像最大16枚
+    テキストから画像 / 画像から画像に対応、13種類のアスペクト比、最大9枚のリファレンス画像をサポート
   </Card>
   <Card title="Gemini-2.5-Flash (Nano banana)" icon="image" href="/en/api-reference/images/nano-banana/generation">
-    Googleの最新高速画像生成モデル
+    Google の最新高速画像生成モデル
   </Card>
   <Card title="Gemini-3-Pro (Nano banana pro)" icon="image" href="/en/api-reference/images/gemini-3-pro/generation">
-    Googleのプロフェッショナル画像生成モデル
+    Google のプロフェッショナルグレード画像生成モデル
   </Card>
   <Card title="Nano Banana V2" icon="image" href="/en/api-reference/images/nano-banana-v2/generation">
-    テキストから画像、画像から画像、画像編集など多様な生成モードをサポート
+    テキストから画像、画像から画像、画像編集など複数の生成モードをサポート
   </Card>
   <Card title="Seedream-4.0" icon="image" href="/en/api-reference/images/seedream-4/generation">
     効率的な画像生成ソリューション
   </Card>
   <Card title="Seedream-4.5" icon="image" href="/en/api-reference/images/seedream-4.5/generation">
-    Seedream 4.5バージョン
+    Seedream 4.5 バージョン
   </Card>
   <Card title="Seedream V5 lite" icon="image" href="/en/api-reference/images/seedream-v5-lite/generation">
-    Seedream最新バージョン、ネット検索による強化生成をサポート
+    Seedream の最新バージョンでネット接続検索による生成強化をサポート
   </Card>
 </CardGroup>
 
 ### 動画生成シリーズ
 
-テキストから動画生成および画像から動画生成をサポートし、多様な解像度と長さの選択肢を提供：
+テキストから動画生成および画像から動画生成をサポートし、複数の解像度と長さのオプションを提供:
 
 <CardGroup cols={2}>
   <Card title="Sora2" icon="video" href="/en/api-reference/videos/sora2/generation">
-    OpenAI Sora2動画生成モデル（10～15秒）
+    OpenAI Sora2 動画生成モデル（10〜15秒）
   </Card>
   <Card title="Sora2 Pro" icon="video" href="/en/api-reference/videos/sora2-pro/generation">
-    Sora2プロ版、高解像度をサポート
+    Sora2 プロフェッショナル版、高解像度対応
   </Card>
   <Card title="VEO3.1" icon="video" href="/en/api-reference/videos/veo3-1/generation">
-    Google VEO3.1動画生成モデル
+    Google VEO3.1 動画生成モデル
   </Card>
   <Card title="VEO3.1 Fast" icon="video" href="/en/api-reference/videos/veo3-1-fast/generation">
-    VEO3.1高速版
+    VEO3.1 高速版
   </Card>
   <Card title="Seedance-1.5-pro" icon="video" href="/en/api-reference/videos/seedance-1-5-pro/generation">
-    前後フレーム制御と音声生成をサポート（4～12秒）
+    始点・終点フレーム制御と音声生成に対応（4〜12秒）
   </Card>
   <Card title="Seedance Pro Fast" icon="video" href="/en/api-reference/videos/seedance_pro_fast/generation">
-    Seedance高速版、初フレーム制御をサポート
+    Seedance 高速版、始点フレーム制御対応
   </Card>
   <Card title="Seedance Pro" icon="video" href="/en/api-reference/videos/seedance_pro/generation">
-    Seedanceプロ版、前後フレーム制御をサポート
+    Seedance プロ版、始点・終点フレーム制御対応
   </Card>
   <Card title="Seedance 2.0" icon="video" href="/en/api-reference/videos/seedance2/generation">
-    複数参考画像、参考動画、前後フレーム制御をサポート（4～15秒）
+    複数のリファレンス画像やリファレンス動画、始点・終点フレーム制御に対応（4〜15秒）
   </Card>
   <Card title="Seedance 2.0 Fast" icon="video" href="/en/api-reference/videos/seedance2_fast/generation">
-    Seedance 2.0高速版、複数参考画像と前後フレーム制御をサポート
+    Seedance 2.0 高速版、複数リファレンス画像と始点・終点フレーム制御対応
   </Card>
 </CardGroup>
 

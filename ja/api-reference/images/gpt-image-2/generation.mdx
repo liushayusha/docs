@@ -1,11 +1,11 @@
 ---
 title: 'GPT-Image-2 画像生成'
 description: |
-    - 非同期処理モードで、タスクIDを返し後続の照会に使用
-    - OpenAI Images 互換プロトコルに基づき、テキスト画像生成 / 画像から画像生成をサポート
-    - 13種類の画像比率に対応し、aspect_ratio フィールドで指定可能
-    - 参考画像は最大16枚までで、URLとbase64の混在が可能
-    - 提出されたプロンプトはプラットフォームの敏感語句 / セキュリティチェックを通過し、違反内容は即時拒否
+    - 非同期処理モードで、後続の問い合わせに使用するタスクIDを返します
+    - OpenAI Images互換プロトコルに基づき、テキストから画像 / 画像から画像の生成をサポート
+    - 13種類の画像比率をサポートし、aspect_ratioフィールドで指定します
+    - 参照画像は最大9枚まで、URLとbase64の混在をサポート
+    - 提出されたプロンプトはプラットフォームの不適切用語/セキュリティ審査を通過し、違反内容は即時拒否されます
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -35,53 +35,53 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  モデルパラメーターオブジェクト
+  モデルパラメータオブジェクト
 
-  <Expandable title="params オブジェクトのプロパティ">
+  <Expandable title="params オブジェクトの属性">
     <ParamField body="prompt" type="string" required>
       画像生成のテキスト説明
 
-      * 日本語と英語に対応。詳細な記述を推奨。
-      * 提出前にプラットフォームの不適切ワード/安全審査を通過し、違反内容があればエラーを返します。
+      * 日本語と英語に対応、詳細な説明を推奨
+      * 提出前にプラットフォームの敏感語 / セキュリティ審査を通過し、違反コンテンツが検出された場合はエラーを返します
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      リファレンス画像配列。渡すと画像変換モードになります。
+      参考画像の配列。送信すると画像から画像生成モードになります
 
-      * 最大16枚のリファレンス画像を指定可能
-      * 次の2つのフォーマットをサポート：
+      * 最大 9 枚の参考画像
+      * 以下の2つの形式に対応しています：
         1. 公開アクセス可能なURL
         2. Base64エンコード形式
-           * 完全なData URI形式である必要があります：`data:image/{フォーマット};base64,{base64データ}`
+           * 完全なData URI形式を使用する必要があります：`data:image/{フォーマット};base64,{base64データ}`
            * 対応画像フォーマット：jpeg、png、webp
            * 例：`data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
-           * ⚠️ 注意：`data:image/jpeg;base64,`のプレフィックス部分を必ず含むこと
+           * ⚠️ 注意：`data:image/jpeg;base64,`のプレフィックス部分を必ず含めてください
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="1:1">
-      画像生成のアスペクト比
+      画像生成の比率
 
-      次の13種類の比率に対応：
+      13種類の比率に対応：
 
       * `1:1` - 正方形（デフォルト）
       * `16:9` / `9:16` - ワイド横 / 縦
       * `4:3` / `3:4` - 標準横 / 縦
       * `3:2` / `2:3` - クラシック横 / 縦
-      * `5:4` / `4:5` - ほぼ正方形横 / 縦
-      * `2:1` / `1:2` - 幅広横 / 高縦
-      * `21:9` / `9:21` - 超ワイド横 / 超縦長
+      * `5:4` / `4:5` - 近似正方形横 / 縦
+      * `2:1` / `1:2` - ワイド横 / 長い縦
+      * `21:9` / `9:21` - 超ワイド横 / 超長縦
 
       <Warning>
-        数値のピクセル指定（例：`1024x1024`）はサポートせず、エラーになります。
+        比率の書き方のみ対応。ピクセルサイズ（例：`1024x1024`）を指定するとエラーになります
       </Warning>
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発行元タスクID
+  発起者タスクID
 
-  ユーザーが定義するタスク識別子。必須。
+  ユーザー定義のタスク識別子、必須
 </ParamField>
 
 ## Response

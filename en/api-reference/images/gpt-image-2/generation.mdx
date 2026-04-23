@@ -2,10 +2,10 @@
 title: 'GPT-Image-2 Image Generation'
 description: |
     - Asynchronous processing mode, returns a task ID for subsequent queries
-    - Based on OpenAI Images compatibility protocol, supports text-to-image and image-to-image
-    - Supports 13 image aspect ratios, passed via the aspect_ratio field
-    - Up to 16 reference images, supports mixed input of URLs and base64
-    - Submitted prompts undergo platform sensitive word and security review; violating content will be rejected directly
+    - Compatible with OpenAI Images protocol, supports text-to-image / image-to-image
+    - Supports 13 image aspect ratios, passed via aspect_ratio field
+    - Up to 9 reference images, supports mixed URL and base64 input
+    - Submitted prompts undergo platform sensitive word / safety review; violating content will be directly rejected
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -29,57 +29,57 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  Model name
+  Model Name
 
   Fixed value: `"gpt_image_2"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  Model parameter object
+  Model Parameters Object
 
-  <Expandable title="params object properties">
+  <Expandable title="params object Properties">
     <ParamField body="prompt" type="string" required>
-      Text description for image generation
+      Text Description for Image Generation
 
-      * Supports Chinese and English, detailed description is recommended
-      * Will be reviewed for sensitive words / safety before submission; if violations are detected, an error will be returned immediately
+      * Supports Chinese and English, detailed description recommended
+      * Will undergo platform sensitive word / safety review before submission; if violations are detected, an error will be returned immediately
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      Reference image array; if provided, image-to-image generation mode is activated
+      Reference Image Array; passing this enables image-to-image generation mode
 
-      * Up to 16 reference images
+      * Up to 9 reference images
       * Supports the following two formats:
-        1. Publicly accessible URL
+        1. Publicly accessible URLs
         2. Base64 encoded format
-           * Must use the full Data URI format: `data:image/{format};base64,{base64 data}`
+           * Must use complete Data URI format: `data:image/{format};base64,{base64 data}`
            * Supported image formats: jpeg, png, webp
            * Example: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
-           * ⚠️ Note: must include the prefix `data:image/jpeg;base64,`
+           * ⚠️ Note: Must include the prefix `data:image/jpeg;base64,`
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="1:1">
-      Image generation aspect ratio
+      Aspect Ratio for Image Generation
 
       Supports 13 ratios:
 
       * `1:1` - Square (default)
-      * `16:9` / `9:16` - Wide horizontal / vertical
-      * `4:3` / `3:4` - Standard horizontal / vertical
-      * `3:2` / `2:3` - Classic horizontal / vertical
-      * `5:4` / `4:5` - Nearly square horizontal / vertical
-      * `2:1` / `1:2` - Wide horizontal / long vertical
-      * `21:9` / `9:21` - Ultra wide horizontal / ultra long vertical
+      * `16:9` / `9:16` - Widescreen landscape / portrait
+      * `4:3` / `3:4` - Standard screen landscape / portrait
+      * `3:2` / `2:3` - Classic landscape / portrait
+      * `5:4` / `4:5` - Near-square landscape / portrait
+      * `2:1` / `1:2` - Wide landscape / tall portrait
+      * `21:9` / `9:21` - Ultra-wide landscape / ultra-tall portrait
 
       <Warning>
-        Only ratio formats are supported; providing pixel dimensions (e.g. `1024x1024`) will cause an error
+        Only ratio notation is supported; passing pixel dimensions (e.g. `1024x1024`) will cause an error
       </Warning>
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  Initiator task ID
+  Initiator Task ID
 
   User-defined task identifier, required
 </ParamField>

@@ -4,7 +4,7 @@ description: |
     - 异步处理模式，返回任务ID用于后续查询
     - 基于 OpenAI Images 兼容协议，支持文生图 / 图生图
     - 支持 13 种图片比例，通过 aspect_ratio 字段传入
-    - 参考图最多 16 张，支持 URL 与 base64 混填
+    - 参考图最多 9 张，支持 URL 与 base64 混填
     - 提交的 prompt 会经过平台敏感词 / 安全审核，违规内容会被直接拒绝
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
@@ -49,7 +49,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     <ParamField body="image_url" type="string[]">
       参考图数组，传入后走图生图模式
 
-      * 最多 16 张参考图
+      * 最多 9 张参考图
       * 支持以下两种格式：
         1. 公开可访问的 URL
         2. Base64 编码格式
