@@ -1,7 +1,7 @@
 [
   {
     "id": "__frontmatter__",
-    "hash": "b2372518",
+    "hash": "36a44046",
     "index": 0
   },
   {
@@ -11,22 +11,27 @@
   },
   {
     "id": "section-0-authorizations",
-    "hash": "83d46ba4",
+    "hash": "3660f703",
     "index": 2
   },
   {
     "id": "section-1-body",
-    "hash": "552e3c59",
+    "hash": "469c745f",
     "index": 3
   },
   {
     "id": "section-2-尺寸-分辨率映射表",
-    "hash": "c45a3b70",
+    "hash": "9bceb1bd",
     "index": 4
   },
   {
     "id": "section-3-response",
-    "hash": "3cb3d523",
+    "hash": "0194b107",
     "index": 5
+  },
+  {
+    "id": "section-4-查询任务结果",
+    "hash": "cd60c6c6",
+    "index": 6
   }
 ]

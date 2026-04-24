@@ -1,11 +1,12 @@
 ---
 title: 'GPT-Image-2 Image Generation'
 description: |
-    - Asynchronous processing mode, returns a task ID for subsequent queries
+    - Asynchronous processing mode, returns a task ID for subsequent query
     - Compatible with OpenAI Images protocol, supports text-to-image / image-to-image
-    - Supports 13 image aspect ratios, passed via aspect_ratio field
+    - Supports 13 image aspect ratios, passed via the aspect_ratio field
+    - Added resolution tier field, supports 1K / 2K / 4K resolution selection (4K supports 6 aspect ratios only)
     - Up to 9 reference images, supports mixed URL and base64 input
-    - Submitted prompts undergo platform sensitive word / safety review; violating content will be directly rejected
+    - Submitted prompts undergo platform sensitive word / safety review, violating content will be rejected directly
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -37,42 +38,63 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="params" type="object" required>
   Model Parameters Object
 
-  <Expandable title="params object Properties">
+  <Expandable title="params Object Properties">
     <ParamField body="prompt" type="string" required>
       Text Description for Image Generation
 
       * Supports Chinese and English, detailed description recommended
-      * Will undergo platform sensitive word / safety review before submission; if violations are detected, an error will be returned immediately
+      * Will be reviewed for sensitive words / safety before submission, violation will directly return an error
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      Reference Image Array; passing this enables image-to-image generation mode
+      Reference Image Array, when provided activates image-to-image generation mode
 
       * Up to 9 reference images
       * Supports the following two formats:
         1. Publicly accessible URLs
         2. Base64 encoded format
-           * Must use complete Data URI format: `data:image/{format};base64,{base64 data}`
+           * Must use the complete Data URI format: `data:image/{format};base64,{base64 data}`
            * Supported image formats: jpeg, png, webp
            * Example: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
-           * ⚠️ Note: Must include the prefix `data:image/jpeg;base64,`
+           * ⚠️ Note: The prefix `data:image/jpeg;base64,` must be included
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="1:1">
-      Aspect Ratio for Image Generation
+      Image Generation Aspect Ratio
 
       Supports 13 ratios:
 
       * `1:1` - Square (default)
-      * `16:9` / `9:16` - Widescreen landscape / portrait
-      * `4:3` / `3:4` - Standard screen landscape / portrait
-      * `3:2` / `2:3` - Classic landscape / portrait
-      * `5:4` / `4:5` - Near-square landscape / portrait
-      * `2:1` / `1:2` - Wide landscape / tall portrait
-      * `21:9` / `9:21` - Ultra-wide landscape / ultra-tall portrait
+      * `16:9` / `9:16` - Wide horizontal / vertical
+      * `4:3` / `3:4` - Standard horizontal / vertical
+      * `3:2` / `2:3` - Classic horizontal / vertical
+      * `5:4` / `4:5` - Near-square horizontal / vertical
+      * `2:1` / `1:2` - Wide horizontal / long vertical
+      * `21:9` / `9:21` - Ultra-wide horizontal / ultra-long vertical
 
       <Warning>
-        Only ratio notation is supported; passing pixel dimensions (e.g. `1024x1024`) will cause an error
+        Only ratio format is supported; pixel dimensions (e.g. `1024x1024`) will cause an error
+      </Warning>
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="1K">
+      Resolution Tier
+
+      Controls the actual output image clarity:
+
+      * `1K` - 1024 base, cost-effective for daily use (default)
+      * `2K` - 2048 base, suitable for posters / HD requirements
+      * `4K` - 3840 base, **only supported for 6 ratios** (`16:9` / `9:16` / `2:1` / `1:2` / `21:9` / `9:21`)
+
+      <Warning>
+        Unsupported 4K combinations will return 400:
+
+        * `1:1` × `4K` ❌ (pixel limit exceeded)
+        * `3:2` / `2:3` × `4K` ❌ (pixel limit exceeded)
+        * `4:3` / `3:4` × `4K` ❌ (pixel limit exceeded)
+        * `5:4` / `4:5` × `4K` ❌ (pixel limit exceeded)
+
+        For high definition with the above ratios, use `resolution=2K` instead.
       </Warning>
     </ParamField>
   </Expandable>
@@ -83,6 +105,28 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   User-defined task identifier, required
 </ParamField>
+
+## Size × Resolution Mapping Table
+
+`aspect_ratio × resolution` → Actual pixels (13 ratios × 3 levels):
+
+| aspect\_ratio | `1K`      | `2K`      | `4K`          |
+| ------------- | --------- | --------- | ------------- |
+| `1:1`         | 1024×1024 | 2048×2048 | ❌ Exceeds pixel limit       |
+| `3:2`         | 1536×1024 | 2048×1360 | ❌ Exceeds pixel limit       |
+| `2:3`         | 1024×1536 | 1360×2048 | ❌ Exceeds pixel limit       |
+| `4:3`         | 1024×768  | 2048×1536 | ❌ Exceeds pixel limit       |
+| `3:4`         | 768×1024  | 1536×2048 | ❌ Exceeds pixel limit       |
+| `5:4`         | 1280×1024 | 2560×2048 | ❌ Exceeds pixel limit       |
+| `4:5`         | 1024×1280 | 2048×2560 | ❌ Exceeds pixel limit       |
+| `16:9`        | 1536×864  | 2048×1152 | **3840×2160** |
+| `9:16`        | 864×1536  | 1152×2048 | **2160×3840** |
+| `2:1`         | 2048×1024 | 2688×1344 | **3840×1920** |
+| `1:2`         | 1024×2048 | 1344×2688 | **1920×3840** |
+| `21:9`        | 2016×864  | 2688×1152 | **3840×1648** |
+| `9:21`        | 864×2016  | 1152×2688 | **1648×3840** |
+
+> `3:2` / `2:3` @ 2K are actually 2048×1360 (approximate ratio, error < 0.5%); 4K only supports 6 ratios (combinations exceeding OpenAI's total pixel limit are unavailable).
 
 ## Response
 

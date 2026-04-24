@@ -55,7 +55,8 @@
                 "group": "GPT-Image-2",
                 "icon": "image",
                 "pages": [
-                  "zh/api-reference/images/gpt-image-2/generation"
+                  "zh/api-reference/images/gpt-image-2/generation",
+                  "zh/api-reference/images/gpt-image-2-official/generation"
                 ]
               },
               {
@@ -232,7 +233,8 @@
                 "group": "GPT-Image-2",
                 "icon": "image",
                 "pages": [
-                  "en/api-reference/images/gpt-image-2/generation"
+                  "en/api-reference/images/gpt-image-2/generation",
+                  "en/api-reference/images/gpt-image-2-official/generation"
                 ]
               },
               {
@@ -368,7 +370,8 @@
                 "group": "GPT-Image-2",
                 "icon": "image",
                 "pages": [
-                  "ja/api-reference/images/gpt-image-2/generation"
+                  "ja/api-reference/images/gpt-image-2/generation",
+                  "ja/api-reference/images/gpt-image-2-official/generation"
                 ]
               },
               {
@@ -504,7 +507,8 @@
                 "group": "GPT-Image-2",
                 "icon": "image",
                 "pages": [
-                  "ko/api-reference/images/gpt-image-2/generation"
+                  "ko/api-reference/images/gpt-image-2/generation",
+                  "ko/api-reference/images/gpt-image-2-official/generation"
                 ]
               },
               {

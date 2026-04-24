@@ -1,0 +1,548 @@
+---
+title: 'GPT-Image-2 公式チャネル 画像生成'
+description: |
+    - OpenAI公式のgpt-image-2モデル、/v1/images/generations互換プロトコルに基づく
+    - 非同期処理モード、後続のクエリに使用するtask_idを返す
+    - テキストから画像 / 画像から画像 三合一
+    - resolutionフィールドを新たに追加、1K / 2K / 4Kの解像度選択をサポート
+    - 13種類のアスペクト比に対応（4Kではそのうち6種類：16:9 / 9:16 / 2:1 / 1:2 / 21:9 / 9:21）
+    - 参考画像は最大9枚、URLとbase64の混在入力をサポート
+    - 提出されたプロンプトはプラットフォームの敏感語句/セキュリティ審査を通過し、違反内容は直接拒否される
+api: 'POST https://api.apimart.ai/v1/images/generations'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  すべてのエンドポイントは Bearer Token による認証が必要です
+
+  API Key の取得：
+
+  <a href={apiKeyUrl} target="_blank">API Key 管理ページ</a> にアクセスして API Key を取得してください
+
+  使用時はリクエストヘッダーに次のように追加します：
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" default="gpt-image-2-official" required>
+  画像生成モデル名
+
+  固定で `gpt-image-2-official` を入力（OpenAI公式の gpt-image-2 モデル）
+</ParamField>
+
+<ParamField body="prompt" type="string" required>
+  画像生成用のテキスト説明
+
+  * 日本語・英語対応、詳細に記述することを推奨
+  * 提出前にプラットフォームの禁止用語／セキュリティチェックを通過し、違反があった場合はエラーを直接返します
+</ParamField>
+
+<ParamField body="size" type="string" default="1:1">
+  画面の比率
+
+  公開用の比率値。システム内部では `resolution` によって特定のピクセル数に自動マッピングされます。
+
+  13種類の比率をサポート：
+
+  * `1:1` - 正方形構図（デフォルト、SNSのアイコン／ロゴ）
+  * `3:2` - 横長構図（一眼レフカメラでよく使われる比率）
+  * `2:3` - 縦長構図（ポスター縦型）
+  * `4:3` - 横長構図（クラシックモニター／プレゼンテーション）
+  * `3:4` - 縦長構図
+  * `5:4` - 横長構図
+  * `4:5` - 縦長構図（Instagram縦型投稿）
+  * `16:9` - 横長構図（ワイドスクリーン動画のサムネイル）
+  * `9:16` - 縦長構図（スマホ全画面／ショート動画のサムネイル）
+  * `2:1` - 横長構図（ウェブバナー）
+  * `1:2` - 縦長構図
+  * `21:9` - 横長構図（映画の超ワイドスクリーン）
+  * `9:21` - 縦長構図
+
+  <Warning>
+    比率の書き方のみ対応。ピクセル指定（例: `1024x1024`）は直接エラーになります
+  </Warning>
+</ParamField>
+
+<ParamField body="resolution" type="string" default="1K">
+  解像度の段階
+
+  実際の画像の鮮明さを制御：
+
+  * `1K` - 1024基準、コスト節約で日常使いに十分（デフォルト）
+  * `2K` - 2048基準、ポスター／高画質ニーズ向け
+  * `4K` - 3840基準、**6つの比率のみサポート**（`16:9` / `9:16` / `2:1` / `1:2` / `21:9` / `9:21`）
+
+  <Warning>
+    サポート外の4K組み合わせの場合は400エラーを返します：
+
+    * `1:1` × `4K` ❌（ピクセル上限超過）
+    * `3:2` / `2:3` × `4K` ❌（ピクセル上限超過）
+    * `4:3` / `3:4` × `4K` ❌（ピクセル上限超過）
+    * `5:4` / `4:5` × `4K` ❌（ピクセル上限超過）
+
+    上記比率で高解像度が必要な場合は、`resolution=2K` を使用してください。
+  </Warning>
+</ParamField>
+
+<ParamField body="quality" type="string" default="auto">
+  画像の品質
+
+  * `auto` - 自動（デフォルト、通常は `low` と同等）
+  * `low` - 速くてコスト節約、輪郭は十分
+  * `medium` - バランス型
+  * `high` - 最高精度（4K + high は >120秒の処理時間）
+</ParamField>
+
+<ParamField body="image_urls" type="array">
+  参考画像の配列。渡すと画像から画像生成モードになります
+
+  * 最大 **9枚** の参考画像
+  * 以下２つの形式をサポート：
+    1. 公開アクセス可能なURL
+    2. Base64エンコード形式
+       * 完全なData URI形式である必要があります：`data:image/{フォーマット};base64,{base64データ}`
+       * サポートされる画像フォーマット：jpeg、png、webp
+       * 例：`data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+       * ⚠️ 注意：`data:image/jpeg;base64,` のプレフィックス部分が必須です
+</ParamField>
+
+## サイズ × 解像度マッピング表
+
+`size × resolution` → OpenAI 実際のピクセル（13 比率 × 3 画質レベル）：
+
+| size   | `1K`      | `2K`      | `4K`          |
+| ------ | --------- | --------- | ------------- |
+| `1:1`  | 1024×1024 | 2048×2048 | ❌ 超ピクセル上限       |
+| `3:2`  | 1536×1024 | 2048×1360 | ❌ 超ピクセル上限       |
+| `2:3`  | 1024×1536 | 1360×2048 | ❌ 超ピクセル上限       |
+| `4:3`  | 1024×768  | 2048×1536 | ❌ 超ピクセル上限       |
+| `3:4`  | 768×1024  | 1536×2048 | ❌ 超ピクセル上限       |
+| `5:4`  | 1280×1024 | 2560×2048 | ❌ 超ピクセル上限       |
+| `4:5`  | 1024×1280 | 2048×2560 | ❌ 超ピクセル上限       |
+| `16:9` | 1536×864  | 2048×1152 | **3840×2160** |
+| `9:16` | 864×1536  | 1152×2048 | **2160×3840** |
+| `2:1`  | 2048×1024 | 2688×1344 | **3840×1920** |
+| `1:2`  | 1024×2048 | 1344×2688 | **1920×3840** |
+| `21:9` | 2016×864  | 2688×1152 | **3840×1648** |
+| `9:21` | 864×2016  | 1152×2688 | **1648×3840** |
+
+> `3:2` / `2:3` @ 2K は実際2048×1360（近似比率、誤差 \< 0.5%）；4K は6つの比率のみ対応（総ピクセルがOpenAI上限を超える組み合わせは使用不可）。
+
+## Response
+
+<ResponseField name="code" type="integer">
+  レスポンスステータスコード
+</ResponseField>
+
+<ResponseField name="data" type="array">
+  返却データの配列
+
+  <Expandable title="プロパティ">
+    <ResponseField name="status" type="string">
+      タスクステータス
+
+      * `submitted` - 送信済み
+    </ResponseField>
+
+    <ResponseField name="task_id" type="string">
+      タスクの一意識別子。後続のタスク結果のクエリに使用されます
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## タスク結果の照会
+
+正常に送信されると `task_id` が返され、`GET /v1/tasks/{task_id}` を使用してタスクの状態をポーリングします。詳細は [タスク照会API](/ja/api-reference/tasks/get-task) を参照してください。
+
+### ポーリングの推奨設定
+
+* **初回照会の遅延**：送信後 10~20 秒待ってから照会を開始
+* **照会間隔**：3~5 秒ごとを推奨
+* **タイムアウトの参考値**：`high + 2K/4K` コンビネーションで最大約 130 秒かかるため、クライアントのタイムアウトは 180 秒以上を推奨
+
+<RequestExample>
+  ```bash cURL
+  curl --request POST \
+    --url https://api.apimart.ai/v1/images/generations \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gpt-image-2-official",
+      "prompt": "星空の下の古い城",
+      "size": "16:9",
+      "resolution": "2K",
+      "quality": "high"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://api.apimart.ai/v1/images/generations"
+
+  payload = {
+      "model": "gpt-image-2-official",
+      "prompt": "星空の下の古い城",
+      "size": "16:9",
+      "resolution": "2K",
+      "quality": "high"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://api.apimart.ai/v1/images/generations";
+
+  const payload = {
+    model: "gpt-image-2-official",
+    prompt: "星空の下の古い城",
+    size: "16:9",
+    resolution: "2K",
+    quality: "high",
+  };
+
+  const headers = {
+    Authorization: "Bearer <token>",
+    "Content-Type": "application/json",
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload),
+  })
+    .then((response) => response.json())
+    .then((data) => console.log(data))
+    .catch((error) => console.error("Error:", error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://api.apimart.ai/v1/images/generations"
+
+      payload := map[string]interface{}{
+          "model":      "gpt-image-2-official",
+          "prompt":     "星空の下の古い城",
+          "size":       "16:9",
+          "resolution": "2K",
+          "quality":    "high",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://api.apimart.ai/v1/images/generations";
+
+          String payload = """
+          {
+            "model": "gpt-image-2-official",
+            "prompt": "星空の下の古い城",
+            "size": "16:9",
+            "resolution": "2K",
+            "quality": "high"
+          }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://api.apimart.ai/v1/images/generations";
+
+  $payload = [
+      "model" => "gpt-image-2-official",
+      "prompt" => "星空の下の古い城",
+      "size" => "16:9",
+      "resolution" => "2K",
+      "quality" => "high"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url = URI("https://api.apimart.ai/v1/images/generations")
+
+  payload = {
+    model: "gpt-image-2-official",
+    prompt: "星空の下の古い城",
+    size: "16:9",
+    resolution: "2K",
+    quality: "high"
+  }
+
+  http = Net::HTTP.new(url.host, url.port)
+  http.use_ssl = true
+
+  request = Net::HTTP::Post.new(url)
+  request["Authorization"] = "Bearer <token>"
+  request["Content-Type"] = "application/json"
+  request.body = payload.to_json
+
+  response = http.request(request)
+  puts response.body
+  ```
+
+  ```swift Swift
+  import Foundation
+
+  let url = URL(string: "https://api.apimart.ai/v1/images/generations")!
+
+  let payload: [String: Any] = [
+      "model": "gpt-image-2-official",
+      "prompt": "星空の下の古い城",
+      "size": "16:9",
+      "resolution": "2K",
+      "quality": "high"
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      if let error = error {
+          print("Error: \(error)")
+          return
+      }
+
+      if let data = data, let responseString = String(data: data, encoding: .utf8) {
+          print(responseString)
+      }
+  }
+
+  task.resume()
+  ```
+
+  ```csharp C#
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url = "https://api.apimart.ai/v1/images/generations";
+
+          var payload = @"{
+              ""model"": ""gpt-image-2-official"",
+              ""prompt"": ""星空の下の古い城"",
+              ""size"": ""16:9"",
+              ""resolution"": ""2K"",
+              ""quality"": ""high""
+          }";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+
+          var content = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          var result = await response.Content.ReadAsStringAsync();
+
+          Console.WriteLine(result);
+      }
+  }
+  ```
+
+  ```dart Dart
+  import 'dart:convert';
+  import 'package:http/http.dart' as http;
+
+  void main() async {
+    final url = Uri.parse('https://api.apimart.ai/v1/images/generations');
+
+    final payload = {
+      'model': 'gpt-image-2-official',
+      'prompt': '星空の下の古い城',
+      'size': '16:9',
+      'resolution': '2K',
+      'quality': 'high',
+    };
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer <token>',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(payload),
+    );
+
+    print(response.body);
+  }
+  ```
+
+  ```r R
+  library(httr)
+  library(jsonlite)
+
+  url <- "https://api.apimart.ai/v1/images/generations"
+
+  payload <- list(
+    model = "gpt-image-2-official",
+    prompt = "星空の下の古い城",
+    size = "16:9",
+    resolution = "2K",
+    quality = "high"
+  )
+
+  response <- POST(
+    url,
+    add_headers(
+      Authorization = "Bearer <token>",
+      `Content-Type` = "application/json"
+    ),
+    body = toJSON(payload, auto_unbox = TRUE),
+    encode = "raw"
+  )
+
+  cat(content(response, "text"))
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+  {
+    "code": 200,
+    "data": [
+      {
+        "status": "submitted",
+        "task_id": "task_01KPTXXXXXXXXXXXXXXX"
+      }
+    ]
+  }
+  ```
+
+  ```json 400
+  {
+    "error": {
+      "code": 400,
+      "message": "サイズ 1:1 に対して解像度 4K はサポートされていません。許可されているのは: 1K / 2K",
+      "type": "invalid_request_error"
+    }
+  }
+  ```
+
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "認証に失敗しました。APIキーを確認してください",
+      "type": "authentication_error"
+    }
+  }
+  ```
+
+  ```json 402
+  {
+    "error": {
+      "code": 402,
+      "message": "アカウント残高が不足しています。チャージ後に再試行してください",
+      "type": "payment_required"
+    }
+  }
+  ```
+
+  ```json 429
+  {
+    "error": {
+      "code": 429,
+      "message": "リクエストが多すぎます。時間を置いて再試行してください",
+      "type": "rate_limit_error"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "サーバー内部エラーが発生しました。後ほど再試行してください",
+      "type": "server_error"
+    }
+  }
+  ```
+</ResponseExample>
