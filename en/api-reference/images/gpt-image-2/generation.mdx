@@ -30,78 +30,81 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  Model Name
+  Model name
 
   Fixed value: `"gpt_image_2"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  Model Parameters Object
+  Model parameters object
 
-  <Expandable title="params Object Properties">
+  <Expandable title="params object properties">
     <ParamField body="prompt" type="string" required>
-      Text Description for Image Generation
+      Text description for image generation
 
-      * Supports Chinese and English, detailed description recommended
-      * Will be reviewed for sensitive words / safety before submission, violation will directly return an error
+      * Supports Chinese and English, detailed descriptions are recommended
+      * Before submission, it will go through platform-sensitive word / security review; if any violation is detected, an error will be returned directly
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      Reference Image Array, when provided activates image-to-image generation mode
+      Reference image array, when provided, triggers image-to-image mode
 
       * Up to 9 reference images
       * Supports the following two formats:
-        1. Publicly accessible URLs
+        1. Publicly accessible URL
         2. Base64 encoded format
            * Must use the complete Data URI format: `data:image/{format};base64,{base64 data}`
            * Supported image formats: jpeg, png, webp
            * Example: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
-           * ⚠️ Note: The prefix `data:image/jpeg;base64,` must be included
+           * ⚠️ Note: Must include the `data:image/jpeg;base64,` prefix
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="1:1">
-      Image Generation Aspect Ratio
+      Image generation aspect ratio
 
-      Supports 13 ratios:
+      Default value: `1:1`, also supports `auto` for automatic ratio.
 
+      Supported values:
+
+      * `auto` - Automatically select the most suitable ratio
       * `1:1` - Square (default)
-      * `16:9` / `9:16` - Wide horizontal / vertical
-      * `4:3` / `3:4` - Standard horizontal / vertical
+      * `16:9` / `9:16` - Wide screen horizontal / vertical
+      * `4:3` / `3:4` - Standard screen horizontal / vertical
       * `3:2` / `2:3` - Classic horizontal / vertical
       * `5:4` / `4:5` - Near-square horizontal / vertical
       * `2:1` / `1:2` - Wide horizontal / long vertical
       * `21:9` / `9:21` - Ultra-wide horizontal / ultra-long vertical
 
       <Warning>
-        Only ratio format is supported; pixel dimensions (e.g. `1024x1024`) will cause an error
+        Only ratio strings or `auto` are supported; passing pixel dimensions (e.g. `1024x1024`) will cause an error
       </Warning>
     </ParamField>
 
     <ParamField body="resolution" type="string" default="1K">
-      Resolution Tier
+      Resolution tier
 
       Controls the actual output image clarity:
 
-      * `1K` - 1024 base, cost-effective for daily use (default)
-      * `2K` - 2048 base, suitable for posters / HD requirements
-      * `4K` - 3840 base, **only supported for 6 ratios** (`16:9` / `9:16` / `2:1` / `1:2` / `21:9` / `9:21`)
+      * `1K` - 1024 baseline, cost-effective for daily use (default)
+      * `2K` - 2048 baseline, suitable for posters / high-definition needs
+      * `4K` - 3840 baseline, **supported for only 6 ratios** (`16:9` / `9:16` / `2:1` / `1:2` / `21:9` / `9:21`)
 
       <Warning>
         Unsupported 4K combinations will return 400:
 
-        * `1:1` × `4K` ❌ (pixel limit exceeded)
-        * `3:2` / `2:3` × `4K` ❌ (pixel limit exceeded)
-        * `4:3` / `3:4` × `4K` ❌ (pixel limit exceeded)
-        * `5:4` / `4:5` × `4K` ❌ (pixel limit exceeded)
+        * `1:1` × `4K` ❌ (exceeds pixel limit)
+        * `3:2` / `2:3` × `4K` ❌ (exceeds pixel limit)
+        * `4:3` / `3:4` × `4K` ❌ (exceeds pixel limit)
+        * `5:4` / `4:5` × `4K` ❌ (exceeds pixel limit)
 
-        For high definition with the above ratios, use `resolution=2K` instead.
+        For HD images with the above ratios, please use `resolution=2K`.
       </Warning>
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  Initiator Task ID
+  Initiator task ID
 
   User-defined task identifier, required
 </ParamField>

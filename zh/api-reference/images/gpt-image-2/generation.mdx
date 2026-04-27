@@ -63,8 +63,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     <ParamField body="aspect_ratio" type="string" default="1:1">
       图像生成的比例
 
-      支持 13 种比例：
+      默认值：`1:1`，也支持 `auto` 自动比例。
 
+      支持以下取值：
+
+      * `auto` - 自动选择最合适的比例
       * `1:1` - 正方形（默认）
       * `16:9` / `9:16` - 宽屏横 / 竖
       * `4:3` / `3:4` - 标屏横 / 竖
@@ -74,7 +77,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       * `21:9` / `9:21` - 超宽横 / 超长竖
 
       <Warning>
-        只支持比例写法，传像素尺寸（如 `1024x1024`）会直接报错
+        仅支持比例字符串或 `auto`；传像素尺寸（如 `1024x1024`）会直接报错
       </Warning>
     </ParamField>
 
