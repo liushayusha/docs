@@ -8,7 +8,7 @@ description: |
     - 支持 13 种比例（4K 档支持其中 6 个：16:9 / 9:16 / 2:1 / 1:2 / 21:9 / 9:21）
     - 参考图最多 9 张，支持 URL 与 base64 混填
     - 提交的 prompt 会经过平台敏感词 / 安全审核，违规内容会被直接拒绝
-api: 'POST https://api.apimart.ai/v1/images/generations'
+api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -37,80 +37,86 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   固定填写 `gpt-image-2-official`（OpenAI 官方 gpt-image-2 模型）
 </ParamField>
 
-<ParamField body="prompt" type="string" required>
-  图像生成的文本描述
+<ParamField body="params" type="object" required>
+  模型参数对象
 
-  * 支持中英文，建议详细描述
-  * 提交前会经过平台敏感词 / 安全审核，命中违规内容会直接返回错误
-</ParamField>
+  <Expandable title="params 对象属性">
+    <ParamField body="prompt" type="string" required>
+      图像生成的文本描述
 
-<ParamField body="size" type="string" default="1:1">
-  画面比例
+      * 支持中英文，建议详细描述
+      * 提交前会经过平台敏感词 / 安全审核，命中违规内容会直接返回错误
+    </ParamField>
 
-  对外使用比例值，系统内部按 `resolution` 自动映射到具体像素。
+    <ParamField body="size" type="string" default="1:1">
+      画面比例
 
-  支持 13 种比例：
+      对外使用比例值，系统内部按 `resolution` 自动映射到具体像素。
 
-  * `1:1` - 正方形构图（默认，社交头像 / Logo）
-  * `3:2` - 横构图（单反相机常见比例）
-  * `2:3` - 竖构图（海报竖版）
-  * `4:3` - 横构图（经典显示器 / PPT）
-  * `3:4` - 竖构图
-  * `5:4` - 横构图
-  * `4:5` - 竖构图（Instagram 竖版帖子）
-  * `16:9` - 横构图（宽屏视频封面）
-  * `9:16` - 竖构图（手机全屏 / 短视频封面）
-  * `2:1` - 横构图（网页 Banner）
-  * `1:2` - 竖构图
-  * `21:9` - 横构图（电影超宽屏）
-  * `9:21` - 竖构图
+      支持 13 种比例：
 
-  <Warning>
-    只支持比例写法，传像素尺寸（如 `1024x1024`）会直接报错
-  </Warning>
-</ParamField>
+      * `1:1` - 正方形构图（默认，社交头像 / Logo）
+      * `3:2` - 横构图（单反相机常见比例）
+      * `2:3` - 竖构图（海报竖版）
+      * `4:3` - 横构图（经典显示器 / PPT）
+      * `3:4` - 竖构图
+      * `5:4` - 横构图
+      * `4:5` - 竖构图（Instagram 竖版帖子）
+      * `16:9` - 横构图（宽屏视频封面）
+      * `9:16` - 竖构图（手机全屏 / 短视频封面）
+      * `2:1` - 横构图（网页 Banner）
+      * `1:2` - 竖构图
+      * `21:9` - 横构图（电影超宽屏）
+      * `9:21` - 竖构图
 
-<ParamField body="resolution" type="string" default="1K">
-  分辨率档位
+      <Warning>
+        只支持比例写法，传像素尺寸（如 `1024x1024`）会直接报错
+      </Warning>
+    </ParamField>
 
-  控制实际出图清晰度：
+    <ParamField body="resolution" type="string" default="1K">
+      分辨率档位
 
-  * `1K` - 1024 基准，省钱日常够用（默认）
-  * `2K` - 2048 基准，适合海报 / 高清需求
-  * `4K` - 3840 基准，**仅 6 个比例支持**（`16:9` / `9:16` / `2:1` / `1:2` / `21:9` / `9:21`）
+      控制实际出图清晰度：
 
-  <Warning>
-    不支持的 4K 组合会返回 400：
+      * `1K` - 1024 基准，省钱日常够用（默认）
+      * `2K` - 2048 基准，适合海报 / 高清需求
+      * `4K` - 3840 基准，**仅 6 个比例支持**（`16:9` / `9:16` / `2:1` / `1:2` / `21:9` / `9:21`）
 
-    * `1:1` × `4K` ❌（超像素上限）
-    * `3:2` / `2:3` × `4K` ❌（超像素上限）
-    * `4:3` / `3:4` × `4K` ❌（超像素上限）
-    * `5:4` / `4:5` × `4K` ❌（超像素上限）
+      <Warning>
+        不支持的 4K 组合会返回 400：
 
-    想高清上述比例时，改用 `resolution=2K`。
-  </Warning>
-</ParamField>
+        * `1:1` × `4K` ❌（超像素上限）
+        * `3:2` / `2:3` × `4K` ❌（超像素上限）
+        * `4:3` / `3:4` × `4K` ❌（超像素上限）
+        * `5:4` / `4:5` × `4K` ❌（超像素上限）
 
-<ParamField body="quality" type="string" default="auto">
-  图片质量
+        想高清上述比例时，改用 `resolution=2K`。
+      </Warning>
+    </ParamField>
 
-  * `auto` - 自动（默认，通常等同 `low`）
-  * `low` - 快速省钱，轮廓够用
-  * `medium` - 平衡
-  * `high` - 最高精度（4K + high 耗时 >120s）
-</ParamField>
+    <ParamField body="quality" type="string" default="auto">
+      图片质量
 
-<ParamField body="image_urls" type="array">
-  参考图数组，传入后走图生图模式
+      * `auto` - 自动（默认）
+      * `low` - 快速省钱，轮廓够用
+      * `medium` - 平衡
+      * `high` - 最高精度（4K + high 耗时 >120s）
+    </ParamField>
 
-  * 最多 **9 张** 参考图
-  * 支持以下两种格式：
-    1. 公开可访问的 URL
-    2. Base64 编码格式
-       * 必须使用完整的 Data URI 格式：`data:image/{格式};base64,{base64数据}`
-       * 支持的图片格式：jpeg、png、webp
-       * 示例：`data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
-       * ⚠️ 注意：必须包含 `data:image/jpeg;base64,` 前缀部分
+    <ParamField body="image_urls" type="array">
+      参考图数组，传入后走图生图模式
+
+      * 最多 **9 张** 参考图
+      * 支持以下两种格式：
+        1. 公开可访问的 URL
+        2. Base64 编码格式
+           * 必须使用完整的 Data URI 格式：`data:image/{格式};base64,{base64数据}`
+           * 支持的图片格式：jpeg、png、webp
+           * 示例：`data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+           * ⚠️ 注意：必须包含 `data:image/jpeg;base64,` 前缀部分
+    </ParamField>
+  </Expandable>
 </ParamField>
 
 ## 尺寸 × 分辨率映射表
@@ -170,29 +176,33 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <RequestExample>
   ```bash cURL
   curl --request POST \
-    --url https://api.apimart.ai/v1/images/generations \
+    --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
       "model": "gpt-image-2-official",
-      "prompt": "星空下的古老城堡",
-      "size": "16:9",
-      "resolution": "2K",
-      "quality": "high"
+      "params": {
+        "prompt": "星空下的古老城堡",
+        "size": "16:9",
+        "resolution": "2K",
+        "quality": "high"
+      }
     }'
   ```
 
   ```python Python
   import requests
 
-  url = "https://api.apimart.ai/v1/images/generations"
+  url = "https://aireiter.com/api/openapi/submit"
 
   payload = {
       "model": "gpt-image-2-official",
-      "prompt": "星空下的古老城堡",
-      "size": "16:9",
-      "resolution": "2K",
-      "quality": "high"
+      "params": {
+          "prompt": "星空下的古老城堡",
+          "size": "16:9",
+          "resolution": "2K",
+          "quality": "high"
+      }
   }
 
   headers = {
@@ -206,14 +216,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```
 
   ```javascript JavaScript
-  const url = "https://api.apimart.ai/v1/images/generations";
+  const url = "https://aireiter.com/api/openapi/submit";
 
   const payload = {
     model: "gpt-image-2-official",
-    prompt: "星空下的古老城堡",
-    size: "16:9",
-    resolution: "2K",
-    quality: "high",
+    params: {
+      prompt: "星空下的古老城堡",
+      size: "16:9",
+      resolution: "2K",
+      quality: "high",
+    },
   };
 
   const headers = {
@@ -243,14 +255,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   )
 
   func main() {
-      url := "https://api.apimart.ai/v1/images/generations"
+      url := "https://aireiter.com/api/openapi/submit"
 
       payload := map[string]interface{}{
-          "model":      "gpt-image-2-official",
-          "prompt":     "星空下的古老城堡",
-          "size":       "16:9",
-          "resolution": "2K",
-          "quality":    "high",
+          "model": "gpt-image-2-official",
+          "params": map[string]interface{}{
+              "prompt":     "星空下的古老城堡",
+              "size":       "16:9",
+              "resolution": "2K",
+              "quality":    "high",
+          },
       }
 
       jsonData, _ := json.Marshal(payload)
@@ -279,15 +293,17 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   public class Main {
       public static void main(String[] args) throws Exception {
-          String url = "https://api.apimart.ai/v1/images/generations";
+          String url = "https://aireiter.com/api/openapi/submit";
 
           String payload = """
           {
             "model": "gpt-image-2-official",
-            "prompt": "星空下的古老城堡",
-            "size": "16:9",
-            "resolution": "2K",
-            "quality": "high"
+            "params": {
+              "prompt": "星空下的古老城堡",
+              "size": "16:9",
+              "resolution": "2K",
+              "quality": "high"
+            }
           }
           """;
 
@@ -310,14 +326,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```php PHP
   <?php
 
-  $url = "https://api.apimart.ai/v1/images/generations";
+  $url = "https://aireiter.com/api/openapi/submit";
 
   $payload = [
       "model" => "gpt-image-2-official",
-      "prompt" => "星空下的古老城堡",
-      "size" => "16:9",
-      "resolution" => "2K",
-      "quality" => "high"
+      "params" => [
+          "prompt" => "星空下的古老城堡",
+          "size" => "16:9",
+          "resolution" => "2K",
+          "quality" => "high"
+      ]
   ];
 
   $ch = curl_init($url);
@@ -341,14 +359,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   require 'json'
   require 'uri'
 
-  url = URI("https://api.apimart.ai/v1/images/generations")
+  url = URI("https://aireiter.com/api/openapi/submit")
 
   payload = {
     model: "gpt-image-2-official",
-    prompt: "星空下的古老城堡",
-    size: "16:9",
-    resolution: "2K",
-    quality: "high"
+    params: {
+      prompt: "星空下的古老城堡",
+      size: "16:9",
+      resolution: "2K",
+      quality: "high"
+    }
   }
 
   http = Net::HTTP.new(url.host, url.port)
@@ -366,14 +386,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "https://api.apimart.ai/v1/images/generations")!
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
 
   let payload: [String: Any] = [
       "model": "gpt-image-2-official",
-      "prompt": "星空下的古老城堡",
-      "size": "16:9",
-      "resolution": "2K",
-      "quality": "high"
+      "params": [
+          "prompt": "星空下的古老城堡",
+          "size": "16:9",
+          "resolution": "2K",
+          "quality": "high"
+      ]
   ]
 
   var request = URLRequest(url: url)
@@ -406,14 +428,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
       static async Task Main(string[] args)
       {
-          var url = "https://api.apimart.ai/v1/images/generations";
+          var url = "https://aireiter.com/api/openapi/submit";
 
           var payload = @"{
               ""model"": ""gpt-image-2-official"",
-              ""prompt"": ""星空下的古老城堡"",
-              ""size"": ""16:9"",
-              ""resolution"": ""2K"",
-              ""quality"": ""high""
+              ""params"": {
+                  ""prompt"": ""星空下的古老城堡"",
+                  ""size"": ""16:9"",
+                  ""resolution"": ""2K"",
+                  ""quality"": ""high""
+              }
           }";
 
           using var client = new HttpClient();
@@ -433,14 +457,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   import 'package:http/http.dart' as http;
 
   void main() async {
-    final url = Uri.parse('https://api.apimart.ai/v1/images/generations');
+    final url = Uri.parse('https://aireiter.com/api/openapi/submit');
 
     final payload = {
       'model': 'gpt-image-2-official',
-      'prompt': '星空下的古老城堡',
-      'size': '16:9',
-      'resolution': '2K',
-      'quality': 'high',
+      'params': {
+        'prompt': '星空下的古老城堡',
+        'size': '16:9',
+        'resolution': '2K',
+        'quality': 'high',
+      },
     };
 
     final response = await http.post(
@@ -460,14 +486,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   library(httr)
   library(jsonlite)
 
-  url <- "https://api.apimart.ai/v1/images/generations"
+  url <- "https://aireiter.com/api/openapi/submit"
 
   payload <- list(
     model = "gpt-image-2-official",
-    prompt = "星空下的古老城堡",
-    size = "16:9",
-    resolution = "2K",
-    quality = "high"
+    params = list(
+      prompt = "星空下的古老城堡",
+      size = "16:9",
+      resolution = "2K",
+      quality = "high"
+    )
   )
 
   response <- POST(

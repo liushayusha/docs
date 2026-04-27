@@ -2,13 +2,13 @@
 title: 'GPT-Image-2 公式チャネル 画像生成'
 description: |
     - OpenAI公式のgpt-image-2モデル、/v1/images/generations互換プロトコルに基づく
-    - 非同期処理モード、後続のクエリに使用するtask_idを返す
-    - テキストから画像 / 画像から画像 三合一
-    - resolutionフィールドを新たに追加、1K / 2K / 4Kの解像度選択をサポート
-    - 13種類のアスペクト比に対応（4Kではそのうち6種類：16:9 / 9:16 / 2:1 / 1:2 / 21:9 / 9:21）
-    - 参考画像は最大9枚、URLとbase64の混在入力をサポート
-    - 提出されたプロンプトはプラットフォームの敏感語句/セキュリティ審査を通過し、違反内容は直接拒否される
-api: 'POST https://api.apimart.ai/v1/images/generations'
+    - 非同期処理モード、後続のクエリ用にtask_idを返す
+    - テキスト画像生成 / 画像変換 三合一
+    - 新たにresolutionフィールドを追加、1K / 2K / 4K解像度をサポート
+    - 13種類のアスペクト比をサポート（4Kはそのうち6つを対応：16:9 / 9:16 / 2:1 / 1:2 / 21:9 / 9:21）
+    - 参照画像は最大9枚まで、URLとbase64の混在をサポート
+    - 提出されたプロンプトはプラットフォームの禁止用語 / 安全審査を通過し、違反内容は直接拒否される
+api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
@@ -31,85 +31,91 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" default="gpt-image-2-official" required>
-  画像生成モデル名
+  画像生成モデルの名前
 
-  固定で `gpt-image-2-official` を入力（OpenAI公式の gpt-image-2 モデル）
+  固定で `gpt-image-2-official` を入力してください（OpenAI公式のgpt-image-2モデル）
 </ParamField>
 
-<ParamField body="prompt" type="string" required>
-  画像生成用のテキスト説明
+<ParamField body="params" type="object" required>
+  モデルのパラメータオブジェクト
 
-  * 日本語・英語対応、詳細に記述することを推奨
-  * 提出前にプラットフォームの禁止用語／セキュリティチェックを通過し、違反があった場合はエラーを直接返します
-</ParamField>
+  <Expandable title="params オブジェクトのプロパティ">
+    <ParamField body="prompt" type="string" required>
+      画像生成のテキスト説明
 
-<ParamField body="size" type="string" default="1:1">
-  画面の比率
+      * 日本語と英語をサポートし、詳細な説明を推奨します
+      * 提出前にプラットフォームの禁止ワード／セキュリティチェックが行われ、違反内容が検出されると直接エラーが返されます
+    </ParamField>
 
-  公開用の比率値。システム内部では `resolution` によって特定のピクセル数に自動マッピングされます。
+    <ParamField body="size" type="string" default="1:1">
+      画面比率
 
-  13種類の比率をサポート：
+      外部には比率の値を使用し、システム内部では `resolution` により具体的なピクセルに自動マッピングされます。
 
-  * `1:1` - 正方形構図（デフォルト、SNSのアイコン／ロゴ）
-  * `3:2` - 横長構図（一眼レフカメラでよく使われる比率）
-  * `2:3` - 縦長構図（ポスター縦型）
-  * `4:3` - 横長構図（クラシックモニター／プレゼンテーション）
-  * `3:4` - 縦長構図
-  * `5:4` - 横長構図
-  * `4:5` - 縦長構図（Instagram縦型投稿）
-  * `16:9` - 横長構図（ワイドスクリーン動画のサムネイル）
-  * `9:16` - 縦長構図（スマホ全画面／ショート動画のサムネイル）
-  * `2:1` - 横長構図（ウェブバナー）
-  * `1:2` - 縦長構図
-  * `21:9` - 横長構図（映画の超ワイドスクリーン）
-  * `9:21` - 縦長構図
+      13種類の比率をサポートします：
 
-  <Warning>
-    比率の書き方のみ対応。ピクセル指定（例: `1024x1024`）は直接エラーになります
-  </Warning>
-</ParamField>
+      * `1:1` - 正方形構図（デフォルト、SNSのプロフィール写真／ロゴ用）
+      * `3:2` - 横構図（一眼レフカメラで一般的な比率）
+      * `2:3` - 縦構図（ポスター縦長）
+      * `4:3` - 横構図（クラシックなモニター／PPT用）
+      * `3:4` - 縦構図
+      * `5:4` - 横構図
+      * `4:5` - 縦構図（Instagram縦型投稿）
+      * `16:9` - 横構図（ワイドスクリーン動画のサムネイル）
+      * `9:16` - 縦構図（スマホ全画面／ショート動画サムネイル）
+      * `2:1` - 横構図（ウェブのバナー用）
+      * `1:2` - 縦構図
+      * `21:9` - 横構図（映画の超ワイドスクリーン）
+      * `9:21` - 縦構図
 
-<ParamField body="resolution" type="string" default="1K">
-  解像度の段階
+      <Warning>
+        比率の表記のみサポートし、ピクセルサイズ（例：`1024x1024`）を送信するとエラーになります
+      </Warning>
+    </ParamField>
 
-  実際の画像の鮮明さを制御：
+    <ParamField body="resolution" type="string" default="1K">
+      解像度レベル
 
-  * `1K` - 1024基準、コスト節約で日常使いに十分（デフォルト）
-  * `2K` - 2048基準、ポスター／高画質ニーズ向け
-  * `4K` - 3840基準、**6つの比率のみサポート**（`16:9` / `9:16` / `2:1` / `1:2` / `21:9` / `9:21`）
+      実際の出力画像の鮮明度を制御します：
 
-  <Warning>
-    サポート外の4K組み合わせの場合は400エラーを返します：
+      * `1K` - ベース1024、日常利用で経済的（デフォルト）
+      * `2K` - ベース2048、ポスター／高精細ニーズに適合
+      * `4K` - ベース3840、**6つの比率のみ対応**（`16:9` / `9:16` / `2:1` / `1:2` / `21:9` / `9:21`）
 
-    * `1:1` × `4K` ❌（ピクセル上限超過）
-    * `3:2` / `2:3` × `4K` ❌（ピクセル上限超過）
-    * `4:3` / `3:4` × `4K` ❌（ピクセル上限超過）
-    * `5:4` / `4:5` × `4K` ❌（ピクセル上限超過）
+      <Warning>
+        サポート外の4K組み合わせは400エラーを返します：
 
-    上記比率で高解像度が必要な場合は、`resolution=2K` を使用してください。
-  </Warning>
-</ParamField>
+        * `1:1` × `4K` ❌（ピクセル上限超過）
+        * `3:2` / `2:3` × `4K` ❌（ピクセル上限超過）
+        * `4:3` / `3:4` × `4K` ❌（ピクセル上限超過）
+        * `5:4` / `4:5` × `4K` ❌（ピクセル上限超過）
 
-<ParamField body="quality" type="string" default="auto">
-  画像の品質
+        上記比率で高精細を希望する場合は `resolution=2K` を指定してください。
+      </Warning>
+    </ParamField>
 
-  * `auto` - 自動（デフォルト、通常は `low` と同等）
-  * `low` - 速くてコスト節約、輪郭は十分
-  * `medium` - バランス型
-  * `high` - 最高精度（4K + high は >120秒の処理時間）
-</ParamField>
+    <ParamField body="quality" type="string" default="auto">
+      画像品質
 
-<ParamField body="image_urls" type="array">
-  参考画像の配列。渡すと画像から画像生成モードになります
+      * `auto` - 自動（デフォルト）
+      * `low` - 高速・節約、アウトラインに十分
+      * `medium` - バランス
+      * `high` - 最高精度（4K + high は処理時間 >120秒）
+    </ParamField>
 
-  * 最大 **9枚** の参考画像
-  * 以下２つの形式をサポート：
-    1. 公開アクセス可能なURL
-    2. Base64エンコード形式
-       * 完全なData URI形式である必要があります：`data:image/{フォーマット};base64,{base64データ}`
-       * サポートされる画像フォーマット：jpeg、png、webp
-       * 例：`data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
-       * ⚠️ 注意：`data:image/jpeg;base64,` のプレフィックス部分が必須です
+    <ParamField body="image_urls" type="array">
+      参考画像の配列、渡すと画像ベース生成モードになります
+
+      * 最大 **9枚** の参考画像
+      * 以下の2形式をサポート：
+        1. 公開アクセス可能なURL
+        2. Base64エンコード形式
+           * 完全なData URI形式を使用する必要があります：`data:image/{フォーマット};base64,{base64データ}`
+           * サポート画像フォーマット：jpeg、png、webp
+           * 例：`data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+           * ⚠️ 注意：`data:image/jpeg;base64,`のプレフィックス部分を必ず含めてください
+    </ParamField>
+  </Expandable>
 </ParamField>
 
 ## サイズ × 解像度マッピング表
@@ -156,42 +162,46 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   </Expandable>
 </ResponseField>
 
-## タスク結果の照会
+## タスク結果の取得
 
-正常に送信されると `task_id` が返され、`GET /v1/tasks/{task_id}` を使用してタスクの状態をポーリングします。詳細は [タスク照会API](/ja/api-reference/tasks/get-task) を参照してください。
+送信成功後に `task_id` が返されます。 `GET /v1/tasks/{task_id}` でタスクの状態をポーリングしてください。詳細は [タスク取得エンドポイント](/jp/api-reference/tasks/get-task) を参照してください。
 
-### ポーリングの推奨設定
+### ポーリングの推奨
 
-* **初回照会の遅延**：送信後 10~20 秒待ってから照会を開始
-* **照会間隔**：3~5 秒ごとを推奨
-* **タイムアウトの参考値**：`high + 2K/4K` コンビネーションで最大約 130 秒かかるため、クライアントのタイムアウトは 180 秒以上を推奨
+* **初回取得遅延**：送信後 10〜20 秒待ってから取得を開始してください
+* **取得間隔**：3〜5 秒に1回を推奨します
+* **タイムアウト目安**：`high + 2K/4K` の組み合わせでは最大 130 秒かかるため、クライアントのタイムアウトは 180 秒以上を推奨します
 
 <RequestExample>
   ```bash cURL
   curl --request POST \
-    --url https://api.apimart.ai/v1/images/generations \
+    --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
       "model": "gpt-image-2-official",
-      "prompt": "星空の下の古い城",
-      "size": "16:9",
-      "resolution": "2K",
-      "quality": "high"
+      "params": {
+        "prompt": "星空の下の古い城",
+        "size": "16:9",
+        "resolution": "2K",
+        "quality": "high"
+      }
     }'
   ```
 
   ```python Python
   import requests
 
-  url = "https://api.apimart.ai/v1/images/generations"
+  url = "https://aireiter.com/api/openapi/submit"
 
   payload = {
       "model": "gpt-image-2-official",
-      "prompt": "星空の下の古い城",
-      "size": "16:9",
-      "resolution": "2K",
-      "quality": "high"
+      "params": {
+          "prompt": "星空の下の古い城",
+          "size": "16:9",
+          "resolution": "2K",
+          "quality": "high"
+      }
   }
 
   headers = {
@@ -205,14 +215,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```
 
   ```javascript JavaScript
-  const url = "https://api.apimart.ai/v1/images/generations";
+  const url = "https://aireiter.com/api/openapi/submit";
 
   const payload = {
     model: "gpt-image-2-official",
-    prompt: "星空の下の古い城",
-    size: "16:9",
-    resolution: "2K",
-    quality: "high",
+    params: {
+      prompt: "星空の下の古い城",
+      size: "16:9",
+      resolution: "2K",
+      quality: "high",
+    },
   };
 
   const headers = {
@@ -242,14 +254,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   )
 
   func main() {
-      url := "https://api.apimart.ai/v1/images/generations"
+      url := "https://aireiter.com/api/openapi/submit"
 
       payload := map[string]interface{}{
-          "model":      "gpt-image-2-official",
-          "prompt":     "星空の下の古い城",
-          "size":       "16:9",
-          "resolution": "2K",
-          "quality":    "high",
+          "model": "gpt-image-2-official",
+          "params": map[string]interface{}{
+              "prompt":     "星空の下の古い城",
+              "size":       "16:9",
+              "resolution": "2K",
+              "quality":    "high",
+          },
       }
 
       jsonData, _ := json.Marshal(payload)
@@ -278,15 +292,17 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   public class Main {
       public static void main(String[] args) throws Exception {
-          String url = "https://api.apimart.ai/v1/images/generations";
+          String url = "https://aireiter.com/api/openapi/submit";
 
           String payload = """
           {
             "model": "gpt-image-2-official",
-            "prompt": "星空の下の古い城",
-            "size": "16:9",
-            "resolution": "2K",
-            "quality": "high"
+            "params": {
+              "prompt": "星空の下の古い城",
+              "size": "16:9",
+              "resolution": "2K",
+              "quality": "high"
+            }
           }
           """;
 
@@ -309,14 +325,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```php PHP
   <?php
 
-  $url = "https://api.apimart.ai/v1/images/generations";
+  $url = "https://aireiter.com/api/openapi/submit";
 
   $payload = [
       "model" => "gpt-image-2-official",
-      "prompt" => "星空の下の古い城",
-      "size" => "16:9",
-      "resolution" => "2K",
-      "quality" => "high"
+      "params" => [
+          "prompt" => "星空の下の古い城",
+          "size" => "16:9",
+          "resolution" => "2K",
+          "quality" => "high"
+      ]
   ];
 
   $ch = curl_init($url);
@@ -340,14 +358,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   require 'json'
   require 'uri'
 
-  url = URI("https://api.apimart.ai/v1/images/generations")
+  url = URI("https://aireiter.com/api/openapi/submit")
 
   payload = {
     model: "gpt-image-2-official",
-    prompt: "星空の下の古い城",
-    size: "16:9",
-    resolution: "2K",
-    quality: "high"
+    params: {
+      prompt: "星空の下の古い城",
+      size: "16:9",
+      resolution: "2K",
+      quality: "high"
+    }
   }
 
   http = Net::HTTP.new(url.host, url.port)
@@ -365,14 +385,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "https://api.apimart.ai/v1/images/generations")!
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
 
   let payload: [String: Any] = [
       "model": "gpt-image-2-official",
-      "prompt": "星空の下の古い城",
-      "size": "16:9",
-      "resolution": "2K",
-      "quality": "high"
+      "params": [
+          "prompt": "星空の下の古い城",
+          "size": "16:9",
+          "resolution": "2K",
+          "quality": "high"
+      ]
   ]
 
   var request = URLRequest(url: url)
@@ -405,14 +427,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
       static async Task Main(string[] args)
       {
-          var url = "https://api.apimart.ai/v1/images/generations";
+          var url = "https://aireiter.com/api/openapi/submit";
 
           var payload = @"{
               ""model"": ""gpt-image-2-official"",
-              ""prompt"": ""星空の下の古い城"",
-              ""size"": ""16:9"",
-              ""resolution"": ""2K"",
-              ""quality"": ""high""
+              ""params"": {
+                  ""prompt"": ""星空の下の古い城"",
+                  ""size"": ""16:9"",
+                  ""resolution"": ""2K"",
+                  ""quality"": ""high""
+              }
           }";
 
           using var client = new HttpClient();
@@ -432,14 +456,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   import 'package:http/http.dart' as http;
 
   void main() async {
-    final url = Uri.parse('https://api.apimart.ai/v1/images/generations');
+    final url = Uri.parse('https://aireiter.com/api/openapi/submit');
 
     final payload = {
       'model': 'gpt-image-2-official',
-      'prompt': '星空の下の古い城',
-      'size': '16:9',
-      'resolution': '2K',
-      'quality': 'high',
+      'params': {
+        'prompt': '星空の下の古い城',
+        'size': '16:9',
+        'resolution': '2K',
+        'quality': 'high',
+      },
     };
 
     final response = await http.post(
@@ -459,14 +485,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   library(httr)
   library(jsonlite)
 
-  url <- "https://api.apimart.ai/v1/images/generations"
+  url <- "https://aireiter.com/api/openapi/submit"
 
   payload <- list(
     model = "gpt-image-2-official",
-    prompt = "星空の下の古い城",
-    size = "16:9",
-    resolution = "2K",
-    quality = "high"
+    params = list(
+      prompt = "星空の下の古い城",
+      size = "16:9",
+      resolution = "2K",
+      quality = "high"
+    )
   )
 
   response <- POST(
@@ -500,7 +528,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 400,
-      "message": "サイズ 1:1 に対して解像度 4K はサポートされていません。許可されているのは: 1K / 2K",
+      "message": "解像度4Kはサイズ1:1には対応していません。使用可能: 1K / 2K",
       "type": "invalid_request_error"
     }
   }
@@ -530,7 +558,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 429,
-      "message": "リクエストが多すぎます。時間を置いて再試行してください",
+      "message": "リクエストが多すぎます。時間をおいて再試行してください",
       "type": "rate_limit_error"
     }
   }
@@ -540,7 +568,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 500,
-      "message": "サーバー内部エラーが発生しました。後ほど再試行してください",
+      "message": "サーバー内部エラーが発生しました。時間をおいて再試行してください",
       "type": "server_error"
     }
   }

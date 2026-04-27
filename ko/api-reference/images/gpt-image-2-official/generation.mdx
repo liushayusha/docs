@@ -2,13 +2,13 @@
 title: 'GPT-Image-2 공식 채널 이미지 생성'
 description: |
     - OpenAI 공식 gpt-image-2 모델, /v1/images/generations 호환 프로토콜 기반
-    - 비동기 처리 모드, 후속 조회용 task_id 반환
-    - 텍스트-이미지 / 이미지-이미지 통합
-    - resolution 필드 추가, 1K / 2K / 4K 해상도 선택 지원
-    - 13가지 비율 지원(4K에서는 6가지 지원: 16:9 / 9:16 / 2:1 / 1:2 / 21:9 / 9:21)
-    - 참고 이미지 최대 9장, URL과 base64 혼합 입력 가능
-    - 제출한 prompt는 플랫폼 민감어 및 보안 검열을 거치며, 위반 내용은 즉시 거부됨
-api: 'POST https://api.apimart.ai/v1/images/generations'
+    - 비동기 처리 모드, 후속 조회를 위한 task_id 반환
+    - 텍스트 생성 이미지 / 이미지 변환 이미지 통합 지원
+    - resolution 레벨 필드 추가, 1K / 2K / 4K 해상도 선택 지원
+    - 13가지 비율 지원(4K 레벨은 6가지: 16:9 / 9:16 / 2:1 / 1:2 / 21:9 / 9:21)
+    - 참조 이미지는 최대 9장, URL 및 base64 혼합 입력 지원
+    - 제출한 prompt는 플랫폼의 민감어 및 보안 심사를 거쳐, 위반 내용은 직접 거부됨
+api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
@@ -28,88 +28,94 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```
 </ParamField>
 
-## Body
+## 본문
 
 <ParamField body="model" type="string" default="gpt-image-2-official" required>
   이미지 생성 모델 이름
 
-  고정 입력 `gpt-image-2-official` (OpenAI 공식 gpt-image-2 모델)
+  고정 입력 값 `gpt-image-2-official`(OpenAI 공식 gpt-image-2 모델)
 </ParamField>
 
-<ParamField body="prompt" type="string" required>
-  이미지 생성을 위한 텍스트 설명
+<ParamField body="params" type="object" required>
+  모델 파라미터 객체
 
-  * 한중영 지원, 상세 설명 권장
-  * 제출 전 플랫폼의 민감 단어 / 보안 심사를 거침, 위반 내용 적발 시 즉시 오류 반환
-</ParamField>
+  <Expandable title="params 객체 속성">
+    <ParamField body="prompt" type="string" required>
+      이미지 생성용 텍스트 설명
 
-<ParamField body="size" type="string" default="1:1">
-  화면 비율
+      * 한글, 영어 모두 지원, 자세한 설명 권장
+      * 제출 전 플랫폼 내 민감어 / 보안 심사 진행, 위배 내용 발견 시 직접 오류 반환
+    </ParamField>
 
-  외부 사용 비율 값, 시스템 내부는 `resolution`에 따라 구체 픽셀로 자동 매핑
+    <ParamField body="size" type="string" default="1:1">
+      화면 비율
 
-  13가지 비율 지원:
+      외부에 사용하는 비율 값, 시스템 내부에서는 `resolution`에 따라 자동으로 구체 픽셀에 매핑
 
-  * `1:1` - 정사각형 구성 (기본, SNS 프로필/로고)
-  * `3:2` - 가로 구성 (DSLR 일반 비율)
-  * `2:3` - 세로 구성 (포스터 세로판)
-  * `4:3` - 가로 구성 (클래식 모니터 / PPT)
-  * `3:4` - 세로 구성
-  * `5:4` - 가로 구성
-  * `4:5` - 세로 구성 (Instagram 세로 게시물)
-  * `16:9` - 가로 구성 (와이드 스크린 비디오 커버)
-  * `9:16` - 세로 구성 (휴대폰 전체 화면 / 짧은 동영상 커버)
-  * `2:1` - 가로 구성 (웹 배너)
-  * `1:2` - 세로 구성
-  * `21:9` - 가로 구성 (영화 초광폭)
-  * `9:21` - 세로 구성
+      13가지 비율 지원:
 
-  <Warning>
-    비율 형태만 지원하며, 픽셀 치수(예: `1024x1024`) 입력 시 직접 오류가 발생합니다
-  </Warning>
-</ParamField>
+      * `1:1` - 정사각형 구도(기본, 소셜 프로필 사진 / 로고)
+      * `3:2` - 가로 구도(DSLR 카메라 일반 비율)
+      * `2:3` - 세로 구도(포스터 세로형)
+      * `4:3` - 가로 구도(클래식 모니터 / PPT)
+      * `3:4` - 세로 구도
+      * `5:4` - 가로 구도
+      * `4:5` - 세로 구도(인스타그램 세로 게시물)
+      * `16:9` - 가로 구도(와이드스크린 영상 커버)
+      * `9:16` - 세로 구도(휴대폰 전체 화면 / 숏폼 영상 커버)
+      * `2:1` - 가로 구도(웹 배너)
+      * `1:2` - 세로 구도
+      * `21:9` - 가로 구도(영화 초광폭 화면)
+      * `9:21` - 세로 구도
 
-<ParamField body="resolution" type="string" default="1K">
-  해상도 레벨
+      <Warning>
+        비율 형식만 지원하며, 픽셀 사이즈(ex: `1024x1024`) 전송 시 직접 오류 발생
+      </Warning>
+    </ParamField>
 
-  실제 이미지 선명도 제어:
+    <ParamField body="resolution" type="string" default="1K">
+      해상도 단계
 
-  * `1K` - 1024 기준, 비용 절약 및 일상용 충분 (기본값)
-  * `2K` - 2048 기준, 포스터 / 고화질 요구에 적합
-  * `4K` - 3840 기준, **6가지 비율만 지원됨** (`16:9` / `9:16` / `2:1` / `1:2` / `21:9` / `9:21`)
+      실제 생성 이미지 선명도 제어:
 
-  <Warning>
-    지원하지 않는 4K 조합은 400 오류 반환:
+      * `1K` - 1024 기준, 비용 절감 및 일상 사용 적합(기본값)
+      * `2K` - 2048 기준, 포스터 / 고화질 요구에 적합
+      * `4K` - 3840 기준, **6개 비율만 지원**(`16:9` / `9:16` / `2:1` / `1:2` / `21:9` / `9:21`)
 
-    * `1:1` × `4K` ❌ (초과 픽셀 제한)
-    * `3:2` / `2:3` × `4K` ❌ (초과 픽셀 제한)
-    * `4:3` / `3:4` × `4K` ❌ (초과 픽셀 제한)
-    * `5:4` / `4:5` × `4K` ❌ (초과 픽셀 제한)
+      <Warning>
+        지원하지 않는 4K 조합은 400 오류 반환:
 
-    위 비율에서 고화질 필요 시, `resolution=2K` 사용 권장
-  </Warning>
-</ParamField>
+        * `1:1` × `4K` ❌ (초과 픽셀 제한)
+        * `3:2` / `2:3` × `4K` ❌ (초과 픽셀 제한)
+        * `4:3` / `3:4` × `4K` ❌ (초과 픽셀 제한)
+        * `5:4` / `4:5` × `4K` ❌ (초과 픽셀 제한)
 
-<ParamField body="quality" type="string" default="auto">
-  이미지 품질
+        고해상도로 위 비율 사용 시, `resolution=2K` 사용 권장
+      </Warning>
+    </ParamField>
 
-  * `auto` - 자동 (기본, 일반적으로 `low`와 동일)
-  * `low` - 빠른 처리 및 비용 절감, 윤곽선 중심
-  * `medium` - 균형 잡힘
-  * `high` - 최고 정밀도 (4K + high 시 소요 시간 > 120초)
-</ParamField>
+    <ParamField body="quality" type="string" default="auto">
+      이미지 품질
 
-<ParamField body="image_urls" type="array">
-  참조 이미지 배열, 입력 시 이미지 변환 모드 활성화
+      * `auto` - 자동(기본값)
+      * `low` - 빠르고 비용 절감, 윤곽선 표현에 적합
+      * `medium` - 균형
+      * `high` - 최고 품질(4K + high 시 소요 시간 >120초)
+    </ParamField>
 
-  * 최대 **9장** 참조 이미지 허용
-  * 다음 두 가지 형식 지원:
-    1. 공개 접근 가능한 URL
-    2. Base64 인코딩 형식
-       * 반드시 전체 Data URI 형식 사용: `data:image/{포맷};base64,{base64 데이터}`
-       * 지원 이미지 포맷: jpeg, png, webp
-       * 예시: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
-       * ⚠️ 주의: `data:image/jpeg;base64,` 접두사 포함 필요
+    <ParamField body="image_urls" type="array">
+      참고 이미지 배열, 입력 시 이미지 참고 생성 모드 활성화
+
+      * 최대 **9장** 참고 이미지 허용
+      * 다음 두 가지 형식 지원:
+        1. 공개 접근 가능한 URL
+        2. Base64 인코딩 형식
+           * 반드시 전체 Data URI 형식 사용: `data:image/{포맷};base64,{base64데이터}`
+           * 지원 이미지 포맷: jpeg, png, webp
+           * 예시: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+           * ⚠️ 주의: 반드시 `data:image/jpeg;base64,` 접두사 포함
+    </ParamField>
+  </Expandable>
 </ParamField>
 
 ## 크기 × 해상도 대응표
@@ -158,40 +164,44 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 ## 작업 결과 조회
 
-제출이 성공하면 `task_id`가 반환되며, `GET /v1/tasks/{task_id}` 를 통해 작업 상태를 폴링할 수 있습니다. 자세한 내용은 [작업 조회 엔드포인트](/kr/api-reference/tasks/get-task)를 참조하세요.
+제출 성공 후 `task_id`가 반환되며, `GET /v1/tasks/{task_id}`를 통해 작업 상태를 폴링할 수 있습니다. 자세한 내용은 [작업 조회 API](/en/api-reference/tasks/get-task)를 참고하세요.
 
-### 폴링 권장 사항
+### 폴링 권장사항
 
-* **첫 조회 지연**: 제출 후 10~20초 기다린 후 조회 시작
-* **조회 간격**: 3~5초 간격 권장
-* **타임아웃 참고**: `high + 2K/4K` 조합은 최대 130초 소요될 수 있으며, 클라이언트 타임아웃은 180초 이상 권장
+* **최초 조회 지연 시간**：제출 후 10~20초 대기 후 조회 시작
+* **조회 간격**：3~5초 간격 권장
+* **타임아웃 참고**：`high + 2K/4K` 조합 처리 시간은 최대 130초일 수 있으며, 클라이언트 타임아웃은 180초 이상 권장
 
 <RequestExample>
   ```bash cURL
   curl --request POST \
-    --url https://api.apimart.ai/v1/images/generations \
+    --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
       "model": "gpt-image-2-official",
-      "prompt": "별빛 아래 오래된 성",
-      "size": "16:9",
-      "resolution": "2K",
-      "quality": "high"
+      "params": {
+        "prompt": "별이 빛나는 오래된 성",
+        "size": "16:9",
+        "resolution": "2K",
+        "quality": "high"
+      }
     }'
   ```
 
   ```python Python
   import requests
 
-  url = "https://api.apimart.ai/v1/images/generations"
+  url = "https://aireiter.com/api/openapi/submit"
 
   payload = {
       "model": "gpt-image-2-official",
-      "prompt": "별빛 아래 오래된 성",
-      "size": "16:9",
-      "resolution": "2K",
-      "quality": "high"
+      "params": {
+          "prompt": "별이 빛나는 오래된 성",
+          "size": "16:9",
+          "resolution": "2K",
+          "quality": "high"
+      }
   }
 
   headers = {
@@ -205,14 +215,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```
 
   ```javascript JavaScript
-  const url = "https://api.apimart.ai/v1/images/generations";
+  const url = "https://aireiter.com/api/openapi/submit";
 
   const payload = {
     model: "gpt-image-2-official",
-    prompt: "별빛 아래 오래된 성",
-    size: "16:9",
-    resolution: "2K",
-    quality: "high",
+    params: {
+      prompt: "별이 빛나는 오래된 성",
+      size: "16:9",
+      resolution: "2K",
+      quality: "high",
+    },
   };
 
   const headers = {
@@ -242,14 +254,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   )
 
   func main() {
-      url := "https://api.apimart.ai/v1/images/generations"
+      url := "https://aireiter.com/api/openapi/submit"
 
       payload := map[string]interface{}{
-          "model":      "gpt-image-2-official",
-          "prompt":     "별빛 아래 오래된 성",
-          "size":       "16:9",
-          "resolution": "2K",
-          "quality":    "high",
+          "model": "gpt-image-2-official",
+          "params": map[string]interface{}{
+              "prompt":     "별이 빛나는 오래된 성",
+              "size":       "16:9",
+              "resolution": "2K",
+              "quality":    "high",
+          },
       }
 
       jsonData, _ := json.Marshal(payload)
@@ -278,15 +292,17 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   public class Main {
       public static void main(String[] args) throws Exception {
-          String url = "https://api.apimart.ai/v1/images/generations";
+          String url = "https://aireiter.com/api/openapi/submit";
 
           String payload = """
           {
             "model": "gpt-image-2-official",
-            "prompt": "별빛 아래 오래된 성",
-            "size": "16:9",
-            "resolution": "2K",
-            "quality": "high"
+            "params": {
+              "prompt": "별이 빛나는 오래된 성",
+              "size": "16:9",
+              "resolution": "2K",
+              "quality": "high"
+            }
           }
           """;
 
@@ -309,14 +325,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```php PHP
   <?php
 
-  $url = "https://api.apimart.ai/v1/images/generations";
+  $url = "https://aireiter.com/api/openapi/submit";
 
   $payload = [
       "model" => "gpt-image-2-official",
-      "prompt" => "별빛 아래 오래된 성",
-      "size" => "16:9",
-      "resolution" => "2K",
-      "quality" => "high"
+      "params" => [
+          "prompt" => "별이 빛나는 오래된 성",
+          "size" => "16:9",
+          "resolution" => "2K",
+          "quality" => "high"
+      ]
   ];
 
   $ch = curl_init($url);
@@ -340,14 +358,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   require 'json'
   require 'uri'
 
-  url = URI("https://api.apimart.ai/v1/images/generations")
+  url = URI("https://aireiter.com/api/openapi/submit")
 
   payload = {
     model: "gpt-image-2-official",
-    prompt: "별빛 아래 오래된 성",
-    size: "16:9",
-    resolution: "2K",
-    quality: "high"
+    params: {
+      prompt: "별이 빛나는 오래된 성",
+      size: "16:9",
+      resolution: "2K",
+      quality: "high"
+    }
   }
 
   http = Net::HTTP.new(url.host, url.port)
@@ -365,14 +385,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "https://api.apimart.ai/v1/images/generations")!
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
 
   let payload: [String: Any] = [
       "model": "gpt-image-2-official",
-      "prompt": "별빛 아래 오래된 성",
-      "size": "16:9",
-      "resolution": "2K",
-      "quality": "high"
+      "params": [
+          "prompt": "별이 빛나는 오래된 성",
+          "size": "16:9",
+          "resolution": "2K",
+          "quality": "high"
+      ]
   ]
 
   var request = URLRequest(url: url)
@@ -405,14 +427,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
       static async Task Main(string[] args)
       {
-          var url = "https://api.apimart.ai/v1/images/generations";
+          var url = "https://aireiter.com/api/openapi/submit";
 
           var payload = @"{
               ""model"": ""gpt-image-2-official"",
-              ""prompt"": ""별빛 아래 오래된 성"",
-              ""size"": ""16:9"",
-              ""resolution"": ""2K"",
-              ""quality"": ""high""
+              ""params"": {
+                  ""prompt"": ""별이 빛나는 오래된 성"",
+                  ""size"": ""16:9"",
+                  ""resolution"": ""2K"",
+                  ""quality"": ""high""
+              }
           }";
 
           using var client = new HttpClient();
@@ -432,14 +456,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   import 'package:http/http.dart' as http;
 
   void main() async {
-    final url = Uri.parse('https://api.apimart.ai/v1/images/generations');
+    final url = Uri.parse('https://aireiter.com/api/openapi/submit');
 
     final payload = {
       'model': 'gpt-image-2-official',
-      'prompt': '별빛 아래 오래된 성',
-      'size': '16:9',
-      'resolution': '2K',
-      'quality': 'high',
+      'params': {
+        'prompt': '별이 빛나는 오래된 성',
+        'size': '16:9',
+        'resolution': '2K',
+        'quality': 'high',
+      },
     };
 
     final response = await http.post(
@@ -459,14 +485,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   library(httr)
   library(jsonlite)
 
-  url <- "https://api.apimart.ai/v1/images/generations"
+  url <- "https://aireiter.com/api/openapi/submit"
 
   payload <- list(
     model = "gpt-image-2-official",
-    prompt = "별빛 아래 오래된 성",
-    size = "16:9",
-    resolution = "2K",
-    quality = "high"
+    params = list(
+      prompt = "별이 빛나는 오래된 성",
+      size = "16:9",
+      resolution = "2K",
+      quality = "high"
+    )
   )
 
   response <- POST(
@@ -500,7 +528,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 400,
-      "message": "해상도 4K는 크기 1:1에 지원되지 않습니다. 허용: 1K / 2K",
+      "message": "크기 1:1에 대해 해상도 4K는 지원되지 않으며, 허용치는 1K / 2K입니다",
       "type": "invalid_request_error"
     }
   }
@@ -530,7 +558,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 429,
-      "message": "요청이 너무 많습니다. 잠시 후 다시 시도하세요",
+      "message": "요청이 너무 빈번합니다. 잠시 후 다시 시도하세요",
       "type": "rate_limit_error"
     }
   }

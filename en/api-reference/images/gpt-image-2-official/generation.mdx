@@ -1,14 +1,14 @@
 ---
 title: 'GPT-Image-2 Official Channel Image Generation'
 description: |
-    - OpenAI official gpt-image-2 model, based on /v1/images/generations compatible protocol
+    - Official OpenAI gpt-image-2 model, compatible with the /v1/images/generations protocol
     - Asynchronous processing mode, returns task_id for subsequent queries
-    - Text-to-image / image-to-image all-in-one
-    - New resolution tier field, supports 1K / 2K / 4K resolution options
+    - Text-to-image / Image-to-image all-in-one
+    - Added resolution tier field, supports 1K / 2K / 4K resolution options
     - Supports 13 aspect ratios (4K tier supports 6 of them: 16:9 / 9:16 / 2:1 / 1:2 / 21:9 / 9:21)
-    - Up to 9 reference images, supports mixed URLs and base64
-    - Submitted prompts are reviewed for platform sensitive words / safety, violating content will be directly rejected
-api: 'POST https://api.apimart.ai/v1/images/generations'
+    - Up to 9 reference images, supports mixed URL and base64
+    - Submitted prompts undergo platform sensitive words / safety review, violating content will be directly rejected
+api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
@@ -33,83 +33,89 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="model" type="string" default="gpt-image-2-official" required>
   Image generation model name
 
-  Fixed value: `gpt-image-2-official` (OpenAI official gpt-image-2 model)
+  Fixed value `gpt-image-2-official` (OpenAI official gpt-image-2 model)
 </ParamField>
 
-<ParamField body="prompt" type="string" required>
-  Text description for image generation
+<ParamField body="params" type="object" required>
+  Model parameters object
 
-  * Supports Chinese and English, detailed description is recommended
-  * Before submission, it will go through platform sensitivity / safety review; violating content will return an error directly
-</ParamField>
+  <Expandable title="params Object Properties">
+    <ParamField body="prompt" type="string" required>
+      Text description for image generation
 
-<ParamField body="size" type="string" default="1:1">
-  Aspect ratio
+      * Supports Chinese and English, detailed description recommended
+      * Content will be checked against platform sensitive words / security review before submission; hits on violations will return an error directly
+    </ParamField>
 
-  Public-facing ratio values; internally mapped to specific pixels by the system according to `resolution`.
+    <ParamField body="size" type="string" default="1:1">
+      Aspect ratio
 
-  Supports 13 aspect ratios:
+      Externally uses ratio values; internally mapped automatically to specific pixels by `resolution`.
 
-  * `1:1` - Square composition (default, social avatar / logo)
-  * `3:2` - Landscape composition (common DSLR ratio)
-  * `2:3` - Portrait composition (vertical poster)
-  * `4:3` - Landscape composition (classic monitor / PPT)
-  * `3:4` - Portrait composition
-  * `5:4` - Landscape composition
-  * `4:5` - Portrait composition (Instagram vertical post)
-  * `16:9` - Landscape composition (widescreen video cover)
-  * `9:16` - Portrait composition (full-screen mobile / short video cover)
-  * `2:1` - Landscape composition (web banner)
-  * `1:2` - Portrait composition
-  * `21:9` - Landscape composition (cinematic ultrawide)
-  * `9:21` - Portrait composition
+      Supports 13 ratios:
 
-  <Warning>
-    Only ratio formats are supported; passing pixel dimensions (like `1024x1024`) will cause an immediate error
-  </Warning>
-</ParamField>
+      * `1:1` - Square composition (default, social avatar / logo)
+      * `3:2` - Landscape (common DSLR ratio)
+      * `2:3` - Portrait (poster vertical)
+      * `4:3` - Landscape (classic monitor / PPT)
+      * `3:4` - Portrait
+      * `5:4` - Landscape
+      * `4:5` - Portrait (Instagram vertical post)
+      * `16:9` - Landscape (widescreen video cover)
+      * `9:16` - Portrait (phone fullscreen / short video cover)
+      * `2:1` - Landscape (web banner)
+      * `1:2` - Portrait
+      * `21:9` - Landscape (cinema ultra widescreen)
+      * `9:21` - Portrait
 
-<ParamField body="resolution" type="string" default="1K">
-  Resolution tier
+      <Warning>
+        Only ratio format is supported; passing pixel dimensions (e.g. `1024x1024`) will cause an error
+      </Warning>
+    </ParamField>
 
-  Controls the actual image clarity:
+    <ParamField body="resolution" type="string" default="1K">
+      Resolution tier
 
-  * `1K` - Baseline 1024, economical and sufficient for daily use (default)
-  * `2K` - Baseline 2048, suitable for posters / high-definition needs
-  * `4K` - Baseline 3840, **only supported for 6 ratios** (`16:9` / `9:16` / `2:1` / `1:2` / `21:9` / `9:21`)
+      Controls actual output image clarity:
 
-  <Warning>
-    Unsupported 4K combinations will return 400:
+      * `1K` - 1024 baseline, cost-saving daily use (default)
+      * `2K` - 2048 baseline, suitable for posters / HD needs
+      * `4K` - 3840 baseline, **only supported for 6 ratios** (`16:9` / `9:16` / `2:1` / `1:2` / `21:9` / `9:21`)
 
-    * `1:1` × `4K` ❌ (exceeds pixel limit)
-    * `3:2` / `2:3` × `4K` ❌ (exceeds pixel limit)
-    * `4:3` / `3:4` × `4K` ❌ (exceeds pixel limit)
-    * `5:4` / `4:5` × `4K` ❌ (exceeds pixel limit)
+      <Warning>
+        Unsupported 4K combinations will return 400:
 
-    For HD versions of these ratios, use `resolution=2K` instead.
-  </Warning>
-</ParamField>
+        * `1:1` × `4K` ❌ (exceeds pixel limit)
+        * `3:2` / `2:3` × `4K` ❌ (exceeds pixel limit)
+        * `4:3` / `3:4` × `4K` ❌ (exceeds pixel limit)
+        * `5:4` / `4:5` × `4K` ❌ (exceeds pixel limit)
 
-<ParamField body="quality" type="string" default="auto">
-  Image quality
+        For HD images of these ratios, use `resolution=2K` instead.
+      </Warning>
+    </ParamField>
 
-  * `auto` - Automatic (default, usually equivalent to `low`)
-  * `low` - Fast and economical, sufficient outlines
-  * `medium` - Balanced
-  * `high` - Highest precision (4K + high takes >120 seconds)
-</ParamField>
+    <ParamField body="quality" type="string" default="auto">
+      Image quality
 
-<ParamField body="image_urls" type="array">
-  Reference image array; when provided, operates in image-to-image mode
+      * `auto` - Automatic (default)
+      * `low` - Fast and cost-saving, outlines are sufficient
+      * `medium` - Balanced
+      * `high` - Highest precision (4K + high takes >120 seconds)
+    </ParamField>
 
-  * Up to **9** reference images
-  * Supports the following two formats:
-    1. Publicly accessible URLs
-    2. Base64 encoded format
-       * Must use the full Data URI format: `data:image/{format};base64,{base64 data}`
-       * Supported image formats: jpeg, png, webp
-       * Example: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
-       * ⚠️ Note: must include the `data:image/jpeg;base64,` prefix
+    <ParamField body="image_urls" type="array">
+      Reference image array; when provided, image-to-image generation mode is used
+
+      * Up to **9** reference images
+      * Supports the following two formats:
+        1. Public accessible URLs
+        2. Base64 encoded format
+           * Must use the full Data URI format: `data:image/{format};base64,{base64data}`
+           * Supported image formats: jpeg, png, webp
+           * Example: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+           * ⚠️ Note: must include the `data:image/jpeg;base64,` prefix
+    </ParamField>
+  </Expandable>
 </ParamField>
 
 ## Size × Resolution Mapping Table
@@ -158,40 +164,44 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 ## Query Task Result
 
-After a successful submission, a `task_id` is returned. You can poll the task status via `GET /v1/tasks/{task_id}`. See [Task Query API](/en/api-reference/tasks/get-task) for details.
+After successful submission, a `task_id` is returned. Poll the task status through `GET /v1/tasks/{task_id}`. For details, see [Task Query Endpoint](/en/api-reference/tasks/get-task).
 
 ### Polling Recommendations
 
-* **Initial Query Delay**: Wait 10~20 seconds after submission before starting to query
-* **Query Interval**: Recommended every 3~5 seconds
-* **Timeout Reference**: The `high + 2K/4K` combination may take up to 130 seconds, client timeout is recommended to be ≥ 180 seconds
+* **Initial query delay**: Wait 10~20 seconds after submission before starting to query
+* **Query interval**: Recommended every 3~5 seconds
+* **Timeout reference**: The `high + 2K/4K` combination can take up to 130 seconds; client timeout is recommended to be ≥ 180 seconds
 
 <RequestExample>
   ```bash cURL
   curl --request POST \
-    --url https://api.apimart.ai/v1/images/generations \
+    --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
       "model": "gpt-image-2-official",
-      "prompt": "An ancient castle under the starry sky",
-      "size": "16:9",
-      "resolution": "2K",
-      "quality": "high"
+      "params": {
+        "prompt": "An ancient castle under the starry sky",
+        "size": "16:9",
+        "resolution": "2K",
+        "quality": "high"
+      }
     }'
   ```
 
   ```python Python
   import requests
 
-  url = "https://api.apimart.ai/v1/images/generations"
+  url = "https://aireiter.com/api/openapi/submit"
 
   payload = {
       "model": "gpt-image-2-official",
-      "prompt": "An ancient castle under the starry sky",
-      "size": "16:9",
-      "resolution": "2K",
-      "quality": "high"
+      "params": {
+          "prompt": "An ancient castle under the starry sky",
+          "size": "16:9",
+          "resolution": "2K",
+          "quality": "high"
+      }
   }
 
   headers = {
@@ -205,14 +215,16 @@ After a successful submission, a `task_id` is returned. You can poll the task st
   ```
 
   ```javascript JavaScript
-  const url = "https://api.apimart.ai/v1/images/generations";
+  const url = "https://aireiter.com/api/openapi/submit";
 
   const payload = {
     model: "gpt-image-2-official",
-    prompt: "An ancient castle under the starry sky",
-    size: "16:9",
-    resolution: "2K",
-    quality: "high",
+    params: {
+      prompt: "An ancient castle under the starry sky",
+      size: "16:9",
+      resolution: "2K",
+      quality: "high",
+    },
   };
 
   const headers = {
@@ -242,14 +254,16 @@ After a successful submission, a `task_id` is returned. You can poll the task st
   )
 
   func main() {
-      url := "https://api.apimart.ai/v1/images/generations"
+      url := "https://aireiter.com/api/openapi/submit"
 
       payload := map[string]interface{}{
-          "model":      "gpt-image-2-official",
-          "prompt":     "An ancient castle under the starry sky",
-          "size":       "16:9",
-          "resolution": "2K",
-          "quality":    "high",
+          "model": "gpt-image-2-official",
+          "params": map[string]interface{}{
+              "prompt":     "An ancient castle under the starry sky",
+              "size":       "16:9",
+              "resolution": "2K",
+              "quality":    "high",
+          },
       }
 
       jsonData, _ := json.Marshal(payload)
@@ -278,15 +292,17 @@ After a successful submission, a `task_id` is returned. You can poll the task st
 
   public class Main {
       public static void main(String[] args) throws Exception {
-          String url = "https://api.apimart.ai/v1/images/generations";
+          String url = "https://aireiter.com/api/openapi/submit";
 
           String payload = """
           {
             "model": "gpt-image-2-official",
-            "prompt": "An ancient castle under the starry sky",
-            "size": "16:9",
-            "resolution": "2K",
-            "quality": "high"
+            "params": {
+              "prompt": "An ancient castle under the starry sky",
+              "size": "16:9",
+              "resolution": "2K",
+              "quality": "high"
+            }
           }
           """;
 
@@ -309,14 +325,16 @@ After a successful submission, a `task_id` is returned. You can poll the task st
   ```php PHP
   <?php
 
-  $url = "https://api.apimart.ai/v1/images/generations";
+  $url = "https://aireiter.com/api/openapi/submit";
 
   $payload = [
       "model" => "gpt-image-2-official",
-      "prompt" => "An ancient castle under the starry sky",
-      "size" => "16:9",
-      "resolution" => "2K",
-      "quality" => "high"
+      "params" => [
+          "prompt" => "An ancient castle under the starry sky",
+          "size" => "16:9",
+          "resolution" => "2K",
+          "quality" => "high"
+      ]
   ];
 
   $ch = curl_init($url);
@@ -340,14 +358,16 @@ After a successful submission, a `task_id` is returned. You can poll the task st
   require 'json'
   require 'uri'
 
-  url = URI("https://api.apimart.ai/v1/images/generations")
+  url = URI("https://aireiter.com/api/openapi/submit")
 
   payload = {
     model: "gpt-image-2-official",
-    prompt: "An ancient castle under the starry sky",
-    size: "16:9",
-    resolution: "2K",
-    quality: "high"
+    params: {
+      prompt: "An ancient castle under the starry sky",
+      size: "16:9",
+      resolution: "2K",
+      quality: "high"
+    }
   }
 
   http = Net::HTTP.new(url.host, url.port)
@@ -365,14 +385,16 @@ After a successful submission, a `task_id` is returned. You can poll the task st
   ```swift Swift
   import Foundation
 
-  let url = URL(string: "https://api.apimart.ai/v1/images/generations")!
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
 
   let payload: [String: Any] = [
       "model": "gpt-image-2-official",
-      "prompt": "An ancient castle under the starry sky",
-      "size": "16:9",
-      "resolution": "2K",
-      "quality": "high"
+      "params": [
+          "prompt": "An ancient castle under the starry sky",
+          "size": "16:9",
+          "resolution": "2K",
+          "quality": "high"
+      ]
   ]
 
   var request = URLRequest(url: url)
@@ -405,14 +427,16 @@ After a successful submission, a `task_id` is returned. You can poll the task st
   {
       static async Task Main(string[] args)
       {
-          var url = "https://api.apimart.ai/v1/images/generations";
+          var url = "https://aireiter.com/api/openapi/submit";
 
           var payload = @"{
               ""model"": ""gpt-image-2-official"",
-              ""prompt"": ""An ancient castle under the starry sky"",
-              ""size"": ""16:9"",
-              ""resolution"": ""2K"",
-              ""quality"": ""high""
+              ""params"": {
+                  ""prompt"": ""An ancient castle under the starry sky"",
+                  ""size"": ""16:9"",
+                  ""resolution"": ""2K"",
+                  ""quality"": ""high""
+              }
           }";
 
           using var client = new HttpClient();
@@ -432,14 +456,16 @@ After a successful submission, a `task_id` is returned. You can poll the task st
   import 'package:http/http.dart' as http;
 
   void main() async {
-    final url = Uri.parse('https://api.apimart.ai/v1/images/generations');
+    final url = Uri.parse('https://aireiter.com/api/openapi/submit');
 
     final payload = {
       'model': 'gpt-image-2-official',
-      'prompt': 'An ancient castle under the starry sky',
-      'size': '16:9',
-      'resolution': '2K',
-      'quality': 'high',
+      'params': {
+        'prompt': 'An ancient castle under the starry sky',
+        'size': '16:9',
+        'resolution': '2K',
+        'quality': 'high',
+      },
     };
 
     final response = await http.post(
@@ -459,14 +485,16 @@ After a successful submission, a `task_id` is returned. You can poll the task st
   library(httr)
   library(jsonlite)
 
-  url <- "https://api.apimart.ai/v1/images/generations"
+  url <- "https://aireiter.com/api/openapi/submit"
 
   payload <- list(
     model = "gpt-image-2-official",
-    prompt = "An ancient castle under the starry sky",
-    size = "16:9",
-    resolution = "2K",
-    quality = "high"
+    params = list(
+      prompt = "An ancient castle under the starry sky",
+      size = "16:9",
+      resolution = "2K",
+      quality = "high"
+    )
   )
 
   response <- POST(
