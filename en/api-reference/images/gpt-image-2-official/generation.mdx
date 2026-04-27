@@ -30,87 +30,86 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 ## Body
 
-<ParamField body="model" type="string" default="gpt-image-2-official" required>
-  Image generation model name
+<ParamField body="model" type="string" default="gpt_image_2_official" required>
+  Name of the image generation model
 
-  Fixed value `gpt-image-2-official` (OpenAI official gpt-image-2 model)
+  Fixed value `gpt_image_2_official` (OpenAI official gpt-image-2 model)
 </ParamField>
 
 <ParamField body="params" type="object" required>
   Model parameters object
 
-  <Expandable title="params Object Properties">
+  <Expandable title="params object properties">
     <ParamField body="prompt" type="string" required>
       Text description for image generation
 
       * Supports Chinese and English, detailed description recommended
-      * Content will be checked against platform sensitive words / security review before submission; hits on violations will return an error directly
+      * Will be checked by platform sensitive word / security review before submitting; violation will cause an error response
     </ParamField>
 
-    <ParamField body="size" type="string" default="1:1">
+    <ParamField body="aspect_ratio" type="string" default="1:1">
       Aspect ratio
 
-      Externally uses ratio values; internally mapped automatically to specific pixels by `resolution`.
+      Externally used ratio values; internally mapped to specific pixels according to `resolution`.
 
       Supports 13 ratios:
 
       * `1:1` - Square composition (default, social avatar / logo)
-      * `3:2` - Landscape (common DSLR ratio)
-      * `2:3` - Portrait (poster vertical)
-      * `4:3` - Landscape (classic monitor / PPT)
-      * `3:4` - Portrait
-      * `5:4` - Landscape
-      * `4:5` - Portrait (Instagram vertical post)
-      * `16:9` - Landscape (widescreen video cover)
-      * `9:16` - Portrait (phone fullscreen / short video cover)
-      * `2:1` - Landscape (web banner)
-      * `1:2` - Portrait
-      * `21:9` - Landscape (cinema ultra widescreen)
-      * `9:21` - Portrait
+      * `3:2` - Landscape composition (common DSLR ratio)
+      * `2:3` - Portrait composition (poster vertical)
+      * `4:3` - Landscape composition (classic monitor / PPT)
+      * `3:4` - Portrait composition
+      * `5:4` - Landscape composition
+      * `4:5` - Portrait composition (Instagram vertical post)
+      * `16:9` - Landscape composition (widescreen video cover)
+      * `9:16` - Portrait composition (full-screen phone / short video cover)
+      * `2:1` - Landscape composition (web banner)
+      * `1:2` - Portrait composition
+      * `21:9` - Landscape composition (cinema widescreen)
+      * `9:21` - Portrait composition
 
       <Warning>
-        Only ratio format is supported; passing pixel dimensions (e.g. `1024x1024`) will cause an error
+        Only ratio format is supported; pixel size inputs (e.g. `1024x1024`) will cause an error
       </Warning>
     </ParamField>
 
     <ParamField body="resolution" type="string" default="1K">
       Resolution tier
 
-      Controls actual output image clarity:
+      Controls actual image clarity:
 
-      * `1K` - 1024 baseline, cost-saving daily use (default)
+      * `1K` - 1024 baseline, cost-effective for daily use (default)
       * `2K` - 2048 baseline, suitable for posters / HD needs
-      * `4K` - 3840 baseline, **only supported for 6 ratios** (`16:9` / `9:16` / `2:1` / `1:2` / `21:9` / `9:21`)
+      * `4K` - 3840 baseline, **supported only by 6 ratios** (`16:9` / `9:16` / `2:1` / `1:2` / `21:9` / `9:21`)
 
       <Warning>
-        Unsupported 4K combinations will return 400:
+        Unsupported 4K combinations will return 400 error:
 
         * `1:1` × `4K` ❌ (exceeds pixel limit)
         * `3:2` / `2:3` × `4K` ❌ (exceeds pixel limit)
         * `4:3` / `3:4` × `4K` ❌ (exceeds pixel limit)
         * `5:4` / `4:5` × `4K` ❌ (exceeds pixel limit)
 
-        For HD images of these ratios, use `resolution=2K` instead.
+        For HD images in these ratios, use `resolution=2K` instead.
       </Warning>
     </ParamField>
 
-    <ParamField body="quality" type="string" default="auto">
+    <ParamField body="quality" type="string" default="low">
       Image quality
 
-      * `auto` - Automatic (default)
-      * `low` - Fast and cost-saving, outlines are sufficient
+      * `low` - Fast and cost-saving, contour adequate (default)
       * `medium` - Balanced
-      * `high` - Highest precision (4K + high takes >120 seconds)
+      * `high` - Highest precision (4K + high consumes >120 seconds)
     </ParamField>
 
-    <ParamField body="image_urls" type="array">
-      Reference image array; when provided, image-to-image generation mode is used
+    <ParamField body="image_url" type="array">
+      Reference image array, uses image-to-image mode when provided
 
       * Up to **9** reference images
-      * Supports the following two formats:
-        1. Public accessible URLs
+      * Supports two formats:
+        1. Publicly accessible URL
         2. Base64 encoded format
-           * Must use the full Data URI format: `data:image/{format};base64,{base64data}`
+           * Must use full Data URI format: `data:image/{format};base64,{base64 data}`
            * Supported image formats: jpeg, png, webp
            * Example: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
            * ⚠️ Note: must include the `data:image/jpeg;base64,` prefix
@@ -118,12 +117,18 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   </Expandable>
 </ParamField>
 
+<ParamField body="out_task_id" type="string" required>
+  Initiator task ID
+
+  User-defined task identifier, required
+</ParamField>
+
 ## Size × Resolution Mapping Table
 
-`size × resolution` → Actual OpenAI pixels (13 ratios × 3 levels):
+`aspect_ratio × resolution` → OpenAI Actual Pixels (13 ratios × 3 tiers):
 
-| size   | `1K`      | `2K`      | `4K`          |
-| ------ | --------- | --------- | ------------- |
+| aspect\_ratio | `1K`      | `2K`      | `4K`          |
+| ------------- | --------- | --------- | ------------- |
 | `1:1`  | 1024×1024 | 2048×2048 | ❌ Pixel limit exceeded       |
 | `3:2`  | 1536×1024 | 2048×1360 | ❌ Pixel limit exceeded       |
 | `2:3`  | 1024×1536 | 1360×2048 | ❌ Pixel limit exceeded       |
@@ -138,7 +143,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 | `21:9` | 2016×864  | 2688×1152 | **3840×1648** |
 | `9:21` | 864×2016  | 1152×2688 | **1648×3840** |
 
-> `3:2` / `2:3` at 2K is actually 2048×1360 (approximate ratio, error < 0.5%); 4K only supports 6 ratios (combinations exceeding the OpenAI total pixel limit are unavailable).
+> `3:2` / `2:3` @ 2K are actually 2048×1360 (approximate ratio, error < 0.5%); 4K supports only 6 ratios (combinations exceeding OpenAI's total pixel limit are unavailable).
 
 ## Response
 
@@ -164,13 +169,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 ## Query Task Result
 
-After successful submission, a `task_id` is returned. Poll the task status through `GET /v1/tasks/{task_id}`. For details, see [Task Query Endpoint](/en/api-reference/tasks/get-task).
+Upon successful submission, a `task_id` is returned. Poll the task status using `GET /v1/tasks/{task_id}`. For details, see the [Task Query Endpoint](/en/api-reference/tasks/get-task).
 
 ### Polling Recommendations
 
-* **Initial query delay**: Wait 10~20 seconds after submission before starting to query
-* **Query interval**: Recommended every 3~5 seconds
-* **Timeout reference**: The `high + 2K/4K` combination can take up to 130 seconds; client timeout is recommended to be ≥ 180 seconds
+* **Initial Query Delay**: Wait 10~20 seconds after submission before starting to query
+* **Query Interval**: Recommend every 3~5 seconds
+* **Timeout Reference**: `high + 2K/4K` combination can take up to 130 seconds; client timeout recommendation ≥ 180 seconds
 
 <RequestExample>
   ```bash cURL
@@ -179,13 +184,14 @@ After successful submission, a `task_id` is returned. Poll the task status throu
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
-      "model": "gpt-image-2-official",
+      "model": "gpt_image_2_official",
       "params": {
-        "prompt": "An ancient castle under the starry sky",
-        "size": "16:9",
+        "prompt": "Ancient castle under the starry sky",
+        "aspect_ratio": "16:9",
         "resolution": "2K",
         "quality": "high"
-      }
+      },
+      "out_task_id": "my_task_123456"
     }'
   ```
 
@@ -195,13 +201,14 @@ After successful submission, a `task_id` is returned. Poll the task status throu
   url = "https://aireiter.com/api/openapi/submit"
 
   payload = {
-      "model": "gpt-image-2-official",
+      "model": "gpt_image_2_official",
       "params": {
-          "prompt": "An ancient castle under the starry sky",
-          "size": "16:9",
+          "prompt": "Ancient castle under the starry sky",
+          "aspect_ratio": "16:9",
           "resolution": "2K",
           "quality": "high"
-      }
+      },
+      "out_task_id": "my_task_123456"
   }
 
   headers = {
@@ -218,13 +225,14 @@ After successful submission, a `task_id` is returned. Poll the task status throu
   const url = "https://aireiter.com/api/openapi/submit";
 
   const payload = {
-    model: "gpt-image-2-official",
+    model: "gpt_image_2_official",
     params: {
-      prompt: "An ancient castle under the starry sky",
-      size: "16:9",
+      prompt: "Ancient castle under the starry sky",
+      aspect_ratio: "16:9",
       resolution: "2K",
       quality: "high",
     },
+    out_task_id: "my_task_123456",
   };
 
   const headers = {
@@ -257,13 +265,14 @@ After successful submission, a `task_id` is returned. Poll the task status throu
       url := "https://aireiter.com/api/openapi/submit"
 
       payload := map[string]interface{}{
-          "model": "gpt-image-2-official",
+          "model": "gpt_image_2_official",
           "params": map[string]interface{}{
-              "prompt":     "An ancient castle under the starry sky",
-              "size":       "16:9",
+              "prompt":     "Ancient castle under the starry sky",
+              "aspect_ratio":       "16:9",
               "resolution": "2K",
               "quality":    "high",
           },
+          "out_task_id": "my_task_123456",
       }
 
       jsonData, _ := json.Marshal(payload)
@@ -296,13 +305,14 @@ After successful submission, a `task_id` is returned. Poll the task status throu
 
           String payload = """
           {
-            "model": "gpt-image-2-official",
+            "model": "gpt_image_2_official",
             "params": {
-              "prompt": "An ancient castle under the starry sky",
-              "size": "16:9",
+              "prompt": "Ancient castle under the starry sky",
+              "aspect_ratio": "16:9",
               "resolution": "2K",
               "quality": "high"
-            }
+            },
+            "out_task_id": "my_task_123456"
           }
           """;
 
@@ -328,13 +338,14 @@ After successful submission, a `task_id` is returned. Poll the task status throu
   $url = "https://aireiter.com/api/openapi/submit";
 
   $payload = [
-      "model" => "gpt-image-2-official",
+      "model" => "gpt_image_2_official",
       "params" => [
-          "prompt" => "An ancient castle under the starry sky",
-          "size" => "16:9",
+          "prompt" => "Ancient castle under the starry sky",
+          "aspect_ratio" => "16:9",
           "resolution" => "2K",
           "quality" => "high"
-      ]
+      ],
+      "out_task_id" => "my_task_123456"
   ];
 
   $ch = curl_init($url);
@@ -361,13 +372,14 @@ After successful submission, a `task_id` is returned. Poll the task status throu
   url = URI("https://aireiter.com/api/openapi/submit")
 
   payload = {
-    model: "gpt-image-2-official",
+    model: "gpt_image_2_official",
     params: {
-      prompt: "An ancient castle under the starry sky",
-      size: "16:9",
+      prompt: "Ancient castle under the starry sky",
+      aspect_ratio: "16:9",
       resolution: "2K",
       quality: "high"
-    }
+    },
+    out_task_id: "my_task_123456"
   }
 
   http = Net::HTTP.new(url.host, url.port)
@@ -388,13 +400,14 @@ After successful submission, a `task_id` is returned. Poll the task status throu
   let url = URL(string: "https://aireiter.com/api/openapi/submit")!
 
   let payload: [String: Any] = [
-      "model": "gpt-image-2-official",
+      "model": "gpt_image_2_official",
       "params": [
-          "prompt": "An ancient castle under the starry sky",
-          "size": "16:9",
+          "prompt": "Ancient castle under the starry sky",
+          "aspect_ratio": "16:9",
           "resolution": "2K",
           "quality": "high"
-      ]
+      ],
+      "out_task_id": "my_task_123456"
   ]
 
   var request = URLRequest(url: url)
@@ -430,13 +443,14 @@ After successful submission, a `task_id` is returned. Poll the task status throu
           var url = "https://aireiter.com/api/openapi/submit";
 
           var payload = @"{
-              ""model"": ""gpt-image-2-official"",
+              ""model"": ""gpt_image_2_official"",
               ""params"": {
-                  ""prompt"": ""An ancient castle under the starry sky"",
-                  ""size"": ""16:9"",
+                  ""prompt"": ""Ancient castle under the starry sky"",
+                  ""aspect_ratio"": ""16:9"",
                   ""resolution"": ""2K"",
                   ""quality"": ""high""
-              }
+              },
+              ""out_task_id"": ""my_task_123456""
           }";
 
           using var client = new HttpClient();
@@ -459,13 +473,14 @@ After successful submission, a `task_id` is returned. Poll the task status throu
     final url = Uri.parse('https://aireiter.com/api/openapi/submit');
 
     final payload = {
-      'model': 'gpt-image-2-official',
+      'model': 'gpt_image_2_official',
       'params': {
-        'prompt': 'An ancient castle under the starry sky',
-        'size': '16:9',
+        'prompt': 'Ancient castle under the starry sky',
+        'aspect_ratio': '16:9',
         'resolution': '2K',
         'quality': 'high',
       },
+      'out_task_id': 'my_task_123456',
     };
 
     final response = await http.post(
@@ -488,13 +503,14 @@ After successful submission, a `task_id` is returned. Poll the task status throu
   url <- "https://aireiter.com/api/openapi/submit"
 
   payload <- list(
-    model = "gpt-image-2-official",
+    model = "gpt_image_2_official",
     params = list(
-      prompt = "An ancient castle under the starry sky",
-      size = "16:9",
+      prompt = "Ancient castle under the starry sky",
+      aspect_ratio = "16:9",
       resolution = "2K",
       quality = "high"
-    )
+    ),
+    out_task_id = "my_task_123456"
   )
 
   response <- POST(

@@ -31,10 +31,10 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 ## Body
 
-<ParamField body="model" type="string" default="gpt-image-2-official" required>
+<ParamField body="model" type="string" default="gpt_image_2_official" required>
   图像生成模型名称
 
-  固定填写 `gpt-image-2-official`（OpenAI 官方 gpt-image-2 模型）
+  固定填写 `gpt_image_2_official`（OpenAI 官方 gpt-image-2 模型）
 </ParamField>
 
 <ParamField body="params" type="object" required>
@@ -48,7 +48,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       * 提交前会经过平台敏感词 / 安全审核，命中违规内容会直接返回错误
     </ParamField>
 
-    <ParamField body="size" type="string" default="1:1">
+    <ParamField body="aspect_ratio" type="string" default="1:1">
       画面比例
 
       对外使用比例值，系统内部按 `resolution` 自动映射到具体像素。
@@ -103,7 +103,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       * `high` - 最高精度（4K + high 耗时 >120s）
     </ParamField>
 
-    <ParamField body="image_urls" type="array">
+    <ParamField body="image_url" type="array">
       参考图数组，传入后走图生图模式
 
       * 最多 **9 张** 参考图
@@ -118,12 +118,18 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   </Expandable>
 </ParamField>
 
+<ParamField body="out_task_id" type="string" required>
+  发起方任务ID
+
+  用户自定义的任务标识，必填
+</ParamField>
+
 ## 尺寸 × 分辨率映射表
 
-`size × resolution` → OpenAI 实际像素（13 比例 × 3 档位）：
+`aspect_ratio × resolution` → OpenAI 实际像素（13 比例 × 3 档位）：
 
-| size   | `1K`      | `2K`      | `4K`          |
-| ------ | --------- | --------- | ------------- |
+| aspect\_ratio | `1K`      | `2K`      | `4K`          |
+| ------------- | --------- | --------- | ------------- |
 | `1:1`  | 1024×1024 | 2048×2048 | ❌ 超像素上限       |
 | `3:2`  | 1536×1024 | 2048×1360 | ❌ 超像素上限       |
 | `2:3`  | 1024×1536 | 1360×2048 | ❌ 超像素上限       |
@@ -179,13 +185,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
-      "model": "gpt-image-2-official",
+      "model": "gpt_image_2_official",
       "params": {
         "prompt": "星空下的古老城堡",
-        "size": "16:9",
+        "aspect_ratio": "16:9",
         "resolution": "2K",
         "quality": "high"
-      }
+      },
+      "out_task_id": "my_task_123456"
     }'
   ```
 
@@ -195,13 +202,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   url = "https://aireiter.com/api/openapi/submit"
 
   payload = {
-      "model": "gpt-image-2-official",
+      "model": "gpt_image_2_official",
       "params": {
           "prompt": "星空下的古老城堡",
-          "size": "16:9",
+          "aspect_ratio": "16:9",
           "resolution": "2K",
           "quality": "high"
-      }
+      },
+      "out_task_id": "my_task_123456"
   }
 
   headers = {
@@ -218,13 +226,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   const url = "https://aireiter.com/api/openapi/submit";
 
   const payload = {
-    model: "gpt-image-2-official",
+    model: "gpt_image_2_official",
     params: {
       prompt: "星空下的古老城堡",
-      size: "16:9",
+      aspect_ratio: "16:9",
       resolution: "2K",
       quality: "high",
     },
+    out_task_id: "my_task_123456",
   };
 
   const headers = {
@@ -257,13 +266,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       url := "https://aireiter.com/api/openapi/submit"
 
       payload := map[string]interface{}{
-          "model": "gpt-image-2-official",
+          "model": "gpt_image_2_official",
           "params": map[string]interface{}{
               "prompt":     "星空下的古老城堡",
-              "size":       "16:9",
+              "aspect_ratio":       "16:9",
               "resolution": "2K",
               "quality":    "high",
           },
+          "out_task_id": "my_task_123456",
       }
 
       jsonData, _ := json.Marshal(payload)
@@ -296,13 +306,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
           String payload = """
           {
-            "model": "gpt-image-2-official",
+            "model": "gpt_image_2_official",
             "params": {
               "prompt": "星空下的古老城堡",
-              "size": "16:9",
+              "aspect_ratio": "16:9",
               "resolution": "2K",
               "quality": "high"
-            }
+            },
+            "out_task_id": "my_task_123456"
           }
           """;
 
@@ -328,13 +339,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   $url = "https://aireiter.com/api/openapi/submit";
 
   $payload = [
-      "model" => "gpt-image-2-official",
+      "model" => "gpt_image_2_official",
       "params" => [
           "prompt" => "星空下的古老城堡",
-          "size" => "16:9",
+          "aspect_ratio" => "16:9",
           "resolution" => "2K",
           "quality" => "high"
-      ]
+      ],
+      "out_task_id" => "my_task_123456"
   ];
 
   $ch = curl_init($url);
@@ -361,13 +373,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   url = URI("https://aireiter.com/api/openapi/submit")
 
   payload = {
-    model: "gpt-image-2-official",
+    model: "gpt_image_2_official",
     params: {
       prompt: "星空下的古老城堡",
-      size: "16:9",
+      aspect_ratio: "16:9",
       resolution: "2K",
       quality: "high"
-    }
+    },
+    out_task_id: "my_task_123456"
   }
 
   http = Net::HTTP.new(url.host, url.port)
@@ -388,13 +401,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let url = URL(string: "https://aireiter.com/api/openapi/submit")!
 
   let payload: [String: Any] = [
-      "model": "gpt-image-2-official",
+      "model": "gpt_image_2_official",
       "params": [
           "prompt": "星空下的古老城堡",
-          "size": "16:9",
+          "aspect_ratio": "16:9",
           "resolution": "2K",
           "quality": "high"
-      ]
+      ],
+      "out_task_id": "my_task_123456"
   ]
 
   var request = URLRequest(url: url)
@@ -430,13 +444,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           var url = "https://aireiter.com/api/openapi/submit";
 
           var payload = @"{
-              ""model"": ""gpt-image-2-official"",
+              ""model"": ""gpt_image_2_official"",
               ""params"": {
                   ""prompt"": ""星空下的古老城堡"",
-                  ""size"": ""16:9"",
+                  ""aspect_ratio"": ""16:9"",
                   ""resolution"": ""2K"",
                   ""quality"": ""high""
-              }
+              },
+              ""out_task_id"": ""my_task_123456""
           }";
 
           using var client = new HttpClient();
@@ -459,13 +474,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     final url = Uri.parse('https://aireiter.com/api/openapi/submit');
 
     final payload = {
-      'model': 'gpt-image-2-official',
+      'model': 'gpt_image_2_official',
       'params': {
         'prompt': '星空下的古老城堡',
-        'size': '16:9',
+        'aspect_ratio': '16:9',
         'resolution': '2K',
         'quality': 'high',
       },
+      'out_task_id': 'my_task_123456',
     };
 
     final response = await http.post(
@@ -488,13 +504,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   url <- "https://aireiter.com/api/openapi/submit"
 
   payload <- list(
-    model = "gpt-image-2-official",
+    model = "gpt_image_2_official",
     params = list(
       prompt = "星空下的古老城堡",
-      size = "16:9",
+      aspect_ratio = "16:9",
       resolution = "2K",
       quality = "high"
-    )
+    ),
+    out_task_id = "my_task_123456"
   )
 
   response <- POST(
