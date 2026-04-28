@@ -21,30 +21,30 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   代替認証方式。`Authorization` と併用不可。フォーマット：`x-api-key: <api-key>`
 </ParamField>
 
-## リクエストボディパラメーター
+## リクエストボディパラメータ
 
 <ParamField body="model" type="string" required>
-  使用するモデル名。例：`gpt-4o`、`gpt-5.4`など。
+  使用するモデル名。例：`gpt-4o`、`gpt-5.4`、`gpt-5.5`など。
 
-  完全なモデルリストは `GET /api/v1/models` で取得可能です。
+  完全なモデル一覧は `GET /api/v1/models` で取得可能です。
 </ParamField>
 
 <ParamField body="input" type="array" required>
   入力内容のリスト
 
-  入力配列で、各入力項目は `role` と `content` の2つのフィールドを含みます。多段対話やマルチモーダル（テキスト＋画像）に対応。
+  入力配列で、各入力項目は `role` と `content` の2つのフィールドを含みます。多輪対話およびマルチモーダルコンテンツ（テキスト＋画像）に対応しています。
 
-  <Expandable title="詳細なフィールド説明">
+  <Expandable title="詳細フィールド説明">
     <ParamField body="role" type="string" required default="user">
-      メッセージの役割
+      メッセージのロール
 
-      選択可能な値：`user`（ユーザーメッセージ）、`assistant`（AIの応答、多段対話用）、`system`（システムプロンプト）
+      選択可能な値：`user`（ユーザーメッセージ）、`assistant`（AI返信、多輪対話用）、`system`（システムプロンプト）
     </ParamField>
 
     <ParamField body="content" type="array" required>
-      内容の配列
+      コンテンツ配列
 
-      複数のタイプのコンテンツブロックをサポートし、テキストおよび画像を含めることができます。
+      複数タイプのコンテンツブロックをサポートし、テキストと画像を含むことができます。
 
       <Expandable title="コンテンツブロックのタイプ">
         <ParamField body="type" type="string" required>
@@ -67,7 +67,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
           `type` が `input_image` の場合に使用します
 
-          2種類のフォーマットをサポート：
+          以下の2つの形式をサポートします：
 
           **1. 完全な画像URLアドレス**
 
@@ -76,11 +76,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
           **2. Base64エンコード形式**
 
-          * **完全なData URI形式である必要があります**
-          * フォーマット：`data:image/{format};base64,{base64データ}`
-          * 対応画像フォーマット：jpeg、png、gif、webp
+          * **完全なData URI形式を使用する必要があります**
+          * 形式：`data:image/{フォーマット};base64,{base64データ}`
+          * 対応フォーマット：jpeg、png、gif、webp
           * 例：`data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
-          * 注意：`data:image/jpeg;base64,` のプレフィックス部分を必ず含めてください
+          * 注意：`data:image/jpeg;base64,` のプレフィックスを含める必要があります
         </ParamField>
       </Expandable>
     </ParamField>
@@ -88,92 +88,92 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="instructions" type="string">
-  システムプロンプト。モデルの行動規範、役割、コンテキスト設定に使用します。
+  システムプロンプト。モデルの行動規範、役割、文脈を設定するために使用されます。
 
-  メッセージ配列の中の `role: "system"` のメッセージに相当します。
+  メッセージ配列中の `role: "system"` メッセージと同等です。
 </ParamField>
 
 <ParamField body="stream" type="boolean" default="true">
-  ストリーム出力を有効にするかどうか。
+  ストリーミング出力を有効にするかどうか。
 
-  - `true`（デフォルト）：SSEイベントストリーム形式でトークン単位に逐次返却、リアルタイム表示に適する
-  - `false`：完全な応答を待って一括返却、一括処理に適する
+  - `true`（デフォルト）：SSEイベントストリーム方式でトークン単位で返し、リアルタイム表示に適します
+  - `false`：完全な応答を待って一括返却し、一括処理に適します
 </ParamField>
 
 <ParamField body="max_output_tokens" type="integer">
-  生成される応答の最大トークン数。制限を超えた場合のレスポンスは `status` が `"incomplete"`、`incomplete_details.reason` が `"max_output_tokens"` となります。
+  生成される返信の最大トークン数。制限を超えるとレスポンスの `status` が `"incomplete"`、`incomplete_details.reason` が `"max_output_tokens"` になります。
 </ParamField>
 
 <ParamField body="temperature" type="number">
-  サンプリング温度、範囲は `0` ~ `2`。値が高いほど出力がランダムに、低いほど確定的になります。`temperature` と `top_p` の同時変更は推奨されません。
+  サンプリング温度、範囲は `0` 〜 `2`。値が高いほど出力がよりランダムに、値が低いほど決定的になります。`temperature` と `top_p` を同時に変更することは推奨されません。
 </ParamField>
 
 <ParamField body="top_p" type="number">
-  核サンプリング確率、範囲は `0` ~ `1`。モデルは累積確率が `top_p` に達するトークンからのみサンプリングします。
+  核サンプリング確率、範囲は `0` 〜 `1`。モデルは累積確率が `top_p` に達するまでのトークンからのみサンプリングします。
 </ParamField>
 
 <ParamField body="tools" type="array">
-  モデルが呼び出せるツールのリスト。現時点では `type: "function"` タイプのみをサポートし、`web_search`、`file_search`、`computer_use` などの組み込みツールは非対応です。
+  モデルが呼び出せるツールのリスト。現在は `type: "function"` タイプのみサポートし、`web_search`、`file_search`、`computer_use` 等の組み込みツールはサポートしていません。
 
-  <Expandable title="functionツールのフォーマット">
+  <Expandable title="function ツールの形式">
     <ParamField body="type" type="string" required>
-      固定で `"function"`
+      固定値 `"function"`
     </ParamField>
 
     <ParamField body="name" type="string" required>
-      関数名。`^[a-zA-Z0-9_-]{1,64}$` に準拠する必要があります
+      関数名、 `^[a-zA-Z0-9_-]{1,64}$` に準拠する必要があります
     </ParamField>
 
     <ParamField body="description" type="string">
-      関数の説明。モデルがいつこのツールを呼び出すか判断するための助けになります
+      関数の説明で、モデルがツールをいつ呼び出すか判断するためのものです
     </ParamField>
 
     <ParamField body="parameters" type="object">
-      パラメーター定義。JSON Schema形式に準拠
+      パラメータ定義で、JSON Schemaフォーマットに準拠します
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="tool_choice" type="string | object" default="auto">
-  ツール呼び出し方針：
+  ツール呼び出しポリシー：
 
-  - `"auto"`：モデルが自動でツール呼び出しを判断
-  - `"none"`：ツール呼び出しを禁止
-  - `"required"`：少なくとも1つのツール呼び出しを強制
-  - `{ "type": "function", "name": "function_name" }`：指定したツールを強制呼び出し
+  - `"auto"`: モデルが自動的にツール呼び出しを判断します
+  - `"none"`: ツール呼び出しを禁止します
+  - `"required"`: 少なくとも1つのツール呼び出しを強制します
+  - `{ "type": "function", "name": "function_name" }`: 指定ツールの呼び出しを強制します
 </ParamField>
 
 <ParamField body="parallel_tool_calls" type="boolean" default="true">
-  モデルが複数のツールを並列呼び出し可能か。`tools` が提供された場合のみ有効です。
+  モデルが複数のツールを並行して呼び出すことを許可するか。`tools` が提供されている場合に有効です。
 </ParamField>
 
 <ParamField body="text" type="object">
   出力フォーマットの制御。
 
-  <Expandable title="textオブジェクト">
+  <Expandable title="text オブジェクト">
     <ParamField body="format" type="object">
-      <Expandable title="formatオブジェクト">
+      <Expandable title="format オブジェクト">
         <ParamField body="type" type="string" required>
           出力フォーマットタイプ：
-          - `"text"`：通常テキスト（デフォルト）
-          - `"json_object"`：JSON形式
-          - `"json_schema"`：指定されたSchemaに準拠したJSON
+          - `"text"`: 通常テキスト（デフォルト）
+          - `"json_object"`: JSONフォーマット
+          - `"json_schema"`: 指定されたスキーマ準拠のJSON
         </ParamField>
 
         <ParamField body="name" type="string">
-          Schema名（`json_schema` の場合のみ有効）
+          スキーマ名（`json_schema` の場合のみ有効）
         </ParamField>
 
         <ParamField body="description" type="string">
-          Schemaの説明（`json_schema` の場合のみ有効）
+          スキーマ説明（`json_schema` の場合のみ有効）
         </ParamField>
 
         <ParamField body="strict" type="boolean" default="true">
-          Schemaに厳密に準拠するかどうか（`json_schema` の場合のみ有効）
+          スキーマを厳格に遵守するか（`json_schema` の場合のみ有効）
         </ParamField>
 
         <ParamField body="schema" type="object">
-          JSON Schemaの定義（`json_schema` の場合は必須）
+          JSON Schema定義（`json_schema` の場合は必須）
         </ParamField>
       </Expandable>
     </ParamField>
@@ -183,7 +183,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="reasoning" type="object">
   推論モード設定（推論対応モデル、例：`gpt-5.2` 以上向け）。
 
-  <Expandable title="reasoningオブジェクト">
+  <Expandable title="reasoning オブジェクト">
     <ParamField body="effort" type="string">
       推論強度：`"low"` | `"medium"` | `"high"`
     </ParamField>

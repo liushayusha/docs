@@ -24,7 +24,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Request Body Parameters
 
 <ParamField body="model" type="string" required>
-  The name of the model to use. Examples: `gpt-4o`, `gpt-5.4`, etc.
+  The name of the model to use. Examples: `gpt-4o`, `gpt-5.4`, `gpt-5.5`, etc.
 
   The full list of models can be obtained via `GET /api/v1/models`.
 </ParamField>
@@ -32,25 +32,25 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="input" type="array" required>
   List of input contents
 
-  An array of inputs, each containing `role` and `content` fields. Supports multi-turn conversations and multimodal content (text + images).
+  An array of inputs, each containing the fields `role` and `content`. Supports multi-turn conversations and multi-modal content (text + images).
 
   <Expandable title="Detailed Field Description">
     <ParamField body="role" type="string" required default="user">
       Message role
 
-      Possible values: `user` (user message), `assistant` (AI reply, for multi-turn conversations), `system` (system prompts)
+      Options: `user` (user message), `assistant` (AI reply for multi-turn dialogue), `system` (system prompt)
     </ParamField>
 
     <ParamField body="content" type="array" required>
-      Array of contents
+      Content array
 
-      Supports various types of content blocks, which can include text and images.
+      Supports various types of content blocks, including text and images.
 
       <Expandable title="Content Block Types">
         <ParamField body="type" type="string" required>
           Content type
 
-          Possible values:
+          Options:
 
           * `input_text`: text input
           * `input_image`: image input
@@ -59,7 +59,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
         <ParamField body="text" type="string">
           Text content
 
-          Used when `type` is `input_text`, fill in the text content
+          Used when `type` is `input_text`; fill in the text content
         </ParamField>
 
         <ParamField body="image_url" type="string">
@@ -71,7 +71,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
           **1. Full image URL address**
 
-          * Publicly accessible image URL (http:// or https://)
+          * Publicly accessible image URLs (http\:// or https\://)
           * Example: `https://example.com/image.jpg`
 
           **2. Base64 encoded format**
@@ -80,7 +80,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           * Format: `data:image/{format};base64,{base64_data}`
           * Supported image formats: jpeg, png, gif, webp
           * Example: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
-          * Note: Must include the `data:image/jpeg;base64,` prefix
+          * Note: Must include the prefix `data:image/jpeg;base64,`
         </ParamField>
       </Expandable>
     </ParamField>
@@ -88,16 +88,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="instructions" type="string">
-  System prompt. Used to set the model's behavior guidelines, role identity, or context background.
+  System Prompt. Used to set the model's behavior guidelines, role identity, or context.
 
-  Equivalent to a message with `role: "system"` in the message array.
+  Equivalent to a message in the array with `role: "system"`.
 </ParamField>
 
 <ParamField body="stream" type="boolean" default="true">
   Whether to enable streaming output.
 
-  - `true` (default): returns token by token via SSE event stream, suitable for real-time display
-  - `false`: waits for the complete response and returns at once, suitable for batch processing
+  - `true` (default): returns tokens incrementally as SSE event stream, suitable for real-time display
+  - `false`: returns the full response at once after completion, suitable for batch processing
 </ParamField>
 
 <ParamField body="max_output_tokens" type="integer">
@@ -105,7 +105,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="temperature" type="number">
-  Sampling temperature, range `0` to `2`. Higher values produce more random output, lower values more deterministic output. It is not recommended to modify both `temperature` and `top_p` simultaneously.
+  Sampling temperature, range `0` to `2`. Higher values result in more random output, lower values more deterministic. Not recommended to adjust `temperature` and `top_p` simultaneously.
 </ParamField>
 
 <ParamField body="top_p" type="number">
@@ -113,9 +113,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="tools" type="array">
-  List of tools available for the model to call. Currently only supports `type: "function"` type; built-in tools like `web_search`, `file_search`, `computer_use` are not supported.
+  List of tools available for the model to call. Currently, only `type: "function"` is supported; built-in tools like `web_search`, `file_search`, `computer_use` are not supported.
 
-  <Expandable title="Format of function tools">
+  <Expandable title="Function Tool Format">
     <ParamField body="type" type="string" required>
       Fixed as `"function"`
     </ParamField>
@@ -137,39 +137,39 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="tool_choice" type="string | object" default="auto">
   Tool calling policy:
 
-  - `"auto"`: model automatically decides whether to call tools
-  - `"none"`: forbid calling tools
-  - `"required"`: force at least one tool call
-  - `{ "type": "function", "name": "function_name" }`: force call a specified tool
+  - `"auto"`: model decides automatically whether to call tools
+  - `"none"`: prohibit calling tools
+  - `"required"`: force calling at least one tool
+  - `{ "type": "function", "name": "function_name" }`: force call the specified tool
 </ParamField>
 
 <ParamField body="parallel_tool_calls" type="boolean" default="true">
-  Whether to allow the model to call multiple tools in parallel. Effective only when `tools` are provided.
+  Whether the model is allowed to call multiple tools in parallel. Only effective if `tools` are provided.
 </ParamField>
 
 <ParamField body="text" type="object">
   Output format control.
 
-  <Expandable title="text object">
+  <Expandable title="Text Object">
     <ParamField body="format" type="object">
-      <Expandable title="format object">
+      <Expandable title="Format Object">
         <ParamField body="type" type="string" required>
           Output format type:
           - `"text"`: plain text (default)
           - `"json_object"`: JSON format
-          - `"json_schema"`: JSON conforming to specified Schema
+          - `"json_schema"`: JSON complying with specified Schema
         </ParamField>
 
         <ParamField body="name" type="string">
-          Schema name (valid only for `json_schema`)
+          Schema name (effective only for `json_schema`)
         </ParamField>
 
         <ParamField body="description" type="string">
-          Schema description (valid only for `json_schema`)
+          Schema description (effective only for `json_schema`)
         </ParamField>
 
         <ParamField body="strict" type="boolean" default="true">
-          Whether to strictly follow the Schema (valid only for `json_schema`)
+          Whether to strictly follow the Schema (effective only for `json_schema`)
         </ParamField>
 
         <ParamField body="schema" type="object">
@@ -181,11 +181,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="reasoning" type="object">
-  Reasoning mode configuration (applicable for models supporting reasoning, such as `gpt-5.2` and above).
+  Reasoning mode configuration (applicable to models supporting reasoning, such as `gpt-5.2` and above).
 
-  <Expandable title="reasoning object">
+  <Expandable title="Reasoning Object">
     <ParamField body="effort" type="string">
-      Reasoning strength: `"low"` | `"medium"` | `"high"`
+      Reasoning intensity: `"low"` | `"medium"` | `"high"`
     </ParamField>
 
   </Expandable>
