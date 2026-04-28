@@ -60,15 +60,18 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
            * ⚠️ 注意：必须包含 `data:image/jpeg;base64,` 前缀部分
     </ParamField>
 
-    <ParamField body="aspect_ratio" type="string" default="1:1">
+    <ParamField body="aspect_ratio" type="string" default="auto">
       图像生成的比例
 
-      默认值：`1:1`，也支持 `auto` 自动比例。
+      默认值随 `resolution` 不同而变化：
+
+      * `resolution` 为 `1K` / `2K` 时不传默认为 `auto`
+      * `resolution` 为 `4K` 时不传默认为 `16:9`
 
       支持以下取值：
 
       * `auto` - 自动选择最合适的比例
-      * `1:1` - 正方形（默认）
+      * `1:1` - 正方形
       * `16:9` / `9:16` - 宽屏横 / 竖
       * `4:3` / `3:4` - 标屏横 / 竖
       * `3:2` / `2:3` - 经典横 / 竖

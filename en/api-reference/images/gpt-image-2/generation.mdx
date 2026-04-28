@@ -36,58 +36,61 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  Model parameters object
+  Model parameter object
 
   <Expandable title="params object properties">
     <ParamField body="prompt" type="string" required>
       Text description for image generation
 
-      * Supports Chinese and English, detailed descriptions are recommended
-      * Before submission, it will go through platform-sensitive word / security review; if any violation is detected, an error will be returned directly
+      * Supports both Chinese and English; detailed description is recommended
+      * Will undergo platform sensitive word / security review before submission; if violating content is detected, an error will be returned immediately
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      Reference image array, when provided, triggers image-to-image mode
+      Array of reference images; when provided, image-to-image generation mode will be used
 
       * Up to 9 reference images
       * Supports the following two formats:
         1. Publicly accessible URL
         2. Base64 encoded format
-           * Must use the complete Data URI format: `data:image/{format};base64,{base64 data}`
+           * Must use complete Data URI format: `data:image/{format};base64,{base64-data}`
            * Supported image formats: jpeg, png, webp
            * Example: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
-           * ⚠️ Note: Must include the `data:image/jpeg;base64,` prefix
+           * ⚠️ Note: The prefix `data:image/jpeg;base64,` must be included
     </ParamField>
 
-    <ParamField body="aspect_ratio" type="string" default="1:1">
-      Image generation aspect ratio
+    <ParamField body="aspect_ratio" type="string" default="auto">
+      Aspect ratio for image generation
 
-      Default value: `1:1`, also supports `auto` for automatic ratio.
+      Default value varies depending on `resolution`:
+
+      * If `resolution` is `1K` / `2K`, default is `auto` if not provided
+      * If `resolution` is `4K`, default is `16:9` if not provided
 
       Supported values:
 
-      * `auto` - Automatically select the most suitable ratio
-      * `1:1` - Square (default)
-      * `16:9` / `9:16` - Wide screen horizontal / vertical
+      * `auto` - Automatically selects the most suitable ratio
+      * `1:1` - Square
+      * `16:9` / `9:16` - Widescreen horizontal / vertical
       * `4:3` / `3:4` - Standard screen horizontal / vertical
       * `3:2` / `2:3` - Classic horizontal / vertical
       * `5:4` / `4:5` - Near-square horizontal / vertical
-      * `2:1` / `1:2` - Wide horizontal / long vertical
-      * `21:9` / `9:21` - Ultra-wide horizontal / ultra-long vertical
+      * `2:1` / `1:2` - Wide horizontal / tall vertical
+      * `21:9` / `9:21` - Ultra-wide horizontal / ultra-tall vertical
 
       <Warning>
-        Only ratio strings or `auto` are supported; passing pixel dimensions (e.g. `1024x1024`) will cause an error
+        Only ratio strings or `auto` are supported; passing pixel dimensions (e.g., `1024x1024`) will cause an error
       </Warning>
     </ParamField>
 
     <ParamField body="resolution" type="string" default="1K">
       Resolution tier
 
-      Controls the actual output image clarity:
+      Controls the actual image clarity:
 
       * `1K` - 1024 baseline, cost-effective for daily use (default)
-      * `2K` - 2048 baseline, suitable for posters / high-definition needs
-      * `4K` - 3840 baseline, **supported for only 6 ratios** (`16:9` / `9:16` / `2:1` / `1:2` / `21:9` / `9:21`)
+      * `2K` - 2048 baseline, suitable for posters / high definition needs
+      * `4K` - 3840 baseline, **only 6 ratios supported** (`16:9` / `9:16` / `2:1` / `1:2` / `21:9` / `9:21`)
 
       <Warning>
         Unsupported 4K combinations will return 400:
@@ -97,7 +100,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
         * `4:3` / `3:4` × `4K` ❌ (exceeds pixel limit)
         * `5:4` / `4:5` × `4K` ❌ (exceeds pixel limit)
 
-        For HD images with the above ratios, please use `resolution=2K`.
+        For high definition images with the above ratios, use `resolution=2K`.
       </Warning>
     </ParamField>
   </Expandable>
