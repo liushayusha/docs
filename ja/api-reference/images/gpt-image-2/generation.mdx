@@ -1,12 +1,13 @@
 ---
 title: 'GPT-Image-2 画像生成'
 description: |
-    - 非同期処理モード、タスクIDを返し後続の照会に使用
-    - OpenAI Images 互換プロトコルに基づく、テキストから画像 / 画像から画像生成をサポート
-    - 13種類の画像アスペクト比をサポート、aspect_ratio フィールドで指定
-    - 新たに resolution フィールドを追加、1K / 2K / 4K 解像度の選択をサポート（4Kは6種類の比率のみ対応）
-    - 参照用画像は最大9枚まで、URL と base64 の混在入力をサポート
-    - 送信されたプロンプトはプラットフォームの検閲 / 安全審査を通過し、違反内容は即座に拒否される
+    - 非同期処理モードで、タスクIDを返し後続のクエリに使用可能
+    - OpenAI Images 互換プロトコルに基づき、テキストから画像／画像から画像をサポート
+    - 13種類のアスペクト比を aspect_ratio フィールドで指定可能
+    - resolution フィールドを新設し、1K／2K／4K 解像度の選択をサポート（4Kは6つの比率のみ対応）
+    - size フィールドを新規追加し、ピクセルサイズのカスタム指定をサポート（aspect_ratio／resolution と相互排他、総ピクセル数は2,088,960以上で正確な出力が可能）
+    - 参考画像は最大10枚まで、URLとbase64の混在入力をサポート
+    - 提出されたプロンプトはプラットフォームのセンシティブワード／安全審査を通過し、違反内容は即座に拒否される
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -36,80 +37,117 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  モデルパラメータオブジェクト
+  モデルパラメーターオブジェクト
 
-  <Expandable title="params オブジェクトのプロパティ">
+  <Expandable title="params オブジェクトの属性">
     <ParamField body="prompt" type="string" required>
       画像生成のテキスト説明
 
-      * 日本語と英語の両方をサポート、詳細な説明を推奨
-      * 提出前にプラットフォームの禁止ワード／セキュリティチェックを通過し、違反内容があればエラーを直接返す
+      * 日本語と英語をサポートし、詳細な説明を推奨
+      * 提出前にプラットフォームの敏感語／安全審査を通過し、違反コンテンツがあれば直接エラーが返される
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      参考画像の配列。渡すと画像生成モードを有効にする
+      参考画像の配列。入力すると画像生成モードになる
 
-      * 最大9枚の参考画像
-      * 以下の2種類のフォーマットをサポート：
-        1. 公開アクセス可能なURL
-        2. Base64エンコード形式
-           * 完全なData URI形式を使用する必要があります：`data:image/{フォーマット};base64,{base64データ}`
-           * 対応画像形式：jpeg、png、webp
+      * 最大 10 枚の参考画像
+      * 以下の2つの形式をサポート：
+        1. 公開アクセス可能な URL
+        2. Base64 エンコード形式
+           * 完全なData URI形式である必要があります：`data:image/{フォーマット};base64,{base64データ}`
+           * サポートする画像フォーマット：jpeg、png、webp
            * 例：`data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
-           * ⚠️ 注意：必ず`data:image/jpeg;base64,`のプレフィックス部分を含むこと
+           * ⚠️ 注意：`data:image/jpeg;base64,` プレフィックス部分を必ず含む必要があります
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="auto">
-      画像生成のアスペクト比
+      画像生成の比率
 
-      デフォルト値は`resolution`により異なります：
+      デフォルト値は `resolution` によって異なります：
 
-      * `resolution`が`1K`／`2K`の時は、省略で`auto`
-      * `resolution`が`4K`の時は、省略で`16:9`
+      * `resolution` が `1K` / `2K` の場合、未指定は `auto`
+      * `resolution` が `4K` の場合、未指定は `16:9`
 
       以下の値をサポート：
 
-      * `auto` - 自動で最適な比率を選択
+      * `auto` - 最適な比率を自動選択
       * `1:1` - 正方形
-      * `16:9`／`9:16` - ワイド横／縦
-      * `4:3`／`3:4` - 標準横／縦
-      * `3:2`／`2:3` - クラシック横／縦
-      * `5:4`／`4:5` - ほぼ正方形横／縦
-      * `2:1`／`1:2` - ワイド横／ロング縦
-      * `21:9`／`9:21` - 超ワイド横／超ロング縦
+      * `16:9` / `9:16` - ワイド横 / 縦
+      * `4:3` / `3:4` - 標準横 / 縦
+      * `3:2` / `2:3` - クラシック横 / 縦
+      * `5:4` / `4:5` - 近似正方形横 / 縦
+      * `2:1` / `1:2` - 広横 / 縦長
+      * `21:9` / `9:21` - 超ワイド横 / 超縦長
 
       <Warning>
-        文字列としての比率か`auto`のみ対応；ピクセル指定（例：`1024x1024`）はエラーになります
+        比率文字列または `auto` のみをサポート；ピクセルサイズ（例：`1024x1024`）を渡すとエラーになります
       </Warning>
     </ParamField>
 
     <ParamField body="resolution" type="string" default="1K">
-      解像度レンジ
+      解像度のレベル
 
-      実際の画像の鮮明さを制御：
+      実際の出力画像の鮮明さを制御：
 
-      * `1K` - 1024基準、日常利用に最適（デフォルト）
-      * `2K` - 2048基準、ポスターや高解像度用途に適す
-      * `4K` - 3840基準、**6つの比率でのみ対応**（`16:9`／`9:16`／`2:1`／`1:2`／`21:9`／`9:21`）
+      * `1K` - 1024 基準、コストを抑えた日常利用に十分（デフォルト）
+      * `2K` - 2048 基準、ポスターや高解像度用途に適合
+      * `4K` - 3840 基準、**6つの比率のみ対応**（`16:9` / `9:16` / `2:1` / `1:2` / `21:9` / `9:21`）
 
       <Warning>
-        非対応の4K組合せは400エラーを返す：
+        非対応の4K組み合わせは 400 エラーが返されます：
 
-        * `1:1` × `4K` ❌（ピクセル過剰）
-        * `3:2`／`2:3` × `4K` ❌（ピクセル過剰）
-        * `4:3`／`3:4` × `4K` ❌（ピクセル過剰）
-        * `5:4`／`4:5` × `4K` ❌（ピクセル過剰）
+        * `1:1` × `4K` ❌（ピクセル上限超過）
+        * `3:2` / `2:3` × `4K` ❌（ピクセル上限超過）
+        * `4:3` / `3:4` × `4K` ❌（ピクセル上限超過）
+        * `5:4` / `4:5` × `4K` ❌（ピクセル上限超過）
 
-        上記比率を高解像度で利用したい場合は`resolution=2K`を使用してください。
+        上記比率で高解像度が必要な場合は、`resolution=2K` を使用してください。
       </Warning>
+
+      <Warning>
+        `size` を指定する場合、`resolution` と `aspect_ratio` は同時に渡せません。両方渡した場合は 400 エラーが返ります。
+      </Warning>
+    </ParamField>
+
+    <ParamField body="size" type="string">
+      カスタムピクセルサイズ（`aspect_ratio` / `resolution` と **排他**）
+
+      フォーマットは `幅x高さ`。例：`2048x1536`、`3840x2160`
+
+      **使用制限：**
+
+      * フォーマットは必ず `^\d+x\d+$` であること。例 `2048x1536`、他の書式はサポートしません
+      * `aspect_ratio` と `resolution` と排他関係で、3つのうちどれか一つのみ選択可能。複数指定すると 400 エラー
+      * 総ピクセル数（幅 × 高さ）は **655,360 ～ 8,294,400** の範囲にある必要があります
+
+      **実測のピクセル下限：**
+
+      | 総ピクセル範囲 | 上流の動作 |
+      | --- | --- |
+      | ≥ 2,088,960（約 2.0M） | 指定した `size` に正確に従って出力 ✅ |
+      | < 2,088,960 | 約1.57M の近似比率に静かに置き換え（`size`未指定と同等）⚠️ |
+
+      <Warning>
+        総ピクセル数が約 2,088,960 未満の場合、上流はエラーを返さず静かに出力サイズを置き換えます。正確な制御が必要な場合は、**総ピクセル数を2,088,960以上**にすることを推奨します。
+
+        小サイズのニーズは `aspect_ratio` + `resolution=1K` の組み合わせを使用してください。
+      </Warning>
+
+      **おすすめの使い方：**
+
+      | ニーズ | 推奨方法 |
+      | --- | --- |
+      | ピクセルサイズを正確に制御したい | `size`、かつ総ピクセル数 ≥ 2,088,960 |
+      | 小サイズ（2Mピクセル未満） | `aspect_ratio` + `resolution=1K` |
+      | 中～大サイズ任意の比率 | `size`、2K / 4K 範囲の任意比率で正確に出力可能 |
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発行者タスクID
+  発起者タスクID
 
-  ユーザーが定義するタスク識別子で必須
+  ユーザーが定義するタスク識別子、必須
 </ParamField>
 
 ## サイズ × 解像度マッピング表
@@ -134,14 +172,40 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 > `3:2` / `2:3` @ 2K は実際には 2048×1360（近似比率、誤差\<0.5%）；4K は6つの比率のみ対応（総ピクセル数がOpenAIの上限を超える組み合わせは使用不可）。
 
+## カスタムサイズ（size パラメータ）
+
+ピクセルサイズを正確に制御する場合、`aspect_ratio` + `resolution` の組み合わせの代わりに `size` パラメータを使用できます。
+
+**有効範囲：** 合計ピクセル数 655,360 ～ 8,294,400（上流公式制限）
+
+**実測有効下限：** 合計ピクセル数 ≥ **2,088,960**（約 1440×1452 または 2048×1020 の同等面積）
+
+下限より少ない場合、上流ではエラーが発生しませんが、約1.57Mピクセルの近い比率サイズに静かに置き換えられます。
+
+### よく使う size の例
+
+| size 値 | 合計ピクセル数 | 推奨用途 |
+| --- | --- | --- |
+| `2048x2048` | 4,194,304 | 正方形の高解像度 |
+| `2048x1536` | 3,145,728 | 4:3 横向き |
+| `1536x2048` | 3,145,728 | 3:4 縦向き |
+| `2048x1152` | 2,359,296 | 16:9 横向き |
+| `1152x2048` | 2,359,296 | 9:16 縦向き |
+| `3840x2160` | 8,294,400 | 4K 16:9（最高品質） |
+| `2688x1344` | 3,612,672 | 2:1 幅広横向き |
+
+<Warning>
+  **`aspect_ratio` または `resolution` と同時に渡さないでください。そうしないと 400 が返されます。**
+</Warning>
+
 ## Response
 
 <ResponseField name="out_task_id" type="string">
-  発信者タスクID。結果のクエリに使用できます
+  発注者のタスクID。結果の照会に使用可能
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  初期状態で、固定値は `"pending"`
+  初期ステータス。固定で `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
@@ -149,11 +213,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  作成日時（ISOフォーマット）
+  作成日時（ISO形式）
 </ResponseField>
 
 <RequestExample>
-  ```bash cURL
+  ```bash cURL（aspect_ratio）
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
@@ -161,10 +225,25 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     --data '{
       "model": "gpt_image_2",
       "params": {
-        "prompt": "窓辺に座って夕日を見ている一匹のオレンジ猫、水彩画風",
+        "prompt": "窓辺に座って夕日を見ている茶トラ猫、水彩画風",
         "aspect_ratio": "16:9"
       },
       "out_task_id": "my_task_123456"
+    }'
+  ```
+
+  ```bash cURL（size カスタムサイズ）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gpt_image_2",
+      "params": {
+        "prompt": "窓辺に座って夕日を見ている茶トラ猫、水彩画風",
+        "size": "2048x1152"
+      },
+      "out_task_id": "my_task_size_001"
     }'
   ```
 
@@ -176,7 +255,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
       "model": "gpt_image_2",
       "params": {
-          "prompt": "窓辺に座って夕日を見ている一匹のオレンジ猫、水彩画風",
+          "prompt": "窓辺に座って夕日を見ている茶トラ猫、水彩画風",
           "aspect_ratio": "16:9"
       },
       "out_task_id": "my_task_123456"
@@ -198,7 +277,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   const payload = {
     model: "gpt_image_2",
     params: {
-      prompt: "窓辺に座って夕日を見ている一匹のオレンジ猫、水彩画風",
+      prompt: "窓辺に座って夕日を見ている茶トラ猫、水彩画風",
       aspect_ratio: "16:9"
     },
     out_task_id: "my_task_123456"
@@ -236,7 +315,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       payload := map[string]interface{}{
           "model": "gpt_image_2",
           "params": map[string]interface{}{
-              "prompt":       "窓辺に座って夕日を見ている一匹のオレンジ猫、水彩画風",
+              "prompt":       "窓辺に座って夕日を見ている茶トラ猫、水彩画風",
               "aspect_ratio": "16:9",
           },
           "out_task_id": "my_task_123456",
@@ -274,7 +353,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           {
             "model": "gpt_image_2",
             "params": {
-              "prompt": "窓辺に座って夕日を見ている一匹のオレンジ猫、水彩画風",
+              "prompt": "窓辺に座って夕日を見ている茶トラ猫、水彩画風",
               "aspect_ratio": "16:9"
             },
             "out_task_id": "my_task_123456"
@@ -305,7 +384,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   $payload = [
       "model" => "gpt_image_2",
       "params" => [
-          "prompt" => "窓辺に座って夕日を見ている一匹のオレンジ猫、水彩画風",
+          "prompt" => "窓辺に座って夕日を見ている茶トラ猫、水彩画風",
           "aspect_ratio" => "16:9"
       ],
       "out_task_id" => "my_task_123456"
@@ -337,7 +416,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
     model: "gpt_image_2",
     params: {
-      prompt: "窓辺に座って夕日を見ている一匹のオレンジ猫、水彩画風",
+      prompt: "窓辺に座って夕日を見ている茶トラ猫、水彩画風",
       aspect_ratio: "16:9"
     },
     out_task_id: "my_task_123456"
@@ -362,7 +441,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload: [String: Any] = [
       "model": "gpt_image_2",
       "params": [
-          "prompt": "窓辺に座って夕日を見ている一匹のオレンジ猫、水彩画風",
+          "prompt": "窓辺に座って夕日を見ている茶トラ猫、水彩画風",
           "aspect_ratio": "16:9"
       ],
       "out_task_id": "my_task_123456"
@@ -403,7 +482,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           var payload = @"{
               ""model"": ""gpt_image_2"",
               ""params"": {
-                  ""prompt"": ""窓辺に座って夕日を見ている一匹のオレンジ猫、水彩画風"",
+                  ""prompt"": ""窓辺に座って夕日を見ている茶トラ猫、水彩画風"",
                   ""aspect_ratio"": ""16:9""
               },
               ""out_task_id"": ""my_task_123456""
@@ -437,7 +516,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           const char *payload = "{"
               "\"model\":\"gpt_image_2\","
               "\"params\":{"
-                  "\"prompt\":\"窓辺に座って夕日を見ている一匹のオレンジ猫、水彩画風\","
+                  "\"prompt\":\"窓辺に座って夕日を見ている茶トラ猫、水彩画風\","
                   "\"aspect_ratio\":\"16:9\""
               "},"
               "\"out_task_id\":\"my_task_123456\""
@@ -477,7 +556,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           NSDictionary *payload = @{
               @"model": @"gpt_image_2",
               @"params": @{
-                  @"prompt": @"窓辺に座って夕日を見ている一匹のオレンジ猫、水彩画風",
+                  @"prompt": @"窓辺に座って夕日を見ている茶トラ猫、水彩画風",
                   @"aspect_ratio": @"16:9"
               },
               @"out_task_id": @"my_task_123456"
@@ -524,7 +603,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload = {|{
     "model": "gpt_image_2",
     "params": {
-      "prompt": "窓辺に座って夕日を見ている一匹のオレンジ猫、水彩画風",
+      "prompt": "窓辺に座って夕日を見ている茶トラ猫、水彩画風",
       "aspect_ratio": "16:9"
     },
     "out_task_id": "my_task_123456"
@@ -554,7 +633,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     final payload = {
       'model': 'gpt_image_2',
       'params': {
-        'prompt': '窓辺に座って夕日を見ている一匹のオレンジ猫、水彩画風',
+        'prompt': '窓辺に座って夕日を見ている茶トラ猫、水彩画風',
         'aspect_ratio': '16:9'
       },
       'out_task_id': 'my_task_123456'
@@ -582,7 +661,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload <- list(
     model = "gpt_image_2",
     params = list(
-      prompt = "窓辺に座って夕日を見ている一匹のオレンジ猫、水彩画風",
+      prompt = "窓辺に座って夕日を見ている茶トラ猫、水彩画風",
       aspect_ratio = "16:9"
     ),
     out_task_id = "my_task_123456"
@@ -628,7 +707,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 401,
-      "message": "認証失敗。APIキーを確認してください"
+      "message": "認証に失敗しました。APIキーを確認してください"
     }
   }
   ```
@@ -637,7 +716,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 433,
-      "message": "アカウント残高不足。チャージして再試行してください"
+      "message": "アカウント残高が不足しています。チャージ後再試行してください"
     }
   }
   ```
@@ -646,7 +725,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 500,
-      "message": "サーバー内部エラー。後でもう一度お試しください"
+      "message": "サーバ内部エラー。後でもう一度お試しください"
     }
   }
   ```

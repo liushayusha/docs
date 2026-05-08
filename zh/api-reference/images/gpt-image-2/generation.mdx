@@ -5,7 +5,8 @@ description: |
     - 基于 OpenAI Images 兼容协议，支持文生图 / 图生图
     - 支持 13 种图片比例，通过 aspect_ratio 字段传入
     - 新增 resolution 档位字段，支持 1K / 2K / 4K 分辨率选择（4K 仅支持 6 个比例）
-    - 参考图最多 9 张，支持 URL 与 base64 混填
+    - 新增 size 字段，支持自定义像素尺寸（与 aspect_ratio / resolution 互斥，总像素 ≥ 2,088,960 方可精确出图）
+    - 参考图最多 10 张，支持 URL 与 base64 混填
     - 提交的 prompt 会经过平台敏感词 / 安全审核，违规内容会被直接拒绝
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
@@ -50,7 +51,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     <ParamField body="image_url" type="string[]">
       参考图数组，传入后走图生图模式
 
-      * 最多 9 张参考图
+      * 最多 10 张参考图
       * 支持以下两种格式：
         1. 公开可访问的 URL
         2. Base64 编码格式
@@ -103,6 +104,43 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
         想高清上述比例时，改用 `resolution=2K`。
       </Warning>
+
+      <Warning>
+        传入 `size` 时，`resolution` 与 `aspect_ratio` 均不可同时传入，否则返回 400。
+      </Warning>
+    </ParamField>
+
+    <ParamField body="size" type="string">
+      自定义像素尺寸（与 `aspect_ratio` / `resolution` **互斥**）
+
+      格式为 `宽x高`，例如 `2048x1536`、`3840x2160`。
+
+      **使用限制：**
+
+      * 格式必须为 `^\d+x\d+$`，如 `2048x1536`，不支持其他写法
+      * 与 `aspect_ratio`、`resolution` 互斥，三者只能选其一；同时传入返回 400
+      * 总像素（宽 × 高）需在 **655,360 ~ 8,294,400** 范围内
+
+      **实测像素下限：**
+
+      | 总像素范围 | 上游行为 |
+      | --- | --- |
+      | ≥ 2,088,960（约 2.0M） | 按传入 `size` 精确出图 ✅ |
+      | < 2,088,960 | 静默替换为 ~1.57M 的相近比例（等同未传 `size`）⚠️ |
+
+      <Warning>
+        总像素低于约 2,088,960 时，上游不会报错，但会静默替换输出尺寸。如需精确控制，**建议总像素 ≥ 2,088,960**。
+
+        小尺寸需求请改用 `aspect_ratio` + `resolution=1K` 组合。
+      </Warning>
+
+      **选用建议：**
+
+      | 需求 | 推荐方式 |
+      | --- | --- |
+      | 精确控制像素尺寸 | `size`，且总像素 ≥ 2,088,960 |
+      | 小尺寸（< 2M 像素） | `aspect_ratio` + `resolution=1K` |
+      | 中大尺寸任意比例 | `size`，2K / 4K 范围任意比例均可精确出图 |
     </ParamField>
   </Expandable>
 </ParamField>
@@ -135,6 +173,32 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 > `3:2` / `2:3` @ 2K 实际是 2048×1360（近似比例，误差 \< 0.5%）；4K 仅支持 6 个比例（总像素超 OpenAI 上限的组合不可用）。
 
+## 自定义尺寸（size 参数）
+
+当需要精确控制像素尺寸时，可使用 `size` 参数代替 `aspect_ratio` + `resolution` 组合。
+
+**有效范围：** 总像素 655,360 ~ 8,294,400（上游官方限制）
+
+**实测有效下限：** 总像素 ≥ **2,088,960**（约 1440×1452 或 2048×1020 等同面积）
+
+低于此下限时上游不报错，但会静默替换为相近比例的 ~1.57M 像素尺寸。
+
+### 常用 size 示例
+
+| size 值 | 总像素 | 推荐用途 |
+| --- | --- | --- |
+| `2048x2048` | 4,194,304 | 正方形高清 |
+| `2048x1536` | 3,145,728 | 4:3 横版 |
+| `1536x2048` | 3,145,728 | 3:4 竖版 |
+| `2048x1152` | 2,359,296 | 16:9 横版 |
+| `1152x2048` | 2,359,296 | 9:16 竖版 |
+| `3840x2160` | 8,294,400 | 4K 16:9（最高档） |
+| `2688x1344` | 3,612,672 | 2:1 宽横版 |
+
+<Warning>
+  **不要与 `aspect_ratio` 或 `resolution` 同时传入**，否则返回 400。
+</Warning>
+
 ## Response
 
 <ResponseField name="out_task_id" type="string">
@@ -154,7 +218,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <RequestExample>
-  ```bash cURL
+  ```bash cURL（aspect_ratio）
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
@@ -166,6 +230,21 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
         "aspect_ratio": "16:9"
       },
       "out_task_id": "my_task_123456"
+    }'
+  ```
+
+  ```bash cURL（size 自定义尺寸）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gpt_image_2",
+      "params": {
+        "prompt": "一只橘猫坐在窗台上看夕阳，水彩画风格",
+        "size": "2048x1152"
+      },
+      "out_task_id": "my_task_size_001"
     }'
   ```
 

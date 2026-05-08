@@ -1,12 +1,13 @@
 ---
 title: 'GPT-Image-2 이미지 생성'
 description: |
-    - 비동기 처리 모드, 후속 조회를 위한 작업 ID 반환
+    - 비동기 처리 모드, 작업 ID를 반환하여 후속 쿼리에 사용
     - OpenAI Images 호환 프로토콜 기반, 텍스트-투-이미지 / 이미지-투-이미지 지원
     - 13가지 이미지 비율 지원, aspect_ratio 필드로 전달
-    - resolution 단계 필드 추가, 1K / 2K / 4K 해상도 선택 지원(4K는 6가지 비율만 지원)
-    - 참조 이미지 최대 9장, URL과 base64 혼합 입력 가능
-    - 제출된 프롬프트는 플랫폼의 민감어 / 보안 심사를 거치며, 위반 내용은 즉시 거부
+    - resolution 단계 필드 추가, 1K / 2K / 4K 해상도 선택 지원 (4K는 6가지 비율만 지원)
+    - size 필드 추가, 사용자 지정 픽셀 크기 지원 (aspect_ratio / resolution과 상호 배타적, 총 픽셀 수 ≥ 2,088,960이어야 정확한 이미지 생성 가능)
+    - 참조 이미지는 최대 10장까지 URL 또는 base64 혼용 제출 가능
+    - 제출된 프롬프트는 플랫폼 민감어 / 보안 심사를 거치며, 위반 내용은 바로 거부됨
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -36,50 +37,50 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  모델 매개변수 객체
+  모델 파라미터 객체
 
   <Expandable title="params 객체 속성">
     <ParamField body="prompt" type="string" required>
       이미지 생성을 위한 텍스트 설명
 
-      * 중문과 영문 지원, 상세 설명 권장
-      * 제출 전 플랫폼의 민감어 / 안전 심사를 거치며, 위반 내용 발견 시 바로 오류 반환
+      * 한중 영어 지원, 자세한 설명 권장
+      * 제출 전 플랫폼 민감어/보안 심사를 거치며, 위반 내용 감지 시 오류 반환
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      참고 이미지 배열, 전달 시 이미지 생성 모드 적용
+      참조 이미지 배열, 입력 시 이미지-이미지 생성 모드로 전환
 
-      * 최대 9장까지 참고 이미지 허용
+      * 최대 10장까지 참조 이미지 가능
       * 다음 두 가지 형식 지원:
         1. 공개 접근 가능한 URL
         2. Base64 인코딩 형식
-           * 완전한 Data URI 형식 사용 필수: `data:image/{포맷};base64,{base64 데이터}`
-           * 지원하는 이미지 포맷: jpeg, png, webp
+           * 완전한 Data URI 형식으로 사용해야 함: `data:image/{포맷};base64,{base64데이터}`
+           * 지원 이미지 형식: jpeg, png, webp
            * 예시: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
-           * ⚠️ 주의: `data:image/jpeg;base64,` 접두어 포함 필수
+           * ⚠️ 주의: 반드시 `data:image/jpeg;base64,` 접두사가 포함되어야 함
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="auto">
       이미지 생성 비율
 
-      기본값은 `resolution`에 따라 다름:
+      기본값은 `resolution`에 따라 달라집니다:
 
-      * `resolution`이 `1K` / `2K`일 때 미전달하면 기본값은 `auto`
-      * `resolution`이 `4K`일 때 미전달하면 기본값은 `16:9`
+      * `resolution`이 `1K` / `2K`일 때 미전달 시 기본은 `auto`
+      * `resolution`이 `4K`일 때 미전달 시 기본은 `16:9`
 
-      다음 값 지원:
+      지원하는 값:
 
       * `auto` - 가장 적합한 비율 자동 선택
       * `1:1` - 정사각형
       * `16:9` / `9:16` - 와이드 가로 / 세로
       * `4:3` / `3:4` - 표준 가로 / 세로
       * `3:2` / `2:3` - 클래식 가로 / 세로
-      * `5:4` / `4:5` - 근사 가로 / 세로
+      * `5:4` / `4:5` - 근사 정방 가로 / 세로
       * `2:1` / `1:2` - 넓은 가로 / 긴 세로
       * `21:9` / `9:21` - 초광폭 가로 / 초긴 세로
 
       <Warning>
-        비율 문자열 또는 `auto`만 지원; 픽셀 치수(예: `1024x1024`) 전달 시 오류 발생
+        비율은 문자열 형식이나 `auto`만 지원하며; 픽셀 크기(예: `1024x1024`)를 전달하면 오류가 발생합니다
       </Warning>
     </ParamField>
 
@@ -88,20 +89,57 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
       실제 출력 이미지 선명도 제어:
 
-      * `1K` - 1024 기준, 비용 절감용 일상 사용에 적합 (기본값)
-      * `2K` - 2048 기준, 포스터 / 고화질 요구에 적합
-      * `4K` - 3840 기준, **6개 비율만 지원** (`16:9` / `9:16` / `2:1` / `1:2` / `21:9` / `9:21`)
+      * `1K` - 1024 기준, 비용 절감용 일상적 사용(기본값)
+      * `2K` - 2048 기준, 포스터/고해상도 용도 적합
+      * `4K` - 3840 기준, **6가지 비율만 지원**(`16:9` / `9:16` / `2:1` / `1:2` / `21:9` / `9:21`)
 
       <Warning>
-        허용되지 않는 4K 조합은 400 오류 반환:
+        지원되지 않는 4K 조합은 400 오류 반환:
 
-        * `1:1` × `4K` ❌ (픽셀 초과 제한)
-        * `3:2` / `2:3` × `4K` ❌ (픽셀 초과 제한)
-        * `4:3` / `3:4` × `4K` ❌ (픽셀 초과 제한)
-        * `5:4` / `4:5` × `4K` ❌ (픽셀 초과 제한)
+        * `1:1` × `4K` ❌ (초과 픽셀 한도)
+        * `3:2` / `2:3` × `4K` ❌ (초과 픽셀 한도)
+        * `4:3` / `3:4` × `4K` ❌ (초과 픽셀 한도)
+        * `5:4` / `4:5` × `4K` ❌ (초과 픽셀 한도)
 
-        위 비율에서 고화질을 원하면 `resolution=2K` 사용 권장.
+        위 비율에서 고해상도를 원하면 `resolution=2K` 사용 권장.
       </Warning>
+
+      <Warning>
+        `size` 전달 시, `resolution`과 `aspect_ratio`는 동시에 전달 불가, 그렇지 않으면 400 오류 반환됨.
+      </Warning>
+    </ParamField>
+
+    <ParamField body="size" type="string">
+      사용자 정의 픽셀 크기 (`aspect_ratio` / `resolution`과 **상호 배타적**)
+
+      형식은 `폭x높이`, 예: `2048x1536`, `3840x2160`.
+
+      **사용 제한:**
+
+      * 형식은 `^\d+x\d+$` 이어야 하며, 예: `2048x1536`, 다른 형식 미지원
+      * `aspect_ratio`, `resolution`과 상호 배타적이며, 셋 중 하나만 선택 가능; 동시에 전달 시 400 오류
+      * 전체 픽셀 수(폭 × 높이)는 **655,360 ~ 8,294,400** 범위 내이어야 함
+
+      **실제 테스트된 픽셀 하한:**
+
+      | 총 픽셀 범위 | 상위 처리 동작 |
+      | --- | --- |
+      | ≥ 2,088,960 (약 2.0M) | 입력한 `size`대로 정확히 출력 ✅ |
+      | < 2,088,960 | 약 1.57M에 근접한 비율로 조용히 대체 (마치 `size` 미입력 상태) ⚠️ |
+
+      <Warning>
+        총 픽셀이 약 2,088,960 미만이면 상위에서 오류를 발생시키지 않으나 출력 크기를 조용히 대체함. 정확한 제어가 필요하면 **총 픽셀 ≥ 2,088,960** 권장.
+
+        작은 크기 요구는 `aspect_ratio` + `resolution=1K` 조합 사용 권장.
+      </Warning>
+
+      **선택 가이드:**
+
+      | 요구 사항 | 추천 방식 |
+      | --- | --- |
+      | 정확한 픽셀 크기 제어 | `size`, 총 픽셀 ≥ 2,088,960 |
+      | 소형(2M 픽셀 미만) | `aspect_ratio` + `resolution=1K` |
+      | 중대형 임의 비율 | `size`, 2K/4K 범위 내 임의 비율도 정확 출력 가능 |
     </ParamField>
   </Expandable>
 </ParamField>
@@ -109,7 +147,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="out_task_id" type="string" required>
   발신자 작업 ID
 
-  사용자가 정의한 작업 식별자, 필수 입력
+  사용자 정의 작업 식별자, 필수 입력
 </ParamField>
 
 ## 크기 × 해상도 매핑 표
@@ -134,14 +172,40 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 > `3:2` / `2:3` @ 2K는 실제로 2048×1360 (근사 비율, 오차 \< 0.5%); 4K는 6개 비율만 지원 (총 픽셀이 OpenAI 최대치 초과 조합은 사용 불가).
 
+## 사용자 정의 크기(size 매개변수)
+
+픽셀 크기를 정확히 제어해야 할 때, `aspect_ratio` + `resolution` 조합 대신 `size` 매개변수를 사용할 수 있습니다.
+
+**유효 범위:** 총 픽셀 655,360 ~ 8,294,400(상위 공식 제한)
+
+**실제 유효 하한:** 총 픽셀 ≥ **2,088,960**(약 1440×1452 또는 2048×1020 동등 면적)
+
+이 하한 미만에서는 상위에서 오류를 반환하지 않지만, 조용히 약 1.57M 픽셀 크기의 비슷한 비율로 대체됩니다.
+
+### 자주 사용하는 size 예시
+
+| size 값 | 총 픽셀 | 추천 용도 |
+| --- | --- | --- |
+| `2048x2048` | 4,194,304 | 정사각형 고해상도 |
+| `2048x1536` | 3,145,728 | 4:3 가로형 |
+| `1536x2048` | 3,145,728 | 3:4 세로형 |
+| `2048x1152` | 2,359,296 | 16:9 가로형 |
+| `1152x2048` | 2,359,296 | 9:16 세로형 |
+| `3840x2160` | 8,294,400 | 4K 16:9(최상위) |
+| `2688x1344` | 3,612,672 | 2:1 와이드 가로형 |
+
+<Warning>
+  **`aspect_ratio`나 `resolution`과 동시에 전달하지 마십시오**, 그렇지 않으면 400을 반환합니다.
+</Warning>
+
 ## Response
 
 <ResponseField name="out_task_id" type="string">
-  요청자 작업 ID로, 결과 조회에 사용할 수 있습니다
+  요청자 작업 ID로 결과 조회에 사용할 수 있음
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  초기 상태로 고정된 값 `"pending"`
+  초기 상태, 고정 값 `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
@@ -149,11 +213,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  생성 시간 (ISO 형식)
+  생성 시간(ISO 형식)
 </ResponseField>
 
 <RequestExample>
-  ```bash cURL
+  ```bash cURL（aspect_ratio）
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
@@ -161,10 +225,25 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     --data '{
       "model": "gpt_image_2",
       "params": {
-        "prompt": "한 마리의 주황색 고양이가 창틀에 앉아 석양을 바라보는 수채화 스타일",
+        "prompt": "한 마리의 주황색 고양이가 창턱에 앉아 석양을 바라보는 수채화 스타일",
         "aspect_ratio": "16:9"
       },
       "out_task_id": "my_task_123456"
+    }'
+  ```
+
+  ```bash cURL（size 사용자 정의 크기）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gpt_image_2",
+      "params": {
+        "prompt": "한 마리의 주황색 고양이가 창턱에 앉아 석양을 바라보는 수채화 스타일",
+        "size": "2048x1152"
+      },
+      "out_task_id": "my_task_size_001"
     }'
   ```
 
@@ -176,7 +255,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
       "model": "gpt_image_2",
       "params": {
-          "prompt": "한 마리의 주황색 고양이가 창틀에 앉아 석양을 바라보는 수채화 스타일",
+          "prompt": "한 마리의 주황색 고양이가 창턱에 앉아 석양을 바라보는 수채화 스타일",
           "aspect_ratio": "16:9"
       },
       "out_task_id": "my_task_123456"
@@ -198,7 +277,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   const payload = {
     model: "gpt_image_2",
     params: {
-      prompt: "한 마리의 주황색 고양이가 창틀에 앉아 석양을 바라보는 수채화 스타일",
+      prompt: "한 마리의 주황색 고양이가 창턱에 앉아 석양을 바라보는 수채화 스타일",
       aspect_ratio: "16:9"
     },
     out_task_id: "my_task_123456"
@@ -236,7 +315,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       payload := map[string]interface{}{
           "model": "gpt_image_2",
           "params": map[string]interface{}{
-              "prompt":       "한 마리의 주황색 고양이가 창틀에 앉아 석양을 바라보는 수채화 스타일",
+              "prompt":       "한 마리의 주황색 고양이가 창턱에 앉아 석양을 바라보는 수채화 스타일",
               "aspect_ratio": "16:9",
           },
           "out_task_id": "my_task_123456",
@@ -274,7 +353,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           {
             "model": "gpt_image_2",
             "params": {
-              "prompt": "한 마리의 주황색 고양이가 창틀에 앉아 석양을 바라보는 수채화 스타일",
+              "prompt": "한 마리의 주황색 고양이가 창턱에 앉아 석양을 바라보는 수채화 스타일",
               "aspect_ratio": "16:9"
             },
             "out_task_id": "my_task_123456"
@@ -305,7 +384,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   $payload = [
       "model" => "gpt_image_2",
       "params" => [
-          "prompt" => "한 마리의 주황색 고양이가 창틀에 앉아 석양을 바라보는 수채화 스타일",
+          "prompt" => "한 마리의 주황색 고양이가 창턱에 앉아 석양을 바라보는 수채화 스타일",
           "aspect_ratio" => "16:9"
       ],
       "out_task_id" => "my_task_123456"
@@ -337,7 +416,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
     model: "gpt_image_2",
     params: {
-      prompt: "한 마리의 주황색 고양이가 창틀에 앉아 석양을 바라보는 수채화 스타일",
+      prompt: "한 마리의 주황색 고양이가 창턱에 앉아 석양을 바라보는 수채화 스타일",
       aspect_ratio: "16:9"
     },
     out_task_id: "my_task_123456"
@@ -362,7 +441,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload: [String: Any] = [
       "model": "gpt_image_2",
       "params": [
-          "prompt": "한 마리의 주황색 고양이가 창틀에 앉아 석양을 바라보는 수채화 스타일",
+          "prompt": "한 마리의 주황색 고양이가 창턱에 앉아 석양을 바라보는 수채화 스타일",
           "aspect_ratio": "16:9"
       ],
       "out_task_id": "my_task_123456"
@@ -403,7 +482,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           var payload = @"{
               ""model"": ""gpt_image_2"",
               ""params"": {
-                  ""prompt"": ""한 마리의 주황색 고양이가 창틀에 앉아 석양을 바라보는 수채화 스타일"",
+                  ""prompt"": ""한 마리의 주황색 고양이가 창턱에 앉아 석양을 바라보는 수채화 스타일"",
                   ""aspect_ratio"": ""16:9""
               },
               ""out_task_id"": ""my_task_123456""
@@ -437,7 +516,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           const char *payload = "{"
               "\"model\":\"gpt_image_2\","
               "\"params\":{"
-                  "\"prompt\":\"한 마리의 주황색 고양이가 창틀에 앉아 석양을 바라보는 수채화 스타일\","
+                  "\"prompt\":\"한 마리의 주황색 고양이가 창턱에 앉아 석양을 바라보는 수채화 스타일\","
                   "\"aspect_ratio\":\"16:9\""
               "},"
               "\"out_task_id\":\"my_task_123456\""
@@ -477,7 +556,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           NSDictionary *payload = @{
               @"model": @"gpt_image_2",
               @"params": @{
-                  @"prompt": @"한 마리의 주황색 고양이가 창틀에 앉아 석양을 바라보는 수채화 스타일",
+                  @"prompt": @"한 마리의 주황색 고양이가 창턱에 앉아 석양을 바라보는 수채화 스타일",
                   @"aspect_ratio": @"16:9"
               },
               @"out_task_id": @"my_task_123456"
@@ -524,7 +603,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload = {|{
     "model": "gpt_image_2",
     "params": {
-      "prompt": "한 마리의 주황색 고양이가 창틀에 앉아 석양을 바라보는 수채화 스타일",
+      "prompt": "한 마리의 주황색 고양이가 창턱에 앉아 석양을 바라보는 수채화 스타일",
       "aspect_ratio": "16:9"
     },
     "out_task_id": "my_task_123456"
@@ -554,7 +633,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     final payload = {
       'model': 'gpt_image_2',
       'params': {
-        'prompt': '한 마리의 주황색 고양이가 창틀에 앉아 석양을 바라보는 수채화 스타일',
+        'prompt': '한 마리의 주황색 고양이가 창턱에 앉아 석양을 바라보는 수채화 스타일',
         'aspect_ratio': '16:9'
       },
       'out_task_id': 'my_task_123456'
@@ -582,7 +661,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload <- list(
     model = "gpt_image_2",
     params = list(
-      prompt = "한 마리의 주황색 고양이가 창틀에 앉아 석양을 바라보는 수채화 스타일",
+      prompt = "한 마리의 주황색 고양이가 창턱에 앉아 석양을 바라보는 수채화 스타일",
       aspect_ratio = "16:9"
     ),
     out_task_id = "my_task_123456"
@@ -619,7 +698,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```json 400
   {
       "statusCode": 400,
-      "message": "요청 매개변수 유효하지 않음",
+      "message": "요청 파라미터가 유효하지 않음",
       "ok": false
   }
   ```

@@ -1,12 +1,13 @@
 ---
 title: 'GPT-Image-2 Image Generation'
 description: |
-    - Asynchronous processing mode, returns a task ID for subsequent query
-    - Compatible with OpenAI Images protocol, supports text-to-image / image-to-image
+    - Asynchronous processing mode, returns a task ID for subsequent queries
+    - Compatible with OpenAI Images protocol, supports text-to-image and image-to-image
     - Supports 13 image aspect ratios, passed via the aspect_ratio field
-    - Added resolution tier field, supports 1K / 2K / 4K resolution selection (4K supports 6 aspect ratios only)
-    - Up to 9 reference images, supports mixed URL and base64 input
-    - Submitted prompts undergo platform sensitive word / safety review, violating content will be rejected directly
+    - Added resolution tier field, supports 1K / 2K / 4K resolution options (4K supports only 6 aspect ratios)
+    - Added size field, supports custom pixel dimensions (mutually exclusive with aspect_ratio / resolution, total pixels ≥ 2,088,960 for accurate rendering)
+    - Up to 10 reference images, supports mixed URLs and base64
+    - Submitted prompts are reviewed for sensitive words / security by the platform; violating content will be rejected outright
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -42,21 +43,21 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     <ParamField body="prompt" type="string" required>
       Text description for image generation
 
-      * Supports both Chinese and English; detailed description is recommended
-      * Will undergo platform sensitive word / security review before submission; if violating content is detected, an error will be returned immediately
+      * Supports Chinese and English; detailed descriptions are recommended
+      * Before submission, it will go through platform sensitive words / safety review; hitting prohibited content will return an error immediately
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      Array of reference images; when provided, image-to-image generation mode will be used
+      Array of reference images; providing this triggers image-to-image mode
 
-      * Up to 9 reference images
+      * Up to 10 reference images
       * Supports the following two formats:
-        1. Publicly accessible URL
+        1. Publicly accessible URLs
         2. Base64 encoded format
-           * Must use complete Data URI format: `data:image/{format};base64,{base64-data}`
+           * Must use full Data URI format: `data:image/{format};base64,{base64 data}`
            * Supported image formats: jpeg, png, webp
            * Example: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
-           * ⚠️ Note: The prefix `data:image/jpeg;base64,` must be included
+           * ⚠️ Note: Must include the prefix `data:image/jpeg;base64,`
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="auto">
@@ -64,44 +65,81 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
       Default value varies depending on `resolution`:
 
-      * If `resolution` is `1K` / `2K`, default is `auto` if not provided
-      * If `resolution` is `4K`, default is `16:9` if not provided
+      * When `resolution` is `1K` / `2K`, not passing this defaults to `auto`
+      * When `resolution` is `4K`, not passing this defaults to `16:9`
 
       Supported values:
 
-      * `auto` - Automatically selects the most suitable ratio
+      * `auto` - Automatically select the most suitable ratio
       * `1:1` - Square
-      * `16:9` / `9:16` - Widescreen horizontal / vertical
+      * `16:9` / `9:16` - Wide horizontal / vertical
       * `4:3` / `3:4` - Standard screen horizontal / vertical
       * `3:2` / `2:3` - Classic horizontal / vertical
-      * `5:4` / `4:5` - Near-square horizontal / vertical
+      * `5:4` / `4:5` - Almost square horizontal / vertical
       * `2:1` / `1:2` - Wide horizontal / tall vertical
       * `21:9` / `9:21` - Ultra-wide horizontal / ultra-tall vertical
 
       <Warning>
-        Only ratio strings or `auto` are supported; passing pixel dimensions (e.g., `1024x1024`) will cause an error
+        Only ratio strings or `auto` are supported; passing pixel dimensions (e.g. `1024x1024`) will cause an error
       </Warning>
     </ParamField>
 
     <ParamField body="resolution" type="string" default="1K">
-      Resolution tier
+      Resolution level
 
-      Controls the actual image clarity:
+      Controls actual output image clarity:
 
       * `1K` - 1024 baseline, cost-effective for daily use (default)
-      * `2K` - 2048 baseline, suitable for posters / high definition needs
-      * `4K` - 3840 baseline, **only 6 ratios supported** (`16:9` / `9:16` / `2:1` / `1:2` / `21:9` / `9:21`)
+      * `2K` - 2048 baseline, suitable for posters / HD needs
+      * `4K` - 3840 baseline, **only supports 6 aspect ratios** (`16:9` / `9:16` / `2:1` / `1:2` / `21:9` / `9:21`)
 
       <Warning>
-        Unsupported 4K combinations will return 400:
+        Unsupported 4K combinations return 400:
 
         * `1:1` × `4K` ❌ (exceeds pixel limit)
         * `3:2` / `2:3` × `4K` ❌ (exceeds pixel limit)
         * `4:3` / `3:4` × `4K` ❌ (exceeds pixel limit)
         * `5:4` / `4:5` × `4K` ❌ (exceeds pixel limit)
 
-        For high definition images with the above ratios, use `resolution=2K`.
+        For HD images with these ratios, use `resolution=2K`.
       </Warning>
+
+      <Warning>
+        When passing `size`, `resolution` and `aspect_ratio` must not be passed simultaneously; otherwise, 400 is returned.
+      </Warning>
+    </ParamField>
+
+    <ParamField body="size" type="string">
+      Custom pixel size (**mutually exclusive** with `aspect_ratio` / `resolution`)
+
+      Format is `widthxheight`, e.g. `2048x1536`, `3840x2160`.
+
+      **Usage restrictions:**
+
+      * Format must match `^\d+x\d+$`, such as `2048x1536`, other formats are unsupported
+      * Mutually exclusive with `aspect_ratio` and `resolution`; only one of these three can be used at a time; passing together returns 400
+      * Total pixels (width × height) must be within **655,360 ~ 8,294,400**
+
+      **Measured pixel lower limit:**
+
+      | Total Pixel Range | Upstream Behavior |
+      | --- | --- |
+      | ≥ 2,088,960 (approx 2.0M) | Output images precisely match passed `size` ✅ |
+      | < 2,088,960 | Silently replaced with a close ratio of ~1.57M pixels (equivalent to not passing `size`) ⚠️ |
+
+      <Warning>
+        When total pixels are below approx 2,088,960, upstream does not report an error but silently replaces output size. For precise control, **total pixels ≥ 2,088,960** is recommended.
+
+        For smaller sizes, use `aspect_ratio` + `resolution=1K` combination.
+      </Warning>
+
+      **Recommendations:**
+
+      | Requirement | Recommended Method |
+      | --- | --- |
+      | Precise pixel size control | `size`, with total pixels ≥ 2,088,960 |
+      | Small size (< 2M pixels) | `aspect_ratio` + `resolution=1K` |
+      | Medium to large size any ratio | `size`, precise output supported in 2K / 4K ranges |
     </ParamField>
   </Expandable>
 </ParamField>
@@ -134,18 +172,44 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 > `3:2` / `2:3` @ 2K are actually 2048×1360 (approximate ratio, error < 0.5%); 4K only supports 6 ratios (combinations exceeding OpenAI's total pixel limit are unavailable).
 
+## Custom Size (size parameter)
+
+When you need precise control over pixel dimensions, use the `size` parameter instead of the `aspect_ratio` + `resolution` combination.
+
+**Valid range:** Total pixels 655,360 ~ 8,294,400 (upstream official limit)
+
+**Tested effective lower limit:** Total pixels ≥ **2,088,960** (approximately 1440×1452 or 2048×1020 equivalent area)
+
+Below this lower limit, the upstream does not report an error but silently replaces it with a close proportion size of about 1.57M pixels.
+
+### Common size examples
+
+| size value | Total pixels | Recommended use |
+| --- | --- | --- |
+| `2048x2048` | 4,194,304 | Square HD |
+| `2048x1536` | 3,145,728 | 4:3 landscape |
+| `1536x2048` | 3,145,728 | 3:4 portrait |
+| `2048x1152` | 2,359,296 | 16:9 landscape |
+| `1152x2048` | 2,359,296 | 9:16 portrait |
+| `3840x2160` | 8,294,400 | 4K 16:9 (highest quality) |
+| `2688x1344` | 3,612,672 | 2:1 wide landscape |
+
+<Warning>
+  **Do not pass together with `aspect_ratio` or `resolution`, otherwise a 400 will be returned.**
+</Warning>
+
 ## Response
 
 <ResponseField name="out_task_id" type="string">
-  Initiator task ID, can be used to query the result
+  Initiator task ID, which can be used to query the result
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  Initial status, fixed as `"pending"`
+  Initial status, fixed to `"pending"`
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  Estimated credits consumption
+  Estimated consumed credits
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
@@ -153,7 +217,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <RequestExample>
-  ```bash cURL
+  ```bash cURL (aspect_ratio)
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
@@ -165,6 +229,21 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
         "aspect_ratio": "16:9"
       },
       "out_task_id": "my_task_123456"
+    }'
+  ```
+
+  ```bash cURL (size custom size)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gpt_image_2",
+      "params": {
+        "prompt": "An orange cat sitting on the windowsill watching the sunset, watercolor style",
+        "size": "2048x1152"
+      },
+      "out_task_id": "my_task_size_001"
     }'
   ```
 
@@ -637,7 +716,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 433,
-      "message": "Insufficient account balance, please recharge and try again"
+      "message": "Insufficient account balance, please top up and try again"
     }
   }
   ```
