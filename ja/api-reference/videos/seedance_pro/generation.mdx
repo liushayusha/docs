@@ -33,11 +33,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  モデルパラメーターオブジェクト
+  モデルパラメータオブジェクト
 
   <Expandable title="params オブジェクトのプロパティ">
     <ParamField body="prompt" type="string" required>
-      ビデオ生成のためのテキスト説明
+      ビデオ生成のテキスト説明
 
       制限なし
     </ParamField>
@@ -45,7 +45,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     <ParamField body="video_length" type="number" default="5">
       ビデオの長さ（秒）
 
-      サポートされている長さの範囲：4～12秒
+      対応可能な長さの範囲：4～12秒
 
       デフォルト値：5秒
     </ParamField>
@@ -53,49 +53,49 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     <ParamField body="aspect_ratio" type="string" required>
       ビデオのアスペクト比
 
-      サポートされているアスペクト比：
+      対応可能なアスペクト比：
       * `16:9` - 横向き
       * `9:16` - 縦向き
     </ParamField>
 
-    <ParamField body="resolution" type="string" required>
+    <ParamField body="resolution" type="string" default="720p">
       ビデオの解像度
 
-      サポートされている解像度：
+      対応可能な解像度：
       * `720p` - 標準画質
       * `1080p` - 高画質
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      参考画像のURL、ビデオ生成のための（最初のフレーム）
+      画像生成ビデオ（最初のフレーム）用の参照画像のURL
 
-      * 単一の画像のみサポート
+      * 単一の画像のみ対応
       * 公開アクセス可能なURLをサポート
     </ParamField>
 
     <ParamField body="end_image_url" type="string">
-      最終フレームの参考画像のURL
+      最終フレームの参照画像のURL
 
-      * 単一の画像のみサポート
+      * 単一の画像のみ対応
       * 公開アクセス可能なURLをサポート
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発信側タスクID
+  発信者のタスクID
 
   ユーザー定義のタスク識別子、必須
 </ParamField>
 
 ### 解像度とアスペクト比の組み合わせ表
 
-| アスペクト比 | 解像度 | 実際のサイズ |
-|--------|--------|----------|
-| 16:9   | 720p   | 1280x720 |
-| 16:9   | 1080p  | 1920x1080|
-| 9:16   | 720p   | 720x1280 |
-| 9:16   | 1080p  | 1080x1920|
+| アスペクト比 | 解像度 | 実寸サイズ |
+|--------------|--------|------------|
+| 16:9         | 720p   | 1280x720   |
+| 16:9         | 1080p  | 1920x1080  |
+| 9:16         | 720p   | 720x1280   |
+| 9:16         | 1080p  | 1080x1920  |
 
 ## Response
 

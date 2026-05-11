@@ -10,6 +10,12 @@ api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
+<Note>
+このインターフェースは2つのモデルバリエーションをサポートしており、パラメータは完全に同じです：
+- `seedance2_fast` — 標準の高速版
+- `seedance2_fast_face` — 実写版のアップロードに対応し、高速版と機能は同じです
+</Note>
+
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
@@ -31,7 +37,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="model" type="string" required>
   モデル名
 
-  固定値：`"seedance2_fast"`
+  以下のモデルバリアントをサポートしています（パラメータは完全に一致し、必要に応じて選択してください）：
+  * `seedance2_fast` — 標準の高速版
+  * `seedance2_fast_face` — 実写対応版で、高速版と同じ機能
 </ParamField>
 
 <ParamField body="params" type="object" required>
@@ -39,35 +47,35 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   <Expandable title="params オブジェクトのプロパティ">
     <ParamField body="prompt" type="string" required>
-      動画生成のテキスト説明、空にできません
+      動画生成用のテキスト説明。空にできません
     </ParamField>
 
     <ParamField body="type" type="string" required>
-      参照モード、画像/動画パラメータの使用方法を決定します
+      参照モード。画像／動画パラメータの使用方法を決定します
 
-      * `all_reference` — インテリジェント参照モード：`image_url` はキャラクター/スタイルの参照画像（最大 9 枚）、`video_url` は参照動画（最大 3 つ）
-      * `first_last_frame` — はじめと終わりのフレームモード：`image_url` は最初のフレーム（1 枚のみ）、`end_image_url` は最後のフレーム、`video_url` はサポートしません
+      * `all_reference` — インテリジェント参照モード：`image_url` はキャラクター／スタイル参考画像（最大 9 枚）、`video_url` は参考動画（最大 3 つ）として使用
+      * `first_last_frame` — 最初と最後のフレームモード：`image_url` は最初のフレーム（1 枚のみ）、`end_image_url` が最後のフレーム。`video_url` は対応しません
 
-      必須、選択可能値：`all_reference`、`first_last_frame`
+      必須。利用可能な値：`all_reference`、`first_last_frame`
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      参照画像のURL
+      参考画像の URL
 
-      * `all_reference` モード：最大 9 枚、各画像最大 50MB、最小辺長 300px
+      * `all_reference` モード：最大 9 枚、1 枚あたり最大 50MB、最小辺長 300px
       * `first_last_frame` モード：1 枚のみ（最初のフレーム）、最大 10MB、最小辺長 300px
     </ParamField>
 
     <ParamField body="video_url" type="string[]">
-      参照動画のURL
+      参考動画の URL
 
-      `all_reference` モードのみ対応。最大 3 つ；対応形式は `mp4`、`mov`；単一動画の長さは 2～15 秒、すべての参照動画の合計長さは 15 秒以下；単一動画ファイルは 50MB 以下；フレームレートは 24～60 FPS；解像度は `480p`、`720p` が対応；アスペクト比は 0.4～2.5；幅・高さは 300～6000px の範囲；総ピクセル数は 409600～927408 範囲内である必要があります
+      `all_reference` モードのみ対応。最大 3 つ。`mp4`、`mov` に対応。単一動画の長さは 2～15 秒、参照動画の合計は 15 秒以内。単一動画のサイズは最大 50MB。フレームレートは 24～60 FPS。解像度は `480p`、`720p` をサポート。アスペクト比は 0.4～2.5。幅と高さは 300～6000px 範囲。総ピクセル数は 409600～927408 の間にある必要があります
 
-      <Warning>`all_reference` モードのみ有効で、`type` が `first_last_frame` の場合はこのパラメータを送信しないでください</Warning>
+      <Warning>`all_reference` モードのみ有効。`type` が `first_last_frame` の場合はこのパラメータを渡さないでください</Warning>
     </ParamField>
 
     <ParamField body="end_image_url" type="string">
-      最終フレーム画像のURL
+      最終フレーム画像の URL
 
       最大 10MB
 
@@ -77,13 +85,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     <ParamField body="aspect_ratio" type="string" default="16:9">
       動画のアスペクト比
 
-      対応アスペクト比：
-      * `16:9` - 横長（デフォルト）
-      * `9:16` - 縦長
+      対応するアスペクト比：
+      * `16:9` - 横向き（デフォルト）
+      * `9:16` - 縦向き
       * `1:1` - 正方形
       * `4:3` - 標準
       * `3:4` - 縦型標準
-      * `21:9` - 超ワイドスクリーン
+      * `21:9` - ウルトラワイド
     </ParamField>
 
     <ParamField body="resolution" type="string" default="720p">
@@ -97,19 +105,19 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     <ParamField body="video_length" type="string" default="5">
       動画の長さ（秒）
 
-      対応可能な長さの範囲：4～15 秒、デフォルトは 5 秒
+      サポートされる長さの範囲：4～15秒、デフォルトは5秒
     </ParamField>
 
     <ParamField body="generate_audio" type="boolean" default="true">
-      音声を生成するかどうか、デフォルトは `true`
+      音声を生成するかどうか。デフォルトは `true`
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発注側タスクID
+  発起者タスクID
 
-  ユーザー定義のタスク識別子、必須
+  ユーザー定義のタスク識別子。必須
 </ParamField>
 
 ## Response

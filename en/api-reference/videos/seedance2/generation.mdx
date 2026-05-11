@@ -9,6 +9,12 @@ api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
+<Note>
+This endpoint supports two model variants with identical parameters:
+- `seedance2` — Standard version
+- `seedance2_face` — Supports uploading real person version, functionality is consistent with the standard version
+</Note>
+
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
@@ -30,11 +36,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="model" type="string" required>
   Model Name
 
-  Fixed value: `"seedance2"`
+  Supports the following model variants (parameters are exactly the same, choose as needed):
+  * `seedance2` — Standard version
+  * `seedance2_face` — Supports uploading real human version, functionality is consistent with the standard version
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  Model Parameters Object
+  Model parameters object
 
   <Expandable title="params Object Properties">
     <ParamField body="prompt" type="string" required>
@@ -44,33 +52,33 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     <ParamField body="type" type="string" required>
       Reference mode, determines how image/video parameters are used
 
-      * `all_reference` — Smart reference mode: `image_url` as character/style reference images (up to 9), `video_url` as reference videos (up to 3)
-      * `first_last_frame` — First and last frame mode: `image_url` is the first frame (only 1 image), `end_image_url` is the last frame, does not support `video_url`
+      * `all_reference` — Intelligent reference mode: `image_url` used as character/style reference images (up to 9), `video_url` used as reference videos (up to 3)
+      * `first_last_frame` — First and last frame mode: `image_url` as first frame (only 1), `end_image_url` as last frame, `video_url` not supported
 
-      Required, possible values: `all_reference`, `first_last_frame`
+      Required, optional values: `all_reference`, `first_last_frame`
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
       Reference image URLs
 
-      * In `all_reference` mode: up to 9 images, max 50MB each, minimum dimension 300px
-      * In `first_last_frame` mode: only 1 image (first frame), max 10MB, minimum dimension 300px
+      * In `all_reference` mode: up to 9 images, max 50MB each, minimum side length 300px
+      * In `first_last_frame` mode: only 1 image (first frame), max 10MB, minimum side length 300px
     </ParamField>
 
     <ParamField body="video_url" type="string[]">
       Reference video URLs
 
-      Supported only in `all_reference` mode. Up to 3 videos; supports `mp4`, `mov`; single video duration between 2-15 seconds; total duration of all reference videos no more than 15 seconds; max single video size 50MB; frame rate 24-60 FPS; resolutions supported: `480p`, `720p`; aspect ratio 0.4-2.5; width and height range 300-6000px; total pixels between 409600 and 927408
+      Only supported in `all_reference` mode. Up to 3; supports `mp4`, `mov`; single video duration 2-15 seconds, total length of all reference videos no more than 15 seconds; max 50MB per video; frame rate 24-60 FPS; resolutions supported are `480p`, `720p`; aspect ratio 0.4-2.5; width and height range 300-6000px; total pixels between 409600 and 927408
 
-      <Warning>Valid only in `all_reference` mode, please do not provide this parameter when `type` is `first_last_frame`</Warning>
+      <Warning>Only valid in `all_reference` mode, do not pass this parameter when `type` is `first_last_frame`</Warning>
     </ParamField>
 
     <ParamField body="end_image_url" type="string">
       Last frame image URL
 
-      Maximum 10MB
+      Max 10MB
 
-      <Note>Valid only in `first_last_frame` mode</Note>
+      <Note>Only valid in `first_last_frame` mode</Note>
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="16:9">
@@ -81,7 +89,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       * `9:16` - Portrait
       * `1:1` - Square
       * `4:3` - Standard
-      * `3:4` - Vertical standard
+      * `3:4` - Portrait standard
       * `21:9` - Ultra-wide
     </ParamField>
 
@@ -91,22 +99,23 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       Supported resolutions:
       * `480p`
       * `720p` (default)
+      * `1080p`
     </ParamField>
 
     <ParamField body="video_length" type="string" default="5">
       Video length (seconds)
 
-      Supported range: 4 to 15 seconds, default 5 seconds
+      Supported length range: 4 to 15 seconds, default 5 seconds
     </ParamField>
 
     <ParamField body="generate_audio" type="boolean" default="true">
-      Whether to generate audio, default is `true`
+      Whether to generate audio, default `true`
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  Initiator Task ID
+  Initiator task ID
 
   User-defined task identifier, required
 </ParamField>

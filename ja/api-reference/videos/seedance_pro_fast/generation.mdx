@@ -33,11 +33,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  モデルパラメーターオブジェクト
+  モデルのパラメーターオブジェクト
 
   <Expandable title="params オブジェクトのプロパティ">
     <ParamField body="prompt" type="string" required>
-      ビデオ生成用のテキスト説明
+      動画生成のテキスト説明
 
       制限なし
     </ParamField>
@@ -45,7 +45,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     <ParamField body="video_length" type="number" default="5">
       動画の長さ（秒）
 
-      対応可能な長さの範囲：4～12秒
+      対応する長さの範囲：4〜12秒
 
       デフォルト値：5秒
     </ParamField>
@@ -53,37 +53,37 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     <ParamField body="aspect_ratio" type="string" required>
       動画のアスペクト比
 
-      対応可能なアスペクト比：
+      対応するアスペクト比：
       * `16:9` - 横向き
       * `9:16` - 縦向き
     </ParamField>
 
-    <ParamField body="resolution" type="string" required>
+    <ParamField body="resolution" type="string" default="720p">
       動画の解像度
 
-      対応可能な解像度：
+      サポートされている解像度：
       * `720p` - 標準画質
       * `1080p` - 高画質
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      画像から動画を生成するための参照画像のURL（最初のフレーム）
+      画像から動画生成用の参照画像のURL（初フレーム）
 
-      * 画像は単一のもののみ対応
-      * 公開アクセス可能なURLに対応
+      * 単一画像のみ対応
+      * 公開されてアクセス可能なURLをサポート
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発信元タスクID
+  発注者のタスクID
 
-  ユーザー定義のタスク識別子、必須
+  ユーザーが定義するタスク識別子、必須
 </ParamField>
 
 ### 解像度とアスペクト比の組み合わせ表
 
-| アスペクト比 | 解像度 | 実寸サイズ |
+| アスペクト比 | 解像度 | 実際のサイズ |
 |--------|--------|----------|
 | 16:9   | 720p   | 1280x720 |
 | 16:9   | 1080p  | 1920x1080|

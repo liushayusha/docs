@@ -27,76 +27,76 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  Model Name
+  Model name
 
   Fixed value: `"seedance_1_5_pro"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  Model Parameters Object
+  Model parameters object
 
-  <Expandable title="params Object Properties">
+  <Expandable title="params object properties">
     <ParamField body="prompt" type="string" required>
-      Text Description for Video Generation
+      Text description for video generation
 
-      Unlimited
+      No limit
     </ParamField>
 
     <ParamField body="video_length" type="number" default="5">
-      Video Duration (seconds)
+      Video length (seconds)
 
-      Supported duration range: 4-12 seconds
+      Supported length range: 4-12 seconds
 
-      Default: 5 seconds
+      Default value: 5 seconds
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" required>
-      Video Aspect Ratio
+      Video aspect ratio
 
       Supported aspect ratios:
       * `16:9` - Landscape
       * `9:16` - Portrait
     </ParamField>
 
-    <ParamField body="resolution" type="string" required>
-      Video Resolution
+    <ParamField body="resolution" type="string" default="720p">
+      Video resolution
 
       Supported resolutions:
-      * `720p` - Standard Definition
-      * `1080p` - High Definition
+      * `720p` - Standard definition
+      * `1080p` - High definition
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      Reference Image URL for Image-to-Video (First Frame)
+      Reference image URL for image-to-video (first frame)
 
-      * Only supports a single image
+      * Single image only
       * Supports publicly accessible URLs
     </ParamField>
 
     <ParamField body="end_image_url" type="string">
-      Reference Image URL for Ending Frame
+      Reference image URL for the end frame
 
-      * Only supports a single image
+      * Single image only
       * Supports publicly accessible URLs
     </ParamField>
 
     <ParamField body="generate_audio" type="boolean" default="false">
-      Whether to Generate Audio
+      Whether to generate audio
 
-      When set to `true`, the video will include AI-generated accompanying audio
+      If set to `true`, the video will include AI-generated accompanying audio
 
-      Default: `false`
+      Default value: `false`
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  Initiator Task ID
+  Initiator task ID
 
   User-defined task identifier, required
 </ParamField>
 
-### Resolution and Aspect Ratio Combinations Table
+### Resolution and Aspect Ratio Combination Table
 
 | Aspect Ratio | Resolution | Actual Size |
 |--------|--------|----------|

@@ -9,6 +9,12 @@ api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
+<Note>
+이 인터페이스는 두 가지 모델 변형을 지원하며, 파라미터는 완전히 동일합니다:
+- `seedance2` — 표준 버전
+- `seedance2_face` — 실사 업로드 지원, 기능은 표준 버전과 동일
+</Note>
+
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
@@ -30,39 +36,41 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="model" type="string" required>
   모델 이름
 
-  고정값: `"seedance2"`
+  다음 모델 변형을 지원합니다(파라미터는 완전히 동일하며 필요에 따라 선택):
+  * `seedance2` — 표준 버전
+  * `seedance2_face` — 실제 인물 업로드 지원, 기능은 표준 버전과 동일
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  모델 매개변수 객체
+  모델 파라미터 객체
 
   <Expandable title="params 객체 속성">
     <ParamField body="prompt" type="string" required>
-      영상 생성을 위한 텍스트 설명, 비어 있을 수 없음
+      비디오 생성에 사용할 텍스트 설명, 비어 있을 수 없습니다
     </ParamField>
 
     <ParamField body="type" type="string" required>
-      참조 모드, 이미지/영상 매개변수 사용 방법 결정
+      참고 모드, 이미지/비디오 파라미터 사용 방식을 결정합니다
 
-      * `all_reference` — 스마트 참조 모드: `image_url`이 캐릭터/스타일 참조 이미지로 사용(최대 9장), `video_url`이 참조 영상으로 사용(최대 3개)
-      * `first_last_frame` — 시작/끝 프레임 모드: `image_url`이 첫 프레임(단 1장), `end_image_url`이 마지막 프레임, `video_url` 미지원
+      * `all_reference` — 스마트 참고 모드: `image_url`는 캐릭터/스타일 참고 이미지(최대 9장), `video_url`는 참고 비디오(최대 3개)
+      * `first_last_frame` — 첫-마지막 프레임 모드: `image_url`는 첫 프레임(단 1장), `end_image_url`는 마지막 프레임, `video_url`는 지원하지 않음
 
-      필수, 선택 가능한 값: `all_reference`, `first_last_frame`
+      필수 입력, 선택 가능한 값: `all_reference`, `first_last_frame`
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      참조 이미지 URL
+      참고 이미지 URL
 
-      * `all_reference` 모드: 최대 9장, 각 이미지 최대 50MB, 최소 변 길이 300px
+      * `all_reference` 모드: 최대 9장, 각 최대 50MB, 최소 변 길이 300px
       * `first_last_frame` 모드: 단 1장(첫 프레임), 최대 10MB, 최소 변 길이 300px
     </ParamField>
 
     <ParamField body="video_url" type="string[]">
-      참조 영상 URL
+      참고 비디오 URL
 
-      오직 `all_reference` 모드에서만 지원. 최대 3개; `mp4`, `mov` 지원; 단일 영상 길이 2~15초, 모든 참조 영상 총길이 15초 이내; 단일 영상 최대 50MB; 프레임률 24~60 FPS; 해상도 `480p`, `720p` 지원; 가로세로 비 0.4~2.5; 가로세로 범위 300~6000px; 총 픽셀 수 409600~927408 범위 내여야 함
+      `all_reference` 모드만 지원. 최대 3개; `mp4`, `mov` 지원; 단일 비디오 길이 2-15초, 모든 참고 비디오 총 길이 15초를 넘지 않음; 단일 비디오 최대 50MB; 프레임률 24-60 FPS; 해상도 `480p`, `720p` 지원; 종횡비 0.4-2.5; 너비 및 높이 300-6000px; 전체 픽셀 수 409600-927408 사이여야 함
 
-      <Warning>오직 `all_reference` 모드에서만 유효, `type`이 `first_last_frame`일 경우 이 매개변수를 전달하지 마세요</Warning>
+      <Warning>`all_reference` 모드에서만 유효, `type`이 `first_last_frame`일 경우 이 파라미터를 전달하지 마십시오</Warning>
     </ParamField>
 
     <ParamField body="end_image_url" type="string">
@@ -70,33 +78,34 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
       최대 10MB
 
-      <Note>오직 `first_last_frame` 모드에서만 유효</Note>
+      <Note>`first_last_frame` 모드에서만 유효</Note>
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="16:9">
-      영상 가로세로 비
+      비디오 종횡비
 
-      지원 가로세로 비:
-      * `16:9` - 가로 모드(기본값)
-      * `9:16` - 세로 모드
+      지원되는 종횡비:
+      * `16:9` - 가로 화면(기본값)
+      * `9:16` - 세로 화면
       * `1:1` - 정사각형
       * `4:3` - 표준
       * `3:4` - 세로 표준
-      * `21:9` - 초광폭
+      * `21:9` - 울트라 와이드
     </ParamField>
 
     <ParamField body="resolution" type="string" default="720p">
-      영상 해상도
+      비디오 해상도
 
-      지원 해상도:
+      지원되는 해상도:
       * `480p`
       * `720p`(기본값)
+      * `1080p`
     </ParamField>
 
     <ParamField body="video_length" type="string" default="5">
-      영상 길이(초)
+      비디오 길이(초)
 
-      지원 길이 범위: 4~15초, 기본 5초
+      지원 길이 범위: 4~15초, 기본값 5초
     </ParamField>
 
     <ParamField body="generate_audio" type="boolean" default="true">
@@ -108,7 +117,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="out_task_id" type="string" required>
   요청자 작업 ID
 
-  사용자 정의 작업 식별자, 필수
+  사용자가 정의한 작업 식별자, 필수 입력
 </ParamField>
 
 ## Response

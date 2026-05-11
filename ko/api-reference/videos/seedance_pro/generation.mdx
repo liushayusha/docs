@@ -29,7 +29,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="model" type="string" required>
   모델 이름
 
-  고정 값: `"seedance_pro"`
+  고정값: `"seedance_pro"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
@@ -37,7 +37,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   <Expandable title="params 객체 속성">
     <ParamField body="prompt" type="string" required>
-      영상 생성을 위한 텍스트 설명
+      영상 생성 텍스트 설명
 
       제한 없음
     </ParamField>
@@ -51,23 +51,23 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" required>
-      영상 가로세로 비율
+      영상 가로세로비
 
-      지원 비율:
+      지원 가로세로비:
       * `16:9` - 가로
       * `9:16` - 세로
     </ParamField>
 
-    <ParamField body="resolution" type="string" required>
+    <ParamField body="resolution" type="string" default="720p">
       영상 해상도
 
       지원 해상도:
-      * `720p` - 표준 화질
+      * `720p` - 표준화질
       * `1080p` - 고화질
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      영상 생성용 참조 이미지 URL(첫 프레임)
+      영상 생성용 참조 이미지 URL (첫 프레임)
 
       * 단일 이미지만 지원
       * 공개 접근 가능한 URL 지원
@@ -83,14 +83,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  요청자 작업 ID
+  발신자 작업 ID
 
-  사용자 정의 작업 식별자, 필수 입력
+  사용자 정의 작업 식별자로 필수 입력
 </ParamField>
 
-### 해상도 및 가로세로 비율 조합 표
+### 해상도와 가로세로비 조합표
 
-| 가로세로 비율 | 해상도 | 실제 크기 |
+| 가로세로비 | 해상도 | 실제 크기 |
 |--------|--------|----------|
 | 16:9   | 720p   | 1280x720 |
 | 16:9   | 1080p  | 1920x1080|

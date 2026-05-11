@@ -10,6 +10,12 @@ api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
+<Note>
+This endpoint supports two model variants with identical parameters:
+- `seedance2_fast` — Standard fast version
+- `seedance2_fast_face` — Supports uploading real human version, features identical to the fast version
+</Note>
+
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
@@ -31,7 +37,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="model" type="string" required>
   Model name
 
-  Fixed value: `"seedance2_fast"`
+  Supports the following model variants (parameters are identical, choose as needed):
+  * `seedance2_fast` — Standard fast version
+  * `seedance2_fast_face` — Supports uploading real-person version, functions same as fast version
 </ParamField>
 
 <ParamField body="params" type="object" required>
@@ -45,8 +53,8 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     <ParamField body="type" type="string" required>
       Reference mode, determines how image/video parameters are used
 
-      * `all_reference` — Smart reference mode: `image_url` as character/style reference images (up to 9), `video_url` as reference videos (up to 3)
-      * `first_last_frame` — First and last frame mode: `image_url` as first frame (only 1), `end_image_url` as last frame, does not support `video_url`
+      * `all_reference` — Smart reference mode: `image_url` used as character/style reference images (up to 9), `video_url` used as reference videos (up to 3)
+      * `first_last_frame` — First and last frame mode: `image_url` is the first frame (only 1), `end_image_url` is the last frame, `video_url` not supported
 
       Required, optional values: `all_reference`, `first_last_frame`
     </ParamField>
@@ -54,16 +62,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     <ParamField body="image_url" type="string[]">
       Reference image URLs
 
-      * In `all_reference` mode: up to 9 images, max 50MB each, minimum side length 300px
-      * In `first_last_frame` mode: only 1 image (first frame), max 10MB, minimum side length 300px
+      * `all_reference` mode: up to 9 images, max 50MB each, minimum side length 300px
+      * `first_last_frame` mode: only 1 image (first frame), max 10MB, minimum side length 300px
     </ParamField>
 
     <ParamField body="video_url" type="string[]">
       Reference video URLs
 
-      Supported only in `all_reference` mode. Up to 3 videos; supports `mp4`, `mov`; single video duration 2-15 seconds; total duration of all reference videos not exceeding 15 seconds; single video max 50MB; frame rate 24-60 FPS; resolutions supported: `480p`, `720p`; aspect ratio 0.4~2.5; width and height range 300-6000px; total pixels between 409600-927408
+      Supported only in `all_reference` mode. Maximum 3 videos; supports `mp4`, `mov`; single video length 2-15 seconds, total length of all reference videos not exceeding 15 seconds; single video max 50MB; frame rate 24-60 FPS; resolutions supported: `480p`, `720p`; aspect ratio 0.4~2.5; width and height range 300-6000px; total pixels between 409600 and 927408
 
-      <Warning>Only effective in `all_reference` mode; do not pass this parameter when `type` is `first_last_frame`</Warning>
+      <Warning>Only effective in `all_reference` mode, do not pass this parameter when `type` is `first_last_frame`</Warning>
     </ParamField>
 
     <ParamField body="end_image_url" type="string">
@@ -82,7 +90,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       * `9:16` - Portrait
       * `1:1` - Square
       * `4:3` - Standard
-      * `3:4` - Vertical standard
+      * `3:4` - Portrait standard
       * `21:9` - Ultra-wide
     </ParamField>
 
@@ -97,19 +105,19 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     <ParamField body="video_length" type="string" default="5">
       Video length (seconds)
 
-      Supported range: 4~15 seconds, default 5 seconds
+      Supported range: 4 to 15 seconds, default 5 seconds
     </ParamField>
 
     <ParamField body="generate_audio" type="boolean" default="true">
-      Whether to generate audio, default is `true`
+      Whether to generate audio, default `true`
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  Initiator task ID
+  Client task ID
 
-  User defined task identifier, required
+  User-defined task identifier, required
 </ParamField>
 
 ## Response

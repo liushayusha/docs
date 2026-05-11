@@ -58,7 +58,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       * `9:16` - 縦向き
     </ParamField>
 
-    <ParamField body="resolution" type="string" required>
+    <ParamField body="resolution" type="string" default="720p">
       動画の解像度
 
       対応可能な解像度：
@@ -67,17 +67,17 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="image_url" type="string">
-      参考画像のURL（動画生成の最初のフレーム用）
+      動画生成の参考画像のURL（初期フレーム）
 
-      * 1枚の画像のみサポート
-      * 公開アクセス可能なURLに対応
+      * 画像は1枚のみ対応
+      * 公開アクセス可能なURLをサポート
     </ParamField>
 
     <ParamField body="end_image_url" type="string">
-      終了フレームの参考画像URL
+      最終フレーム参考画像のURL
 
-      * 1枚の画像のみサポート
-      * 公開アクセス可能なURLに対応
+      * 画像は1枚のみ対応
+      * 公開アクセス可能なURLをサポート
     </ParamField>
 
     <ParamField body="generate_audio" type="boolean" default="false">
@@ -91,19 +91,19 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発注者タスクID
+  発信元タスクID
 
-  ユーザーが定義するタスク識別子で必須
+  ユーザーが定義するタスク識別子（必須）
 </ParamField>
 
 ### 解像度とアスペクト比の組み合わせ表
 
-| アスペクト比 | 解像度 | 実際のサイズ |
-|--------------|--------|--------------|
-| 16:9         | 720p   | 1280x720     |
-| 16:9         | 1080p  | 1920x1080    |
-| 9:16         | 720p   | 720x1280     |
-| 9:16         | 1080p  | 1080x1920    |
+| アスペクト比 | 解像度  | 実際のサイズ    |
+|--------------|---------|----------------|
+| 16:9         | 720p    | 1280x720       |
+| 16:9         | 1080p   | 1920x1080      |
+| 9:16         | 720p    | 720x1280       |
+| 9:16         | 1080p   | 1080x1920      |
 
 ## Response
 
