@@ -2,12 +2,12 @@
 title: 'GPT-Image-2 Image Generation'
 description: |
     - Asynchronous processing mode, returns a task ID for subsequent queries
-    - Compatible with OpenAI Images protocol, supports text-to-image and image-to-image
-    - Supports 13 image aspect ratios, passed via the aspect_ratio field
-    - Added resolution tier field, supports 1K / 2K / 4K resolution options (4K supports only 6 aspect ratios)
-    - Added size field, supports custom pixel dimensions (mutually exclusive with aspect_ratio / resolution, total pixels ≥ 2,088,960 for accurate rendering)
-    - Up to 10 reference images, supports mixed URLs and base64
-    - Submitted prompts are reviewed for sensitive words / security by the platform; violating content will be rejected outright
+    - Compatible with OpenAI Images protocol, supports text-to-image / image-to-image
+    - Supports 13 image aspect ratios, passed through the aspect_ratio field
+    - Added resolution tier field, supports 1K / 2K / 4K resolution selection (4K full aspect ratio supported)
+    - Added size field, supports custom pixel dimensions (mutually exclusive with aspect_ratio / resolution, total pixels ≥ 2,088,960 required for precise generation)
+    - Up to 10 reference images, supports mixed URL and base64 inputs
+    - Submitted prompts will undergo platform sensitive word / security review, violating content will be directly rejected
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -31,146 +31,135 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  Model name
+  Model Name
 
   Fixed value: `"gpt_image_2"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  Model parameter object
+  Model Parameters Object
 
-  <Expandable title="params object properties">
+  <Expandable title="params Object Properties">
     <ParamField body="prompt" type="string" required>
-      Text description for image generation
+      Text Description for Image Generation
 
       * Supports Chinese and English; detailed descriptions are recommended
-      * Before submission, it will go through platform sensitive words / safety review; hitting prohibited content will return an error immediately
+      * The prompt will undergo platform sensitive word / security review before submission; any violation will result in an error
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      Array of reference images; providing this triggers image-to-image mode
+      Reference Image Array; when provided, image-to-image mode is used
 
       * Up to 10 reference images
       * Supports the following two formats:
         1. Publicly accessible URLs
         2. Base64 encoded format
-           * Must use full Data URI format: `data:image/{format};base64,{base64 data}`
+           * Must use the full Data URI format: `data:image/{format};base64,{base64 data}`
            * Supported image formats: jpeg, png, webp
            * Example: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
-           * ⚠️ Note: Must include the prefix `data:image/jpeg;base64,`
+           * ⚠️ Note: Must include the `data:image/jpeg;base64,` prefix
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="auto">
-      Aspect ratio for image generation
+      Image Generation Aspect Ratio
 
-      Default value varies depending on `resolution`:
+      Default value varies with `resolution`:
 
-      * When `resolution` is `1K` / `2K`, not passing this defaults to `auto`
-      * When `resolution` is `4K`, not passing this defaults to `16:9`
+      * Defaults to `auto` when `resolution` is `1K` / `2K`
+      * Defaults to `16:9` when `resolution` is `4K`
 
       Supported values:
 
-      * `auto` - Automatically select the most suitable ratio
+      * `auto` - Automatically selects the most suitable ratio
       * `1:1` - Square
       * `16:9` / `9:16` - Wide horizontal / vertical
-      * `4:3` / `3:4` - Standard screen horizontal / vertical
+      * `4:3` / `3:4` - Standard horizontal / vertical
       * `3:2` / `2:3` - Classic horizontal / vertical
-      * `5:4` / `4:5` - Almost square horizontal / vertical
+      * `5:4` / `4:5` - Nearly square horizontal / vertical
       * `2:1` / `1:2` - Wide horizontal / tall vertical
       * `21:9` / `9:21` - Ultra-wide horizontal / ultra-tall vertical
 
       <Warning>
-        Only ratio strings or `auto` are supported; passing pixel dimensions (e.g. `1024x1024`) will cause an error
+        Only aspect ratio strings or `auto` are supported; passing pixel dimensions (e.g., `1024x1024`) will cause an error
       </Warning>
     </ParamField>
 
     <ParamField body="resolution" type="string" default="1K">
-      Resolution level
+      Resolution Tier
 
-      Controls actual output image clarity:
+      Controls the actual output image clarity:
 
       * `1K` - 1024 baseline, cost-effective for daily use (default)
-      * `2K` - 2048 baseline, suitable for posters / HD needs
-      * `4K` - 3840 baseline, **only supports 6 aspect ratios** (`16:9` / `9:16` / `2:1` / `1:2` / `21:9` / `9:21`)
+      * `2K` - 2048 baseline, suitable for posters / high-definition needs
+      * `4K` - 3840 baseline, **supports all 13 ratios**
 
       <Warning>
-        Unsupported 4K combinations return 400:
-
-        * `1:1` × `4K` ❌ (exceeds pixel limit)
-        * `3:2` / `2:3` × `4K` ❌ (exceeds pixel limit)
-        * `4:3` / `3:4` × `4K` ❌ (exceeds pixel limit)
-        * `5:4` / `4:5` × `4K` ❌ (exceeds pixel limit)
-
-        For HD images with these ratios, use `resolution=2K`.
-      </Warning>
-
-      <Warning>
-        When passing `size`, `resolution` and `aspect_ratio` must not be passed simultaneously; otherwise, 400 is returned.
+        When passing `size`, `resolution` and `aspect_ratio` cannot be passed at the same time; otherwise, a 400 error will be returned.
       </Warning>
     </ParamField>
 
     <ParamField body="size" type="string">
-      Custom pixel size (**mutually exclusive** with `aspect_ratio` / `resolution`)
+      Custom Pixel Dimensions (mutually exclusive with `aspect_ratio` / `resolution`)
 
-      Format is `widthxheight`, e.g. `2048x1536`, `3840x2160`.
+      Format is `widthxheight`, e.g., `2048x1536`, `3840x2160`.
 
-      **Usage restrictions:**
+      **Usage Limitations:**
 
-      * Format must match `^\d+x\d+$`, such as `2048x1536`, other formats are unsupported
-      * Mutually exclusive with `aspect_ratio` and `resolution`; only one of these three can be used at a time; passing together returns 400
+      * Format must match `^\d+x\d+$`, such as `2048x1536`; other formats are unsupported
+      * Mutually exclusive with `aspect_ratio` and `resolution`; only one of the three can be chosen; passing both will return 400
       * Total pixels (width × height) must be within **655,360 ~ 8,294,400**
 
-      **Measured pixel lower limit:**
+      **Practical Pixel Lower Limit:**
 
       | Total Pixel Range | Upstream Behavior |
       | --- | --- |
-      | ≥ 2,088,960 (approx 2.0M) | Output images precisely match passed `size` ✅ |
-      | < 2,088,960 | Silently replaced with a close ratio of ~1.57M pixels (equivalent to not passing `size`) ⚠️ |
+      | ≥ 2,088,960 (approx. 2.0M) | Exact output according to the passed `size` ✅ |
+      | < 2,088,960 | Silently replaced with a similar ratio (~1.57M) (equivalent to not passing `size`) ⚠️ |
 
       <Warning>
-        When total pixels are below approx 2,088,960, upstream does not report an error but silently replaces output size. For precise control, **total pixels ≥ 2,088,960** is recommended.
+        When total pixels are below approximately 2,088,960, upstream does not report an error but silently replaces output size. For precise control, **it is recommended to have total pixels ≥ 2,088,960**.
 
-        For smaller sizes, use `aspect_ratio` + `resolution=1K` combination.
+        For small size needs, please use the combination of `aspect_ratio` + `resolution=1K`.
       </Warning>
 
       **Recommendations:**
 
       | Requirement | Recommended Method |
       | --- | --- |
-      | Precise pixel size control | `size`, with total pixels ≥ 2,088,960 |
+      | Precise pixel size control | `size` with total pixels ≥ 2,088,960 |
       | Small size (< 2M pixels) | `aspect_ratio` + `resolution=1K` |
-      | Medium to large size any ratio | `size`, precise output supported in 2K / 4K ranges |
+      | Medium to large sizes with any ratio | `size`; 2K / 4K range supports precise output for any ratio |
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  Initiator task ID
+  Initiator Task ID
 
   User-defined task identifier, required
 </ParamField>
 
 ## Size × Resolution Mapping Table
 
-`aspect_ratio × resolution` → Actual pixels (13 ratios × 3 levels):
+`aspect_ratio × resolution` → Actual Pixels (13 ratios × 3 levels):
 
-| aspect\_ratio | `1K`      | `2K`      | `4K`          |
-| ------------- | --------- | --------- | ------------- |
-| `1:1`         | 1024×1024 | 2048×2048 | ❌ Exceeds pixel limit       |
-| `3:2`         | 1536×1024 | 2048×1360 | ❌ Exceeds pixel limit       |
-| `2:3`         | 1024×1536 | 1360×2048 | ❌ Exceeds pixel limit       |
-| `4:3`         | 1024×768  | 2048×1536 | ❌ Exceeds pixel limit       |
-| `3:4`         | 768×1024  | 1536×2048 | ❌ Exceeds pixel limit       |
-| `5:4`         | 1280×1024 | 2560×2048 | ❌ Exceeds pixel limit       |
-| `4:5`         | 1024×1280 | 2048×2560 | ❌ Exceeds pixel limit       |
-| `16:9`        | 1536×864  | 2048×1152 | **3840×2160** |
-| `9:16`        | 864×1536  | 1152×2048 | **2160×3840** |
-| `2:1`         | 2048×1024 | 2688×1344 | **3840×1920** |
-| `1:2`         | 1024×2048 | 1344×2688 | **1920×3840** |
-| `21:9`        | 2016×864  | 2688×1152 | **3840×1648** |
-| `9:21`        | 864×2016  | 1152×2688 | **1648×3840** |
+| aspect\_ratio | `1K`                    | `2K`      | `4K`          |
+| ------------- | ----------------------- | --------- | ------------- |
+| `1:1`         | 1024×1024 / 1254×1254   | 2048×2048 | **2880×2880** |
+| `3:2`         | 1536×1024               | 2048×1360 | **3520×2336** |
+| `2:3`         | 1024×1536               | 1360×2048 | **2336×3520** |
+| `4:3`         | 1024×768                | 2048×1536 | **3312×2480** |
+| `3:4`         | 768×1024                | 1536×2048 | **2480×3312** |
+| `5:4`         | 1280×1024 / 1448×1086   | 2560×2048 | **3216×2576** |
+| `4:5`         | 1024×1280 / 1122×1402   | 2048×2560 | **2576×3216** |
+| `16:9`        | 1536×864 / 1672×941     | 2048×1152 | **3840×2160** |
+| `9:16`        | 864×1536 / 941×1672     | 1152×2048 | **2160×3840** |
+| `2:1`         | 2048×1024 / 1774×887    | 2688×1344 | **3840×1920** |
+| `1:2`         | 1024×2048 / 887×1774    | 1344×2688 | **1920×3840** |
+| `21:9`        | 2016×864 / 1915×821     | 2688×1152 | **3840×1648** |
+| `9:21`        | 864×2016 / 821×1915     | 1152×2688 | **1648×3840** |
 
-> `3:2` / `2:3` @ 2K are actually 2048×1360 (approximate ratio, error < 0.5%); 4K only supports 6 ratios (combinations exceeding OpenAI's total pixel limit are unavailable).
+> `3:2` / `2:3` @ 2K is actually 2048×1360 (approximate ratio, error < 0.5%); 4K now supports all 13 ratios.
 
 ## Custom Size (size parameter)
 
