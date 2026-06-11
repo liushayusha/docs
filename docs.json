@@ -255,7 +255,8 @@
                 "group": "Seedream V5 lite",
                 "icon": "image",
                 "pages": [
-                  "en/api-reference/images/seedream-v5-lite/generation"
+                  "en/api-reference/images/seedream-v5-lite/generation",
+                  "en/api-reference/images/seedream-v5-lite/seedream-5.0/generation"
                 ]
               }
             ]
@@ -311,6 +312,47 @@
                 "icon": "video",
                 "pages": [
                   "en/api-reference/videos/seedance_pro/generation"
+                ]
+              },
+              {
+                "group": "Seedance 2.0",
+                "icon": "video",
+                "pages": [
+                  "en/api-reference/videos/seedance2/generation"
+                ]
+              },
+              {
+                "group": "Seedance 2.0 Fast",
+                "icon": "video",
+                "pages": [
+                  "en/api-reference/videos/seedance2_fast/generation"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Text Series",
+            "icon": "message",
+            "pages": [
+              {
+                "group": "Claude Messages API",
+                "icon": "message",
+                "pages": [
+                  "en/api-reference/text/claude-messages-api/endpoint"
+                ]
+              },
+              {
+                "group": "OpenAI Chat Completions API",
+                "icon": "message",
+                "pages": [
+                  "en/api-reference/text/openai-chat-completions-api/endpoint"
+                ]
+              },
+              {
+                "group": "OpenAI Responses API",
+                "icon": "message",
+                "pages": [
+                  "en/api-reference/text/openai-responses-api/endpoint"
                 ]
               }
             ]
@@ -392,7 +434,8 @@
                 "group": "Seedream V5 lite",
                 "icon": "image",
                 "pages": [
-                  "ja/api-reference/images/seedream-v5-lite/generation"
+                  "ja/api-reference/images/seedream-v5-lite/generation",
+                  "ja/api-reference/images/seedream-v5-lite/seedream-5.0/generation"
                 ]
               }
             ]
@@ -448,6 +491,47 @@
                 "icon": "video",
                 "pages": [
                   "ja/api-reference/videos/seedance_pro/generation"
+                ]
+              },
+              {
+                "group": "Seedance 2.0",
+                "icon": "video",
+                "pages": [
+                  "ja/api-reference/videos/seedance2/generation"
+                ]
+              },
+              {
+                "group": "Seedance 2.0 Fast",
+                "icon": "video",
+                "pages": [
+                  "ja/api-reference/videos/seedance2_fast/generation"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "テキストシリーズ",
+            "icon": "message",
+            "pages": [
+              {
+                "group": "Claude Messages API",
+                "icon": "message",
+                "pages": [
+                  "ja/api-reference/text/claude-messages-api/endpoint"
+                ]
+              },
+              {
+                "group": "OpenAI Chat Completions API",
+                "icon": "message",
+                "pages": [
+                  "ja/api-reference/text/openai-chat-completions-api/endpoint"
+                ]
+              },
+              {
+                "group": "OpenAI Responses API",
+                "icon": "message",
+                "pages": [
+                  "ja/api-reference/text/openai-responses-api/endpoint"
                 ]
               }
             ]
@@ -529,7 +613,8 @@
                 "group": "Seedream V5 lite",
                 "icon": "image",
                 "pages": [
-                  "ko/api-reference/images/seedream-v5-lite/generation"
+                  "ko/api-reference/images/seedream-v5-lite/generation",
+                  "ko/api-reference/images/seedream-v5-lite/seedream-5.0/generation"
                 ]
               }
             ]
@@ -585,6 +670,47 @@
                 "icon": "video",
                 "pages": [
                   "ko/api-reference/videos/seedance_pro/generation"
+                ]
+              },
+              {
+                "group": "Seedance 2.0",
+                "icon": "video",
+                "pages": [
+                  "ko/api-reference/videos/seedance2/generation"
+                ]
+              },
+              {
+                "group": "Seedance 2.0 Fast",
+                "icon": "video",
+                "pages": [
+                  "ko/api-reference/videos/seedance2_fast/generation"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "텍스트 시리즈",
+            "icon": "message",
+            "pages": [
+              {
+                "group": "Claude Messages API",
+                "icon": "message",
+                "pages": [
+                  "ko/api-reference/text/claude-messages-api/endpoint"
+                ]
+              },
+              {
+                "group": "OpenAI Chat Completions API",
+                "icon": "message",
+                "pages": [
+                  "ko/api-reference/text/openai-chat-completions-api/endpoint"
+                ]
+              },
+              {
+                "group": "OpenAI Responses API",
+                "icon": "message",
+                "pages": [
+                  "ko/api-reference/text/openai-responses-api/endpoint"
                 ]
               }
             ]
