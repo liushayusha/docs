@@ -79,6 +79,13 @@
                 "pages": [
                   "zh/api-reference/images/seedream-v5-lite/generation"
                 ]
+              },
+              {
+                "group": "Wan2.7-Image-Pro",
+                "icon": "image",
+                "pages": [
+                  "zh/api-reference/images/wan2-7-image-pro/generation"
+                ]
               }
             ]
           },
@@ -257,6 +264,13 @@
                 "pages": [
                   "en/api-reference/images/seedream-v5-lite/generation",
                   "en/api-reference/images/seedream-v5-lite/seedream-5.0/generation"
+                ]
+              },
+              {
+                "group": "Wan2.7-Image-Pro",
+                "icon": "image",
+                "pages": [
+                  "en/api-reference/images/wan2-7-image-pro/generation"
                 ]
               }
             ]
@@ -437,6 +451,13 @@
                   "ja/api-reference/images/seedream-v5-lite/generation",
                   "ja/api-reference/images/seedream-v5-lite/seedream-5.0/generation"
                 ]
+              },
+              {
+                "group": "Wan2.7-Image-Pro",
+                "icon": "image",
+                "pages": [
+                  "ja/api-reference/images/wan2-7-image-pro/generation"
+                ]
               }
             ]
           },
@@ -615,6 +636,13 @@
                 "pages": [
                   "ko/api-reference/images/seedream-v5-lite/generation",
                   "ko/api-reference/images/seedream-v5-lite/seedream-5.0/generation"
+                ]
+              },
+              {
+                "group": "Wan2.7-Image-Pro",
+                "icon": "image",
+                "pages": [
+                  "ko/api-reference/images/wan2-7-image-pro/generation"
                 ]
               }
             ]
