@@ -94,6 +94,20 @@
             "icon": "video",
             "pages": [
               {
+                "group": "Kling 3.0",
+                "icon": "video",
+                "pages": [
+                  "zh/api-reference/videos/kling-3-0/generation"
+                ]
+              },
+              {
+                "group": "Grok Imagine 1.5",
+                "icon": "video",
+                "pages": [
+                  "zh/api-reference/videos/grok-imagine-1-5/generation"
+                ]
+              },
+              {
                 "group": "Sora2",
                 "icon": "video",
                 "pages": [
@@ -279,6 +293,20 @@
             "group": "Video Series",
             "icon": "video",
             "pages": [
+              {
+                "group": "Kling 3.0",
+                "icon": "video",
+                "pages": [
+                  "en/api-reference/videos/kling-3-0/generation"
+                ]
+              },
+              {
+                "group": "Grok Imagine 1.5",
+                "icon": "video",
+                "pages": [
+                  "en/api-reference/videos/grok-imagine-1-5/generation"
+                ]
+              },
               {
                 "group": "Sora2",
                 "icon": "video",
@@ -466,6 +494,20 @@
             "icon": "video",
             "pages": [
               {
+                "group": "Kling 3.0",
+                "icon": "video",
+                "pages": [
+                  "ja/api-reference/videos/kling-3-0/generation"
+                ]
+              },
+              {
+                "group": "Grok Imagine 1.5",
+                "icon": "video",
+                "pages": [
+                  "ja/api-reference/videos/grok-imagine-1-5/generation"
+                ]
+              },
+              {
                 "group": "Sora2",
                 "icon": "video",
                 "pages": [
@@ -651,6 +693,20 @@
             "group": "비디오 시리즈",
             "icon": "video",
             "pages": [
+              {
+                "group": "Kling 3.0",
+                "icon": "video",
+                "pages": [
+                  "ko/api-reference/videos/kling-3-0/generation"
+                ]
+              },
+              {
+                "group": "Grok Imagine 1.5",
+                "icon": "video",
+                "pages": [
+                  "ko/api-reference/videos/grok-imagine-1-5/generation"
+                ]
+              },
               {
                 "group": "Sora2",
                 "icon": "video",
