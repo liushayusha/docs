@@ -169,6 +169,13 @@
                 "pages": [
                   "zh/api-reference/videos/seedance2_fast/generation"
                 ]
+              },
+              {
+                "group": "Seedance 2.0 Mini",
+                "icon": "video",
+                "pages": [
+                  "zh/api-reference/videos/seedance2_mini/generation"
+                ]
               }
             ]
           },
@@ -368,6 +375,13 @@
                 "icon": "video",
                 "pages": [
                   "en/api-reference/videos/seedance2_fast/generation"
+                ]
+              },
+              {
+                "group": "Seedance 2.0 Mini",
+                "icon": "video",
+                "pages": [
+                  "en/api-reference/videos/seedance2_mini/generation"
                 ]
               }
             ]
@@ -569,6 +583,13 @@
                 "pages": [
                   "ja/api-reference/videos/seedance2_fast/generation"
                 ]
+              },
+              {
+                "group": "Seedance 2.0 Mini",
+                "icon": "video",
+                "pages": [
+                  "ja/api-reference/videos/seedance2_mini/generation"
+                ]
               }
             ]
           },
@@ -768,6 +789,13 @@
                 "icon": "video",
                 "pages": [
                   "ko/api-reference/videos/seedance2_fast/generation"
+                ]
+              },
+              {
+                "group": "Seedance 2.0 Mini",
+                "icon": "video",
+                "pages": [
+                  "ko/api-reference/videos/seedance2_mini/generation"
                 ]
               }
             ]
