@@ -81,6 +81,13 @@
                 ]
               },
               {
+                "group": "Seedream V5 Pro",
+                "icon": "image",
+                "pages": [
+                  "zh/api-reference/images/seedream-v5-pro/generation"
+                ]
+              },
+              {
                 "group": "Wan2.7-Image-Pro",
                 "icon": "image",
                 "pages": [
@@ -285,6 +292,13 @@
                 "pages": [
                   "en/api-reference/images/seedream-v5-lite/generation",
                   "en/api-reference/images/seedream-v5-lite/seedream-5.0/generation"
+                ]
+              },
+              {
+                "group": "Seedream V5 Pro",
+                "icon": "image",
+                "pages": [
+                  "en/api-reference/images/seedream-v5-pro/generation"
                 ]
               },
               {
@@ -495,6 +509,13 @@
                 ]
               },
               {
+                "group": "Seedream V5 Pro",
+                "icon": "image",
+                "pages": [
+                  "ja/api-reference/images/seedream-v5-pro/generation"
+                ]
+              },
+              {
                 "group": "Wan2.7-Image-Pro",
                 "icon": "image",
                 "pages": [
@@ -699,6 +720,13 @@
                 "pages": [
                   "ko/api-reference/images/seedream-v5-lite/generation",
                   "ko/api-reference/images/seedream-v5-lite/seedream-5.0/generation"
+                ]
+              },
+              {
+                "group": "Seedream V5 Pro",
+                "icon": "image",
+                "pages": [
+                  "ko/api-reference/images/seedream-v5-pro/generation"
                 ]
               },
               {

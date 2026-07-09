@@ -9,7 +9,6 @@ api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
-
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
@@ -115,18 +114,18 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Response
 
 <ResponseField name="out_task_id" type="string">
-  요청자 작업 ID로 결과 조회에 사용할 수 있습니다
+  요청자 작업 ID로, 결과 조회에 사용할 수 있습니다
 </ResponseField>
 <ResponseField name="status" type="string">
-  초기 상태로, 고정값 `"pending"`
+  초기 상태이며, 값은 항상 `"pending"`입니다
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  예상 소모 크레딧
+  예상 소모 포인트
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  생성 시간(ISO 형식)
+  생성 시간 (ISO 형식)
 </ResponseField>
 
 <RequestExample>
@@ -138,7 +137,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     --data '{
       "model": "seedance2_mini",
       "params": {
-        "prompt": "한 사람이 스튜디오에서 춤추고 있습니다",
+        "prompt": "한 사람이 작업실에서 춤추고 있습니다",
         "type": "all_reference",
         "image_url": ["https://example.com/character.jpg"],
         "video_url": ["https://example.com/dance.mp4"],
@@ -179,7 +178,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
       "model": "seedance2_mini",
       "params": {
-          "prompt": "한 사람이 스튜디오에서 춤추고 있습니다",
+          "prompt": "한 사람이 작업실에서 춤추고 있습니다",
           "type": "all_reference",
           "image_url": ["https://example.com/character.jpg"],
           "aspect_ratio": "16:9",
@@ -206,7 +205,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   const payload = {
     model: "seedance2_mini",
     params: {
-      prompt: "한 사람이 스튜디오에서 춤추고 있습니다",
+      prompt: "한 사람이 작업실에서 춤추고 있습니다",
       type: "all_reference",
       image_url: ["https://example.com/character.jpg"],
       aspect_ratio: "16:9",
@@ -249,7 +248,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       payload := map[string]interface{}{
           "model": "seedance2_mini",
           "params": map[string]interface{}{
-              "prompt":         "한 사람이 스튜디오에서 춤추고 있습니다",
+              "prompt":         "한 사람이 작업실에서 춤추고 있습니다",
               "type":           "all_reference",
               "image_url":      []string{"https://example.com/character.jpg"},
               "aspect_ratio":   "16:9",
@@ -295,7 +294,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
               conn.setRequestProperty("Content-Type", "application/json");
               conn.setDoOutput(true);
 
-              String jsonPayload = "{\"model\":\"seedance2_mini\",\"params\":{\"prompt\":\"한 사람이 스튜디오에서 춤추고 있습니다\",\"type\":\"all_reference\",\"image_url\":[\"https://example.com/character.jpg\"],\"aspect_ratio\":\"16:9\",\"resolution\":\"720p\",\"video_length\":\"5\",\"generate_audio\":true},\"out_task_id\":\"my_task_123456\"}";
+              String jsonPayload = "{\"model\":\"seedance2_mini\",\"params\":{\"prompt\":\"한 사람이 작업실에서 춤추고 있습니다\",\"type\":\"all_reference\",\"image_url\":[\"https://example.com/character.jpg\"],\"aspect_ratio\":\"16:9\",\"resolution\":\"720p\",\"video_length\":\"5\",\"generate_audio\":true},\"out_task_id\":\"my_task_123456\"}";
 
               OutputStream os = conn.getOutputStream();
               os.write(jsonPayload.getBytes());
@@ -325,7 +324,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   $payload = array(
       "model" => "seedance2_mini",
       "params" => array(
-          "prompt" => "한 사람이 스튜디오에서 춤추고 있습니다",
+          "prompt" => "한 사람이 작업실에서 춤추고 있습니다",
           "type" => "all_reference",
           "image_url" => array("https://example.com/character.jpg"),
           "aspect_ratio" => "16:9",
@@ -362,7 +361,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
     model: "seedance2_mini",
     params: {
-      prompt: "한 사람이 스튜디오에서 춤추고 있습니다",
+      prompt: "한 사람이 작업실에서 춤추고 있습니다",
       type: "all_reference",
       image_url: ["https://example.com/character.jpg"],
       aspect_ratio: "16:9",
@@ -396,7 +395,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload: [String: Any] = [
       "model": "seedance2_mini",
       "params": [
-          "prompt": "한 사람이 스튜디오에서 춤추고 있습니다",
+          "prompt": "한 사람이 작업실에서 춤추고 있습니다",
           "type": "all_reference",
           "image_url": ["https://example.com/character.jpg"],
           "aspect_ratio": "16:9",
@@ -428,7 +427,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       static async Task Main(string[] args)
       {
           var url = "https://aireiter.com/api/openapi/submit";
-          var payload = "{\"model\":\"seedance2_mini\",\"params\":{\"prompt\":\"한 사람이 스튜디오에서 춤추고 있습니다\",\"type\":\"all_reference\",\"image_url\":[\"https://example.com/character.jpg\"],\"aspect_ratio\":\"16:9\",\"resolution\":\"720p\",\"video_length\":\"5\",\"generate_audio\":true},\"out_task_id\":\"my_task_123456\"}";
+          var payload = "{\"model\":\"seedance2_mini\",\"params\":{\"prompt\":\"한 사람이 작업실에서 춤추고 있습니다\",\"type\":\"all_reference\",\"image_url\":[\"https://example.com/character.jpg\"],\"aspect_ratio\":\"16:9\",\"resolution\":\"720p\",\"video_length\":\"5\",\"generate_audio\":true},\"out_task_id\":\"my_task_123456\"}";
 
           using (var client = new HttpClient())
           {
@@ -460,7 +459,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```json 400
     {
         "statusCode": 400,
-        "message": "잘못된 요청 파라미터",
+        "message": "요청 파라미터가 유효하지 않습니다",
         "ok": false
     }
   ```
@@ -476,7 +475,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 433,
-      "message": "계정 잔액 부족, 충전 후 다시 시도하세요"
+      "message": "계정 잔액이 부족합니다. 충전 후 다시 시도해 주세요"
     }
   }
   ```
@@ -485,7 +484,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 500,
-      "message": "서버 내부 오류, 잠시 후 다시 시도하세요"
+      "message": "서버 내부 오류, 나중에 다시 시도해 주세요"
     }
   }
   ```

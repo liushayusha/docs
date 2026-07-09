@@ -9,7 +9,6 @@ api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
-
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
@@ -115,7 +114,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Response
 
 <ResponseField name="out_task_id" type="string">
-  The initiator task ID, which can be used to query the results
+  Initiator task ID, can be used to query results
 </ResponseField>
 <ResponseField name="status" type="string">
   Initial status, fixed as `"pending"`
