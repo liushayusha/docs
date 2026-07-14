@@ -1,0 +1,119 @@
+---
+title: 'Kling 3.0 Turbo Video Generation'
+description: |
+    - Asynchronous processing mode, returns task ID for subsequent queries
+    - Supports text-to-video and image-to-video from one optional reference image
+    - Supports 720p / 1080p, 3-15 second video generation
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  All endpoints require authentication using a Bearer Token.
+
+  Get your API Key:
+
+  Visit the <a href={apiKeyUrl} target="_blank">API Key Management Page</a> to obtain your API Key.
+
+  Include in the request header:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  Model Name:
+
+  * `"kling_3_0_turbo"` - Default
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  Model Parameters Object
+
+  <Expandable title="params Object Properties">
+    <ParamField body="prompt" type="string" required>
+      Text description for video generation
+
+      * Required
+      * Upstream limit: 2500 characters
+    </ParamField>
+
+    <ParamField body="image_url" type="string">
+      Optional reference image URL for image-to-video
+
+      * Optional
+      * Omit this field for text-to-video
+      * Provide one image to use image-to-video
+      * Supports only a single image
+      * Supports publicly accessible URLs
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" required default="16:9">
+      Aspect ratio of the generated video frame
+
+      * Required
+      * Allowed values: `1:1`, `9:16`, `16:9`
+      * Default: `16:9`
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="720p">
+      Video resolution
+
+      * `720p` - Standard definition (default)
+      * `1080p` - High definition
+    </ParamField>
+
+    <ParamField body="video_length" type="integer" default="5">
+      Video length (seconds)
+
+      * Range: 3 to 15 (integer)
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  Initiator Task ID
+
+  User-defined task identifier, required
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  Initiator task ID, which can be used to query the result
+</ResponseField>
+<ResponseField name="status" type="string">
+  Initial status, fixed as `"pending"`
+</ResponseField>
+<ResponseField name="estimated_credits" type="number">
+  Estimated credits consumption
+</ResponseField>
+<ResponseField name="created_at" type="string">
+  Creation time (ISO format)
+</ResponseField>
+
+<RequestExample>
+  ```bash cURL
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "kling_3_0_turbo",
+      "params": {
+        "prompt": "A cinematic push-in shot with natural motion and soft lighting",
+        "image_url": "https://example.com/reference.jpg",
+        "aspect_ratio": "16:9",
+        "resolution": "720p",
+        "video_length": 5
+      },
+      "out_task_id": "my_task_123456"
+    }'
+  ```
+</RequestExample>

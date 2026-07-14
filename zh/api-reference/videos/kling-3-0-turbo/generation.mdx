@@ -1,0 +1,172 @@
+---
+title: 'Kling 3.0 Turbo 视频生成'
+description: |
+    - 异步处理模式，返回任务ID用于后续查询
+    - 支持文生视频，以及传入单张参考图的图生视频
+    - 支持 720p / 1080p、3-15 秒视频生成
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  所有接口均需要使用 Bearer Token 进行认证
+
+  获取 API Key：
+
+  访问 <a href={apiKeyUrl} target="_blank">API Key 管理页面</a> 获取您的 API Key
+
+  使用时在请求头中添加：
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  模型名称：
+
+  * `"kling_3_0_turbo"` - 默认
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  模型参数对象
+
+  <Expandable title="params 对象属性">
+    <ParamField body="prompt" type="string" required>
+      视频生成的文本描述
+
+      * 必填
+      * 上游限制最长 2500 字符
+    </ParamField>
+
+    <ParamField body="image_url" type="string">
+      可选参考图像 URL，用于图生视频
+
+      * 可选
+      * 不传时使用文生视频模型
+      * 传入单张图片时使用图生视频模型
+      * 仅支持单张图片
+      * 支持公开可访问的 URL
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" required default="16:9">
+      生成视频画面的宽高比
+
+      * 必填
+      * 可选值：`1:1`、`9:16`、`16:9`
+      * 默认值：`16:9`
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="720p">
+      视频分辨率
+
+      * `720p` - 标清（默认）
+      * `1080p` - 高清
+    </ParamField>
+
+    <ParamField body="video_length" type="integer" default="5">
+      视频时长（秒）
+
+      * 取值范围：3 ~ 15（整数）
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  发起方任务ID
+
+  用户自定义的任务标识，必填
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  发起方任务ID，可用于查询结果
+</ResponseField>
+<ResponseField name="status" type="string">
+  初始状态，固定为 `"pending"`
+</ResponseField>
+<ResponseField name="estimated_credits" type="number">
+  预估消耗积分
+</ResponseField>
+<ResponseField name="created_at" type="string">
+  创建时间（ISO 格式）
+</ResponseField>
+
+<RequestExample>
+  ```bash cURL
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "kling_3_0_turbo",
+      "params": {
+        "prompt": "让画面中的人物缓慢转身，镜头轻微推进，电影感光影",
+        "image_url": "https://example.com/reference.jpg",
+        "aspect_ratio": "16:9",
+        "resolution": "720p",
+        "video_length": 5
+      },
+      "out_task_id": "my_task_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "kling_3_0_turbo",
+      "params": {
+          "prompt": "让画面中的人物缓慢转身，镜头轻微推进，电影感光影",
+          "image_url": "https://example.com/reference.jpg",
+          "aspect_ratio": "16:9",
+          "resolution": "720p",
+          "video_length": 5
+      },
+      "out_task_id": "my_task_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "kling_3_0_turbo",
+    params: {
+      prompt: "让画面中的人物缓慢转身，镜头轻微推进，电影感光影",
+      image_url: "https://example.com/reference.jpg",
+      aspect_ratio: "16:9",
+      resolution: "720p",
+      video_length: 5
+    },
+    out_task_id: "my_task_123456"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data));
+  ```
+</RequestExample>

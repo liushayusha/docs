@@ -1,0 +1,171 @@
+---
+title: 'Kling 3.0 Turbo ビデオ生成'
+description: |
+    - 非同期処理モード、後続のクエリ用にタスクIDを返す
+    - テキストからのビデオ生成、および単一の参考画像を入力した画像ベースのビデオ生成をサポート
+    - 720p / 1080p、3～15秒のビデオ生成をサポート
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  すべてのエンドポイントはBearerトークン認証が必要です
+
+  APIキーの取得：
+
+  <a href={apiKeyUrl} target="_blank">APIキー管理ページ</a> にアクセスしてAPIキーを取得してください
+
+  リクエストヘッダーに以下を追加します：
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  モデル名：
+
+  * `"kling_3_0_turbo"` - デフォルト
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  モデルパラメータオブジェクト
+
+  <Expandable title="params オブジェクトのプロパティ">
+    <ParamField body="prompt" type="string" required>
+      ビデオ生成のテキスト説明
+
+      * 必須
+      * 上流制限は最大2500文字
+    </ParamField>
+
+    <ParamField body="image_url" type="string">
+      オプションの参照画像URL、画像からビデオ生成用
+
+      * オプション
+      * 渡さない場合はテキストからビデオ生成モデルを使用
+      * 1枚の画像を渡す場合は画像からビデオ生成モデルを使用
+      * 単一画像のみ対応
+      * 公開アクセス可能なURLをサポート
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" required default="16:9">
+      生成されるビデオ画面のアスペクト比
+
+      * 必須
+      * 選択可能な値：`1:1`、`9:16`、`16:9`
+      * デフォルト値：`16:9`
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="720p">
+      ビデオ解像度
+
+      * `720p` - 標準画質（デフォルト）
+      * `1080p` - 高画質
+    </ParamField>
+
+    <ParamField body="video_length" type="integer" default="5">
+      ビデオの長さ（秒）
+
+      * 範囲：3〜15（整数）
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  発信者のタスクID
+
+  ユーザー定義のタスク識別子、必須
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  発信者タスクID、結果のクエリに使用可能
+</ResponseField>
+<ResponseField name="status" type="string">
+  初期状態で、固定値は `"pending"`
+</ResponseField>
+<ResponseField name="estimated_credits" type="number">
+  推定消費クレジット
+</ResponseField>
+<ResponseField name="created_at" type="string">
+  作成日時（ISOフォーマット）
+</ResponseField>
+
+<RequestExample>
+  ```bash cURL
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "kling_3_0_turbo",
+      "params": {
+        "prompt": "画面内の人物がゆっくり振り返り、カメラが僅かに前進し、映画のような光と影",
+        "image_url": "https://example.com/reference.jpg",
+        "aspect_ratio": "16:9",
+        "resolution": "720p",
+        "video_length": 5
+      },
+      "out_task_id": "my_task_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "kling_3_0_turbo",
+      "params": {
+          "prompt": "画面内の人物がゆっくり振り返り、カメラが僅かに前進し、映画のような光と影",
+          "image_url": "https://example.com/reference.jpg",
+          "aspect_ratio": "16:9",
+          "resolution": "720p",
+          "video_length": 5
+      },
+      "out_task_id": "my_task_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "kling_3_0_turbo",
+    params: {
+      prompt: "画面内の人物がゆっくり振り返り、カメラが僅かに前進し、映画のような光と影",
+      image_url: "https://example.com/reference.jpg",
+      aspect_ratio: "16:9",
+      resolution: "720p",
+      video_length: 5
+    },
+    out_task_id: "my_task_123456"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data));
+  ```
+</RequestExample>

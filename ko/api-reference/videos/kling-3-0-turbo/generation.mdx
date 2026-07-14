@@ -1,0 +1,171 @@
+---
+title: 'Kling 3.0 Turbo 동영상 생성'
+description: |
+    - 비동기 처리 모드, 작업 ID를 반환하여 이후 조회에 사용
+    - 텍스트 기반 동영상 생성 및 단일 참조 이미지 기반 이미지 생성 동영상 지원
+    - 720p / 1080p, 3-15초 동영상 생성 지원
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  모든 엔드포인트는 Bearer Token 인증이 필요합니다
+
+  API Key 받기:
+
+  <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a>에 접속하여 API Key를 받으세요
+
+  사용할 때 요청 헤더에 다음을 추가합니다:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  모델 이름:
+
+  * `"kling_3_0_turbo"` - 기본값
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  모델 파라미터 객체
+
+  <Expandable title="params 객체 속성">
+    <ParamField body="prompt" type="string" required>
+      비디오 생성 텍스트 설명
+
+      * 필수
+      * 상위 제한 최대 2500자
+    </ParamField>
+
+    <ParamField body="image_url" type="string">
+      선택 참고 이미지 URL, 이미지로 비디오 생성 시 사용
+
+      * 선택 사항
+      * 미전달 시 텍스트로 비디오 생성 모델 사용
+      * 단일 이미지 전달 시 이미지로 비디오 생성 모델 사용
+      * 단일 이미지만 지원
+      * 공개적으로 접근 가능한 URL만 지원
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" required default="16:9">
+      생성되는 비디오 화면의 가로세로 비율
+
+      * 필수
+      * 선택 가능한 값: `1:1`, `9:16`, `16:9`
+      * 기본값: `16:9`
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="720p">
+      비디오 해상도
+
+      * `720p` - 표준화질(기본값)
+      * `1080p` - 고화질
+    </ParamField>
+
+    <ParamField body="video_length" type="integer" default="5">
+      비디오 길이(초)
+
+      * 값 범위: 3 ~ 15 (정수)
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  발신자 작업 ID
+
+  사용자 정의 작업 식별자, 필수 입력
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  요청자 작업 ID로, 결과를 조회하는 데 사용할 수 있습니다.
+</ResponseField>
+<ResponseField name="status" type="string">
+  초기 상태로, 고정 값은 `"pending"`입니다.
+</ResponseField>
+<ResponseField name="estimated_credits" type="number">
+  예상 소모 포인트
+</ResponseField>
+<ResponseField name="created_at" type="string">
+  생성 시간(ISO 형식)
+</ResponseField>
+
+<RequestExample>
+  ```bash cURL
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "kling_3_0_turbo",
+      "params": {
+        "prompt": "화면 속 인물이 천천히 돌아서고, 카메라가 살짝 앞으로 이동하며 영화 같은 빛과 그림자",
+        "image_url": "https://example.com/reference.jpg",
+        "aspect_ratio": "16:9",
+        "resolution": "720p",
+        "video_length": 5
+      },
+      "out_task_id": "my_task_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "kling_3_0_turbo",
+      "params": {
+          "prompt": "화면 속 인물이 천천히 돌아서고, 카메라가 살짝 앞으로 이동하며 영화 같은 빛과 그림자",
+          "image_url": "https://example.com/reference.jpg",
+          "aspect_ratio": "16:9",
+          "resolution": "720p",
+          "video_length": 5
+      },
+      "out_task_id": "my_task_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "kling_3_0_turbo",
+    params: {
+      prompt: "화면 속 인물이 천천히 돌아서고, 카메라가 살짝 앞으로 이동하며 영화 같은 빛과 그림자",
+      image_url: "https://example.com/reference.jpg",
+      aspect_ratio: "16:9",
+      resolution: "720p",
+      video_length: 5
+    },
+    out_task_id: "my_task_123456"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data));
+  ```
+</RequestExample>

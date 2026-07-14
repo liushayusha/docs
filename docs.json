@@ -108,6 +108,20 @@
                 ]
               },
               {
+                "group": "Kling 3.0 Turbo",
+                "icon": "video",
+                "pages": [
+                  "zh/api-reference/videos/kling-3-0-turbo/generation"
+                ]
+              },
+              {
+                "group": "Kling 3.0 Motion Control",
+                "icon": "video",
+                "pages": [
+                  "zh/api-reference/videos/kling-3-motion-control/generation"
+                ]
+              },
+              {
                 "group": "Grok Imagine 1.5",
                 "icon": "video",
                 "pages": [
@@ -319,6 +333,20 @@
                 "icon": "video",
                 "pages": [
                   "en/api-reference/videos/kling-3-0/generation"
+                ]
+              },
+              {
+                "group": "Kling 3.0 Turbo",
+                "icon": "video",
+                "pages": [
+                  "en/api-reference/videos/kling-3-0-turbo/generation"
+                ]
+              },
+              {
+                "group": "Kling 3.0 Motion Control",
+                "icon": "video",
+                "pages": [
+                  "en/api-reference/videos/kling-3-motion-control/generation"
                 ]
               },
               {
@@ -536,6 +564,20 @@
                 ]
               },
               {
+                "group": "Kling 3.0 Turbo",
+                "icon": "video",
+                "pages": [
+                  "ja/api-reference/videos/kling-3-0-turbo/generation"
+                ]
+              },
+              {
+                "group": "Kling 3.0 Motion Control",
+                "icon": "video",
+                "pages": [
+                  "ja/api-reference/videos/kling-3-motion-control/generation"
+                ]
+              },
+              {
                 "group": "Grok Imagine 1.5",
                 "icon": "video",
                 "pages": [
@@ -747,6 +789,20 @@
                 "icon": "video",
                 "pages": [
                   "ko/api-reference/videos/kling-3-0/generation"
+                ]
+              },
+              {
+                "group": "Kling 3.0 Turbo",
+                "icon": "video",
+                "pages": [
+                  "ko/api-reference/videos/kling-3-0-turbo/generation"
+                ]
+              },
+              {
+                "group": "Kling 3.0 Motion Control",
+                "icon": "video",
+                "pages": [
+                  "ko/api-reference/videos/kling-3-motion-control/generation"
                 ]
               },
               {

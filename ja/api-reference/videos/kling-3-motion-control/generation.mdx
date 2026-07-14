@@ -1,0 +1,191 @@
+---
+title: 'Kling 3.0 モーションコントロール動画生成'
+description: |
+    - 非同期処理モードで、タスクIDを返し、後続のクエリに使用可能
+    - 1枚の主体参考画像と1つの動作参考動画を用いて制御可能な動画を生成
+    - 720p / 1080p対応。人物の向きの出典と背景の出典を設定可能。参考動画の実際の長さに基づいて課金
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  すべてのエンドポイントはBearer Tokenによる認証が必要です
+
+  API Keyの取得方法：
+
+  <a href={apiKeyUrl} target="_blank">API Key 管理ページ</a>にアクセスしてAPI Keyを取得してください
+
+  使用時はリクエストヘッダーに以下を追加します：
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  モデル名：
+
+  * `"kling_3_0_motion_control"` - デフォルト
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  モデルパラメーターオブジェクト
+
+  <Expandable title="params オブジェクトのプロパティ">
+    <ParamField body="prompt" type="string">
+      期待される出力効果のテキスト説明
+
+      * 任意
+      * 最大長さ：2500文字
+      * 例：`No distortion, the character's movements are consistent with the video.`
+    </ParamField>
+
+    <ParamField body="image_url" type="string" required>
+      メイン参照画像のURL
+
+      * 必須
+      * 画像は1枚のみ対応
+      * 対応フォーマット：JPG、JPEG、PNG
+      * 最大ファイルサイズ：10MB
+      * 画像サイズは300px以上が必要
+      * アスペクト比は2:5から5:2の範囲であること
+      * 生成される動画内のキャラクター、背景、その他の要素はこの参考画像に基づきます
+    </ParamField>
+
+    <ParamField body="video_url" type="string" required>
+      動作参照ビデオのURL
+
+      * 必須
+      * 動画は1本のみ対応
+      * 対応フォーマット：MP4、MOV / QuickTime
+      * 最大ファイルサイズ：100MB
+      * 動画サイズは300px以上が必要
+      * アスペクト比は2:5から5:2の範囲であること
+      * 長さ：`character_orientation=image` の場合最大10秒、`character_orientation=video` の場合最大30秒
+      * 推定ポイントと実際の課金は動画の実際の長さに基づき計算され、`video_length`の指定は不要
+      * 生成される動画内のキャラクターの動作はこの参照動画と一致します
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="720p">
+      出力解像度モード
+
+      * `720p` - 標準モード（デフォルト）
+      * `1080p` - 高解像度モード
+    </ParamField>
+
+    <ParamField body="character_orientation" type="string" default="video">
+      キャラクターの向きの参照元
+
+      * `video` - 参考動画中のキャラクターの向きに一致、動画長最大30秒（デフォルト）
+      * `image` - 参考画像中のキャラクターの向きに一致、動画長最大10秒
+    </ParamField>
+
+    <ParamField body="background_source" type="string" default="input_video">
+      背景の参照元
+
+      * `input_video` - 動作動画の背景を使用（デフォルト）
+      * `input_image` - メイン画像の背景を使用
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  発注者タスクID
+
+  ユーザー定義のタスク識別子、必須
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  発信側のタスクID、結果の照会に使用可能
+</ResponseField>
+<ResponseField name="status" type="string">
+  初期状態、固定で `"pending"`
+</ResponseField>
+<ResponseField name="estimated_credits" type="number">
+  予測消費クレジット
+</ResponseField>
+<ResponseField name="created_at" type="string">
+  作成日時（ISO形式）
+</ResponseField>
+
+<RequestExample>
+  ```bash cURL
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "kling_3_0_motion_control",
+      "params": {
+        "prompt": "キャラクターが参考ビデオに合わせて自然に踊り、主体の一貫性を保つ",
+        "image_url": "https://example.com/subject.png",
+        "video_url": "https://example.com/motion.mp4",
+        "resolution": "720p",
+        "character_orientation": "video",
+        "background_source": "input_video"
+      },
+      "out_task_id": "my_task_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "kling_3_0_motion_control",
+      "params": {
+          "prompt": "キャラクターが参考ビデオに合わせて自然に踊り、主体の一貫性を保つ",
+          "image_url": "https://example.com/subject.png",
+          "video_url": "https://example.com/motion.mp4",
+          "resolution": "720p",
+          "character_orientation": "video",
+          "background_source": "input_video"
+      },
+      "out_task_id": "my_task_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "kling_3_0_motion_control",
+    params: {
+      prompt: "キャラクターが参考ビデオに合わせて自然に踊り、主体の一貫性を保つ",
+      image_url: "https://example.com/subject.png",
+      video_url: "https://example.com/motion.mp4",
+      resolution: "720p",
+      character_orientation: "video",
+      background_source: "input_video"
+    },
+    out_task_id: "my_task_123456"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data));
+  ```
+</RequestExample>

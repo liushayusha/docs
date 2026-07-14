@@ -1,0 +1,191 @@
+---
+title: 'Kling 3.0 Motion Control Video Generation'
+description: |
+    - Asynchronous processing mode, returns task ID for subsequent queries
+    - Generate controllable video using one main reference image and one motion reference video
+    - Supports 720p / 1080p, allows setting character orientation source and background source, billed according to the real duration of the reference video
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  All endpoints require authentication via Bearer Token
+
+  To get the API Key:
+
+  Visit the <a href={apiKeyUrl} target="_blank">API Key management page</a> to obtain your API Key
+
+  Include in the request header:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  Model name:
+
+  * `"kling_3_0_motion_control"` - Default
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  Model parameter object
+
+  <Expandable title="params Object Properties">
+    <ParamField body="prompt" type="string">
+      Text description of the expected output effect
+
+      * Optional
+      * Maximum length: 2500 characters
+      * Example: `No distortion, the character's movements are consistent with the video.`
+    </ParamField>
+
+    <ParamField body="image_url" type="string" required>
+      Reference image URL for the subject
+
+      * Required
+      * Supports only a single image
+      * Supported formats: JPG, JPEG, PNG
+      * Maximum file size: 10MB
+      * Image dimensions must be greater than 300px
+      * Aspect ratio must be between 2:5 and 5:2
+      * Characters, background, and other elements in the generated video will be based on this reference image
+    </ParamField>
+
+    <ParamField body="video_url" type="string" required>
+      Reference video URL for the motion
+
+      * Required
+      * Supports only a single video
+      * Supported formats: MP4, MOV / QuickTime
+      * Maximum file size: 100MB
+      * Video dimensions must be greater than 300px
+      * Aspect ratio must be between 2:5 and 5:2
+      * Duration: max 10 seconds when `character_orientation=image`, max 30 seconds when `character_orientation=video`
+      * Estimated points and actual billing will be calculated based on the real duration of this video; no need to pass `video_length`
+      * The character's motion in the generated video will match this reference video
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="720p">
+      Output resolution mode
+
+      * `720p` - Standard mode (default)
+      * `1080p` - HD mode
+    </ParamField>
+
+    <ParamField body="character_orientation" type="string" default="video">
+      Character orientation reference source
+
+      * `video` - Match the character orientation in the reference video; video max 30 seconds (default)
+      * `image` - Match the character orientation in the reference image; video max 10 seconds
+    </ParamField>
+
+    <ParamField body="background_source" type="string" default="input_video">
+      Background reference source
+
+      * `input_video` - Use action video background (default)
+      * `input_image` - Use subject image background
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  Initiator's task ID
+
+  User-defined task identifier, required
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  Initiator's task ID, can be used to query the result
+</ResponseField>
+<ResponseField name="status" type="string">
+  Initial status, fixed as `"pending"`
+</ResponseField>
+<ResponseField name="estimated_credits" type="number">
+  Estimated consumption credits
+</ResponseField>
+<ResponseField name="created_at" type="string">
+  Creation time (ISO format)
+</ResponseField>
+
+<RequestExample>
+  ```bash cURL
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "kling_3_0_motion_control",
+      "params": {
+        "prompt": "Make the character naturally dance following the reference video, maintaining consistent main identity",
+        "image_url": "https://example.com/subject.png",
+        "video_url": "https://example.com/motion.mp4",
+        "resolution": "720p",
+        "character_orientation": "video",
+        "background_source": "input_video"
+      },
+      "out_task_id": "my_task_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "kling_3_0_motion_control",
+      "params": {
+          "prompt": "Make the character naturally dance following the reference video, maintaining consistent main identity",
+          "image_url": "https://example.com/subject.png",
+          "video_url": "https://example.com/motion.mp4",
+          "resolution": "720p",
+          "character_orientation": "video",
+          "background_source": "input_video"
+      },
+      "out_task_id": "my_task_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "kling_3_0_motion_control",
+    params: {
+      prompt: "Make the character naturally dance following the reference video, maintaining consistent main identity",
+      image_url: "https://example.com/subject.png",
+      video_url: "https://example.com/motion.mp4",
+      resolution: "720p",
+      character_orientation: "video",
+      background_source: "input_video"
+    },
+    out_task_id: "my_task_123456"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data));
+  ```
+</RequestExample>
