@@ -93,6 +93,13 @@
                 "pages": [
                   "zh/api-reference/images/wan2-7-image-pro/generation"
                 ]
+              },
+              {
+                "group": "FLUX.2 Pro",
+                "icon": "image",
+                "pages": [
+                  "zh/api-reference/images/flux-2-pro/generation"
+                ]
               }
             ]
           },
@@ -320,6 +327,13 @@
                 "icon": "image",
                 "pages": [
                   "en/api-reference/images/wan2-7-image-pro/generation"
+                ]
+              },
+              {
+                "group": "FLUX.2 Pro",
+                "icon": "image",
+                "pages": [
+                  "en/api-reference/images/flux-2-pro/generation"
                 ]
               }
             ]
@@ -549,6 +563,13 @@
                 "pages": [
                   "ja/api-reference/images/wan2-7-image-pro/generation"
                 ]
+              },
+              {
+                "group": "FLUX.2 Pro",
+                "icon": "image",
+                "pages": [
+                  "ja/api-reference/images/flux-2-pro/generation"
+                ]
               }
             ]
           },
@@ -776,6 +797,13 @@
                 "icon": "image",
                 "pages": [
                   "ko/api-reference/images/wan2-7-image-pro/generation"
+                ]
+              },
+              {
+                "group": "FLUX.2 Pro",
+                "icon": "image",
+                "pages": [
+                  "ko/api-reference/images/flux-2-pro/generation"
                 ]
               }
             ]

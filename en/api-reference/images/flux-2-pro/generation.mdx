@@ -1,0 +1,375 @@
+---
+title: 'FLUX.2 Pro Image Generation'
+description: |
+    - Asynchronous processing mode, returns a task ID for subsequent query
+    - Supports text-to-image and image-to-image; automatically switches to image-to-image when image_url is provided
+    - Supports up to 8 reference images for consistency in subject, product, style, and composition
+    - Supports 7 common image aspect ratios
+    - Supports 1K / 2K resolution levels
+    - Submitted prompts undergo platform sensitive word / safety review; violating content will be directly rejected
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  All endpoints require authentication using a Bearer Token.
+
+  Get the API Key:
+
+  Visit the <a href={apiKeyUrl} target="_blank">API Key management page</a> to get your API Key.
+
+  Add the following in the request header:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  Model name.
+
+  Fixed value: `"flux_2_pro"`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  Model parameter object.
+
+  <Expandable title="params object properties">
+    <ParamField body="prompt" type="string" required>
+      Image generation or editing instruction, up to 5000 characters.
+
+      * Supports Chinese and English; it is recommended to clearly describe the subject, scene, composition, lighting, material, and reference image features to be retained
+      * When performing image-to-image, the prompt should clearly specify content to be retained and modified
+      * Submissions will undergo platform sensitivity/safety review; hitting violation content will directly return an error
+    </ParamField>
+
+    <ParamField body="image_url" type="string[]">
+      Array of reference images. Providing this automatically enables image-to-image mode; if omitted, text-to-image mode is used.
+
+      * Up to 8 reference images
+      * Maximum 10 MB per image
+      * Supports jpeg, png, webp
+      * Supports the following two formats:
+        1. Publicly accessible URLs
+        2. Complete Base64 Data URIs, e.g., `data:image/jpeg;base64,/9j/4AAQ...`
+
+      <Warning>
+        URLs must be publicly accessible without requiring login, cookies, or temporary page authorization.
+      </Warning>
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="1:1">
+      Image aspect ratio.
+
+      Supported values:
+
+      * `1:1` - Square (default)
+      * `4:3` / `3:4` - Standard landscape / portrait
+      * `16:9` / `9:16` - Widescreen landscape / portrait
+      * `3:2` / `2:3` - Classic landscape / portrait
+
+      <Warning>
+        `aspect_ratio` represents the target ratio step of the model and does not guarantee fixed pixel dimensions. Different generation modes may return native model sizes close to the ratio. For example, tested 1K image-to-image 16:9 returns 1344×768, 2K text-to-image 16:9 returns 1920×1088.
+      </Warning>
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="1K">
+      Image resolution tier.
+
+      * `1K` - Basic resolution (default), approximately consumes 5 points per image
+      * `2K` - High resolution, approximately consumes 7 points per image
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  Caller-defined task ID used for idempotent submission and querying results.
+
+  * Length is 1-64 characters
+  * Only letters, numbers, underscores, and hyphens are allowed
+  * Cannot be reused under the same API Key
+</ParamField>
+
+## Billing
+
+| resolution | Estimated Credits Used | Number of Generations |
+| --- | ---: | ---: |
+| `1K` | 5 | 1 image |
+| `2K` | 7 | 1 image |
+
+When the submission is successful, the `estimated_credits` in the response is the estimated credits used. After the task is completed, the actual credits used can be checked in the `credits_used` field of the query interface response. If the task generation fails, the system will automatically refund the pre-deducted credits for this task.
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  Caller task ID, which can be used to query the result.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Initial status, fixed as `"pending"`.
+</ResponseField>
+
+<ResponseField name="estimated_credits" type="number">
+  Estimated credit consumption.
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  Creation time, in ISO 8601 format.
+</ResponseField>
+
+## Query Results
+
+After submitting successfully, call with the same `out_task_id`:
+
+```bash
+curl --request POST \
+  --url https://aireiter.com/api/openapi/query \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "out_task_id": "flux_2_pro_task_001"
+  }'
+```
+
+The task status includes `pending`, `processing`, `completed`, and `failed`. After the task is completed, the result images are located in `data.output`, and the actual credits consumed are in `data.credits_used`.
+
+<RequestExample>
+  ```bash cURL (Text-to-Image)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "flux_2_pro",
+      "params": {
+        "prompt": "A futuristic electric sports car parked in front of a modern glass building, blue hour, wet ground reflecting building lights, commercial automotive photography, realistic materials and natural shadows, no text, no watermark",
+        "aspect_ratio": "16:9",
+        "resolution": "2K"
+      },
+      "out_task_id": "flux_2_pro_task_001"
+    }'
+  ```
+
+  ```bash cURL (Image-to-Image)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "flux_2_pro",
+      "params": {
+        "prompt": "Transform the reference product image into a high-end nighttime advertising style, keeping bottle shape, proportions, spray head, transparent glass structure, and label text, using a dark gray background with cool contour lighting, only keeping one product",
+        "image_url": [
+          "https://example.com/product-reference.png"
+        ],
+        "aspect_ratio": "16:9",
+        "resolution": "1K"
+      },
+      "out_task_id": "flux_2_pro_image_task_001"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "flux_2_pro",
+      "params": {
+          "prompt": "Cinematic product advertising photography, glass perfume bottle placed on a black stone pedestal, realistic reflections and natural shadows",
+          "aspect_ratio": "16:9",
+          "resolution": "1K"
+      },
+      "out_task_id": "flux_2_pro_python_001"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const response = await fetch("https://aireiter.com/api/openapi/submit", {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer <token>",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: "flux_2_pro",
+      params: {
+        prompt: "Cinematic product advertising photography, glass perfume bottle placed on a black stone pedestal, realistic reflections and natural shadows",
+        aspect_ratio: "16:9",
+        resolution: "1K"
+      },
+      out_task_id: "flux_2_pro_javascript_001"
+    })
+  });
+
+  console.log(await response.json());
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "fmt"
+      "io"
+      "net/http"
+  )
+
+  func main() {
+      payload := []byte(`{
+        "model":"flux_2_pro",
+        "params":{
+          "prompt":"Cinematic product advertising photography, glass perfume bottle placed on a black stone pedestal, realistic reflections and natural shadows",
+          "aspect_ratio":"16:9",
+          "resolution":"1K"
+        },
+        "out_task_id":"flux_2_pro_go_001"
+      }`)
+
+      req, _ := http.NewRequest(
+          http.MethodPost,
+          "https://aireiter.com/api/openapi/submit",
+          bytes.NewBuffer(payload),
+      )
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      response, err := http.DefaultClient.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer response.Body.Close()
+
+      body, _ := io.ReadAll(response.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.URI;
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String payload = """
+          {
+            "model": "flux_2_pro",
+            "params": {
+              "prompt": "Cinematic product advertising photography, glass perfume bottle placed on a black stone pedestal, realistic reflections and natural shadows",
+              "aspect_ratio": "16:9",
+              "resolution": "1K"
+            },
+            "out_task_id": "flux_2_pro_java_001"
+          }
+          """;
+
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create("https://aireiter.com/api/openapi/submit"))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = HttpClient.newHttpClient().send(
+              request,
+              HttpResponse.BodyHandlers.ofString()
+          );
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $payload = [
+      "model" => "flux_2_pro",
+      "params" => [
+          "prompt" => "Cinematic product advertising photography, glass perfume bottle placed on a black stone pedestal, realistic reflections and natural shadows",
+          "aspect_ratio" => "16:9",
+          "resolution" => "1K"
+      ],
+      "out_task_id" => "flux_2_pro_php_001"
+  ];
+
+  $ch = curl_init("https://aireiter.com/api/openapi/submit");
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  echo curl_exec($ch);
+  curl_close($ch);
+  ?>
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+  {
+    "statusCode": 200,
+    "message": "",
+    "data": {
+      "task_id": "",
+      "status": "pending",
+      "created_at": "2026-07-22T10:37:44.800Z",
+      "out_task_id": "flux_2_pro_task_001",
+      "estimated_credits": 5
+    },
+    "ok": true
+  }
+  ```
+
+  ```json 400
+  {
+    "statusCode": 400,
+    "message": "Invalid aspect_ratio: \"widescreen\". Allowed: [1:1, 4:3, 3:4, 16:9, 9:16, 3:2, 2:3]",
+    "ok": false
+  }
+  ```
+
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "Authentication failed, please check your API key"
+    }
+  }
+  ```
+
+  ```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "Insufficient account balance, please recharge and try again"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "Internal server error, please try again later"
+    }
+  }
+  ```
+</ResponseExample>
