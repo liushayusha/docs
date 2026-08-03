@@ -204,6 +204,13 @@
                 "pages": [
                   "zh/api-reference/videos/seedance2_mini/generation"
                 ]
+              },
+              {
+                "group": "MiniMax H3",
+                "icon": "video",
+                "pages": [
+                  "zh/api-reference/videos/minimax-h3/generation"
+                ]
               }
             ]
           },
@@ -438,6 +445,13 @@
                 "icon": "video",
                 "pages": [
                   "en/api-reference/videos/seedance2_mini/generation"
+                ]
+              },
+              {
+                "group": "MiniMax H3",
+                "icon": "video",
+                "pages": [
+                  "en/api-reference/videos/minimax-h3/generation"
                 ]
               }
             ]
@@ -674,6 +688,13 @@
                 "pages": [
                   "ja/api-reference/videos/seedance2_mini/generation"
                 ]
+              },
+              {
+                "group": "MiniMax H3",
+                "icon": "video",
+                "pages": [
+                  "ja/api-reference/videos/minimax-h3/generation"
+                ]
               }
             ]
           },
@@ -909,6 +930,13 @@
                 "pages": [
                   "ko/api-reference/videos/seedance2_mini/generation"
                 ]
+              },
+              {
+                "group": "MiniMax H3",
+                "icon": "video",
+                "pages": [
+                  "ko/api-reference/videos/minimax-h3/generation"
+                ]
               }
             ]
           },
@@ -960,15 +988,15 @@
   },
   "contextual": {
     "options": [
-     "copy",
-     "view",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "mcp",
-     "cursor",
-     "vscode"
-   ]
+      "copy",
+      "view",
+      "chatgpt",
+      "claude",
+      "perplexity",
+      "mcp",
+      "cursor",
+      "vscode"
+    ]
   },
   "footer": {
     "socials": {

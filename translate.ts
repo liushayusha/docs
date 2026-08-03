@@ -78,8 +78,8 @@ const languageMap: Record<string, string> = {
 languageMap.tw = "Traditional Chinese";
 
 const openai = new OpenAI({
-  baseURL: "https://api.tu-zi.com/v1",
-  apiKey: "sk-OxiNcFAfHhG0SVfZA3PCzeqjCk73oXxoO3Jsq0gQ3YpIfngJ",
+  baseURL: "http://135.181.3.185:18356/v1",
+  apiKey: "sk-3b550da056f4bee2684f03f724b6290f85a8d8cc6f111137ff3364a34778a769",
 });
 
 // 生成翻译系统提示词（包含配置文件中的不翻译词汇）
@@ -589,7 +589,7 @@ async function translateSingleChunk(sourceLang: string, targetLang: string, text
   try {
     const userPrompt = createTranslateUserPrompt(sourceLang, targetLang, textObj);
     const response = await openai.chat.completions.create({
-      model: process.env.TRANSLATE_MODEL || "gpt-4.1-mini",
+      model: process.env.TRANSLATE_MODEL || "gpt-5.4-mini",
       messages: [
         { role: "system", content: translateSystemPrompt },
         { role: "user", content: userPrompt },

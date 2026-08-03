@@ -1,0 +1,340 @@
+---
+title: 'MiniMax H3 비디오 생성'
+description: |
+  - MiniMax H3, Hailuo 03 / Hailuo 3로도 자주 불립니다
+  - 비동기 처리 모드, 후속 조회에 사용할 작업 ID를 반환합니다
+  - 텍스트-비디오 생성, 첫 프레임/마지막 프레임 이미지-비디오 생성, 다중 참고 자료 기반 비디오 생성을 지원합니다
+  - 2K 출력을 지원하며, 비디오 길이는 4-15초입니다
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+<Note>
+AIReiter에서 MiniMax H3의 모델 이름은 `minimax_h3`입니다. 이 모델은 Hailuo 03, Hailuo 3 또는 MiniMax H3 API로도 자주 검색됩니다.
+</Note>
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  모든 인터페이스는 Bearer Token으로 인증해야 합니다.
+
+  API Key 받기:
+
+  <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a>에 접속하여 API Key를 받으세요.
+
+  사용할 때는 요청 헤더에 다음을 추가하세요:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  모델 이름, 고정값:
+
+  * `minimax_h3`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  모델 Parameters 객체.
+
+  <Expandable title="params 객체 Properties">
+    <ParamField body="prompt" type="string" required>
+      비디오 생성용 텍스트 설명, 최대 7000자.
+
+      주체, 장면, 카메라 움직임, 동작, 스타일, 조명, 리듬 등의 내용을 설명할 수 있습니다.
+    </ParamField>
+
+    <ParamField body="type" type="string" default="text_to_video">
+      생성 유형으로, MiniMax H3가 어떤 상위 모드를 사용할지 결정합니다.
+
+      * `text_to_video` - 텍스트-투-비디오, 프롬프트만 사용해 비디오를 생성합니다.
+      * `first_last_frame` - 첫 프레임/마지막 프레임 이미지 기반 비디오 생성, 첫 프레임, 마지막 프레임 또는 첫-끝 프레임 전환으로 비디오를 생성합니다.
+      * `all_reference` - 여러 참고 자료 기반 비디오 생성, 참고 이미지, 참고 비디오, 참고 오디오를 사용할 수 있습니다.
+    </ParamField>
+
+    <ParamField body="video_length" type="number" default="4">
+      생성 비디오 길이, 단위는 초입니다.
+
+      정수 `4`부터 `15`까지 지원합니다.
+
+      <Warning>비디오 길이는 과금에 직접 영향을 미칩니다.</Warning>
+    </ParamField>
+
+    <ParamField body="quality" type="string" default="2k">
+      출력 품질, 현재 고정값:
+
+      * `2k`
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="16:9">
+      비디오 가로세로 비율입니다.
+
+      지원되는 가로세로 비율:
+
+      * `21:9` - 초광각
+      * `16:9` - 가로형, 기본값
+      * `4:3` - 표준 가로형
+      * `1:1` - 정사각형
+      * `3:4` - 세로형 표준
+      * `9:16` - 세로형
+
+      <Warning>`first_last_frame` 모드는 가로세로 비율을 별도로 선택할 수 없으며, 출력은 입력 이미지 비율을 따릅니다.</Warning>
+    </ParamField>
+
+    <ParamField body="image_url" type="string | string[]">
+      이미지 URL.
+
+      `type`에 따라 의미가 다릅니다:
+
+      * `text_to_video` - 이미지를 전달할 필요가 없습니다.
+      * `first_last_frame` - 첫 프레임 이미지로 사용합니다. 배열도 전달할 수 있으며, 첫 번째 이미지는 첫 프레임, 두 번째 이미지는 마지막 프레임으로 사용됩니다.
+      * `all_reference` - 참고 이미지로 사용하며, 최대 9장까지 가능합니다.
+
+      이미지 요구 사항:
+
+      * JPG, JPEG, PNG, WEBP, HEIC, HEIF 지원
+      * 단일 이미지 최대 30MB
+      * 가로세로 범위 256-5760px
+      * 이미지 가로세로 비율 범위 0.4-2.5
+    </ParamField>
+
+    <ParamField body="end_image_url" type="string">
+      마지막 프레임 이미지 URL.
+
+      `first_last_frame` 모드에서만 유효합니다. 마지막 프레임을 `image_url` 배열의 두 번째 이미지로 전달할 수도 있습니다.
+    </ParamField>
+
+    <ParamField body="video_url" type="string | string[]">
+      참고 비디오 URL.
+
+      `all_reference` 모드에서만 유효합니다.
+
+      AIReiter는 현재 참고 비디오 1개만 허용하여 참고 비디오 길이 과금이 정확하도록 보장합니다. EvoLink 상위 시스템은 최대 3개의 참고 비디오를 지원하며, 총 길이는 15초를 넘을 수 없습니다.
+
+      비디오 요구 사항:
+
+      * 단일 비디오 길이 2-15초
+      * MP4, MOV 지원
+      * 비디오 인코딩 H.264 또는 H.265
+      * 오디오 인코딩 AAC 또는 MP3
+      * 단일 비디오 최대 50MB
+      * 가로세로 범위 256-5760px
+      * 프레임률 23.976-60 FPS
+
+      <Warning>참고 비디오 길이는 과금 초 수에 포함됩니다. URL이 공개적으로 접근 가능하고, 비디오 길이 메타데이터를 읽을 수 있는지 확인하세요.</Warning>
+    </ParamField>
+
+    <ParamField body="audio_url" type="string | string[]">
+      참고 오디오 URL.
+
+      `all_reference` 모드에서만 유효하며, 최대 3개의 오디오를 지원합니다.
+
+      오디오 요구 사항:
+
+      * 단일 오디오 길이 2-15초
+      * WAV, MP3 지원
+      * 단일 오디오 최대 15MB
+
+      <Note>참고 오디오는 별도로 과금되지 않습니다.</Note>
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  요청 측 작업 ID.
+
+  사용자가 정의한 작업 식별자이며 필수입니다. 이후 이 ID로 작업 상태와 결과를 조회할 수 있습니다.
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  요청한 측의 작업 ID로, 결과를 조회하는 데 사용할 수 있습니다.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  초기 상태이며, 일반적으로 `"pending"`입니다.
+</ResponseField>
+
+<ResponseField name="estimated_credits" type="number">
+  예상 소모 포인트.
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  생성 시간, ISO 형식입니다.
+</ResponseField>
+
+## Query Task
+
+MiniMax H3는 비동기 비디오 생성 모델입니다. 작업을 제출한 후 `out_task_id`를 사용하여 작업 상태를 조회하세요.
+
+<ParamField body="out_task_id" type="string" required>
+  작업 제출 시 전달된 요청자 작업 ID입니다.
+</ParamField>
+
+<RequestExample>
+  ```bash cURL
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/query \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "out_task_id": "minimax_h3_task_123456"
+    }'
+  ```
+</RequestExample>
+
+조회가 성공하고 완료되면, 응답의 `output` 필드에 생성된 비디오 URL이 포함됩니다.
+
+## Pricing
+
+MiniMax H3는 생성된 비디오의 초 수, 참조 비디오의 초 수, 추가 참조 이미지 수를 기준으로 요금이 청구됩니다.
+
+| Billing item | Price |
+| --- | --- |
+| 2K 생성 비디오 | 40.15 credits / 초 |
+| 참조 비디오 입력 | 40.15 credits / 초 |
+| 참조 이미지 | 처음 5장은 무료, 이후에는 12.1 credits / 장 |
+| 참조 오디오 | 무료 |
+
+요금 계산식:
+
+```
+(생성된 비디오 초 수 + 참조 비디오 초 수) × 40.15 + max(참조 이미지 수 - 5, 0) × 12.1
+```
+
+예시:
+
+* 4초 텍스트-투-비디오: `4 × 40.15 = 160.6 credits`
+* 4초 출력 + 9초 참조 비디오: `(4 + 9) × 40.15 = 521.95 credits`
+* 15초 출력 + 15초 참조 비디오 + 9장 참조 이미지: `30 × 40.15 + 4 × 12.1 = 1252.9 credits`
+
+## Request Examples
+
+<RequestExample>
+  ```bash cURL（文生视频）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "minimax_h3",
+      "params": {
+        "prompt": "외로운 여행자가 황금빛 시간에 바람이 휘몰아치는 절벽을 따라 걷는, 시네마틱 트래킹 샷",
+        "type": "text_to_video",
+        "video_length": 5,
+        "quality": "2k",
+        "aspect_ratio": "16:9"
+      },
+      "out_task_id": "minimax_h3_text_123456"
+    }'
+  ```
+
+  ```bash cURL（首帧/尾帧）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "minimax_h3",
+      "params": {
+        "prompt": "두 구도 사이의 부드러운 전환, 부드러운 바람, 은은한 카메라 줌인",
+        "type": "first_last_frame",
+        "image_url": [
+          "https://example.com/first.jpg",
+          "https://example.com/last.jpg"
+        ],
+        "video_length": 6,
+        "quality": "2k"
+      },
+      "out_task_id": "minimax_h3_frame_123456"
+    }'
+  ```
+
+  ```bash cURL（多参考素材）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "minimax_h3",
+      "params": {
+        "prompt": "일관된 제품 외관과 시네마틱한 모션을 갖춘 세련된 이커머스 제품 영상을 만드세요",
+        "type": "all_reference",
+        "image_url": [
+          "https://example.com/product-front.jpg",
+          "https://example.com/product-lifestyle.jpg"
+        ],
+        "video_url": ["https://example.com/motion-reference.mp4"],
+        "audio_url": ["https://example.com/music-reference.mp3"],
+        "video_length": 5,
+        "quality": "2k",
+        "aspect_ratio": "16:9"
+      },
+      "out_task_id": "minimax_h3_reference_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "minimax_h3",
+      "params": {
+          "prompt": "부드러운 스튜디오 조명이 있는 시네마틱 제품 영상",
+          "type": "text_to_video",
+          "video_length": 5,
+          "quality": "2k",
+          "aspect_ratio": "16:9"
+      },
+      "out_task_id": "minimax_h3_python_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const response = await fetch("https://aireiter.com/api/openapi/submit", {
+    method: "POST",
+    headers: {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: "minimax_h3",
+      params: {
+        prompt: "부드러운 스튜디오 조명이 있는 시네마틱 제품 영상",
+        type: "text_to_video",
+        video_length: 5,
+        quality: "2k",
+        aspect_ratio: "16:9"
+      },
+      out_task_id: "minimax_h3_js_123456"
+    })
+  });
+
+  const data = await response.json();
+  console.log(data);
+  ```
+</RequestExample>
+
+## Mode Notes
+
+<Note>
+The `text_to_video` mode will call MiniMax H3 text-to-video capabilities; the `first_last_frame` mode will call image-to-video capabilities; and the `all_reference` mode will call multi-reference asset generation capabilities.
+</Note>
+
+<Warning>
+When `type` is `first_last_frame`, do not rely on the `aspect_ratio` parameter. The output aspect ratio for this mode is determined by the input image.
+</Warning>

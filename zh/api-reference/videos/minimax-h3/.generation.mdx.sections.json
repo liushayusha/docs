@@ -1,0 +1,47 @@
+[
+  {
+    "id": "__frontmatter__",
+    "hash": "ee5bc491",
+    "index": 0
+  },
+  {
+    "id": "__prologue__",
+    "hash": "05073000",
+    "index": 1
+  },
+  {
+    "id": "section-0-authorizations",
+    "hash": "e5ca9803",
+    "index": 2
+  },
+  {
+    "id": "section-1-body",
+    "hash": "0b0b7e08",
+    "index": 3
+  },
+  {
+    "id": "section-2-response",
+    "hash": "4411cb11",
+    "index": 4
+  },
+  {
+    "id": "section-3-query-task",
+    "hash": "245910d5",
+    "index": 5
+  },
+  {
+    "id": "section-4-pricing",
+    "hash": "4bddafd3",
+    "index": 6
+  },
+  {
+    "id": "section-5-request-examples",
+    "hash": "75835752",
+    "index": 7
+  },
+  {
+    "id": "section-6-mode-notes",
+    "hash": "29087453",
+    "index": 8
+  }
+]

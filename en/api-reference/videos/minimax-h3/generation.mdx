@@ -1,0 +1,340 @@
+---
+title: 'MiniMax H3 Video Generation'
+description: |
+  - MiniMax H3, also known as Hailuo 03 / Hailuo 3
+  - Asynchronous processing mode, returns a task ID for subsequent queries
+  - Supports text-to-video, first frame/last frame image-to-video, and multi-reference material video generation
+  - Supports 2K output, video duration 4-15 seconds
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+<Note>
+The model name of MiniMax H3 in AIReiter is `minimax_h3`. This model is also commonly searched as Hailuo 03, Hailuo 3, or the MiniMax H3 API.
+</Note>
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  All endpoints require Bearer Token authentication.
+
+  Get the API Key:
+
+  Visit the <a href={apiKeyUrl} target="_blank">API Key management page</a> to get your API Key.
+
+  When using it, add the following to the request header:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  Model name, fixed value:
+
+  * `minimax_h3`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  Model parameters object.
+
+  <Expandable title="params Object Properties">
+    <ParamField body="prompt" type="string" required>
+      Text description for video generation, up to 7000 characters.
+
+      You can describe the subject, scene, camera movement, actions, style, lighting, pacing, and more.
+    </ParamField>
+
+    <ParamField body="type" type="string" default="text_to_video">
+      Generation type, which determines which upstream mode MiniMax H3 uses.
+
+      * `text_to_video` - Text-to-video, generate video using only the prompt
+      * `first_last_frame` - First/last frame image-to-video, generate video using the first frame, last frame, or a transition between the first and last frames
+      * `all_reference` - Multi-reference material video generation, can use reference images, reference videos, and reference audio
+    </ParamField>
+
+    <ParamField body="video_length" type="number" default="4">
+      Video duration, in seconds.
+
+      Integer supported: `4` to `15`.
+
+      <Warning>Video duration directly affects billing.</Warning>
+    </ParamField>
+
+    <ParamField body="quality" type="string" default="2k">
+      Output quality, currently fixed as:
+
+      * `2k`
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="16:9">
+      Video aspect ratio.
+
+      Supported aspect ratios:
+
+      * `21:9` - Ultra-wide
+      * `16:9` - Landscape, default value
+      * `4:3` - Standard landscape
+      * `1:1` - Square
+      * `3:4` - Standard portrait
+      * `9:16` - Portrait
+
+      <Warning>The `first_last_frame` mode does not support selecting the aspect ratio separately. The output will follow the input image ratio.</Warning>
+    </ParamField>
+
+    <ParamField body="image_url" type="string | string[]">
+      Image URL.
+
+      The meaning varies by `type`:
+
+      * `text_to_video` - No image needs to be provided
+      * `first_last_frame` - Used as the first frame image; you can also pass an array, with the first image as the first frame and the second as the last frame
+      * `all_reference` - Used as reference images, up to 9 images
+
+      Image requirements:
+
+      * Supports JPG, JPEG, PNG, WEBP, HEIC, HEIF
+      * Maximum size per image: 30MB
+      * Width and height range: 256-5760px
+      * Image aspect ratio range: 0.4-2.5
+    </ParamField>
+
+    <ParamField body="end_image_url" type="string">
+      Last frame image URL.
+
+      Only valid in `first_last_frame` mode. You can also pass the last frame as the second image in the `image_url` array.
+    </ParamField>
+
+    <ParamField body="video_url" type="string | string[]">
+      Reference video URL.
+
+      Only valid in `all_reference` mode.
+
+      AIReiter currently allows 1 reference video to ensure accurate billing for reference video duration; the EvoLink upstream supports up to 3 reference videos, with a total duration not exceeding 15 seconds.
+
+      Video requirements:
+
+      * Single video duration: 2-15 seconds
+      * Supports MP4, MOV
+      * Video encoding: H.264 or H.265
+      * Audio encoding: AAC or MP3
+      * Maximum size per video: 50MB
+      * Width and height range: 256-5760px
+      * Frame rate: 23.976-60 FPS
+
+      <Warning>The duration of reference videos will be included in billed seconds. Make sure the URL is publicly accessible and that the video duration metadata can be read.</Warning>
+    </ParamField>
+
+    <ParamField body="audio_url" type="string | string[]">
+      Reference audio URL.
+
+      Only valid in `all_reference` mode, up to 3 audio files.
+
+      Audio requirements:
+
+      * Single audio duration: 2-15 seconds
+      * Supports WAV, MP3
+      * Maximum size per audio file: 15MB
+
+      <Note>Reference audio is not billed separately.</Note>
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  Initiator task ID.
+
+  User-defined task identifier, required. You can use this ID later to query the task status and result.
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  Originator task ID, used to query the result.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Initial status, usually `"pending"`.
+</ResponseField>
+
+<ResponseField name="estimated_credits" type="number">
+  Estimated credits consumed.
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  Creation time, in ISO format.
+</ResponseField>
+
+## Query Task
+
+MiniMax H3 is an asynchronous video generation model. After submitting a task, use `out_task_id` to query the task status.
+
+<ParamField body="out_task_id" type="string" required>
+  The initiator task ID passed in when submitting the task.
+</ParamField>
+
+<RequestExample>
+  ```bash cURL
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/query \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "out_task_id": "minimax_h3_task_123456"
+    }'
+  ```
+</RequestExample>
+
+After the query succeeds and is completed, the `output` field in the Response will contain the generated video URL.
+
+## Pricing
+
+MiniMax H3 is billed based on the number of generated video seconds, reference video seconds, and additional reference images.
+
+| Billing Item | Price |
+| --- | --- |
+| 2K generated video | 40.15 credits / second |
+| Reference video input | 40.15 credits / second |
+| Reference images | Free for the first 5 images, 12.1 credits / image thereafter |
+| Reference audio | Free |
+
+Billing formula:
+
+```
+(generated video seconds + reference video seconds) × 40.15 + max(number of reference images - 5, 0) × 12.1
+```
+
+Example:
+
+* 4-second text-to-video: `4 × 40.15 = 160.6 credits`
+* 4-second output + 9-second reference video: `(4 + 9) × 40.15 = 521.95 credits`
+* 15-second output + 15-second reference video + 9 reference images: `30 × 40.15 + 4 × 12.1 = 1252.9 credits`
+
+## Request Examples
+
+<RequestExample>
+  ```bash cURL (Text to Video)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "minimax_h3",
+      "params": {
+        "prompt": "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
+        "type": "text_to_video",
+        "video_length": 5,
+        "quality": "2k",
+        "aspect_ratio": "16:9"
+      },
+      "out_task_id": "minimax_h3_text_123456"
+    }'
+  ```
+
+  ```bash cURL (First/Last Frame)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "minimax_h3",
+      "params": {
+        "prompt": "Smooth transition between the two framings, gentle wind, subtle camera push-in",
+        "type": "first_last_frame",
+        "image_url": [
+          "https://example.com/first.jpg",
+          "https://example.com/last.jpg"
+        ],
+        "video_length": 6,
+        "quality": "2k"
+      },
+      "out_task_id": "minimax_h3_frame_123456"
+    }'
+  ```
+
+  ```bash cURL (Multiple Reference Assets)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "minimax_h3",
+      "params": {
+        "prompt": "Create a polished ecommerce product video with consistent product appearance and cinematic motion",
+        "type": "all_reference",
+        "image_url": [
+          "https://example.com/product-front.jpg",
+          "https://example.com/product-lifestyle.jpg"
+        ],
+        "video_url": ["https://example.com/motion-reference.mp4"],
+        "audio_url": ["https://example.com/music-reference.mp3"],
+        "video_length": 5,
+        "quality": "2k",
+        "aspect_ratio": "16:9"
+      },
+      "out_task_id": "minimax_h3_reference_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "minimax_h3",
+      "params": {
+          "prompt": "A cinematic product video with soft studio lighting",
+          "type": "text_to_video",
+          "video_length": 5,
+          "quality": "2k",
+          "aspect_ratio": "16:9"
+      },
+      "out_task_id": "minimax_h3_python_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const response = await fetch("https://aireiter.com/api/openapi/submit", {
+    method: "POST",
+    headers: {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: "minimax_h3",
+      params: {
+        prompt: "A cinematic product video with soft studio lighting",
+        type: "text_to_video",
+        video_length: 5,
+        quality: "2k",
+        aspect_ratio: "16:9"
+      },
+      out_task_id: "minimax_h3_js_123456"
+    })
+  });
+
+  const data = await response.json();
+  console.log(data);
+  ```
+</RequestExample>
+
+## Mode Notes
+
+<Note>
+The `text_to_video` mode invokes MiniMax H3 text-to-video capabilities; the `first_last_frame` mode invokes image-to-video capabilities; the `all_reference` mode invokes multi-reference asset generation capabilities.
+</Note>
+
+<Warning>
+When `type` is `first_last_frame`, do not rely on the `aspect_ratio` parameter. The output aspect ratio in this mode is determined by the input image.
+</Warning>
