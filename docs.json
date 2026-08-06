@@ -136,6 +136,13 @@
                 ]
               },
               {
+                "group": "FLUX 3 Video",
+                "icon": "video",
+                "pages": [
+                  "zh/api-reference/videos/flux-3-video/generation"
+                ]
+              },
+              {
                 "group": "Sora2",
                 "icon": "video",
                 "pages": [
@@ -375,6 +382,13 @@
                 "icon": "video",
                 "pages": [
                   "en/api-reference/videos/grok-imagine-1-5/generation"
+                ]
+              },
+              {
+                "group": "FLUX 3 Video",
+                "icon": "video",
+                "pages": [
+                  "en/api-reference/videos/flux-3-video/generation"
                 ]
               },
               {
@@ -620,6 +634,13 @@
                 ]
               },
               {
+                "group": "FLUX 3 Video",
+                "icon": "video",
+                "pages": [
+                  "ja/api-reference/videos/flux-3-video/generation"
+                ]
+              },
+              {
                 "group": "Sora2",
                 "icon": "video",
                 "pages": [
@@ -859,6 +880,13 @@
                 "icon": "video",
                 "pages": [
                   "ko/api-reference/videos/grok-imagine-1-5/generation"
+                ]
+              },
+              {
+                "group": "FLUX 3 Video",
+                "icon": "video",
+                "pages": [
+                  "ko/api-reference/videos/flux-3-video/generation"
                 ]
               },
               {
