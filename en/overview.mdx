@@ -1,10 +1,10 @@
 ---
 title: 'AIReiter — AI Text, Image, and Video Generation API Platform'
-description: 'A unified AI text, image, and video generation API platform. Supports multiple mainstream models including Claude, GPT, Gemini, Sora2, VEO3, Seedance2, etc. Compatible with OpenAI SDK, asynchronous task processing, transparent pricing, and easy to use.'
+description: 'A unified AI text, image, and video generation API platform. Supports multiple mainstream models including Claude, GPT, Gemini, VEO3, Seedance2, etc. Compatible with OpenAI SDK, asynchronous task processing, transparent pricing, and easy to use.'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
-AIReiter is a unified AI content generation API platform that provides text dialogue, image generation, and video generation services. By simple REST API calls, you can use mainstream AI models such as Claude, GPT, Gemini, Sora2, VEO3, Seedance2, and others. The text interface is fully compatible with the OpenAI SDK and can be used by directly replacing the `baseURL`.
+AIReiter is a unified AI content generation API platform that provides text dialogue, image generation, and video generation services. By simple REST API calls, you can use mainstream AI models such as Claude, GPT, Gemini, VEO3, Seedance2, and others. The text interface is fully compatible with the OpenAI SDK and can be used by directly replacing the `baseURL`.
 
 ## Quick Start
 
@@ -15,8 +15,8 @@ AIReiter is a unified AI content generation API platform that provides text dial
   <Card title="Image Generation" icon="image" href="/en/api-reference/images/gpt-4o/generation">
     Generate images using GPT-4o, Gemini, Seedream, and other models
   </Card>
-  <Card title="Video Generation" icon="video" href="/en/api-reference/videos/sora2/generation">
-    Generate video content using Sora2, VEO3, Seedance2, and other models
+  <Card title="Video Generation" icon="video" href="/en/api-reference/videos/veo3-1/generation">
+    Generate video content using VEO3, Seedance2, and other models
   </Card>
   <Card title="Task Status Query" icon="list-check" href="/en/api-reference/tasks/status">
     Query execution status and results of asynchronous tasks
@@ -99,7 +99,7 @@ Model channels represent different service tiers. Each model offers multiple cha
 Channels only affect service stability and do not impact output quality. All channels use the same underlying model, ensuring identical quality of generated results. Generally, higher-priced channels provide better service stability.
 </Note>
 
-When using, simply replace the model name with the corresponding channel version, for example, replace `"sora2"` with `"sora2_plus"`, while keeping other parameters unchanged.
+When using, simply replace the model name with the corresponding channel version, for example, replace `"seedance2"` with `"seedance2_fast"`, while keeping other parameters unchanged.
 
 ## Supported Models
 
@@ -155,12 +155,6 @@ AIReiter offers multiple image generation models, supporting text-to-image and i
 Supports text-to-video and image-to-video, offering multiple resolution and duration options:
 
 <CardGroup cols={2}>
-  <Card title="Sora2" icon="video" href="/en/api-reference/videos/sora2/generation">
-    OpenAI Sora2 video generation model (10-15 seconds)
-  </Card>
-  <Card title="Sora2 Pro" icon="video" href="/en/api-reference/videos/sora2-pro/generation">
-    Sora2 professional version, supporting HD resolution
-  </Card>
   <Card title="VEO3.1" icon="video" href="/en/api-reference/videos/veo3-1/generation">
     Google VEO3.1 video generation model
   </Card>
@@ -202,7 +196,7 @@ A unified API endpoint supporting various text, image, and video generation mode
 
 - **Text conversation**: Claude, GPT and other models, compatible with OpenAI SDK
 - **Image generation**: GPT-4o, Gemini, Seedream and other models
-- **Video generation**: Sora2, VEO3, Seedance and other models
+- **Video generation**: VEO3, Seedance and other models
 - Unified request format and response structure
 - Flexible parameter configuration
 
@@ -290,7 +284,7 @@ Visit the <a href={apiKeyUrl} target="_blank">API Key Management Page</a> to obt
   <Card title="View Image Generation Documentation" icon="image" href="/en/api-reference/images/gpt-4o/generation">
     Learn how to use various image generation models
   </Card>
-  <Card title="View Video Generation Documentation" icon="video" href="/en/api-reference/videos/sora2/generation">
+  <Card title="View Video Generation Documentation" icon="video" href="/en/api-reference/videos/veo3-1/generation">
     Learn how to generate video content
   </Card>
   <Card title="Task Management" icon="list-check" href="/en/api-reference/tasks/status">

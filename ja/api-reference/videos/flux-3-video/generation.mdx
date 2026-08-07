@@ -72,7 +72,7 @@ AIReiter における FLUX 3 Video のモデル名は `flux_3_video` です。�
     <ParamField body="video_length" type="integer" default="5">
       出力動画の長さ。単位は秒です。
 
-      5〜20 の整数に対応しています。動画の長さは課金に直接影響します。
+      5〜20 の整数に対応しています。
     </ParamField>
 
     <ParamField body="resolution" type="string" default="hd">
@@ -81,7 +81,7 @@ AIReiter における FLUX 3 Video のモデル名は `flux_3_video` です。�
       * `hd` - HD
       * `fhd` - FHD
 
-      <Note>FHD は HD より画素数と価格が高く、具体的な出力サイズはアスペクト比によって変化します。</Note>
+      <Note>FHD は HD より画素数が多く、具体的な出力サイズはアスペクト比によって変化します。</Note>
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="auto">
@@ -100,7 +100,7 @@ AIReiter における FLUX 3 Video のモデル名は `flux_3_video` です。�
     <ParamField body="generate_audio" type="boolean" default="true">
       動画と同期したネイティブ音声を生成するかどうか。
 
-      セリフ、環境音、効果音を含めることができます。音声をオフにしても価格は下がりません。
+      セリフ、環境音、効果音を含めることができます。
     </ParamField>
 
     <ParamField body="safety_tolerance" type="integer" default="2">
@@ -128,10 +128,6 @@ AIReiter における FLUX 3 Video のモデル名は `flux_3_video` です。�
   初期状態。通常は `"pending"` です。
 </ResponseField>
 
-<ResponseField name="estimated_credits" type="number">
-  現在のパラメータに基づいて計算された推定クレジット。
-</ResponseField>
-
 <ResponseField name="created_at" type="string">
   作成時間。ISO 8601 形式。
 </ResponseField>
@@ -152,29 +148,7 @@ FLUX 3 Video は非同期処理を採用しています。送信が成功した�
   ```
 </RequestExample>
 
-タスク完了後、レスポンスの `output` 配列には生成された動画 URL が含まれます。実際の消費クレジットは `credits_used` から取得できます。完全なフィールドについては[タスクのステータスを取得](/en/api-reference/tasks/status)を参照してください。
-
-## Pricing
-
-FLUX 3 Video は生成モード、出力品質、動画の秒数に応じて課金されます。音声の生成には追加料金はかかりません。
-
-| モード | HD | FHD |
-| --- | ---: | ---: |
-| Text-to-Video / Ordered Keyframes | 17.68 credits / 秒 | 30.16 credits / 秒 |
-| Video Continuation | 42.64 credits / 秒 | 55.12 credits / 秒 |
-
-課金式：
-
-```text
-credits = corresponding mode and quality per-second price × video_length
-```
-
-例：
-
-* 5秒 HD Text-to-Video: `17.68 × 5 = 88.4 credits`
-* 5秒 FHD Ordered Keyframes: `30.16 × 5 = 150.8 credits`
-* 5秒 HD Video Continuation: `42.64 × 5 = 213.2 credits`
-* 5秒 FHD Video Continuation: `55.12 × 5 = 275.6 credits`
+タスク完了後、レスポンスの `output` 配列には生成された動画 URL が含まれます。完全なフィールドについては[タスクのステータスを取得](/ja/api-reference/tasks/status)を参照してください。
 
 ## Request Examples
 

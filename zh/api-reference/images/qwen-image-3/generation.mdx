@@ -1,0 +1,216 @@
+---
+title: 'Qwen Image 3.0 图片生成与编辑'
+description: |
+    - 异步处理模式，返回任务 ID 用于后续查询
+    - 支持文生图和图生图，不传参考图时为文生图
+    - 支持最多 3 张参考图和一次生成 1-6 张图片
+    - 支持 1K / 2K 分辨率和 7 种常用图片比例
+    - 提交的 prompt 会经过平台敏感词 / 安全审核，违规内容会被直接拒绝
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  所有接口均需要使用 Bearer Token 进行认证。
+
+  访问 <a href={apiKeyUrl} target="_blank">API Key 管理页面</a> 获取 API Key，并在请求头中添加：
+
+  ```text
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  模型名称，固定值：`"qwen_image_3"`。
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  模型参数对象。
+
+  <Expandable title="params 对象属性">
+    <ParamField body="prompt" type="string" required>
+      图片生成或编辑指令。支持中文和英文。
+
+      建议明确描述主体、场景、构图、光线、材质、文字内容，以及参考图中需要保留或修改的部分。
+    </ParamField>
+
+    <ParamField body="image_url" type="string[]">
+      参考图数组。传入后使用图生图模式；不传时使用文生图模式。
+
+      * 最多 3 张参考图
+      * 单张图片最大 10MB
+      * 支持 jpeg、png、webp
+      * 支持公开可访问的 URL 或完整 Base64 Data URI
+
+      <Warning>
+        图片 URL 必须能被公网直接访问，不能依赖登录状态、Cookie 或页面临时授权。
+      </Warning>
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="1K">
+      输出分辨率档位。
+
+      * `1K` - 基础分辨率（默认）
+      * `2K` - 高清分辨率
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="1:1">
+      输出图片宽高比。
+
+      支持以下取值：
+
+      * `1:1` - 正方形（默认）
+      * `3:2` / `2:3` - 经典横版 / 竖版
+      * `4:3` / `3:4` - 标准横版 / 竖版
+      * `16:9` / `9:16` - 宽屏横版 / 竖版
+
+    </ParamField>
+
+    <ParamField body="output_n" type="integer" default="1">
+      本次任务生成的图片数量，取值范围为 `1` 到 `6`。
+    </ParamField>
+
+    <ParamField body="prompt_extend" type="boolean" default="false">
+      提示词智能改写。默认关闭，以保证结果可预测。需要智能改写时设为 `true`。
+    </ParamField>
+
+    <ParamField body="prompt_extend_mode" type="string" default="direct">
+      提示词改写方式。仅当 `prompt_extend` 为 `true` 时生效。
+
+      * `direct` - 均衡改写，支持文生图和图生图
+      * `agent` - 激进改写，仅支持文生图
+    </ParamField>
+
+    <ParamField body="negative_prompt" type="string">
+      负向提示词，用于描述不希望出现在结果中的内容，例如模糊、变形或错误文字。
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  调用方自定义任务 ID，用于幂等提交和查询结果。
+
+  * 长度为 1-64 个字符
+  * 建议仅使用字母、数字、下划线和连字符
+  * 同一个 API Key 下不要重复使用
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  调用方任务 ID，可用于查询任务状态和结果。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  初始状态，通常为 `"pending"`。
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  任务创建时间，ISO 8601 格式。
+</ResponseField>
+
+## 查询结果
+
+提交成功后，使用相同的 `out_task_id` 调用查询接口：
+
+```bash
+curl --request POST \
+  --url https://aireiter.com/api/openapi/query \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "out_task_id": "qwen_image_3_task_001"
+  }'
+```
+
+任务状态包括 `pending`、`processing`、`completed` 和 `failed`。任务完成后，图片数组位于 `data.output`。
+
+<RequestExample>
+  ```bash cURL（文生图）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "qwen_image_3",
+      "params": {
+        "prompt": "现代玻璃建筑前的未来感电动跑车，蓝调时刻，商业汽车摄影，真实材质与自然阴影，无文字，无水印",
+        "resolution": "2K",
+        "aspect_ratio": "16:9",
+        "output_n": 1,
+        "prompt_extend": true,
+        "prompt_extend_mode": "agent"
+      },
+      "out_task_id": "qwen_image_3_task_001"
+    }'
+  ```
+
+  ```bash cURL（图生图）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "qwen_image_3",
+      "params": {
+        "prompt": "保持商品主体和标签结构，将背景改为深灰色高级广告摄影棚，增加冷色轮廓光",
+        "image_url": ["https://example.com/product-reference.png"],
+        "resolution": "1K",
+        "aspect_ratio": "1:1",
+        "output_n": 1
+      },
+      "out_task_id": "qwen_image_3_edit_001"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  response = requests.post(
+      "https://aireiter.com/api/openapi/submit",
+      headers={
+          "Authorization": "Bearer <token>",
+          "Content-Type": "application/json"
+      },
+      json={
+          "model": "qwen_image_3",
+          "params": {
+              "prompt": "电影感产品广告摄影，玻璃香水瓶置于黑色石台上",
+              "resolution": "1K",
+              "aspect_ratio": "16:9",
+              "output_n": 1
+          },
+          "out_task_id": "qwen_image_3_python_001"
+      }
+  )
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const response = await fetch("https://aireiter.com/api/openapi/submit", {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer <token>",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: "qwen_image_3",
+      params: {
+        prompt: "电影感产品广告摄影，玻璃香水瓶置于黑色石台上",
+        resolution: "1K",
+        aspect_ratio: "16:9",
+        output_n: 1
+      },
+      out_task_id: "qwen_image_3_javascript_001"
+    })
+  });
+
+  console.log(await response.json());
+  ```
+</RequestExample>

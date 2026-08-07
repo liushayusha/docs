@@ -28,7 +28,7 @@ npm run translate
 
 # 只翻译指定文件
 npm run translate overview.mdx
-npm run translate api-reference/videos/sora2/generation.mdx
+npm run translate api-reference/videos/veo3-1/generation.mdx
 
 # 翻译多个指定文件
 npm run translate overview.mdx api-reference/videos/veo3/generation.mdx
@@ -327,7 +327,7 @@ C部分内容。
 2. ⚠️ **不要手动编辑其他语言文件** - 翻译会覆盖手动修改
 3. ⚠️ **务必提交 `.sections.json` 到 Git** - 丢失会导致全量重翻
 4. ✅ **Hash 文件自动管理** - `.sections.json` 文件由系统自动创建和更新
-5. ✅ **支持部分路径匹配** - `npm run translate sora2` 会翻译所有包含 "sora2" 的文件
+5. ✅ **支持部分路径匹配** - `npm run translate veo3-1` 会翻译所有包含 "veo3-1" 的文件
 
 ## 优势对比
 

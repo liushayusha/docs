@@ -50,8 +50,6 @@ export const apiKeyUrl = 'https://test.aireiter.com/keys'; // API Key 管理页�
 - `zh/api-reference/images/gpt-4o/generation.mdx`
 - `zh/api-reference/images/seedream-4/generation.mdx`
 - `zh/api-reference/images/seedream-4.5/generation.mdx`
-- `zh/api-reference/videos/sora2/generation.mdx`
-- `zh/api-reference/videos/sora2-pro/generation.mdx`
 - `zh/api-reference/videos/veo3-1/generation.mdx`
 - `zh/api-reference/videos/veo3-1-fast/generation.mdx`
 - `zh/api-reference/tasks/status.mdx`

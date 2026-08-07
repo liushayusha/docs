@@ -1,11 +1,11 @@
 ---
 title: 'AIReiter — AI 文本、图像与视频生成 API 平台'
-description: '统一的 AI 文本、图像和视频生成 API 平台。支持多种主流模型，包括 Claude、GPT、Gemini、Sora2、VEO3、Seedance2 等。兼容 OpenAI SDK，异步任务处理，透明定价，简单易用。'
+description: '统一的 AI 文本、图像和视频生成 API 平台。支持多种主流模型，包括 Claude、GPT、Gemini、VEO3、Seedance2 等。兼容 OpenAI SDK，异步任务处理，透明定价，简单易用。'
 ---
 
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
-AIReiter 是一个统一的 AI 内容生成 API 平台，提供文本对话、图像生成和视频生成服务。通过简单的 REST API 调用，即可使用 Claude、GPT、Gemini、Sora2、VEO3、Seedance2 等多种主流 AI 模型。文本接口完全兼容 OpenAI SDK，可直接替换 `baseURL` 使用。
+AIReiter 是一个统一的 AI 内容生成 API 平台，提供文本对话、图像生成和视频生成服务。通过简单的 REST API 调用，即可使用 Claude、GPT、Gemini、VEO3、Seedance2 等多种主流 AI 模型。文本接口完全兼容 OpenAI SDK，可直接替换 `baseURL` 使用。
 
 ## 快速开始
 
@@ -16,8 +16,8 @@ AIReiter 是一个统一的 AI 内容生成 API 平台，提供文本对话、�
   <Card title="图像生成" icon="image" href="/zh/api-reference/images/gpt-4o/generation">
     使用 GPT-4o、Gemini、Seedream 等模型生成图像
   </Card>
-  <Card title="视频生成" icon="video" href="/zh/api-reference/videos/sora2/generation">
-    使用 Sora2、VEO3、Seedance2 等模型生成视频内容
+  <Card title="视频生成" icon="video" href="/zh/api-reference/videos/veo3-1/generation">
+    使用 VEO3、Seedance2 等模型生成视频内容
   </Card>
   <Card title="任务状态查询" icon="list-check" href="/zh/api-reference/tasks/status">
     查询异步任务的执行状态和结果
@@ -100,7 +100,7 @@ curl --request POST \
 通道只影响服务稳定性，不影响输出质量。所有通道使用相同的底层模型，生成结果的质量完全一致。通常来说，价格越高的通道，服务稳定性越好。
 </Note>
 
-使用时只需将模型名称替换为对应的通道版本即可，例如将 `"sora2"` 替换为 `"sora2_plus"`，其他参数保持不变。
+使用时只需将模型名称替换为对应的通道版本即可，例如将 `"seedance2"` 替换为 `"seedance2_fast"`，其他参数保持不变。
 
 ## 支持的模型
 
@@ -156,12 +156,6 @@ AIReiter 提供多种图像生成模型，支持文本生成图像和图生图�
 支持文本生成视频和图生视频，提供多种分辨率和时长选项：
 
 <CardGroup cols={2}>
-  <Card title="Sora2" icon="video" href="/zh/api-reference/videos/sora2/generation">
-    OpenAI Sora2 视频生成模型（10-15秒）
-  </Card>
-  <Card title="Sora2 Pro" icon="video" href="/zh/api-reference/videos/sora2-pro/generation">
-    Sora2 专业版，支持高清分辨率
-  </Card>
   <Card title="VEO3.1" icon="video" href="/zh/api-reference/videos/veo3-1/generation">
     Google VEO3.1 视频生成模型
   </Card>
@@ -203,7 +197,7 @@ AIReiter 提供多种图像生成模型，支持文本生成图像和图生图�
 
 - **文本对话**：Claude、GPT 等模型，兼容 OpenAI SDK
 - **图像生成**：GPT-4o、Gemini、Seedream 等模型
-- **视频生成**：Sora2、VEO3、Seedance 等模型
+- **视频生成**：VEO3、Seedance 等模型
 - 统一的请求格式和响应结构
 - 灵活的参数配置
 
@@ -291,7 +285,7 @@ Authorization: Bearer YOUR_API_KEY
   <Card title="查看图像生成文档" icon="image" href="/zh/api-reference/images/gpt-4o/generation">
     了解如何使用各种图像生成模型
   </Card>
-  <Card title="查看视频生成文档" icon="video" href="/zh/api-reference/videos/sora2/generation">
+  <Card title="查看视频生成文档" icon="video" href="/zh/api-reference/videos/veo3-1/generation">
     了解如何生成视频内容
   </Card>
   <Card title="任务管理" icon="list-check" href="/zh/api-reference/tasks/status">

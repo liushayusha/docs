@@ -1,0 +1,245 @@
+---
+title: 'Qwen Image 3.0 Pro Image Generation and Editing'
+description: |
+    - Suitable for posters, typography, menus, infographics, and high-detail image editing
+    - Asynchronous processing mode, returning a task ID for later query
+    - Supports text-to-image, up to 3 reference images, and generating 1-6 images at a time
+    - Supports 1K / 2K resolutions and 7 common image aspect ratios
+    - Output format is fixed as PNG and custom pixel dimensions are not supported
+    - Submitted prompts are subject to platform sensitive-word / safety review, and violating content will be rejected directly
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  All endpoints require Bearer Token authentication.
+
+  Visit the <a href={apiKeyUrl} target="_blank">API Key management page</a> to get your API Key, and add the following to the request headers:
+
+  ```text
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  Model name, fixed value: `"qwen_image_3_pro"`.
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  Model parameters object.
+
+  <Expandable title="Params Object Properties">
+    <ParamField body="prompt" type="string" required>
+      Image generation or editing instructions. Supports Chinese and English.
+
+      The Pro model is suitable for tasks that require readable text, complex hierarchies, dense layouts, and high-detail rendering. It is recommended to clearly describe the text content, font style, hierarchy, position, whitespace, and the reference image features that need to be preserved.
+    </ParamField>
+
+    <ParamField body="image_url" type="string[]">
+      Reference image array. If provided, the image-to-image mode will be used; if not provided, the text-to-image mode will be used.
+
+      * Up to 3 reference images
+      * Maximum 10MB per image
+      * Supports jpeg, png, webp
+      * Supports publicly accessible URLs or complete Base64 Data URIs
+
+      <Warning>
+        The image URL must be directly accessible from the public internet and must not rely on login status, cookies, or temporary page authorization.
+      </Warning>
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="1K">
+      Output resolution tier.
+
+      * `1K` - Base resolution (default)
+      * `2K` - High-definition resolution, suitable for text, posters, and dense layouts
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="1:1">
+      Output image aspect ratio.
+
+      Supported values:
+
+      * `1:1` - Square (default)
+      * `3:2` / `2:3` - Classic landscape / portrait
+      * `4:3` / `3:4` - Standard landscape / portrait
+      * `16:9` / `9:16` - Widescreen landscape / portrait
+
+      <Warning>
+        The current endpoint does not support `21:9`, nor custom pixel dimensions such as `1024x1024`.
+      </Warning>
+    </ParamField>
+
+    <ParamField body="output_n" type="integer" default="1">
+      The number of images generated for this task. The range is `1` to `6`.
+    </ParamField>
+
+    <ParamField body="output_format" type="string" default="png">
+      Output format, currently fixed to `png`.
+
+      <Warning>
+        The current AIReiter access channel does not provide a JPEG output option.
+      </Warning>
+    </ParamField>
+
+    <ParamField body="prompt_extend" type="boolean" default="true">
+      Whether to enable intelligent prompt expansion. Enabled by default, suitable for shorter prompts.
+    </ParamField>
+
+    <ParamField body="negative_prompt" type="string">
+      Negative prompt, used to describe content that should not appear in the result, such as blurriness, garbled text, crowded layouts, or structural distortion.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  Caller-defined task ID, used for idempotent submission and result queries.
+
+  * Length: 1-64 characters
+  * It is recommended to use only letters, numbers, underscores, and hyphens
+  * Do not reuse it under the same API Key
+</ParamField>
+
+## Billing
+
+| Billing Item | Price |
+| --- | ---: |
+| Per 1K output image | 3.20 credits ($0.032) |
+| Per 2K output image | 6.00 credits ($0.060) |
+| Per input reference image | 0.25 credits ($0.0025) |
+
+Billing formula:
+
+* 1K: `3.20 × output_n + 0.25 × number of reference images`
+* 2K: `6.00 × output_n + 0.25 × number of reference images`
+
+For example, generating 1 1K image and passing in 1 reference image is expected to consume `3.45` credits; generating 1 2K image and passing in 1 reference image is expected to consume `6.25` credits. When the submission succeeds, `estimated_credits` in the Response is the estimated consumption; after the task is completed, `credits_used` in the query Response is the actual consumption. No final charge will be incurred if the task fails.
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  Caller task ID, which can be used to query the task status and results.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Initial status, usually `"pending"`.
+</ResponseField>
+
+<ResponseField name="estimated_credits" type="number">
+  Estimated credits consumed by this task.
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  Task creation time, in ISO 8601 format.
+</ResponseField>
+
+## Query Results
+
+After the submission succeeds, call the query endpoint using the same `out_task_id`:
+
+```bash
+curl --request POST \
+  --url https://aireiter.com/api/openapi/query \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "out_task_id": "qwen_image_3_pro_task_001"
+  }'
+```
+
+Task statuses include `pending`, `processing`, `completed`, and `failed`. After the task is completed, the image array is located at `data.output`, and the actual credits used are located at `data.credits_used`.
+
+<RequestExample>
+  ```bash cURL（Text to Image）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "qwen_image_3_pro",
+      "params": {
+        "prompt": "Design a vertical menu poster for a specialty coffee shop, with the title MORNING ROAST, clearly readable price tiers, modern editorial layout, and realistic coffee photography",
+        "resolution": "2K",
+        "aspect_ratio": "3:4",
+        "output_n": 1,
+        "output_format": "png",
+        "prompt_extend": true,
+        "negative_prompt": "garbled text, blur, cramped layout, watermark"
+      },
+      "out_task_id": "qwen_image_3_pro_task_001"
+    }'
+  ```
+
+  ```bash cURL（Multi-Reference Image Editing）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "qwen_image_3_pro",
+      "params": {
+        "prompt": "Use the product subject from the first image, the color scheme from the second image, and the layout from the third image to generate a premium landscape ad, keeping the label text clear",
+        "image_url": [
+          "https://example.com/product.png",
+          "https://example.com/color-reference.png",
+          "https://example.com/layout-reference.png"
+        ],
+        "resolution": "2K",
+        "aspect_ratio": "16:9",
+        "output_n": 1,
+        "output_format": "png"
+      },
+      "out_task_id": "qwen_image_3_pro_edit_001"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  response = requests.post(
+      "https://aireiter.com/api/openapi/submit",
+      headers={
+          "Authorization": "Bearer <token>",
+          "Content-Type": "application/json"
+      },
+      json={
+          "model": "qwen_image_3_pro",
+          "params": {
+              "prompt": "Modern technology product launch poster, clear title, distinct information hierarchy, dark background",
+              "resolution": "2K",
+              "aspect_ratio": "16:9",
+              "output_n": 1
+          },
+          "out_task_id": "qwen_image_3_pro_python_001"
+      }
+  )
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const response = await fetch("https://aireiter.com/api/openapi/submit", {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer <token>",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: "qwen_image_3_pro",
+      params: {
+        prompt: "Modern technology product launch poster, clear title, distinct information hierarchy, dark background",
+        resolution: "2K",
+        aspect_ratio: "16:9",
+        output_n: 1
+      },
+      out_task_id: "qwen_image_3_pro_javascript_001"
+    })
+  });
+
+  console.log(await response.json());
+  ```
+</RequestExample>

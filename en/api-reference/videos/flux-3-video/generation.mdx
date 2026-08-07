@@ -72,7 +72,7 @@ The model name for FLUX 3 Video in AIReiter is `flux_3_video`. It currently supp
     <ParamField body="video_length" type="integer" default="5">
       Output video duration, in seconds.
 
-      Supports integers from `5` to `20`. Video duration directly affects billing.
+      Supports integers from `5` to `20`.
     </ParamField>
 
     <ParamField body="resolution" type="string" default="hd">
@@ -81,7 +81,7 @@ The model name for FLUX 3 Video in AIReiter is `flux_3_video`. It currently supp
       * `hd` - HD
       * `fhd` - FHD
 
-      <Note>FHD has a higher pixel count and price than HD. The exact output size varies depending on the aspect ratio.</Note>
+      <Note>FHD has a higher pixel count than HD. The exact output size varies depending on the aspect ratio.</Note>
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="auto">
@@ -100,7 +100,7 @@ The model name for FLUX 3 Video in AIReiter is `flux_3_video`. It currently supp
     <ParamField body="generate_audio" type="boolean" default="true">
       Whether to generate native audio synchronized with the video.
 
-      This can include dialogue, ambient sound, and sound effects. Turning off audio will not reduce the price.
+      This can include dialogue, ambient sound, and sound effects.
     </ParamField>
 
     <ParamField body="safety_tolerance" type="integer" default="2">
@@ -128,10 +128,6 @@ The model name for FLUX 3 Video in AIReiter is `flux_3_video`. It currently supp
   Initial status, usually `"pending"`.
 </ResponseField>
 
-<ResponseField name="estimated_credits" type="number">
-  Estimated credits calculated based on the current parameters.
-</ResponseField>
-
 <ResponseField name="created_at" type="string">
   Creation time, in ISO 8601 format.
 </ResponseField>
@@ -152,29 +148,7 @@ FLUX 3 Video uses asynchronous processing. After submission succeeds, use the sa
   ```
 </RequestExample>
 
-After the task is completed, the `output` array in the Response will contain the generated video URL, and the actual credits charged can be obtained from `credits_used`. For complete fields, see [Get Task Status](/en/api-reference/tasks/status).
-
-## Pricing
-
-FLUX 3 Video is billed according to generation mode, output quality, and video duration in seconds. Generating audio does not incur additional charges.
-
-| Mode | HD | FHD |
-| --- | ---: | ---: |
-| Text-to-Video / Ordered Keyframes | 17.68 credits / second | 30.16 credits / second |
-| Video Continuation | 42.64 credits / second | 55.12 credits / second |
-
-Billing formula:
-
-```text
-Credits = per-second price for the corresponding mode and quality × video_length
-```
-
-Examples:
-
-* 5-second HD Text-to-Video: `17.68 × 5 = 88.4 credits`
-* 5-second FHD Ordered Keyframes: `30.16 × 5 = 150.8 credits`
-* 5-second HD Video Continuation: `42.64 × 5 = 213.2 credits`
-* 5-second FHD Video Continuation: `55.12 × 5 = 275.6 credits`
+After the task is completed, the `output` array in the response will contain the generated video URL. For complete fields, see [Get Task Status](/en/api-reference/tasks/status).
 
 ## Request Examples
 

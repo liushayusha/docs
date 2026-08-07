@@ -4,7 +4,7 @@ description: |
   - MiniMax H3，也常被称为 Hailuo 03 / Hailuo 3
   - 异步处理模式，返回任务 ID 用于后续查询
   - 支持文生视频、首帧/尾帧图生视频、多参考素材生成视频
-  - 支持 2K 输出，视频时长 4-15 秒
+  - 支持 768P / 2K 输出，视频时长 4-15 秒
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 
@@ -49,7 +49,7 @@ MiniMax H3 在 AIReiter 中的模型名称为 `minimax_h3`。该模型也常被�
     </ParamField>
 
     <ParamField body="type" type="string" default="text_to_video">
-      生成类型，决定 MiniMax H3 使用哪一种上游模式。
+      生成类型，决定使用哪一种视频生成模式。
 
       * `text_to_video` - 文生视频，仅使用提示词生成视频
       * `first_last_frame` - 首帧/尾帧图生视频，使用首帧、尾帧或首尾帧过渡生成视频
@@ -60,13 +60,12 @@ MiniMax H3 在 AIReiter 中的模型名称为 `minimax_h3`。该模型也常被�
       生成视频时长，单位为秒。
 
       支持整数：`4` 到 `15`。
-
-      <Warning>视频时长会直接影响计费。</Warning>
     </ParamField>
 
     <ParamField body="quality" type="string" default="2k">
-      输出质量，当前固定为：
+      输出质量：
 
+      * `768p`
       * `2k`
     </ParamField>
 
@@ -113,7 +112,7 @@ MiniMax H3 在 AIReiter 中的模型名称为 `minimax_h3`。该模型也常被�
 
       仅 `all_reference` 模式有效。
 
-      AIReiter 当前开放 1 个参考视频，以确保参考视频时长计费准确；EvoLink 上游支持最多 3 个参考视频，且总时长不超过 15 秒。
+      当前最多支持 1 个参考视频。
 
       视频要求：
 
@@ -125,7 +124,7 @@ MiniMax H3 在 AIReiter 中的模型名称为 `minimax_h3`。该模型也常被�
       * 宽高范围 256-5760px
       * 帧率 23.976-60 FPS
 
-      <Warning>参考视频时长会加入计费秒数。请确保 URL 可公开访问，并且视频时长元数据可读取。</Warning>
+      <Warning>请确保 URL 可公开访问，并且视频时长元数据可读取。</Warning>
     </ParamField>
 
     <ParamField body="audio_url" type="string | string[]">
@@ -138,8 +137,6 @@ MiniMax H3 在 AIReiter 中的模型名称为 `minimax_h3`。该模型也常被�
       * 单个音频时长 2-15 秒
       * 支持 WAV、MP3
       * 单个音频最大 15MB
-
-      <Note>参考音频不单独计费。</Note>
     </ParamField>
   </Expandable>
 </ParamField>
@@ -189,29 +186,6 @@ MiniMax H3 是异步视频生成模型。提交任务后，请使用 `out_task_i
 </RequestExample>
 
 查询成功并完成后，响应中的 `output` 字段会包含生成的视频 URL。
-
-## Pricing
-
-MiniMax H3 按生成视频秒数、参考视频秒数和额外参考图片计费。
-
-| 计费项 | 价格 |
-| --- | --- |
-| 2K 生成视频 | 40.15 credits / 秒 |
-| 参考视频输入 | 40.15 credits / 秒 |
-| 参考图片 | 前 5 张免费，超出后 12.1 credits / 张 |
-| 参考音频 | 免费 |
-
-计费公式：
-
-```
-(生成视频秒数 + 参考视频秒数) × 40.15 + max(参考图片张数 - 5, 0) × 12.1
-```
-
-示例：
-
-* 4 秒文生视频：`4 × 40.15 = 160.6 credits`
-* 4 秒输出 + 9 秒参考视频：`(4 + 9) × 40.15 = 521.95 credits`
-* 15 秒输出 + 15 秒参考视频 + 9 张参考图片：`30 × 40.15 + 4 × 12.1 = 1252.9 credits`
 
 ## Request Examples
 

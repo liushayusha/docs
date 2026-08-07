@@ -1,10 +1,10 @@
 ---
 title: 'AIReiter — AI テキスト、画像、動画生成 API プラットフォーム'
-description: '統一された AI テキスト、画像、動画生成 API プラットフォーム。Claude、GPT、Gemini、Sora2、VEO3、Seedance2 などの主要モデルをサポート。OpenAI SDK 互換、非同期タスク処理、透明な価格設定、簡単で使いやすい。'
+description: '統一された AI テキスト、画像、動画生成 API プラットフォーム。Claude、GPT、Gemini、VEO3、Seedance2 などの主要モデルをサポート。OpenAI SDK 互換、非同期タスク処理、透明な価格設定、簡単で使いやすい。'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
-AIReiter は統一された AI コンテンツ生成 API プラットフォームであり、テキスト会話、画像生成、動画生成サービスを提供します。シンプルな REST API 呼び出しを通じて、Claude、GPT、Gemini、Sora2、VEO3、Seedance2 などの主要な AI モデルを利用できます。テキストインターフェースは OpenAI SDK と完全に互換性があり、`baseURL` を直接置き換えて使用できます。
+AIReiter は統一された AI コンテンツ生成 API プラットフォームであり、テキスト会話、画像生成、動画生成サービスを提供します。シンプルな REST API 呼び出しを通じて、Claude、GPT、Gemini、VEO3、Seedance2 などの主要な AI モデルを利用できます。テキストインターフェースは OpenAI SDK と完全に互換性があり、`baseURL` を直接置き換えて使用できます。
 
 ## クイックスタート
 
@@ -15,8 +15,8 @@ AIReiter は統一された AI コンテンツ生成 API プラットフォー�
   <Card title="画像生成" icon="image" href="/ja/api-reference/images/gpt-4o/generation">
     GPT-4o、Gemini、Seedreamなどのモデルを使用して画像を生成します
   </Card>
-  <Card title="動画生成" icon="video" href="/ja/api-reference/videos/sora2/generation">
-    Sora2、VEO3、Seedance2などのモデルで動画コンテンツを生成します
+  <Card title="動画生成" icon="video" href="/ja/api-reference/videos/veo3-1/generation">
+    VEO3、Seedance2などのモデルで動画コンテンツを生成します
   </Card>
   <Card title="タスク状態の照会" icon="list-check" href="/ja/api-reference/tasks/status">
     非同期タスクの実行状態と結果を照会します
@@ -99,7 +99,7 @@ curl --request POST \
 チャネルはサービスの安定性にのみ影響し、出力品質には影響しません。すべてのチャネルは同じ基盤モデルを使用しており、生成結果の品質は完全に一致します。一般的に、価格が高いチャネルほどサービスの安定性が良いです。
 </Note>
 
-使用時はモデル名を対応するチャネルバージョンに置き換えるだけで済みます。例えば `"sora2"` を `"sora2_plus"` に置き換え、その他のパラメータは変更しません。
+使用時はモデル名を対応するチャネルバージョンに置き換えるだけで済みます。例えば `"seedance2"` を `"seedance2_fast"` に置き換え、その他のパラメータは変更しません。
 
 ## 対応モデル
 
@@ -155,12 +155,6 @@ AIReiter は多様な画像生成モデルを提供し、テキストから画�
 テキストから動画生成および画像から動画生成をサポートし、複数の解像度と長さのオプションを提供:
 
 <CardGroup cols={2}>
-  <Card title="Sora2" icon="video" href="/en/api-reference/videos/sora2/generation">
-    OpenAI Sora2 動画生成モデル（10〜15秒）
-  </Card>
-  <Card title="Sora2 Pro" icon="video" href="/en/api-reference/videos/sora2-pro/generation">
-    Sora2 プロフェッショナル版、高解像度対応
-  </Card>
   <Card title="VEO3.1" icon="video" href="/en/api-reference/videos/veo3-1/generation">
     Google VEO3.1 動画生成モデル
   </Card>
@@ -202,7 +196,7 @@ AIReiter は多様な画像生成モデルを提供し、テキストから画�
 
 - **テキスト対話**：Claude、GPTなどのモデル、OpenAI SDK互換
 - **画像生成**：GPT-4o、Gemini、Seedreamなどのモデル
-- **動画生成**：Sora2、VEO3、Seedanceなどのモデル
+- **動画生成**：VEO3、Seedanceなどのモデル
 - 統一されたリクエストフォーマットとレスポンス構造
 - 柔軟なパラメーター設定
 
@@ -290,7 +284,7 @@ Authorization: Bearer YOUR_API_KEY
   <Card title="画像生成ドキュメントを見る" icon="image" href="/ja/api-reference/images/gpt-4o/generation">
     さまざまな画像生成モデルの使い方を理解する
   </Card>
-  <Card title="動画生成ドキュメントを見る" icon="video" href="/ja/api-reference/videos/sora2/generation">
+  <Card title="動画生成ドキュメントを見る" icon="video" href="/ja/api-reference/videos/veo3-1/generation">
     動画コンテンツの生成方法を理解する
   </Card>
   <Card title="タスク管理" icon="list-check" href="/ja/api-reference/tasks/status">

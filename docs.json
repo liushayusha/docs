@@ -60,6 +60,14 @@
                 ]
               },
               {
+                "group": "Qwen Image 3.0",
+                "icon": "image",
+                "pages": [
+                  "zh/api-reference/images/qwen-image-3/generation",
+                  "zh/api-reference/images/qwen-image-3-pro/generation"
+                ]
+              },
+              {
                 "group": "Seedream-4.0",
                 "icon": "image",
                 "pages": [
@@ -140,20 +148,6 @@
                 "icon": "video",
                 "pages": [
                   "zh/api-reference/videos/flux-3-video/generation"
-                ]
-              },
-              {
-                "group": "Sora2",
-                "icon": "video",
-                "pages": [
-                  "zh/api-reference/videos/sora2/generation"
-                ]
-              },
-              {
-                "group": "Sora2 Pro",
-                "icon": "video",
-                "pages": [
-                  "zh/api-reference/videos/sora2-pro/generation"
                 ]
               },
               {
@@ -308,6 +302,14 @@
                 ]
               },
               {
+                "group": "Qwen Image 3.0",
+                "icon": "image",
+                "pages": [
+                  "en/api-reference/images/qwen-image-3/generation",
+                  "en/api-reference/images/qwen-image-3-pro/generation"
+                ]
+              },
+              {
                 "group": "Seedream-4.0",
                 "icon": "image",
                 "pages": [
@@ -389,20 +391,6 @@
                 "icon": "video",
                 "pages": [
                   "en/api-reference/videos/flux-3-video/generation"
-                ]
-              },
-              {
-                "group": "Sora2",
-                "icon": "video",
-                "pages": [
-                  "en/api-reference/videos/sora2/generation"
-                ]
-              },
-              {
-                "group": "Sora2 Pro",
-                "icon": "video",
-                "pages": [
-                  "en/api-reference/videos/sora2-pro/generation"
                 ]
               },
               {
@@ -557,6 +545,14 @@
                 ]
               },
               {
+                "group": "Qwen Image 3.0",
+                "icon": "image",
+                "pages": [
+                  "ja/api-reference/images/qwen-image-3/generation",
+                  "ja/api-reference/images/qwen-image-3-pro/generation"
+                ]
+              },
+              {
                 "group": "Seedream-4.0",
                 "icon": "image",
                 "pages": [
@@ -638,20 +634,6 @@
                 "icon": "video",
                 "pages": [
                   "ja/api-reference/videos/flux-3-video/generation"
-                ]
-              },
-              {
-                "group": "Sora2",
-                "icon": "video",
-                "pages": [
-                  "ja/api-reference/videos/sora2/generation"
-                ]
-              },
-              {
-                "group": "Sora2 Pro",
-                "icon": "video",
-                "pages": [
-                  "ja/api-reference/videos/sora2-pro/generation"
                 ]
               },
               {
@@ -806,6 +788,14 @@
                 ]
               },
               {
+                "group": "Qwen Image 3.0",
+                "icon": "image",
+                "pages": [
+                  "ko/api-reference/images/qwen-image-3/generation",
+                  "ko/api-reference/images/qwen-image-3-pro/generation"
+                ]
+              },
+              {
                 "group": "Seedream-4.0",
                 "icon": "image",
                 "pages": [
@@ -887,20 +877,6 @@
                 "icon": "video",
                 "pages": [
                   "ko/api-reference/videos/flux-3-video/generation"
-                ]
-              },
-              {
-                "group": "Sora2",
-                "icon": "video",
-                "pages": [
-                  "ko/api-reference/videos/sora2/generation"
-                ]
-              },
-              {
-                "group": "Sora2 Pro",
-                "icon": "video",
-                "pages": [
-                  "ko/api-reference/videos/sora2-pro/generation"
                 ]
               },
               {
@@ -1007,6 +983,40 @@
       }
     ]
   },
+  "redirects": [
+    {
+      "source": "/zh/api-reference/videos/sora2/generation",
+      "destination": "/zh/api-reference/videos/veo3-1/generation"
+    },
+    {
+      "source": "/zh/api-reference/videos/sora2-pro/generation",
+      "destination": "/zh/api-reference/videos/veo3-1/generation"
+    },
+    {
+      "source": "/en/api-reference/videos/sora2/generation",
+      "destination": "/en/api-reference/videos/veo3-1/generation"
+    },
+    {
+      "source": "/en/api-reference/videos/sora2-pro/generation",
+      "destination": "/en/api-reference/videos/veo3-1/generation"
+    },
+    {
+      "source": "/ja/api-reference/videos/sora2/generation",
+      "destination": "/ja/api-reference/videos/veo3-1/generation"
+    },
+    {
+      "source": "/ja/api-reference/videos/sora2-pro/generation",
+      "destination": "/ja/api-reference/videos/veo3-1/generation"
+    },
+    {
+      "source": "/ko/api-reference/videos/sora2/generation",
+      "destination": "/ko/api-reference/videos/veo3-1/generation"
+    },
+    {
+      "source": "/ko/api-reference/videos/sora2-pro/generation",
+      "destination": "/ko/api-reference/videos/veo3-1/generation"
+    }
+  ],
   "navbar": {
     "primary": {
       "type": "button",
