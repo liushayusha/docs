@@ -28,45 +28,45 @@ AIReiter에서 FLUX 3 Video의 모델 이름은 `flux_3_video`입니다. 현재 
 ## Body
 
 <ParamField body="model" type="string" required>
-  모델 이름, 고정 사용:
+  모델 이름, 고정값:
 
   * `flux_3_video`
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  모델 파라미터 객체.
+  모델 Parameters 객체.
 
-  <Expandable title="params 객체 속성">
+  <Expandable title="params 객체 Properties">
     <ParamField body="mode" type="string" default="t2v">
       생성 모드:
 
-      * `t2v` - 텍스트에서 비디오 생성, 프롬프트만 사용해 비디오를 생성
-      * `i2v` - 순서가 있는 키 프레임, 1~10장의 이미지로 비디오 콘텐츠와 전환을 제어
-      * `v2v` - 비디오 연장, 원본 비디오에서 이어서 동적 콘텐츠를 생성
+      * `t2v` - 텍스트로 비디오 생성, 프롬프트만 사용해 비디오를 생성
+      * `i2v` - 정렬된 키프레임, 1-10장의 이미지를 사용해 비디오 콘텐츠와 전환을 제어
+      * `v2v` - 비디오 이어서 생성, 하나의 원본 비디오에서 동적 콘텐츠를 계속 생성
     </ParamField>
 
     <ParamField body="prompt" type="string" required>
-      비디오 생성용 텍스트 설명.
+      비디오 생성을 위한 텍스트 설명.
 
-      주제, 장면, 동작, 카메라 움직임, 시각 스타일, 대사 및 환경음을 설명하는 것을 권장합니다.
+      주체, 장면, 동작, 카메라 움직임, 시각 스타일, 대사 및 환경음을 설명하는 것을 권장합니다.
     </ParamField>
 
     <ParamField body="image_url" type="string | string[]">
-      순서가 있는 키 프레임 이미지 URL, `i2v` 모드에서만 사용합니다.
+      정렬된 키프레임 이미지 URL, `i2v` 모드에서만 사용됩니다.
 
-      * 공개적으로 접근 가능한 이미지 1~10장을 지원합니다
-      * 이미지 순서가 곧 재생 순서입니다
+      * 공개적으로 접근 가능한 이미지 1-10장을 지원합니다
+      * 이미지 순서는 재생 순서와 동일합니다
       * 첫 번째와 마지막 이미지는 비디오의 시작 및 종료 장면을 정의하는 데 사용할 수 있습니다
 
-      <Warning>`i2v` 모드에서는 최소 한 장의 이미지를 제공해야 합니다. 다른 모드에서는 이 매개변수를 전달하지 마세요.</Warning>
+      <Warning>`i2v` 모드에서는 최소 한 장의 이미지를 제공해야 합니다. 다른 모드에서는 이 Parameters를 전달하지 마세요.</Warning>
     </ParamField>
 
     <ParamField body="video_url" type="string | string[]">
-      원본 비디오 URL, `v2v` 모드에서만 사용합니다.
+      원본 비디오 URL, `v2v` 모드에서만 사용됩니다.
 
-      현재는 공개적으로 접근 가능한 MP4 비디오 하나만 지원합니다. 배열 형식으로 전달하면 첫 번째 URL만 사용합니다.
+      현재는 공개적으로 접근 가능한 MP4 비디오 하나만 지원합니다. 배열 형식으로 전달하면 첫 번째 URL만 사용됩니다.
 
-      <Warning>`v2v` 모드에서는 원본 비디오를 제공해야 합니다. 다른 모드에서는 이 매개변수를 전달하지 마세요.</Warning>
+      <Warning>`v2v` 모드에서는 원본 비디오를 제공해야 합니다. 다른 모드에서는 이 Parameters를 전달하지 마세요.</Warning>
     </ParamField>
 
     <ParamField body="video_length" type="integer" default="5">
@@ -81,14 +81,14 @@ AIReiter에서 FLUX 3 Video의 모델 이름은 `flux_3_video`입니다. 현재 
       * `hd` - HD
       * `fhd` - FHD
 
-      <Note>FHD는 HD보다 픽셀 수가 더 많으며, 구체적인 출력 크기는 화면 비율에 따라 달라집니다.</Note>
+      <Note>FHD는 HD보다 픽셀 수가 더 높으며, 구체적인 출력 크기는 종횡비에 따라 달라집니다.</Note>
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="auto">
-      비디오 화면 비율:
+      비디오 종횡비:
 
       * `auto` - 자동
-      * `21:9` - 초광각
+      * `21:9` - 울트라와이드
       * `2:1` - 와이드스크린
       * `16:9` - 가로형
       * `4:3` - 표준 가로형
@@ -100,11 +100,11 @@ AIReiter에서 FLUX 3 Video의 모델 이름은 `flux_3_video`입니다. 현재 
     <ParamField body="generate_audio" type="boolean" default="true">
       비디오와 동기화된 기본 오디오를 생성할지 여부입니다.
 
-      대사, 환경음, 효과음을 포함할 수 있습니다.
+      대사, 환경음 및 음향 효과를 포함할 수 있습니다.
     </ParamField>
 
     <ParamField body="safety_tolerance" type="integer" default="2">
-      콘텐츠 안전 허용 수준, 정수 `0`부터 `4`까지 지원합니다.
+      콘텐츠 안전 허용도, 정수 `0`부터 `4`까지 지원합니다.
 
       * `0` - 가장 엄격한 필터링
       * `4` - 가장 완화된 설정
@@ -113,15 +113,15 @@ AIReiter에서 FLUX 3 Video의 모델 이름은 `flux_3_video`입니다. 현재 
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  요청 측 작업 ID.
+  발신자 작업 ID.
 
-  호출 측에서 생성하며 고유함을 보장해야 하고, 이후 이 ID로 작업 상태와 결과를 조회합니다.
+  호출 측에서 생성하고 고유성을 보장해야 하며, 이후 이 ID를 사용해 작업 상태와 결과를 조회합니다.
 </ParamField>
 
 ## Response
 
 <ResponseField name="out_task_id" type="string">
-  요청자 작업 ID로, 결과 조회에 사용할 수 있습니다.
+  요청자 작업 ID로, 결과를 조회하는 데 사용할 수 있습니다.
 </ResponseField>
 
 <ResponseField name="status" type="string">
@@ -134,7 +134,7 @@ AIReiter에서 FLUX 3 Video의 모델 이름은 `flux_3_video`입니다. 현재 
 
 ## Query Task
 
-FLUX 3 Video는 비동기 처리를 사용합니다. 제출이 성공하면 동일한 `out_task_id`로 작업을 조회하세요:
+FLUX 3 Video는 비동기 처리를 사용합니다. 제출에 성공한 후, 동일한 `out_task_id`로 작업을 조회하세요:
 
 <RequestExample>
   ```bash cURL
@@ -148,128 +148,7 @@ FLUX 3 Video는 비동기 처리를 사용합니다. 제출이 성공하면 동�
   ```
 </RequestExample>
 
-작업이 완료되면 응답의 `output` 배열에 생성된 비디오 URL이 포함됩니다. 전체 필드는 [작업 상태 가져오기](/ko/api-reference/tasks/status)를 참조하세요.
-
-## Request Examples
-
-<RequestExample>
-  ```bash cURL（文生视频）
-  curl --request POST \
-    --url https://aireiter.com/api/openapi/submit \
-    --header 'Authorization: Bearer <token>' \
-    --header 'Content-Type: application/json' \
-    --data '{
-      "model": "flux_3_video",
-      "params": {
-        "mode": "t2v",
-        "prompt": "영화 같은 트래킹 샷: 한 마리 붉은 여우가 옅은 안개가 낀 숲을 가로지르며, 자연의 환경음과 부드러운 발걸음 소리가 함께 들리는 장면",
-        "video_length": 5,
-        "resolution": "hd",
-        "aspect_ratio": "16:9",
-        "generate_audio": true,
-        "safety_tolerance": 2
-      },
-      "out_task_id": "flux_3_video_t2v_123456"
-    }'
-  ```
-
-  ```bash cURL（有序关键帧）
-  curl --request POST \
-    --url https://aireiter.com/api/openapi/submit \
-    --header 'Authorization: Bearer <token>' \
-    --header 'Content-Type: application/json' \
-    --data '{
-      "model": "flux_3_video",
-      "params": {
-        "mode": "i2v",
-        "prompt": "두 개의 키프레임 사이에서 자연스럽고 연속적인 동작과 카메라 워크를 생성하고, 주체의 외형 일관성을 유지하세요",
-        "image_url": [
-          "https://example.com/first-frame.jpg",
-          "https://example.com/last-frame.jpg"
-        ],
-        "video_length": 5,
-        "resolution": "fhd",
-        "aspect_ratio": "1:1",
-        "generate_audio": true,
-        "safety_tolerance": 2
-      },
-      "out_task_id": "flux_3_video_i2v_123456"
-    }'
-  ```
-
-  ```bash cURL（视频续写）
-  curl --request POST \
-    --url https://aireiter.com/api/openapi/submit \
-    --header 'Authorization: Bearer <token>' \
-    --header 'Content-Type: application/json' \
-    --data '{
-      "model": "flux_3_video",
-      "params": {
-        "mode": "v2v",
-        "prompt": "원본 영상의 움직임 방향, 구도, 조명을 이어서 다음 숲 장면으로 자연스럽게 이어지도록 하세요",
-        "video_url": "https://example.com/source-video.mp4",
-        "video_length": 5,
-        "resolution": "hd",
-        "aspect_ratio": "auto",
-        "generate_audio": true,
-        "safety_tolerance": 2
-      },
-      "out_task_id": "flux_3_video_v2v_123456"
-    }'
-  ```
-
-  ```python Python
-  import requests
-
-  response = requests.post(
-      "https://aireiter.com/api/openapi/submit",
-      headers={
-          "Authorization": "Bearer <token>",
-          "Content-Type": "application/json"
-      },
-      json={
-          "model": "flux_3_video",
-          "params": {
-              "mode": "t2v",
-              "prompt": "A cinematic tracking shot of a red fox crossing a misty forest",
-              "video_length": 5,
-              "resolution": "hd",
-              "aspect_ratio": "16:9",
-              "generate_audio": True,
-              "safety_tolerance": 2
-          },
-          "out_task_id": "flux_3_video_python_123456"
-      }
-  )
-
-  print(response.json())
-  ```
-
-  ```javascript JavaScript
-  const response = await fetch("https://aireiter.com/api/openapi/submit", {
-    method: "POST",
-    headers: {
-      "Authorization": "Bearer <token>",
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model: "flux_3_video",
-      params: {
-        mode: "t2v",
-        prompt: "A cinematic tracking shot of a red fox crossing a misty forest",
-        video_length: 5,
-        resolution: "hd",
-        aspect_ratio: "16:9",
-        generate_audio: true,
-        safety_tolerance: 2
-      },
-      out_task_id: "flux_3_video_javascript_123456"
-    })
-  });
-
-  console.log(await response.json());
-  ```
-</RequestExample>
+작업이 완료되면, 응답의 `output` 배열에 생성된 비디오 URL이 포함됩니다. 전체 필드는 [작업 상태 가져오기](/en/api-reference/tasks/status)를 참조하세요.
 
 ## Mode Rules
 
@@ -281,4 +160,16 @@ FLUX 3 Video는 비동기 처리를 사용합니다. 제출이 성공하면 동�
 
 <Warning>
 이미지와 비디오 URL은 공용 네트워크에서 직접 접근 가능해야 합니다. 작업은 비동기 처리이므로, 최종 비디오를 기다리기 위해 제출 요청의 HTTP 연결을 사용하지 마세요.
+</Warning>
+
+## Mode Rules
+
+| mode | Required Materials | Material Limitations |
+| --- | --- | --- |
+| `t2v` | None | Do not pass `image_url` or `video_url` |
+| `i2v` | `image_url` | 1-10 ordered images |
+| `v2v` | `video_url` | Up to one source video |
+
+<Warning>
+Please ensure that the image and video URLs are directly accessible from the public internet. The task is processed asynchronously, so do not use the HTTP connection from the submission request to wait for the final video.
 </Warning>

@@ -25,67 +25,67 @@ AIReiter における FLUX 3 Video のモデル名は `flux_3_video` です。�
   ```
 </ParamField>
 
-## 本文
+## Body
 
 <ParamField body="model" type="string" required>
-  モデル名。固定値を使用:
+  モデル名、固定で使用：
 
   * `flux_3_video`
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  モデルパラメーターのオブジェクト。
+  モデルパラメーターオブジェクト。
 
   <Expandable title="params オブジェクトの Properties">
     <ParamField body="mode" type="string" default="t2v">
-      生成モード:
+      生成モード：
 
-      * `t2v` - テキストから動画を生成。プロンプトのみを使用して動画を生成します
-      * `i2v` - 順序付きキーフレーム。1〜10枚の画像を使用して動画の内容と遷移を制御します
-      * `v2v` - 動画の続き生成。1つのソース動画から動的コンテンツの生成を続けます
+      * `t2v` - テキストから動画へ。プロンプトのみを使用して動画を生成します
+      * `i2v` - 順序付きキーフレーム。1〜10枚の画像で動画の内容と遷移を制御します
+      * `v2v` - 動画の続き生成。1つのソース動画から動的コンテンツを続けて生成します
     </ParamField>
 
     <ParamField body="prompt" type="string" required>
       動画生成のテキスト説明。
 
-      主体、シーン、動作、カメラの動き、ビジュアルスタイル、セリフ、環境音を説明することを推奨します。
+      主体、シーン、動作、カメラの動き、視覚スタイル、対話、および環境音を記述することを推奨します。
     </ParamField>
 
     <ParamField body="image_url" type="string | string[]">
       順序付きキーフレーム画像 URL。`i2v` モードでのみ使用します。
 
       * 公開アクセス可能な画像を1〜10枚サポート
-      * 画像の順序が再生順序になります
-      * 最初の画像と最後の画像は、動画の開始フレームと終了フレームの定義に使用できます
+      * 画像の順序がそのまま再生順序になります
+      * 1枚目と最後の1枚は、動画の開始フレームと終了フレームを定義するために使用できます
 
-      <Warning>`i2v` モードでは少なくとも1枚の画像を指定する必要があります。その他のモードではこのパラメーターを渡さないでください。</Warning>
+      <Warning>`i2v` モードでは少なくとも1枚の画像を指定する必要があります。他のモードではこのパラメーターを渡さないでください。</Warning>
     </ParamField>
 
     <ParamField body="video_url" type="string | string[]">
       ソース動画 URL。`v2v` モードでのみ使用します。
 
-      現在は公開アクセス可能な MP4 動画を1つまでサポートしています。配列形式で渡された場合は、最初の URL のみを使用します。
+      現在は、公開アクセス可能な MP4 動画を1つまでサポートしています。配列形式で渡された場合は、最初の URL のみが使用されます。
 
-      <Warning>`v2v` モードではソース動画を指定する必要があります。その他のモードではこのパラメーターを渡さないでください。</Warning>
+      <Warning>`v2v` モードではソース動画を指定する必要があります。他のモードではこのパラメーターを渡さないでください。</Warning>
     </ParamField>
 
     <ParamField body="video_length" type="integer" default="5">
       出力動画の長さ。単位は秒です。
 
-      5〜20 の整数に対応しています。
+      5〜20 の整数をサポートします。
     </ParamField>
 
     <ParamField body="resolution" type="string" default="hd">
-      出力品質:
+      出力品質：
 
       * `hd` - HD
       * `fhd` - FHD
 
-      <Note>FHD は HD より画素数が多く、具体的な出力サイズはアスペクト比によって変化します。</Note>
+      <Note>FHD のピクセル数は HD より多く、具体的な出力サイズはアスペクト比によって変わります。</Note>
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="auto">
-      動画のアスペクト比:
+      動画のアスペクト比：
 
       * `auto` - 自動
       * `21:9` - ウルトラワイド
@@ -100,41 +100,41 @@ AIReiter における FLUX 3 Video のモデル名は `flux_3_video` です。�
     <ParamField body="generate_audio" type="boolean" default="true">
       動画と同期したネイティブ音声を生成するかどうか。
 
-      セリフ、環境音、効果音を含めることができます。
+      対話、環境音、効果音を含めることができます。
     </ParamField>
 
     <ParamField body="safety_tolerance" type="integer" default="2">
       コンテンツ安全性の許容度。整数 `0` から `4` をサポートします。
 
-      * `0` - 最も厳しいフィルター
-      * `4` - 最も緩やかな設定
+      * `0` - 最も厳格なフィルタリング
+      * `4` - 最も緩い設定
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発行元のタスク ID。
+  発信側のタスク ID。
 
-  呼び出し元が生成し、一意であることを保証します。後続ではこの ID を使用してタスクのステータスと結果を照会します。
+  呼び出し元が生成し、一意性を保証します。後続ではこの ID を使用してタスクの状態と結果を照会します。
 </ParamField>
 
 ## Response
 
 <ResponseField name="out_task_id" type="string">
-  発信元のタスク ID。結果の照会に使用できます。
+  Initiator task ID, can be used to query the result.
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  初期状態。通常は `"pending"` です。
+  Initial status, usually `"pending"`.
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  作成時間。ISO 8601 形式。
+  Creation time, in ISO 8601 format.
 </ResponseField>
 
 ## Query Task
 
-FLUX 3 Video は非同期処理を採用しています。送信が成功した後、同じ `out_task_id` を使用してタスクを問い合わせます:
+FLUX 3 Video は非同期処理を採用しています。送信に成功したら、同じ `out_task_id` を使用してタスクをクエリします:
 
 <RequestExample>
   ```bash cURL
@@ -148,128 +148,7 @@ FLUX 3 Video は非同期処理を採用しています。送信が成功した�
   ```
 </RequestExample>
 
-タスク完了後、レスポンスの `output` 配列には生成された動画 URL が含まれます。完全なフィールドについては[タスクのステータスを取得](/ja/api-reference/tasks/status)を参照してください。
-
-## Request Examples
-
-<RequestExample>
-  ```bash cURL（Text to Video）
-  curl --request POST \
-    --url https://aireiter.com/api/openapi/submit \
-    --header 'Authorization: Bearer <token>' \
-    --header 'Content-Type: application/json' \
-    --data '{
-      "model": "flux_3_video",
-      "params": {
-        "mode": "t2v",
-        "prompt": "映画のようなトラッキングショット: 1匹のアカギツネが薄霧の森を横切り、自然環境音とやわらかな足音が伴う",
-        "video_length": 5,
-        "resolution": "hd",
-        "aspect_ratio": "16:9",
-        "generate_audio": true,
-        "safety_tolerance": 2
-      },
-      "out_task_id": "flux_3_video_t2v_123456"
-    }'
-  ```
-
-  ```bash cURL（Ordered Keyframes）
-  curl --request POST \
-    --url https://aireiter.com/api/openapi/submit \
-    --header 'Authorization: Bearer <token>' \
-    --header 'Content-Type: application/json' \
-    --data '{
-      "model": "flux_3_video",
-      "params": {
-        "mode": "i2v",
-        "prompt": "2つのキーフレームの間で、主体の見た目を一貫させながら、自然で滑らかな動きとカメラワークを生成します",
-        "image_url": [
-          "https://example.com/first-frame.jpg",
-          "https://example.com/last-frame.jpg"
-        ],
-        "video_length": 5,
-        "resolution": "fhd",
-        "aspect_ratio": "1:1",
-        "generate_audio": true,
-        "safety_tolerance": 2
-      },
-      "out_task_id": "flux_3_video_i2v_123456"
-    }'
-  ```
-
-  ```bash cURL（Video Continuation）
-  curl --request POST \
-    --url https://aireiter.com/api/openapi/submit \
-    --header 'Authorization: Bearer <token>' \
-    --header 'Content-Type: application/json' \
-    --data '{
-      "model": "flux_3_video",
-      "params": {
-        "mode": "v2v",
-        "prompt": "元の動画の動きの方向、構図、光を引き継ぎ、カメラが自然に次の森のシーンへ入るようにします",
-        "video_url": "https://example.com/source-video.mp4",
-        "video_length": 5,
-        "resolution": "hd",
-        "aspect_ratio": "auto",
-        "generate_audio": true,
-        "safety_tolerance": 2
-      },
-      "out_task_id": "flux_3_video_v2v_123456"
-    }'
-  ```
-
-  ```python Python
-  import requests
-
-  response = requests.post(
-      "https://aireiter.com/api/openapi/submit",
-      headers={
-          "Authorization": "Bearer <token>",
-          "Content-Type": "application/json"
-      },
-      json={
-          "model": "flux_3_video",
-          "params": {
-              "mode": "t2v",
-              "prompt": "A cinematic tracking shot of a red fox crossing a misty forest",
-              "video_length": 5,
-              "resolution": "hd",
-              "aspect_ratio": "16:9",
-              "generate_audio": True,
-              "safety_tolerance": 2
-          },
-          "out_task_id": "flux_3_video_python_123456"
-      }
-  )
-
-  print(response.json())
-  ```
-
-  ```javascript JavaScript
-  const response = await fetch("https://aireiter.com/api/openapi/submit", {
-    method: "POST",
-    headers: {
-      "Authorization": "Bearer <token>",
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model: "flux_3_video",
-      params: {
-        mode: "t2v",
-        prompt: "A cinematic tracking shot of a red fox crossing a misty forest",
-        video_length: 5,
-        resolution: "hd",
-        aspect_ratio: "16:9",
-        generate_audio: true,
-        safety_tolerance: 2
-      },
-      out_task_id: "flux_3_video_javascript_123456"
-    })
-  });
-
-  console.log(await response.json());
-  ```
-</RequestExample>
+タスクが完了すると、レスポンス内の `output` 配列に生成された動画の URL が含まれます。完全なフィールドについては[タスクステータスの取得](/en/api-reference/tasks/status)を参照してください。
 
 ## Mode Rules
 
@@ -281,4 +160,16 @@ FLUX 3 Video は非同期処理を採用しています。送信が成功した�
 
 <Warning>
 画像と動画のURLがパブリックネットワークから直接アクセス可能であることを確認してください。タスクは非同期処理のため、最終動画を待つためにリクエスト送信時のHTTP接続を使用しないでください。
+</Warning>
+
+## Mode Rules
+
+| mode | 必須素材 | 素材制限 |
+| --- | --- | --- |
+| `t2v` | なし | `image_url` または `video_url` を送信しないでください |
+| `i2v` | `image_url` | 順序付きの画像を1〜10枚 |
+| `v2v` | `video_url` | ソース動画は最大1つ |
+
+<Warning>
+画像と動画のURLが公開ネットワークから直接アクセス可能であることを確認してください。タスクは非同期処理のため、最終動画を待機するために送信リクエストのHTTP接続を使用しないでください。
 </Warning>

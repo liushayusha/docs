@@ -1,42 +1,42 @@
 [
   {
     "id": "__frontmatter__",
-    "hash": "7184ee50",
+    "hash": "5aa8b1c9",
     "index": 0
   },
   {
     "id": "__prologue__",
-    "hash": "05073000",
+    "hash": "da0e8998",
     "index": 1
   },
   {
     "id": "section-0-authorizations",
-    "hash": "e5ca9803",
+    "hash": "b48bd1c4",
     "index": 2
   },
   {
     "id": "section-1-body",
-    "hash": "c3dc4200",
+    "hash": "35fef91f",
     "index": 3
   },
   {
     "id": "section-2-response",
-    "hash": "4411cb11",
+    "hash": "5170b993",
     "index": 4
   },
   {
     "id": "section-3-query-task",
-    "hash": "245910d5",
+    "hash": "9048681d",
     "index": 5
   },
   {
     "id": "section-4-request-examples",
-    "hash": "75835752",
+    "hash": "0018bbea",
     "index": 6
   },
   {
-    "id": "section-5-mode-notes",
-    "hash": "29087453",
+    "id": "section-5-mode-rules",
+    "hash": "235c40e4",
     "index": 7
   }
 ]

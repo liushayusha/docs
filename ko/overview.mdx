@@ -1,31 +1,31 @@
 ---
 title: 'AIReiter — AI 텍스트, 이미지 및 비디오 생성 API 플랫폼'
-description: '통합 AI 텍스트, 이미지 및 비디오 생성 API 플랫폼입니다. Claude, GPT, Gemini, VEO3, Seedance2 등 다양한 주요 모델을 지원합니다. OpenAI SDK 호환, 비동기 작업 처리, 투명한 가격 책정, 간편한 사용성을 제공합니다.'
+description: '통합된 AI 텍스트, 이미지 및 비디오 생성 API 플랫폼. Claude, GPT, Gemini, VEO3, Seedance2 등 다양한 주요 모델을 지원합니다. OpenAI SDK와 호환되며, 비동기 작업 처리, 투명한 가격 정책, 간편한 사용성을 제공합니다.'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
-AIReiter는 텍스트 대화, 이미지 생성, 동영상 생성 서비스를 제공하는 통합 AI 콘텐츠 생성 API 플랫폼입니다. 간단한 REST API 호출을 통해 Claude, GPT, Gemini, VEO3, Seedance2 등 다양한 주류 AI 모델을 사용할 수 있습니다. 텍스트 인터페이스는 OpenAI SDK와 완전히 호환되어 `baseURL`을 직접 교체하여 사용할 수 있습니다.
+AIReiter는 텍스트 대화, 이미지 생성, 비디오 생성 서비스를 제공하는 통합 AI 콘텐츠 생성 API 플랫폼입니다. 간단한 REST API 호출만으로 Claude, GPT, Gemini, VEO3, Seedance2 등 다양한 주류 AI 모델을 사용할 수 있습니다. 텍스트 인터페이스는 OpenAI SDK와 완전히 호환되며, `baseURL`을 직접 대체하여 사용할 수 있습니다.
 
 ## 빠른 시작
 
 <CardGroup cols={2}>
-  <Card title="텍스트 대화" icon="message" href="/zh/api-reference/text/openai-chat-completions-api/endpoint">
-    OpenAI SDK 호환, Claude, GPT 등 모델 지원
+  <Card title="텍스트 대화" icon="message" href="/en/api-reference/text/openai-chat-completions-api/endpoint">
+    OpenAI SDK와 호환되며, Claude, GPT 등의 모델을 지원합니다.
   </Card>
-  <Card title="이미지 생성" icon="image" href="/zh/api-reference/images/gpt-4o/generation">
-    GPT-4o, Gemini, Seedream 등 모델로 이미지 생성
+  <Card title="이미지 생성" icon="image" href="/en/api-reference/images/gpt-4o/generation">
+    GPT-4o, Gemini, Seedream 등의 모델을 사용해 이미지를 생성합니다.
   </Card>
-  <Card title="비디오 생성" icon="video" href="/ko/api-reference/videos/veo3-1/generation">
-    VEO3, Seedance2 등 모델로 비디오 콘텐츠 생성
+  <Card title="비디오 생성" icon="video" href="/en/api-reference/videos/veo3-1/generation">
+    VEO3, Seedance2 등의 모델을 사용해 비디오 콘텐츠를 생성합니다.
   </Card>
-  <Card title="작업 상태 조회" icon="list-check" href="/zh/api-reference/tasks/status">
-    비동기 작업의 실행 상태와 결과 조회
+  <Card title="작업 상태 조회" icon="list-check" href="/en/api-reference/tasks/status">
+    비동기 작업의 실행 상태와 결과를 조회합니다.
   </Card>
-  <Card title="잔액 조회" icon="wallet" href="/zh/api-reference/tasks/balance">
-    포인트 잔액 및 각 모델 무료 한도 남은 횟수 조회
+  <Card title="잔액 조회" icon="wallet" href="/en/api-reference/tasks/balance">
+    포인트 잔액 및 각 모델의 무료 할당량 남은 횟수를 조회합니다.
   </Card>
-  <Card title="API 키 받기" icon="key" href={apiKeyUrl}>
-    콘솔에 접속하여 API 키 받기
+  <Card title="API Key 가져오기" icon="key" href={apiKeyUrl}>
+    콘솔에 접속하여 API Key를 확인하세요.
   </Card>
 </CardGroup>
 
@@ -86,58 +86,58 @@ curl --request POST \
 
 ## 모델 채널
 
-모델 채널은 서로 다른 서비스 등급을 나타냅니다. 각 모델은 여러 채널 버전을 제공하며, 네 가지 등급으로 나뉩니다:
+모델 채널은 서로 다른 서비스 등급을 나타냅니다. 각 모델은 여러 채널 버전을 제공할 수 있으며, 네 가지 등급으로 나뉩니다:
 
 | 채널 | 설명 |
 |------|------|
-| `base` | 기본 버전, 가장 저렴한 가격 |
-| `plus` | 강화 버전 |
-| `advanced` | 고급 버전 |
-| `max` | 플래그십 버전, 가장 높은 안정성 |
+| `base` | 기본판, 가격이 가장 낮음 |
+| `plus` | 향상판 |
+| `advanced` | 고급판 |
+| `max` | 플래그십 판, 안정성이 가장 높음 |
 
 <Note>
-채널은 서비스 안정성에만 영향을 미치며 출력 품질에는 영향을 주지 않습니다. 모든 채널은 동일한 기본 모델을 사용하여 생성 결과의 품질은 완전히 동일합니다. 일반적으로 가격이 높은 채널일수록 서비스 안정성이 더 좋습니다.
+채널은 서비스 안정성에만 영향을 주며, 출력 품질에는 영향을 주지 않습니다. 모든 채널은 동일한 하위 모델을 사용하므로 생성 결과의 품질은 완전히 동일합니다. 일반적으로 가격이 높을수록 서비스 안정성이 더 좋습니다.
 </Note>
 
-사용할 때는 모델 이름을 해당 채널 버전으로 교체하면 됩니다. 예를 들어 `"seedance2"`를 `"seedance2_fast"`로 바꾸고, 다른 매개변수는 그대로 둡니다.
+사용 시에는 모델 이름을 해당 채널 버전으로 바꾸기만 하면 됩니다. 예를 들어 `"seedance2"`를 `"seedance2_fast"`로 바꾸고, 다른 매개변수는 그대로 유지하면 됩니다.
 
 ## 지원되는 모델
 
 ### 텍스트 대화 시리즈
 
-OpenAI Chat Completions API와 Responses API를 호환하며, 다중 턴 대화, 도구 호출, 구조화 출력, 스트리밍 응답을 지원합니다:
+OpenAI Chat Completions API 및 Responses API와 호환되며, 다중 턴 대화, 도구 호출, 구조화된 출력, 스트리밍 응답을 지원합니다:
 
 <CardGroup cols={2}>
   <Card title="OpenAI Chat Completions API" icon="message" href="/zh/api-reference/text/openai-chat-completions-api/endpoint">
-    OpenAI SDK와 호환되며, GPT, Claude 등 모델을 지원합니다
+    OpenAI SDK와 호환되며, GPT, Claude 등의 모델을 지원합니다
   </Card>
   <Card title="OpenAI Responses API" icon="message" href="/zh/api-reference/text/openai-responses-api/endpoint">
-    OpenAI 최신 Responses 형식
+    OpenAI의 최신 Responses 형식
   </Card>
   <Card title="Claude Messages API" icon="message" href="/zh/api-reference/text/claude-messages-api/endpoint">
-    Anthropic 고유 Messages API 형식
+    Anthropic의 기본 Messages API 형식
   </Card>
 </CardGroup>
 
 ### 이미지 생성 시리즈
 
-AIReiter는 다양한 이미지 생성 모델을 제공하며, 텍스트에서 이미지 생성 및 이미지 변환 기능을 지원합니다:
+AIReiter는 다양한 이미지 생성 모델을 제공하며, 텍스트-이미지 생성과 이미지-이미지 생성 기능을 지원합니다:
 
 <CardGroup cols={2}>
   <Card title="GPT-4o Image" icon="image" href="/zh/api-reference/images/gpt-4o/generation">
     OpenAI의 고품질 이미지 생성 모델
   </Card>
   <Card title="GPT-Image-2" icon="image" href="/zh/api-reference/images/gpt-image-2/generation">
-    텍스트에서 이미지 / 이미지 변환 지원, 13가지 비율, 최대 9장 참조 이미지
+    텍스트-이미지 / 이미지-이미지 생성을 지원하며, 13가지 비율과 최대 9장의 참고 이미지를 지원합니다
   </Card>
   <Card title="Gemini-2.5-Flash (Nano banana)" icon="image" href="/zh/api-reference/images/nano-banana/generation">
-    Google 최신 빠른 이미지 생성 모델
+    Google의 최신 고속 이미지 생성 모델
   </Card>
   <Card title="Gemini-3-Pro (Nano banana pro)" icon="image" href="/zh/api-reference/images/gemini-3-pro/generation">
-    Google 전문 이미지 생성 모델
+    Google의 전문가급 이미지 생성 모델
   </Card>
   <Card title="Nano Banana V2" icon="image" href="/zh/api-reference/images/nano-banana-v2/generation">
-    텍스트에서 이미지, 이미지 변환, 이미지 편집 등 다양한 생성 모드 지원
+    텍스트-이미지, 이미지-이미지, 이미지 편집 등 다양한 생성 모드를 지원합니다
   </Card>
   <Card title="Seedream-4.0" icon="image" href="/zh/api-reference/images/seedream-4/generation">
     효율적인 이미지 생성 솔루션
@@ -146,13 +146,13 @@ AIReiter는 다양한 이미지 생성 모델을 제공하며, 텍스트에서 �
     Seedream 4.5 버전
   </Card>
   <Card title="Seedream V5 lite" icon="image" href="/zh/api-reference/images/seedream-v5-lite/generation">
-    Seedream 최신 버전, 네트워크 검색 강화 생성 지원
+    Seedream의 최신 버전으로, 웹 검색 강화 생성을 지원합니다
   </Card>
 </CardGroup>
 
 ### 비디오 생성 시리즈
 
-텍스트에서 비디오 생성과 이미지에서 비디오 생성을 지원하며, 다양한 해상도와 길이 옵션을 제공합니다:
+텍스트-비디오 생성과 이미지-비디오 생성을 지원하며, 다양한 해상도와 길이 옵션을 제공합니다:
 
 <CardGroup cols={2}>
   <Card title="VEO3.1" icon="video" href="/zh/api-reference/videos/veo3-1/generation">
@@ -162,19 +162,19 @@ AIReiter는 다양한 이미지 생성 모델을 제공하며, 텍스트에서 �
     VEO3.1 빠른 버전
   </Card>
   <Card title="Seedance-1.5-pro" icon="video" href="/zh/api-reference/videos/seedance-1-5-pro/generation">
-    시작 및 종료 프레임 제어와 오디오 생성 지원 (4-12초)
+    시작/끝 프레임 제어와 오디오 생성을 지원합니다(4-12초)
   </Card>
   <Card title="Seedance Pro Fast" icon="video" href="/zh/api-reference/videos/seedance_pro_fast/generation">
-    Seedance 빠른 버전, 시작 프레임 제어 지원
+    Seedance 빠른 버전으로, 시작 프레임 제어를 지원합니다
   </Card>
   <Card title="Seedance Pro" icon="video" href="/zh/api-reference/videos/seedance_pro/generation">
-    Seedance 프로 버전, 시작 및 종료 프레임 제어 지원
+    Seedance 전문가 버전으로, 시작/끝 프레임 제어를 지원합니다
   </Card>
   <Card title="Seedance 2.0" icon="video" href="/zh/api-reference/videos/seedance2/generation">
-    다중 참조 이미지, 참조 비디오 및 시작과 종료 프레임 제어 지원 (4-15초)
+    여러 참고 이미지, 참고 비디오, 그리고 시작/끝 프레임 제어를 지원합니다(4-15초)
   </Card>
   <Card title="Seedance 2.0 Fast" icon="video" href="/zh/api-reference/videos/seedance2_fast/generation">
-    Seedance 2.0 빠른 버전, 다중 참조 이미지 및 시작 종료 프레임 제어 지원
+    Seedance 2.0 빠른 버전으로, 여러 참고 이미지와 시작/끝 프레임 제어를 지원합니다
   </Card>
 </CardGroup>
 
@@ -182,40 +182,40 @@ AIReiter는 다양한 이미지 생성 모델을 제공하며, 텍스트에서 �
 
 ### 비동기 작업 처리
 
-모든 생성 요청은 비동기 처리 모드를 사용하여 장시간 대기를 방지합니다:
+모든 생성 요청은 비동기 처리 모드를 사용하여 오랜 대기를 방지합니다:
 
-- 작업 제출 시 `out_task_id`(발신자 작업 ID, 비즈니스 식별용)를 전달해야 합니다
-- 제출한 `out_task_id`를 즉시 반환합니다
+- 작업 제출 시 `out_task_id`(요청자 작업 ID, 비즈니스 식별용)를 전달해야 합니다
+- 제출한 `out_task_id`가 즉시 반환됩니다
 - `out_task_id`를 사용하여 작업 상태를 조회할 수 있습니다
-- webhook 콜백 알림 지원(선택 사항)
-- 작업 상태 실시간 업데이트: `pending` → `processing` → `completed`
+- webhook 콜백 알림을 지원합니다(선택 사항)
+- 작업 상태가 실시간으로 업데이트됩니다: `pending` → `processing` → `completed`
 
 ### 다중 모델 지원
 
-단일 API 엔드포인트에서 다양한 텍스트, 이미지 및 비디오 생성 모델을 지원합니다:
+하나의 통합된 API endpoint에서 다양한 텍스트, 이미지, 비디오 생성 모델을 지원합니다:
 
-- **텍스트 대화**: Claude, GPT 등 모델, OpenAI SDK 호환
-- **이미지 생성**: GPT-4o, Gemini, Seedream 등 모델
-- **비디오 생성**: VEO3, Seedance 등 모델
+- **텍스트 대화**: Claude, GPT 등의 모델, OpenAI SDK와 호환
+- **이미지 생성**: GPT-4o, Gemini, Seedream 등의 모델
+- **비디오 생성**: VEO3, Seedance 등의 모델
 - 통합된 요청 형식과 응답 구조
-- 유연한 매개변수 구성
+- 유연한 Parameters 구성
 
-### 투명한 가격 정책
+### 투명한 요금
 
-포인트 기반 과금으로 투명하고 명확합니다:
+포인트 기반 과금으로, 투명하고 명확합니다:
 
-- 각 작업은 예상 소모 포인트를 반환합니다
-- 작업 완료 후 실제 소비 포인트 표시
-- 성공적으로 생성된 콘텐츠에 대해서만 비용 청구
-- 숨겨진 비용 없음
+- 각 작업마다 예상 소모 포인트를 반환합니다
+- 작업 완료 후 실제 소모 포인트를 표시합니다
+- 성공적으로 생성된 콘텐츠에 대해서만 비용을 지불합니다
+- 숨겨진 비용이 없습니다
 
 ### 유연한 구성
 
-다양한 생성 매개변수 구성을 지원합니다:
+다양한 생성 Parameters 구성을 지원합니다:
 
-- **이미지**: 다양한 가로 세로 비율(1:1, 3:2, 2:3)
-- **비디오**: 다양한 가로 세로 비율(16:9, 9:16), 길이(10초, 15초), 해상도
-- 참조 이미지 지원(이미지 기반 이미지, 이미지 기반 비디오)
+- **이미지**: 다양한 가로세로 비율(1:1, 3:2, 2:3)
+- **비디오**: 다양한 가로세로 비율(16:9, 9:16), 길이(10초, 15초), 해상도
+- 참조 이미지를 지원합니다(이미지 생성, 이미지 기반 비디오 생성)
 
 ## 인증 방법
 
@@ -278,19 +278,19 @@ Authorization: Bearer YOUR_API_KEY
 ## 다음 단계
 
 <CardGroup cols={2}>
-  <Card title="텍스트 대화 문서 보기" icon="message" href="/zh/api-reference/text/openai-chat-completions-api/endpoint">
-    텍스트 대화 API 사용 방법 알아보기
+  <Card title="텍스트 대화 문서 보기" icon="message" href="/en/api-reference/text/openai-chat-completions-api/endpoint">
+    텍스트 대화 API를 사용하는 방법을 알아보세요
   </Card>
-  <Card title="이미지 생성 문서 보기" icon="image" href="/zh/api-reference/images/gpt-4o/generation">
-    다양한 이미지 생성 모델 사용 방법 알아보기
+  <Card title="이미지 생성 문서 보기" icon="image" href="/en/api-reference/images/gpt-4o/generation">
+    다양한 이미지 생성 모델을 사용하는 방법을 알아보세요
   </Card>
-  <Card title="비디오 생성 문서 보기" icon="video" href="/ko/api-reference/videos/veo3-1/generation">
-    비디오 콘텐츠 생성 방법 알아보기
+  <Card title="비디오 생성 문서 보기" icon="video" href="/en/api-reference/videos/veo3-1/generation">
+    비디오 콘텐츠를 생성하는 방법을 알아보세요
   </Card>
-  <Card title="작업 관리" icon="list-check" href="/zh/api-reference/tasks/status">
-    작업 상태 관리 및 조회 방법 학습하기
+  <Card title="작업 관리" icon="list-check" href="/en/api-reference/tasks/status">
+    작업 상태를 관리하고 조회하는 방법을 알아보세요
   </Card>
   <Card title="API Key 받기" icon="key" href={apiKeyUrl}>
-    지금 바로 AIReiter 사용 시작하기
+    지금 바로 AIReiter 사용을 시작하세요
   </Card>
 </CardGroup>

@@ -1,0 +1,294 @@
+---
+title: 'Seedance 2.5 Video Generation'
+description: |
+  - Supports both full-reference and first-and-last-frame video generation modes
+  - Supports image, video, and audio reference assets
+  - Supports 480p / 720p, 4-30 seconds, and synchronized AI audio
+  - Supports MP4 and high-color-accuracy MOV output
+  - Asynchronous processing mode, returning a task ID for subsequent queries
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+<Note>
+Seedance 2.5 の AIReiter におけるモデル名は `seedance2_5` です。
+</Note>
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  すべてのエンドポイントは Bearer Token による認証が必要です。
+
+  <a href={apiKeyUrl} target="_blank">API Key 管理ページ</a> にアクセスして API Key を取得し、リクエストヘッダーに次を追加してください:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  モデル名、固定値：
+
+  * `seedance2_5`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  モデルパラメータオブジェクト。
+
+  <Expandable title="params オブジェクトの Properties">
+    <ParamField body="prompt" type="string" required>
+      動画生成のテキスト説明。
+
+      主体、シーン、アクション、カメラワーク、ビジュアルスタイル、セリフ、および環境音の説明を推奨します。
+    </ParamField>
+
+    <ParamField body="type" type="string" default="all_reference">
+      参照モード。参照素材の使用方法を決定します。
+
+      * `all_reference` - 全参照モード。参照画像、参照動画、参照音声を使用できます
+      * `first_last_frame` - 先頭・末尾フレームモード。先頭フレームと任意の末尾フレーム画像を使用します
+    </ParamField>
+
+    <ParamField body="image_url" type="string | string[]">
+      参照画像 URL。
+
+      * `all_reference` モード: 最大 30 枚の画像; 1 枚あたり最大 50MB; 画像の最小辺は 300px
+      * `first_last_frame` モード: 先頭フレーム画像として使用; 最大 10MB; 画像の最小辺は 300px
+
+      URL はインターネットから直接アクセス可能である必要があります。
+    </ParamField>
+
+    <ParamField body="end_image_url" type="string">
+      末尾フレーム画像の URL。`first_last_frame` モードでのみ有効です。
+
+      画像は最大 10MB、最小辺 300px で、URL はインターネットから直接アクセス可能である必要があります。
+    </ParamField>
+
+    <ParamField body="video_url" type="string | string[]">
+      参照動画 URL。`all_reference` モードでのみ有効で、最大 9 本の参照動画をサポートします。
+
+      動画要件:
+
+      * 1 本あたりの再生時間は 2-30 秒で、参照動画の合計再生時間は 30 秒を超えないこと
+      * 1 本あたりの最大サイズは 200MB
+      * フレームレートは 24-60 FPS
+      * アスペクト比の範囲は 0.4-2.5
+      * 幅と高さの範囲は 300-6000px
+      * 総ピクセル数の範囲は 409600-8295044
+
+      <Warning>`first_last_frame` モードではこのパラメータを渡さないでください。</Warning>
+    </ParamField>
+
+    <ParamField body="audio_url" type="string | string[]">
+      参照音声 URL。`all_reference` モードでのみ有効で、最大 10 個の音声をサポートします。
+
+      音声要件:
+
+      * 1 つあたりの再生時間は 2-30 秒で、参照音声の合計再生時間は 30 秒を超えないこと
+      * WAV、MP3 をサポート
+      * 1 つあたりの最大サイズは 15MB
+
+      <Warning>`first_last_frame` モードではこのパラメータを渡さないでください。</Warning>
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="720p">
+      動画の解像度:
+
+      * `480p`
+      * `720p` - デフォルト値
+    </ParamField>
+
+    <ParamField body="video_length" type="integer" default="5">
+      出力動画の長さ。単位は秒です。
+
+      `4` から `30` までの整数に対応しています。
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="16:9">
+      動画のアスペクト比:
+
+      * `21:9` - ウルトラワイド
+      * `16:9` - 横長、デフォルト値
+      * `9:16` - 縦長
+      * `4:3` - 標準横長
+      * `3:4` - 標準縦版
+      * `1:1` - 正方形
+    </ParamField>
+
+    <ParamField body="generate_audio" type="boolean" default="true">
+      動画と同期する AI 音声を生成するかどうか。
+
+      * `true` - 音声を生成する、デフォルト値
+      * `false` - 音声を生成しない
+    </ParamField>
+
+    <ParamField body="output_format" type="string" default="mp4">
+      出力動画形式:
+
+      * `mp4` - 汎用形式、ファイルサイズが比較的小さい、デフォルト値
+      * `mov` - 高色精度形式（yuv444p）。後処理の拡張や結合に適しています
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  呼び出し元のタスク ID。
+
+  呼び出し側が生成し、一意性を保証する必要があります。英字、数字、アンダースコア、ハイフンをサポートし、長さは 1-64 文字です。後続ではこの ID を使用してタスクのステータスと結果を問い合わせます。
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  発行側のタスクID。結果の問い合わせに使用できます。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  初期状態。通常は `"pending"` です。
+</ResponseField>
+
+<ResponseField name="estimated_credits" type="number">
+  推定消費ポイント。
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  作成時刻。ISO 8601 形式。
+</ResponseField>
+
+## Query Task
+
+Seedance 2.5は非同期処理を採用しています。送信が成功した後、同じ`out_task_id`を使用してタスクをクエリします:
+
+<RequestExample>
+  ```bash cURL
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/query \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "out_task_id": "seedance2_5_task_123456"
+    }'
+  ```
+</RequestExample>
+
+タスク完了後、レスポンス内の`output`配列に生成された動画URLが含まれます。完全なフィールドについては[Get Task Status](/en/api-reference/tasks/status)を参照してください。
+
+## Request Examples
+
+<RequestExample>
+  ```bash cURL（フルリファレンスモード）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "seedance2_5",
+      "params": {
+        "prompt": "映画のようなプロダクト短編動画。人物と商品の外観を一致させたまま、カメラが滑らかに周回し、自然な環境音を合わせる",
+        "type": "all_reference",
+        "image_url": [
+          "https://example.com/character.jpg",
+          "https://example.com/product.jpg"
+        ],
+        "video_url": ["https://example.com/motion-reference.mp4"],
+        "audio_url": ["https://example.com/music-reference.mp3"],
+        "resolution": "720p",
+        "video_length": 8,
+        "aspect_ratio": "16:9",
+        "generate_audio": true,
+        "output_format": "mov"
+      },
+      "out_task_id": "seedance2_5_reference_123456"
+    }'
+  ```
+
+  ```bash cURL（先頭・末尾フレームモード）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "seedance2_5",
+      "params": {
+        "prompt": "早朝の都市のスカイラインから夜の灯りへ自然に切り替わり、ゆっくりとカメラを前進させる",
+        "type": "first_last_frame",
+        "image_url": "https://example.com/first-frame.jpg",
+        "end_image_url": "https://example.com/last-frame.jpg",
+        "resolution": "720p",
+        "video_length": 10,
+        "aspect_ratio": "16:9",
+        "generate_audio": true,
+        "output_format": "mp4"
+      },
+      "out_task_id": "seedance2_5_frames_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  response = requests.post(
+      "https://aireiter.com/api/openapi/submit",
+      headers={
+          "Authorization": "Bearer <token>",
+          "Content-Type": "application/json"
+      },
+      json={
+          "model": "seedance2_5",
+          "params": {
+              "prompt": "未来都市を夕暮れ時に滑らかにトラッキングショットで進む映像",
+              "type": "all_reference",
+              "image_url": ["https://example.com/style-reference.jpg"],
+              "resolution": "720p",
+              "video_length": 8,
+              "aspect_ratio": "16:9",
+              "generate_audio": True,
+              "output_format": "mp4"
+          },
+          "out_task_id": "seedance2_5_python_123456"
+      }
+  )
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const response = await fetch("https://aireiter.com/api/openapi/submit", {
+    method: "POST",
+    headers: {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: "seedance2_5",
+      params: {
+        prompt: "先頭フレームから末尾フレームへ滑らかに遷移する",
+        type: "first_last_frame",
+        image_url: "https://example.com/first-frame.jpg",
+        end_image_url: "https://example.com/last-frame.jpg",
+        resolution: "720p",
+        video_length: 10,
+        aspect_ratio: "16:9",
+        generate_audio: true,
+        output_format: "mp4"
+      },
+      out_task_id: "seedance2_5_javascript_123456"
+    })
+  });
+
+  console.log(await response.json());
+  ```
+</RequestExample>
+
+## Mode Rules
+
+| type | Available Media | Media Limitations |
+| --- | --- | --- |
+| `all_reference` | `image_url`, `video_url`, `audio_url` | Up to 30 images, 9 videos, and 10 audio files |
+| `first_last_frame` | `image_url`, `end_image_url` | Provide the first and last frame images as needed; do not send videos or audio |
+
+<Warning>
+Please ensure that all media URLs are directly accessible from the public internet. Tasks are processed asynchronously, so do not wait for the final video on the HTTP connection used to submit the request.
+</Warning>

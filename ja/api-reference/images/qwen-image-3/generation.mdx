@@ -1,12 +1,11 @@
 ---
 title: 'Qwen Image 3.0 画像生成と編集'
 description: |
-    - 非同期処理モードで、後続の検索に使用するタスクIDを返します
-    - テキストから画像と画像から画像をサポートし、参照画像を指定しない場合はテキストから画像になります
-    - 最大3枚の参照画像と、1回の生成で1〜6枚の画像をサポートします
-    - 1K / 2K解像度と7種類の一般的な画像比率をサポートします
-    - 出力形式はPNGに固定されており、カスタムピクセルサイズはサポートされていません
-    - 提出されたpromptはプラットフォームのセンシティブワード / 安全審査を通過し、違反コンテンツは直接拒否されます
+    - 非同期処理モードで、後続のクエリ用にタスク ID を返します
+    - テキストから画像生成と画像から画像生成をサポートし、参考画像を指定しない場合はテキストから画像生成になります
+    - 最大 3 枚の参考画像と、1回の生成で 1-6 枚の画像をサポートします
+    - 1K / 2K の解像度と 7 種類の一般的な画像比率をサポートします
+    - 提出された prompt はプラットフォームの敏感語 / 安全審査を通過し、規約違反の内容は直接拒否されます
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -26,117 +25,97 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  モデル名。固定値: `"qwen_image_3"`。
+  モデル名、固定値: `"qwen_image_3"`。
 </ParamField>
 
 <ParamField body="params" type="object" required>
   モデルパラメータオブジェクト。
 
-  <Expandable title="params オブジェクトの属性">
+  <Expandable title="params オブジェクトの Properties">
     <ParamField body="prompt" type="string" required>
       画像生成または編集の指示。中国語と英語に対応しています。
 
-      主体、シーン、構図、光、素材、テキスト内容、そして参考画像で保持または変更する必要がある部分を明確に記述することをおすすめします。
+      主体、シーン、構図、光、素材、テキスト内容、および参考画像で保持または変更が必要な部分を明確に記述することを推奨します。
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      参考画像の配列です。指定すると画像から画像へのモードを使用し、指定しない場合はテキストから画像へのモードを使用します。
+      参考画像の配列。送信すると画像から画像へのモードを使用します。送信しない場合はテキストから画像へのモードを使用します。
 
-      * 最大 3枚の参考画像
-      * 1枚あたりの最大サイズは 10MB
+      * 最大 3 枚の参考画像
+      * 1 枚あたりの画像サイズは最大 10MB
       * jpeg、png、webp をサポート
       * 公開アクセス可能な URL または完全な Base64 Data URI をサポート
 
       <Warning>
-        画像 URL は、ログイン状態、Cookie、またはページの一時的な認可に依存せず、パブリックネットワークから直接アクセスできる必要があります。
+        画像 URL はインターネットから直接アクセス可能である必要があり、ログイン状態、Cookie、またはページの一時的な認証に依存してはいけません。
       </Warning>
     </ParamField>
 
     <ParamField body="resolution" type="string" default="1K">
-      出力解像度のグレードです。
+      出力解像度のレベル。
 
-      * `1K` - ベース解像度（デフォルト）
+      * `1K` - 基本解像度（デフォルト）
       * `2K` - 高解像度
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="1:1">
-      出力画像のアスペクト比です。
+      出力画像のアスペクト比。
 
-      次の値をサポートしています:
+      以下の値をサポートしています:
 
       * `1:1` - 正方形（デフォルト）
-      * `3:2` / `2:3` - 標準の横長 / 縦長
-      * `4:3` / `3:4` - 標準の横長 / 縦長
+      * `3:2` / `2:3` - 代表的な横長 / 縦長
+      * `4:3` / `3:4` - 標準的な横長 / 縦長
       * `16:9` / `9:16` - ワイドスクリーンの横長 / 縦長
 
-      <Warning>
-        現在のインターフェースは `21:9` をサポートしておらず、`1024x1024` などのカスタムピクセルサイズもサポートしていません。
-      </Warning>
     </ParamField>
 
     <ParamField body="output_n" type="integer" default="1">
-      このタスクで生成される画像の数です。値の範囲は `1` から `6` です。
+      このタスクで生成される画像数。値の範囲は `1` から `6` です。
     </ParamField>
 
-    <ParamField body="output_format" type="string" default="png">
-      出力形式です。現在は `png` に固定されています。
-
-      <Warning>
-        現在の AIReiter 接続チャネルでは JPEG 出力オプションは提供されていません。
-      </Warning>
+    <ParamField body="prompt_extend" type="boolean" default="false">
+      プロンプトのインテリジェントな書き換え。結果の予測可能性を確保するため、デフォルトでは無効です。インテリジェントな書き換えが必要な場合は `true` に設定してください。
     </ParamField>
 
-    <ParamField body="prompt_extend" type="boolean" default="true">
-      インテリジェントなプロンプト拡張を有効にするかどうかです。デフォルトでは有効で、短いプロンプトに適しています。
+    <ParamField body="prompt_extend_mode" type="string" default="direct">
+      プロンプトの書き換え方式。`prompt_extend` が `true` の場合にのみ有効です。
+
+      * `direct` - バランスの取れた書き換え。テキストから画像への生成と画像から画像への生成の両方をサポート
+      * `agent` - 積極的な書き換え。テキストから画像への生成のみサポート
     </ParamField>
 
     <ParamField body="negative_prompt" type="string">
-      ネガティブプロンプトです。ぼやけ、変形、誤った文字など、結果に含めたくない内容を記述します。
+      ネガティブプロンプト。ぼかし、変形、誤った文字など、結果に含めたくない内容を記述するために使用します。
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  呼び出し元がカスタマイズするタスク ID で、冪等な送信と結果の問い合わせに使用します。
+  呼び出し元が指定するタスク ID。冪等な送信と結果の取得に使用します。
 
-  * 長さは 1〜64文字
-  * 使用するのは英字、数字、アンダースコア、ハイフンのみにすることを推奨します
+  * 長さは 1〜64 文字
+  * 英字、数字、アンダースコア、ハイフンのみを使用することを推奨します
   * 同じ API Key では重複して使用しないでください
 </ParamField>
-
-## 計費
-
-| 計費項目 | 価格 |
-| --- | ---: |
-| 1K出力ごとに1枚 | 2.40クレジット（$0.024） |
-| 2K出力ごとに1枚 | 2.40クレジット（$0.024） |
-| 入力参照画像ごとに1枚 | 0.25クレジット（$0.0025） |
-
-計算式: `2.40 × output_n + 0.25 × 参照画像数`。
-
-たとえば、1枚の画像を生成し、1枚の参照画像を渡すと、予想消費は `2.65` クレジットです。送信成功時、レスポンス内の `estimated_credits` は予想消費量です。タスク完了後、クエリレスポンス内の `credits_used` は実際の消費量です。タスクが失敗した場合、最終的な課金は発生しません。
 
 ## Response
 
 <ResponseField name="out_task_id" type="string">
-  呼び出し側のタスク ID。タスクの状態と結果を照会するために使用できます。
+  呼び出し側のタスク ID で、タスクの状態と結果をクエリするために使用できます。
 </ResponseField>
 
 <ResponseField name="status" type="string">
   初期状態で、通常は `"pending"` です。
 </ResponseField>
 
-<ResponseField name="estimated_credits" type="number">
-  今回のタスクの推定消費ポイント。
-</ResponseField>
-
 <ResponseField name="created_at" type="string">
-  タスク作成時間、ISO 8601 形式。
+  タスク作成時刻、ISO 8601 形式。
 </ResponseField>
 
-## Query Results
+## クエリ結果
 
-After submission succeeds, call the query endpoint using the same `out_task_id`:
+送信成功後、同じ `out_task_id` を使用してクエリAPIを呼び出します:
 
 ```bash
 curl --request POST \
@@ -148,10 +127,10 @@ curl --request POST \
   }'
 ```
 
-Task statuses include `pending`, `processing`, `completed`, and `failed`. After the task is completed, the image array is located in `data.output`, and the actual credits consumed are located in `data.credits_used`.
+タスクのステータスには `pending`、`processing`、`completed`、`failed` が含まれます。タスク完了後、画像配列は `data.output` にあります。
 
 <RequestExample>
-  ```bash cURL (text-to-image)
+  ```bash cURL（テキストから画像）
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
@@ -159,18 +138,18 @@ Task statuses include `pending`, `processing`, `completed`, and `failed`. After 
     --data '{
       "model": "qwen_image_3",
       "params": {
-        "prompt": "A futuristic electric sports car in front of a modern glass building, blue hour, commercial automotive photography, realistic materials and natural shadows, no text, no watermark",
+        "prompt": "現代的なガラス建築の前にある未来感のある電動スポーツカー、ブルーアワー、商業自動車撮影、リアルな素材と自然な影、文字なし、ウォーターマークなし",
         "resolution": "2K",
         "aspect_ratio": "16:9",
         "output_n": 1,
-        "output_format": "png",
-        "prompt_extend": true
+        "prompt_extend": true,
+        "prompt_extend_mode": "agent"
       },
       "out_task_id": "qwen_image_3_task_001"
     }'
   ```
 
-  ```bash cURL (image-to-image)
+  ```bash cURL（画像から画像）
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
@@ -178,12 +157,11 @@ Task statuses include `pending`, `processing`, `completed`, and `failed`. After 
     --data '{
       "model": "qwen_image_3",
       "params": {
-        "prompt": "Keep the product subject and label structure, change the background to a dark gray premium advertising studio, and add cool-toned rim lighting",
+        "prompt": "商品の主体とラベル構造を維持し、背景をダークグレーの高級広告用スタジオに変更し、寒色系のリムライトを追加します",
         "image_url": ["https://example.com/product-reference.png"],
         "resolution": "1K",
         "aspect_ratio": "1:1",
-        "output_n": 1,
-        "output_format": "png"
+        "output_n": 1
       },
       "out_task_id": "qwen_image_3_edit_001"
     }'
@@ -201,7 +179,7 @@ Task statuses include `pending`, `processing`, `completed`, and `failed`. After 
       json={
           "model": "qwen_image_3",
           "params": {
-              "prompt": "Cinematic product advertising photography, a glass perfume bottle placed on a black stone pedestal",
+              "prompt": "映画のような商品広告撮影、黒い石台の上に置かれたガラスの香水ボトル",
               "resolution": "1K",
               "aspect_ratio": "16:9",
               "output_n": 1
@@ -223,7 +201,7 @@ Task statuses include `pending`, `processing`, `completed`, and `failed`. After 
     body: JSON.stringify({
       model: "qwen_image_3",
       params: {
-        prompt: "Cinematic product advertising photography, a glass perfume bottle placed on a black stone pedestal",
+        prompt: "映画のような商品広告撮影、黒い石台の上に置かれたガラスの香水ボトル",
         resolution: "1K",
         aspect_ratio: "16:9",
         output_n: 1

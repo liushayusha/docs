@@ -1,10 +1,10 @@
 ---
 title: 'MiniMax H3 Video Generation'
 description: |
-  - MiniMax H3, also known as Hailuo 03 / Hailuo 3
+  - MiniMax H3, also commonly known as Hailuo 03 / Hailuo 3
   - Asynchronous processing mode, returns a task ID for subsequent queries
-  - Supports text-to-video, first frame/last frame image-to-video, and multi-reference material video generation
-  - Supports 2K output, video duration 4-15 seconds
+  - Supports text-to-video, first-frame/last-frame image-to-video, and video generation with multiple reference assets
+  - Supports 768P / 2K output, video duration 4-15 seconds
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -40,32 +40,31 @@ The model name of MiniMax H3 in AIReiter is `minimax_h3`. This model is also com
 <ParamField body="params" type="object" required>
   Model parameters object.
 
-  <Expandable title="params Object Properties">
+  <Expandable title="Properties of the params object">
     <ParamField body="prompt" type="string" required>
       Text description for video generation, up to 7000 characters.
 
-      You can describe the subject, scene, camera movement, actions, style, lighting, pacing, and more.
+      You can describe the subject, scene, camera movement, action, style, lighting, rhythm, and more.
     </ParamField>
 
     <ParamField body="type" type="string" default="text_to_video">
-      Generation type, which determines which upstream mode MiniMax H3 uses.
+      Generation type, which determines which video generation mode to use.
 
-      * `text_to_video` - Text-to-video, generate video using only the prompt
-      * `first_last_frame` - First/last frame image-to-video, generate video using the first frame, last frame, or a transition between the first and last frames
-      * `all_reference` - Multi-reference material video generation, can use reference images, reference videos, and reference audio
+      * `text_to_video` - Text-to-video, generates a video using only the prompt
+      * `first_last_frame` - First-frame/last-frame image-to-video, generates a video using the first frame, last frame, or a transition between them
+      * `all_reference` - Generate video from multiple reference materials, can use reference images, reference videos, and reference audio
     </ParamField>
 
     <ParamField body="video_length" type="number" default="4">
       Video duration, in seconds.
 
-      Integer supported: `4` to `15`.
-
-      <Warning>Video duration directly affects billing.</Warning>
+      Integer values supported: `4` to `15`.
     </ParamField>
 
     <ParamField body="quality" type="string" default="2k">
-      Output quality, currently fixed as:
+      Output quality:
 
+      * `768p`
       * `2k`
     </ParamField>
 
@@ -81,7 +80,7 @@ The model name of MiniMax H3 in AIReiter is `minimax_h3`. This model is also com
       * `3:4` - Standard portrait
       * `9:16` - Portrait
 
-      <Warning>The `first_last_frame` mode does not support selecting the aspect ratio separately. The output will follow the input image ratio.</Warning>
+      <Warning>`first_last_frame` mode does not support selecting the aspect ratio separately; the output will follow the input image ratio.</Warning>
     </ParamField>
 
     <ParamField body="image_url" type="string | string[]">
@@ -89,20 +88,20 @@ The model name of MiniMax H3 in AIReiter is `minimax_h3`. This model is also com
 
       The meaning varies by `type`:
 
-      * `text_to_video` - No image needs to be provided
-      * `first_last_frame` - Used as the first frame image; you can also pass an array, with the first image as the first frame and the second as the last frame
+      * `text_to_video` - No image needs to be passed
+      * `first_last_frame` - Used as the first-frame image; you can also pass an array, with the first image as the first frame and the second image as the last frame
       * `all_reference` - Used as reference images, up to 9 images
 
       Image requirements:
 
       * Supports JPG, JPEG, PNG, WEBP, HEIC, HEIF
-      * Maximum size per image: 30MB
+      * Maximum size for a single image is 30MB
       * Width and height range: 256-5760px
       * Image aspect ratio range: 0.4-2.5
     </ParamField>
 
     <ParamField body="end_image_url" type="string">
-      Last frame image URL.
+      Last-frame image URL.
 
       Only valid in `first_last_frame` mode. You can also pass the last frame as the second image in the `image_url` array.
     </ParamField>
@@ -112,7 +111,7 @@ The model name of MiniMax H3 in AIReiter is `minimax_h3`. This model is also com
 
       Only valid in `all_reference` mode.
 
-      AIReiter currently allows 1 reference video to ensure accurate billing for reference video duration; the EvoLink upstream supports up to 3 reference videos, with a total duration not exceeding 15 seconds.
+      Currently, up to 1 reference video is supported.
 
       Video requirements:
 
@@ -120,25 +119,23 @@ The model name of MiniMax H3 in AIReiter is `minimax_h3`. This model is also com
       * Supports MP4, MOV
       * Video encoding: H.264 or H.265
       * Audio encoding: AAC or MP3
-      * Maximum size per video: 50MB
+      * Maximum size for a single video is 50MB
       * Width and height range: 256-5760px
       * Frame rate: 23.976-60 FPS
 
-      <Warning>The duration of reference videos will be included in billed seconds. Make sure the URL is publicly accessible and that the video duration metadata can be read.</Warning>
+      <Warning>Please ensure the URL is publicly accessible and that the video duration metadata can be read.</Warning>
     </ParamField>
 
     <ParamField body="audio_url" type="string | string[]">
       Reference audio URL.
 
-      Only valid in `all_reference` mode, up to 3 audio files.
+      Only valid in `all_reference` mode, with up to 3 audio files.
 
       Audio requirements:
 
       * Single audio duration: 2-15 seconds
       * Supports WAV, MP3
-      * Maximum size per audio file: 15MB
-
-      <Note>Reference audio is not billed separately.</Note>
+      * Maximum size for a single audio file is 15MB
     </ParamField>
   </Expandable>
 </ParamField>
@@ -146,7 +143,7 @@ The model name of MiniMax H3 in AIReiter is `minimax_h3`. This model is also com
 <ParamField body="out_task_id" type="string" required>
   Initiator task ID.
 
-  User-defined task identifier, required. You can use this ID later to query the task status and result.
+  A user-defined task identifier, required. You can use this ID later to query the task status and results.
 </ParamField>
 
 ## Response
@@ -188,29 +185,6 @@ MiniMax H3 is an asynchronous video generation model. After submitting a task, u
 </RequestExample>
 
 After the query succeeds and is completed, the `output` field in the Response will contain the generated video URL.
-
-## Pricing
-
-MiniMax H3 is billed based on the number of generated video seconds, reference video seconds, and additional reference images.
-
-| Billing Item | Price |
-| --- | --- |
-| 2K generated video | 40.15 credits / second |
-| Reference video input | 40.15 credits / second |
-| Reference images | Free for the first 5 images, 12.1 credits / image thereafter |
-| Reference audio | Free |
-
-Billing formula:
-
-```
-(generated video seconds + reference video seconds) × 40.15 + max(number of reference images - 5, 0) × 12.1
-```
-
-Example:
-
-* 4-second text-to-video: `4 × 40.15 = 160.6 credits`
-* 4-second output + 9-second reference video: `(4 + 9) × 40.15 = 521.95 credits`
-* 15-second output + 15-second reference video + 9 reference images: `30 × 40.15 + 4 × 12.1 = 1252.9 credits`
 
 ## Request Examples
 

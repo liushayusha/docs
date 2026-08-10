@@ -2,9 +2,9 @@
 title: 'MiniMax H3 ビデオ生成'
 description: |
   - MiniMax H3、Hailuo 03 / Hailuo 3 とも呼ばれます
-  - 非同期処理モードで、後続のクエリに使用するタスク ID を返します
-  - テキストからビデオ生成、開始フレーム/終了フレーム画像からのビデオ生成、複数の参考素材からのビデオ生成をサポートします
-  - 2K 出力をサポートし、ビデオの長さは 4-15 秒です
+  - 非同期処理モードで、後続のクエリ用にタスク ID を返します
+  - テキストからビデオ生成、最初のフレーム/最後のフレーム画像からビデオ生成、複数の参考素材によるビデオ生成をサポートします
+  - 768P / 2K 出力をサポートし、ビデオの長さは 4-15 秒です
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -32,7 +32,7 @@ AIReiter における MiniMax H3 のモデル名は `minimax_h3` です。この
 ## Body
 
 <ParamField body="model" type="string" required>
-  モデル名。固定値:
+  モデル名。固定で以下を使用します:
 
   * `minimax_h3`
 </ParamField>
@@ -42,30 +42,29 @@ AIReiter における MiniMax H3 のモデル名は `minimax_h3` です。この
 
   <Expandable title="params オブジェクトの属性">
     <ParamField body="prompt" type="string" required>
-      動画生成のテキスト説明。最大 7000 文字。
+      動画生成用のテキスト説明。最大 7000 文字。
 
-      主体、シーン、カメラの動き、アクション、スタイル、光、リズムなどを記述できます。
+      主体、シーン、カメラの動き、動作、スタイル、光、リズムなどを説明できます。
     </ParamField>
 
     <ParamField body="type" type="string" default="text_to_video">
-      生成タイプ。MiniMax H3 がどの上流モードを使用するかを決定します。
+      生成タイプ。どの動画生成モードを使用するかを決定します。
 
-      * `text_to_video` - テキストから動画生成。プロンプトのみを使用して動画を生成します
-      * `first_last_frame` - 最初のフレーム/最後のフレーム画像から動画生成。最初のフレーム、最後のフレーム、または両端フレームの遷移を使って動画を生成します
-      * `all_reference` - 複数の参考素材による動画生成。参考画像、参考動画、参考音声を使用できます
+      * `text_to_video` - テキストから動画を生成。プロンプトのみを使用して動画を生成します
+      * `first_last_frame` - 先頭フレーム/末尾フレーム画像から動画を生成。先頭フレーム、末尾フレーム、または先頭と末尾フレームの遷移を使って動画を生成します
+      * `all_reference` - 複数参照素材から動画を生成。参照画像、参照動画、参照音声を使用できます
     </ParamField>
 
     <ParamField body="video_length" type="number" default="4">
-      生成動画の長さ。単位は秒です。
+      生成する動画の長さ。単位は秒です。
 
-      整数 `4` から `15` をサポートします。
-
-      <Warning>動画の長さは料金に直接影響します。</Warning>
+      整数 `4` から `15` まで対応しています。
     </ParamField>
 
     <ParamField body="quality" type="string" default="2k">
-      出力品質。現在は固定で:
+      出力品質:
 
+      * `768p`
       * `2k`
     </ParamField>
 
@@ -74,14 +73,14 @@ AIReiter における MiniMax H3 のモデル名は `minimax_h3` です。この
 
       対応するアスペクト比:
 
-      * `21:9` - 超ワイドスクリーン
+      * `21:9` - 超ワイド
       * `16:9` - 横向き、デフォルト値
       * `4:3` - 標準横向き
       * `1:1` - 正方形
-      * `3:4` - 縦版標準
+      * `3:4` - 縦向き標準
       * `9:16` - 縦向き
 
-      <Warning>`first_last_frame` モードではアスペクト比を個別に選択できません。出力は入力画像の比率に従います。</Warning>
+      <Warning>`first_last_frame` モードでは、アスペクト比を個別に選択することはできません。出力は入力画像の比率に従います。</Warning>
     </ParamField>
 
     <ParamField body="image_url" type="string | string[]">
@@ -90,55 +89,53 @@ AIReiter における MiniMax H3 のモデル名は `minimax_h3` です。この
       `type` によって意味が異なります:
 
       * `text_to_video` - 画像の送信は不要です
-      * `first_last_frame` - 最初のフレーム画像として使用します。配列を送信することもでき、1 枚目を最初のフレーム、2 枚目を最後のフレームとして使用します
-      * `all_reference` - 参考画像として使用します。最大 9 枚
+      * `first_last_frame` - 先頭フレーム画像として使用します。配列で送ることもでき、1枚目が先頭フレーム、2枚目が末尾フレームになります
+      * `all_reference` - 参照画像として使用します。最大 9 枚まで
 
       画像要件:
 
       * JPG、JPEG、PNG、WEBP、HEIC、HEIF をサポート
-      * 1 枚あたりの最大サイズは 30MB
+      * 画像 1 枚あたりの最大サイズは 30MB
       * 幅と高さの範囲は 256-5760px
-      * 画像のアスペクト比の範囲は 0.4-2.5
+      * 画像のアスペクト比範囲は 0.4-2.5
     </ParamField>
 
     <ParamField body="end_image_url" type="string">
-      最後のフレーム画像 URL。
+      末尾フレーム画像 URL。
 
-      `first_last_frame` モードでのみ有効です。最後のフレームは `image_url` 配列の 2 枚目として渡すこともできます。
+      `first_last_frame` モードでのみ有効です。末尾フレームは `image_url` 配列の2枚目として送信することもできます。
     </ParamField>
 
     <ParamField body="video_url" type="string | string[]">
-      参考動画 URL。
+      参照動画 URL。
 
       `all_reference` モードでのみ有効です。
 
-      AIReiter は現在、参考動画の長さに基づく課金を正確にするため、1 つの参考動画のみを公開しています。EvoLink の上流では最大 3 つの参考動画をサポートし、合計長は 15 秒を超えません。
+      現在、参照動画は最大 1 つまで対応しています。
 
       動画要件:
 
-      * 1 本あたりの長さは 2-15 秒
+      * 動画1本の長さは 2-15 秒
       * MP4、MOV をサポート
-      * 動画コーデックは H.264 または H.265
-      * 音声コーデックは AAC または MP3
-      * 1 本あたりの最大サイズは 50MB
+      * 動画エンコードは H.264 または H.265
+      * 音声エンコードは AAC または MP3
+      * 動画 1 本あたりの最大サイズは 50MB
       * 幅と高さの範囲は 256-5760px
       * フレームレートは 23.976-60 FPS
 
-      <Warning>参考動画の長さは課金秒数に加算されます。URL が公開アクセス可能であり、動画の長さメタデータを読み取れることを確認してください。</Warning>
+      <Warning>URL が公開アクセス可能であり、動画の長さのメタデータを読み取れることを確認してください。</Warning>
     </ParamField>
 
     <ParamField body="audio_url" type="string | string[]">
-      参考音声 URL。
+      参照音声 URL。
 
-      `all_reference` モードでのみ有効で、最大 3 つの音声をサポートします。
+      `all_reference` モードでのみ有効で、最大 3 つの音声に対応しています。
 
       音声要件:
 
-      * 1 つあたりの長さは 2-15 秒
+      * 音声1本の長さは 2-15 秒
       * WAV、MP3 をサポート
-      * 1 つあたりの最大サイズは 15MB
-
-      <Note>参考音声は個別課金されません。</Note>
+      * 音声 1 本あたりの最大サイズは 15MB
     </ParamField>
   </Expandable>
 </ParamField>
@@ -146,7 +143,7 @@ AIReiter における MiniMax H3 のモデル名は `minimax_h3` です。この
 <ParamField body="out_task_id" type="string" required>
   送信元タスク ID。
 
-  ユーザー定義のタスク識別子で、必須です。後続でこの ID を使用してタスクの状態と結果を問い合わせることができます。
+  ユーザーがカスタム定義したタスク識別子で、必須です。後続でこの ID を使用してタスクのステータスと結果を照会できます。
 </ParamField>
 
 ## Response
@@ -188,29 +185,6 @@ MiniMax H3 は非同期ビデオ生成モデルです。タスクを送信した
 </RequestExample>
 
 クエリが成功して完了した後、レスポンスの `output` フィールドに生成された動画の URL が含まれます。
-
-## Pricing
-
-MiniMax H3 は、生成動画の秒数、参考動画の秒数、追加の参考画像に基づいて課金されます。
-
-| 課金項目 | 価格 |
-| --- | --- |
-| 2K 生成動画 | 40.15 credits / 秒 |
-| 参考動画入力 | 40.15 credits / 秒 |
-| 参考画像 | 最初の5枚は無料、5枚を超えると 12.1 credits / 枚 |
-| 参考音声 | 無料 |
-
-課金式:
-
-```
-(生成動画秒数 + 参考動画秒数) × 40.15 + max(参考画像枚数 - 5, 0) × 12.1
-```
-
-例:
-
-* 4秒のテキストから動画生成: `4 × 40.15 = 160.6 credits`
-* 4秒の出力 + 9秒の参考動画: `(4 + 9) × 40.15 = 521.95 credits`
-* 15秒の出力 + 15秒の参考動画 + 9枚の参考画像: `30 × 40.15 + 4 × 12.1 = 1252.9 credits`
 
 ## Request Examples
 

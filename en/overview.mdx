@@ -1,28 +1,28 @@
 ---
 title: 'AIReiter — AI Text, Image, and Video Generation API Platform'
-description: 'A unified AI text, image, and video generation API platform. Supports multiple mainstream models including Claude, GPT, Gemini, VEO3, Seedance2, etc. Compatible with OpenAI SDK, asynchronous task processing, transparent pricing, and easy to use.'
+description: 'A unified AI text, image, and video generation API platform. Supports multiple mainstream models, including Claude, GPT, Gemini, VEO3, Seedance2, and more. Compatible with the OpenAI SDK, asynchronous task processing, transparent pricing, simple and easy to use.'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
-AIReiter is a unified AI content generation API platform that provides text dialogue, image generation, and video generation services. By simple REST API calls, you can use mainstream AI models such as Claude, GPT, Gemini, VEO3, Seedance2, and others. The text interface is fully compatible with the OpenAI SDK and can be used by directly replacing the `baseURL`.
+AIReiter is a unified AI content generation API platform that provides text conversation, image generation, and video generation services. With simple REST API calls, you can use a variety of mainstream AI models such as Claude, GPT, Gemini, VEO3, and Seedance2. The text interface is fully compatible with the OpenAI SDK and can be used by directly replacing `baseURL`.
 
 ## Quick Start
 
 <CardGroup cols={2}>
   <Card title="Text Chat" icon="message" href="/en/api-reference/text/openai-chat-completions-api/endpoint">
-    Compatible with OpenAI SDK, supports Claude, GPT, and other models
+    Compatible with the OpenAI SDK, supports Claude, GPT, and other models
   </Card>
   <Card title="Image Generation" icon="image" href="/en/api-reference/images/gpt-4o/generation">
-    Generate images using GPT-4o, Gemini, Seedream, and other models
+    Generate images using models such as GPT-4o, Gemini, and Seedream
   </Card>
   <Card title="Video Generation" icon="video" href="/en/api-reference/videos/veo3-1/generation">
-    Generate video content using VEO3, Seedance2, and other models
+    Generate video content using models such as VEO3 and Seedance2
   </Card>
   <Card title="Task Status Query" icon="list-check" href="/en/api-reference/tasks/status">
-    Query execution status and results of asynchronous tasks
+    Query the execution status and results of asynchronous tasks
   </Card>
   <Card title="Check Balance" icon="wallet" href="/en/api-reference/tasks/balance">
-    Check points balance and remaining free quota for each model
+    Check your token balance and the remaining free quota for each model
   </Card>
   <Card title="Get API Key" icon="key" href={apiKeyUrl}>
     Access the console to get your API Key
@@ -86,7 +86,7 @@ After the task is completed, the response will include URLs of the generated ima
 
 ## Model Channels
 
-Model channels represent different service tiers. Each model offers multiple channel versions divided into four levels:
+Model channels represent different service tiers. Each model can provide multiple channel versions, divided into four levels:
 
 | Channel | Description |
 |------|------|
@@ -96,20 +96,20 @@ Model channels represent different service tiers. Each model offers multiple cha
 | `max` | Flagship version, highest stability |
 
 <Note>
-Channels only affect service stability and do not impact output quality. All channels use the same underlying model, ensuring identical quality of generated results. Generally, higher-priced channels provide better service stability.
+The channel only affects service stability, not output quality. All channels use the same underlying model, and the quality of the generated results is exactly the same. Generally speaking, the higher the channel price, the better the service stability.
 </Note>
 
-When using, simply replace the model name with the corresponding channel version, for example, replace `"seedance2"` with `"seedance2_fast"`, while keeping other parameters unchanged.
+When using it, just replace the model name with the corresponding channel version. For example, replace `"seedance2"` with `"seedance2_fast"`, and keep the other parameters unchanged.
 
 ## Supported Models
 
 ### Text Conversation Series
 
-Compatible with OpenAI Chat Completions API and Responses API, supporting multi-turn conversations, tool calls, structured output, and streaming responses:
+Compatible with the OpenAI Chat Completions API and Responses API, supporting multi-turn conversations, tool calling, structured output, and streaming responses:
 
 <CardGroup cols={2}>
   <Card title="OpenAI Chat Completions API" icon="message" href="/en/api-reference/text/openai-chat-completions-api/endpoint">
-    Compatible with OpenAI SDK, supporting models like GPT and Claude
+    Compatible with the OpenAI SDK, supports models such as GPT and Claude
   </Card>
   <Card title="OpenAI Responses API" icon="message" href="/en/api-reference/text/openai-responses-api/endpoint">
     OpenAI's latest Responses format
@@ -121,7 +121,7 @@ Compatible with OpenAI Chat Completions API and Responses API, supporting multi-
 
 ### Image Generation Series
 
-AIReiter offers multiple image generation models, supporting text-to-image and image-to-image capabilities:
+AIReiter provides a variety of image generation models, supporting text-to-image and image-to-image features:
 
 <CardGroup cols={2}>
   <Card title="GPT-4o Image" icon="image" href="/en/api-reference/images/gpt-4o/generation">
@@ -137,22 +137,22 @@ AIReiter offers multiple image generation models, supporting text-to-image and i
     Google's professional-grade image generation model
   </Card>
   <Card title="Nano Banana V2" icon="image" href="/en/api-reference/images/nano-banana-v2/generation">
-    Supports multiple generation modes including text-to-image, image-to-image, and image editing
+    Supports multiple generation modes such as text-to-image, image-to-image, and image editing
   </Card>
   <Card title="Seedream-4.0" icon="image" href="/en/api-reference/images/seedream-4/generation">
-    Efficient image generation solution
+    An efficient image generation solution
   </Card>
   <Card title="Seedream-4.5" icon="image" href="/en/api-reference/images/seedream-4.5/generation">
-    Seedream version 4.5
+    Seedream 4.5 version
   </Card>
   <Card title="Seedream V5 lite" icon="image" href="/en/api-reference/images/seedream-v5-lite/generation">
-    Seedream latest version, supporting enhanced generation with online search
+    The latest Seedream version, supports enhanced generation with web search
   </Card>
 </CardGroup>
 
 ### Video Generation Series
 
-Supports text-to-video and image-to-video, offering multiple resolution and duration options:
+Supports text-to-video and image-to-video generation, providing a variety of resolution and duration options:
 
 <CardGroup cols={2}>
   <Card title="VEO3.1" icon="video" href="/en/api-reference/videos/veo3-1/generation">
@@ -162,19 +162,19 @@ Supports text-to-video and image-to-video, offering multiple resolution and dura
     VEO3.1 fast version
   </Card>
   <Card title="Seedance-1.5-pro" icon="video" href="/en/api-reference/videos/seedance-1-5-pro/generation">
-    Supports control of start and end frames and audio generation (4-12 seconds)
+    Supports first-and-last frame control and audio generation (4-12 seconds)
   </Card>
   <Card title="Seedance Pro Fast" icon="video" href="/en/api-reference/videos/seedance_pro_fast/generation">
-    Seedance fast version, supports start frame control
+    Seedance fast version, supports first-frame control
   </Card>
   <Card title="Seedance Pro" icon="video" href="/en/api-reference/videos/seedance_pro/generation">
-    Seedance professional version, supports start and end frame control
+    Seedance professional version, supports first-and-last frame control
   </Card>
   <Card title="Seedance 2.0" icon="video" href="/en/api-reference/videos/seedance2/generation">
-    Supports multiple reference images, reference videos, and start/end frame control (4-15 seconds)
+    Supports multiple reference images, reference videos, and first-and-last frame control (4-15 seconds)
   </Card>
   <Card title="Seedance 2.0 Fast" icon="video" href="/en/api-reference/videos/seedance2_fast/generation">
-    Seedance 2.0 fast version, supports multiple reference images and start/end frame control
+    Seedance 2.0 fast version, supports multiple reference images and first-and-last frame control
   </Card>
 </CardGroup>
 
@@ -182,39 +182,39 @@ Supports text-to-video and image-to-video, offering multiple resolution and dura
 
 ### Asynchronous Task Processing
 
-All generation requests use an asynchronous processing mode to avoid long waiting times:
+All generation requests use asynchronous processing to avoid long waits:
 
-- You need to provide `out_task_id` (initiator’s task ID, used for business identification) when submitting tasks
-- The submitted `out_task_id` is returned immediately
-- You can query the task status using the `out_task_id`
+- When submitting a task, you must pass in `out_task_id` (the initiator's task ID, used for business identification)
+- Immediately returns the `out_task_id` you submitted
+- You can use `out_task_id` to query the task status
 - Supports webhook callback notifications (optional)
-- Task status is updated in real time: `pending` → `processing` → `completed`
+- Real-time task status updates: `pending` → `processing` → `completed`
 
-### Multi-model Support
+### Multi-Model Support
 
-A unified API endpoint supporting various text, image, and video generation models:
+A unified API endpoint that supports multiple text, image, and video generation models:
 
-- **Text conversation**: Claude, GPT and other models, compatible with OpenAI SDK
-- **Image generation**: GPT-4o, Gemini, Seedream and other models
-- **Video generation**: VEO3, Seedance and other models
+- **Text Conversation**: Models such as Claude and GPT, compatible with the OpenAI SDK
+- **Image Generation**: Models such as GPT-4o, Gemini, and Seedream
+- **Video Generation**: Models such as VEO3 and Seedance
 - Unified request format and response structure
 - Flexible parameter configuration
 
 ### Transparent Pricing
 
-Charged by points, transparent and clear:
+Billed by credits, with clear and transparent pricing:
 
-- Each task returns the estimated consumed points
-- Actual consumed points are shown after task completion
-- Pay only for successfully generated content
+- Each task returns the estimated credit consumption
+- The actual credit consumption is shown after the task is completed
+- You only pay for successfully generated content
 - No hidden fees
 
 ### Flexible Configuration
 
 Supports multiple generation parameter configurations:
 
-- **Image**: Various aspect ratios (1:1, 3:2, 2:3)
-- **Video**: Various aspect ratios (16:9, 9:16), durations (10 seconds, 15 seconds), resolutions
+- **Images**: Multiple aspect ratios (1:1, 3:2, 2:3)
+- **Video**: Multiple aspect ratios (16:9, 9:16), durations (10 seconds, 15 seconds), and resolutions
 - Supports reference images (image-to-image, image-to-video)
 
 ## Authentication Method
@@ -278,8 +278,8 @@ Visit the <a href={apiKeyUrl} target="_blank">API Key Management Page</a> to obt
 ## Next Steps
 
 <CardGroup cols={2}>
-  <Card title="View Text Conversation Documentation" icon="message" href="/en/api-reference/text/openai-chat-completions-api/endpoint">
-    Learn how to use the text conversation API
+  <Card title="View Text Chat Documentation" icon="message" href="/en/api-reference/text/openai-chat-completions-api/endpoint">
+    Learn how to use the text chat API
   </Card>
   <Card title="View Image Generation Documentation" icon="image" href="/en/api-reference/images/gpt-4o/generation">
     Learn how to use various image generation models
@@ -288,7 +288,7 @@ Visit the <a href={apiKeyUrl} target="_blank">API Key Management Page</a> to obt
     Learn how to generate video content
   </Card>
   <Card title="Task Management" icon="list-check" href="/en/api-reference/tasks/status">
-    Learn how to manage and query task statuses
+    Learn how to manage and query task status
   </Card>
   <Card title="Get API Key" icon="key" href={apiKeyUrl}>
     Start using AIReiter now

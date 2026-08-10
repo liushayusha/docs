@@ -1,10 +1,10 @@
 ---
 title: 'MiniMax H3 비디오 생성'
 description: |
-  - MiniMax H3, Hailuo 03 / Hailuo 3로도 자주 불립니다
-  - 비동기 처리 모드, 후속 조회에 사용할 작업 ID를 반환합니다
-  - 텍스트-비디오 생성, 첫 프레임/마지막 프레임 이미지-비디오 생성, 다중 참고 자료 기반 비디오 생성을 지원합니다
-  - 2K 출력을 지원하며, 비디오 길이는 4-15초입니다
+  - MiniMax H3, Hailuo 03 / Hailuo 3라고도 불립니다
+  - 비동기 처리 모드, 후속 조회를 위한 작업 ID를 반환합니다
+  - 텍스트-비디오, 첫 프레임/마지막 프레임 이미지-비디오, 여러 참고 자료를 사용한 비디오 생성을 지원합니다
+  - 768P / 2K 출력을 지원하며, 비디오 길이는 4-15초입니다
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -38,9 +38,9 @@ AIReiter에서 MiniMax H3의 모델 이름은 `minimax_h3`입니다. 이 모델�
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  모델 Parameters 객체.
+  모델 파라미터 객체.
 
-  <Expandable title="params 객체 Properties">
+  <Expandable title="params 객체 속성">
     <ParamField body="prompt" type="string" required>
       비디오 생성용 텍스트 설명, 최대 7000자.
 
@@ -48,40 +48,39 @@ AIReiter에서 MiniMax H3의 모델 이름은 `minimax_h3`입니다. 이 모델�
     </ParamField>
 
     <ParamField body="type" type="string" default="text_to_video">
-      생성 유형으로, MiniMax H3가 어떤 상위 모드를 사용할지 결정합니다.
+      생성 유형, 어떤 비디오 생성 모드를 사용할지 결정합니다.
 
-      * `text_to_video` - 텍스트-투-비디오, 프롬프트만 사용해 비디오를 생성합니다.
-      * `first_last_frame` - 첫 프레임/마지막 프레임 이미지 기반 비디오 생성, 첫 프레임, 마지막 프레임 또는 첫-끝 프레임 전환으로 비디오를 생성합니다.
-      * `all_reference` - 여러 참고 자료 기반 비디오 생성, 참고 이미지, 참고 비디오, 참고 오디오를 사용할 수 있습니다.
+      * `text_to_video` - 텍스트-투-비디오, 프롬프트만 사용해 비디오를 생성합니다
+      * `first_last_frame` - 첫 프레임/마지막 프레임 이미지 기반 비디오 생성, 첫 프레임, 마지막 프레임 또는 첫-마지막 프레임 전환으로 비디오를 생성합니다
+      * `all_reference` - 다중 참조 소재 비디오 생성, 참조 이미지, 참조 비디오 및 참조 오디오를 사용할 수 있습니다
     </ParamField>
 
     <ParamField body="video_length" type="number" default="4">
       생성 비디오 길이, 단위는 초입니다.
 
-      정수 `4`부터 `15`까지 지원합니다.
-
-      <Warning>비디오 길이는 과금에 직접 영향을 미칩니다.</Warning>
+      정수를 지원합니다: `4`에서 `15`까지.
     </ParamField>
 
     <ParamField body="quality" type="string" default="2k">
-      출력 품질, 현재 고정값:
+      출력 품질:
 
+      * `768p`
       * `2k`
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="16:9">
-      비디오 가로세로 비율입니다.
+      비디오 화면 비율.
 
-      지원되는 가로세로 비율:
+      지원되는 화면 비율:
 
-      * `21:9` - 초광각
-      * `16:9` - 가로형, 기본값
-      * `4:3` - 표준 가로형
+      * `21:9` - 초광폭
+      * `16:9` - 가로 화면, 기본값
+      * `4:3` - 표준 가로 화면
       * `1:1` - 정사각형
-      * `3:4` - 세로형 표준
-      * `9:16` - 세로형
+      * `3:4` - 세로 표준
+      * `9:16` - 세로 화면
 
-      <Warning>`first_last_frame` 모드는 가로세로 비율을 별도로 선택할 수 없으며, 출력은 입력 이미지 비율을 따릅니다.</Warning>
+      <Warning>`first_last_frame` 모드는 개별 화면 비율 선택을 지원하지 않으며, 출력은 입력 이미지 비율을 따릅니다.</Warning>
     </ParamField>
 
     <ParamField body="image_url" type="string | string[]">
@@ -89,16 +88,16 @@ AIReiter에서 MiniMax H3의 모델 이름은 `minimax_h3`입니다. 이 모델�
 
       `type`에 따라 의미가 다릅니다:
 
-      * `text_to_video` - 이미지를 전달할 필요가 없습니다.
-      * `first_last_frame` - 첫 프레임 이미지로 사용합니다. 배열도 전달할 수 있으며, 첫 번째 이미지는 첫 프레임, 두 번째 이미지는 마지막 프레임으로 사용됩니다.
-      * `all_reference` - 참고 이미지로 사용하며, 최대 9장까지 가능합니다.
+      * `text_to_video` - 이미지를 전달할 필요가 없습니다
+      * `first_last_frame` - 첫 프레임 이미지로 사용합니다. 배열을 전달할 수도 있으며, 첫 번째 이미지는 첫 프레임, 두 번째 이미지는 마지막 프레임으로 사용됩니다
+      * `all_reference` - 참조 이미지로 사용하며, 최대 9장까지 가능합니다
 
       이미지 요구 사항:
 
       * JPG, JPEG, PNG, WEBP, HEIC, HEIF 지원
       * 단일 이미지 최대 30MB
       * 가로세로 범위 256-5760px
-      * 이미지 가로세로 비율 범위 0.4-2.5
+      * 이미지 화면 비율 범위 0.4-2.5
     </ParamField>
 
     <ParamField body="end_image_url" type="string">
@@ -108,11 +107,11 @@ AIReiter에서 MiniMax H3의 모델 이름은 `minimax_h3`입니다. 이 모델�
     </ParamField>
 
     <ParamField body="video_url" type="string | string[]">
-      참고 비디오 URL.
+      참조 비디오 URL.
 
       `all_reference` 모드에서만 유효합니다.
 
-      AIReiter는 현재 참고 비디오 1개만 허용하여 참고 비디오 길이 과금이 정확하도록 보장합니다. EvoLink 상위 시스템은 최대 3개의 참고 비디오를 지원하며, 총 길이는 15초를 넘을 수 없습니다.
+      현재 최대 1개의 참조 비디오만 지원합니다.
 
       비디오 요구 사항:
 
@@ -122,13 +121,13 @@ AIReiter에서 MiniMax H3의 모델 이름은 `minimax_h3`입니다. 이 모델�
       * 오디오 인코딩 AAC 또는 MP3
       * 단일 비디오 최대 50MB
       * 가로세로 범위 256-5760px
-      * 프레임률 23.976-60 FPS
+      * 프레임 속도 23.976-60 FPS
 
-      <Warning>참고 비디오 길이는 과금 초 수에 포함됩니다. URL이 공개적으로 접근 가능하고, 비디오 길이 메타데이터를 읽을 수 있는지 확인하세요.</Warning>
+      <Warning>URL이 공개적으로 접근 가능해야 하며, 비디오 길이 메타데이터를 읽을 수 있어야 합니다.</Warning>
     </ParamField>
 
     <ParamField body="audio_url" type="string | string[]">
-      참고 오디오 URL.
+      참조 오디오 URL.
 
       `all_reference` 모드에서만 유효하며, 최대 3개의 오디오를 지원합니다.
 
@@ -137,8 +136,6 @@ AIReiter에서 MiniMax H3의 모델 이름은 `minimax_h3`입니다. 이 모델�
       * 단일 오디오 길이 2-15초
       * WAV, MP3 지원
       * 단일 오디오 최대 15MB
-
-      <Note>참고 오디오는 별도로 과금되지 않습니다.</Note>
     </ParamField>
   </Expandable>
 </ParamField>
@@ -146,7 +143,7 @@ AIReiter에서 MiniMax H3의 모델 이름은 `minimax_h3`입니다. 이 모델�
 <ParamField body="out_task_id" type="string" required>
   요청 측 작업 ID.
 
-  사용자가 정의한 작업 식별자이며 필수입니다. 이후 이 ID로 작업 상태와 결과를 조회할 수 있습니다.
+  사용자가 정의한 작업 식별자로, 필수입니다. 이후 이 ID를 사용해 작업 상태와 결과를 조회할 수 있습니다.
 </ParamField>
 
 ## Response
@@ -188,29 +185,6 @@ MiniMax H3는 비동기 비디오 생성 모델입니다. 작업을 제출한 �
 </RequestExample>
 
 조회가 성공하고 완료되면, 응답의 `output` 필드에 생성된 비디오 URL이 포함됩니다.
-
-## Pricing
-
-MiniMax H3는 생성된 비디오의 초 수, 참조 비디오의 초 수, 추가 참조 이미지 수를 기준으로 요금이 청구됩니다.
-
-| Billing item | Price |
-| --- | --- |
-| 2K 생성 비디오 | 40.15 credits / 초 |
-| 참조 비디오 입력 | 40.15 credits / 초 |
-| 참조 이미지 | 처음 5장은 무료, 이후에는 12.1 credits / 장 |
-| 참조 오디오 | 무료 |
-
-요금 계산식:
-
-```
-(생성된 비디오 초 수 + 참조 비디오 초 수) × 40.15 + max(참조 이미지 수 - 5, 0) × 12.1
-```
-
-예시:
-
-* 4초 텍스트-투-비디오: `4 × 40.15 = 160.6 credits`
-* 4초 출력 + 9초 참조 비디오: `(4 + 9) × 40.15 = 521.95 credits`
-* 15초 출력 + 15초 참조 비디오 + 9장 참조 이미지: `30 × 40.15 + 4 × 12.1 = 1252.9 credits`
 
 ## Request Examples
 

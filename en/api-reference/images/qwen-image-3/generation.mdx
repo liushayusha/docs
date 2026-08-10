@@ -2,11 +2,10 @@
 title: 'Qwen Image 3.0 Image Generation and Editing'
 description: |
     - Asynchronous processing mode, returns a task ID for subsequent queries
-    - Supports text-to-image and image-to-image; if no reference image is provided, it is text-to-image
+    - Supports text-to-image and image-to-image. If no reference image is provided, it uses text-to-image
     - Supports up to 3 reference images and generating 1-6 images at a time
     - Supports 1K / 2K resolutions and 7 common image aspect ratios
-    - Output format is fixed as PNG; custom pixel dimensions are not supported
-    - Submitted prompts are subject to platform sensitive word / safety review, and violating content will be rejected directly
+    - Submitted prompts undergo platform sensitive word / security review, and violating content will be directly rejected
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -30,22 +29,22 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  Model parameters object.
+  Model parameter object.
 
   <Expandable title="params Object Properties">
     <ParamField body="prompt" type="string" required>
-      Image generation or editing instructions. Supports Chinese and English.
+      Image generation or editing instruction. Chinese and English are supported.
 
-      It is recommended to clearly describe the subject, scene, composition, lighting, materials, text content, and the parts in the reference image that need to be kept or modified.
+      It is recommended to clearly describe the subject, scene, composition, lighting, materials, text content, and the parts in the reference image that need to be preserved or modified.
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      Reference image array. When provided, image-to-image mode is used; when not provided, text-to-image mode is used.
+      Array of reference images. If provided, image-to-image mode is used; if omitted, text-to-image mode is used.
 
       * Up to 3 reference images
-      * Maximum size of a single image: 10MB
-      * Supports jpeg, png, webp
-      * Supports publicly accessible URLs or complete Base64 Data URIs
+      * Maximum size per image: 10MB
+      * Supports jpeg, png, and webp
+      * Supports publicly accessible URLs or a complete Base64 Data URI
 
       <Warning>
         The image URL must be directly accessible from the public internet and cannot rely on login status, cookies, or temporary page authorization.
@@ -56,7 +55,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       Output resolution tier.
 
       * `1K` - Standard resolution (default)
-      * `2K` - High definition resolution
+      * `2K` - High-definition resolution
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="1:1">
@@ -69,65 +68,45 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       * `4:3` / `3:4` - Standard landscape / portrait
       * `16:9` / `9:16` - Widescreen landscape / portrait
 
-      <Warning>
-        The current endpoint does not support `21:9`, nor does it support custom pixel dimensions such as `1024x1024`.
-      </Warning>
     </ParamField>
 
     <ParamField body="output_n" type="integer" default="1">
-      Number of images generated for this task, ranging from `1` to `6`.
+      Number of images generated in this task, ranging from `1` to `6`.
     </ParamField>
 
-    <ParamField body="output_format" type="string" default="png">
-      Output format, currently fixed to `png`.
-
-      <Warning>
-        The current AIReiter integration channel does not provide a JPEG output option.
-      </Warning>
+    <ParamField body="prompt_extend" type="boolean" default="false">
+      Intelligent prompt rewriting. Disabled by default to keep results predictable. Set to `true` when intelligent rewriting is needed.
     </ParamField>
 
-    <ParamField body="prompt_extend" type="boolean" default="true">
-      Whether to enable intelligent prompt expansion. Enabled by default, suitable for shorter prompts.
+    <ParamField body="prompt_extend_mode" type="string" default="direct">
+      Prompt rewriting mode. Takes effect only when `prompt_extend` is `true`.
+
+      * `direct` - Balanced rewriting, supports both text-to-image and image-to-image
+      * `agent` - Aggressive rewriting, supports text-to-image only
     </ParamField>
 
     <ParamField body="negative_prompt" type="string">
-      Negative prompt, used to describe content that should not appear in the result, such as blur, distortion, or incorrect text.
+      Negative prompt, used to describe content that you do not want to appear in the result, such as blur, distortion, or incorrect text.
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  Caller-defined task ID, used for idempotent submission and result querying.
+  Client-defined task ID, used for idempotent submission and result queries.
 
-  * Length must be 1-64 characters
+  * Length: 1-64 characters
   * It is recommended to use only letters, numbers, underscores, and hyphens
-  * Do not reuse the same value under the same API Key
+  * Do not reuse it under the same API Key
 </ParamField>
-
-## Billing
-
-| Billing Item | Price |
-| --- | ---: |
-| Per 1K output image | 2.40 credits ($0.024) |
-| Per 2K output image | 2.40 credits ($0.024) |
-| Per input reference image | 0.25 credits ($0.0025) |
-
-Billing formula: `2.40 × output_n + 0.25 × number of reference images`.
-
-For example, generating 1 image and passing in 1 reference image is expected to consume `2.65` credits. When the submission succeeds, `estimated_credits` in the Response is the estimated consumption; after the task is completed, `credits_used` in the query Response is the actual consumption. No final charge will be applied if the task fails.
 
 ## Response
 
 <ResponseField name="out_task_id" type="string">
-  Caller task ID, which can be used to query the task status and result.
+  Caller task ID, can be used to query the task Status and result.
 </ResponseField>
 
 <ResponseField name="status" type="string">
   Initial status, usually `"pending"`.
-</ResponseField>
-
-<ResponseField name="estimated_credits" type="number">
-  Estimated credits consumed for this task.
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
@@ -136,7 +115,7 @@ For example, generating 1 image and passing in 1 reference image is expected to 
 
 ## Query Results
 
-After submission succeeds, call the query endpoint using the same `out_task_id`:
+After submission succeeds, use the same `out_task_id` to call the query endpoint:
 
 ```bash
 curl --request POST \
@@ -148,10 +127,10 @@ curl --request POST \
   }'
 ```
 
-Task status includes `pending`, `processing`, `completed`, and `failed`. After the task is completed, the image array is located in `data.output`, and the actual credits used are located in `data.credits_used`.
+Task statuses include `pending`, `processing`, `completed`, and `failed`. After the task is completed, the image array is located in `data.output`.
 
 <RequestExample>
-  ```bash cURL (Text-to-Image)
+  ```bash cURL（Text-to-Image）
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
@@ -159,18 +138,18 @@ Task status includes `pending`, `processing`, `completed`, and `failed`. After t
     --data '{
       "model": "qwen_image_3",
       "params": {
-        "prompt": "A futuristic electric sports car in front of a modern glass building, blue hour lighting, commercial automotive photography, realistic materials and natural shadows, no text, no watermark",
+        "prompt": "A futuristic electric sports car in front of a modern glass building, blue hour, commercial automotive photography, realistic materials and natural shadows, no text, no watermark",
         "resolution": "2K",
         "aspect_ratio": "16:9",
         "output_n": 1,
-        "output_format": "png",
-        "prompt_extend": true
+        "prompt_extend": true,
+        "prompt_extend_mode": "agent"
       },
       "out_task_id": "qwen_image_3_task_001"
     }'
   ```
 
-  ```bash cURL (Image-to-Image)
+  ```bash cURL（Image-to-Image）
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
@@ -182,8 +161,7 @@ Task status includes `pending`, `processing`, `completed`, and `failed`. After t
         "image_url": ["https://example.com/product-reference.png"],
         "resolution": "1K",
         "aspect_ratio": "1:1",
-        "output_n": 1,
-        "output_format": "png"
+        "output_n": 1
       },
       "out_task_id": "qwen_image_3_edit_001"
     }'

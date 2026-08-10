@@ -2,11 +2,10 @@
 title: 'Qwen Image 3.0 Pro 画像生成と編集'
 description: |
     - ポスター、文字レイアウト、メニュー、インフォグラフィック、高精細な画像編集に適しています
-    - 非同期処理モードで、後続の問い合わせに使用するタスク ID を返します
-    - テキストから画像の生成、最大 3 枚の参照画像、1回の生成で 1〜6 枚の画像に対応しています
-    - 1K / 2K 解像度と 7 種類の一般的な画像比率に対応しています
-    - 出力形式は PNG に固定されており、カスタムのピクセルサイズはサポートされていません
-    - 提出された prompt はプラットフォームのセンシティブワード / 安全審査を通過し、違反内容は直接拒否されます
+    - 非同期処理モードで、後続の問い合わせに使用するタスクIDを返します
+    - テキストから画像の生成、最大3枚の参照画像、1回の生成で1〜6枚の画像に対応しています
+    - 1K / 2K解像度と7種類の一般的な画像比率に対応しています
+    - 提出されたpromptはプラットフォームの機微な表現 / 安全審査を経て、違反内容は直接拒否されます
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -26,120 +25,97 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  モデル名、固定値: `"qwen_image_3_pro"`。
+  Model name, fixed value: `"qwen_image_3_pro"`.
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  モデルパラメーターオブジェクト。
+  Model parameters object.
 
-  <Expandable title="params オブジェクトのProperties">
+  <Expandable title="params object properties">
     <ParamField body="prompt" type="string" required>
-      画像生成または編集の指示。中国語と英語をサポートします。
+      Image generation or editing instructions. Supports Chinese and English.
 
-      Pro モデルは、読める文字、複雑な階層、密なレイアウト、高いディテール表現が必要なタスクに適しています。文字の内容、フォントスタイル、階層、位置、余白、保持したい参照画像の特徴を明確に記述することを推奨します。
+      The Pro model is suitable for tasks that require readable text, complex hierarchies, dense layouts, and high-detail performance. It is recommended to clearly describe the text content, font style, hierarchy, position, whitespace, and the reference image features that need to be preserved.
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      参照画像の配列。入力すると画像生成・編集モードを使用します。入力しない場合はテキストから画像生成モードを使用します。
+      Array of reference images. When provided, image-to-image mode is used; when omitted, text-to-image mode is used.
 
-      * 最大 3 枚の参照画像
-      * 1 枚あたり最大 10MB
-      * jpeg、png、webp をサポート
-      * 公開アクセス可能な URL または完全な Base64 Data URI をサポート
+      * Up to 3 reference images
+      * Maximum 10MB per image
+      * Supports jpeg, png, webp
+      * Supports publicly accessible URLs or complete Base64 Data URI
 
       <Warning>
-        画像 URL は公開ネットワークから直接アクセスできる必要があり、ログイン状態、Cookie、またはページの一時的な認可に依存してはいけません。
+        The image URL must be directly accessible from the public internet and cannot rely on login status, cookies, or temporary page authorization.
       </Warning>
     </ParamField>
 
     <ParamField body="resolution" type="string" default="1K">
-      出力解像度のレベル。
+      Output resolution tier.
 
-      * `1K` - 基本解像度（デフォルト）
-      * `2K` - 高解像度。文字、ポスター、密なレイアウトに適しています
+      * `1K` - Base resolution (default)
+      * `2K` - High-definition resolution, suitable for text, posters, and dense layouts
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="1:1">
-      出力画像のアスペクト比。
+      Output image aspect ratio.
 
-      次の値をサポートします:
+      Supports the following values:
 
-      * `1:1` - 正方形（デフォルト）
-      * `3:2` / `2:3` - 典型的な横長 / 縦長
-      * `4:3` / `3:4` - 標準的な横長 / 縦長
-      * `16:9` / `9:16` - ワイドスクリーンの横長 / 縦長
+      * `1:1` - Square (default)
+      * `3:2` / `2:3` - Classic landscape / portrait
+      * `4:3` / `3:4` - Standard landscape / portrait
+      * `16:9` / `9:16` - Widescreen landscape / portrait
 
-      <Warning>
-        現在のインターフェースは `21:9` をサポートしておらず、`1024x1024` などのカスタムピクセルサイズもサポートしていません。
-      </Warning>
     </ParamField>
 
     <ParamField body="output_n" type="integer" default="1">
-      このタスクで生成する画像数。値の範囲は `1` から `6` です。
+      Number of images generated for this task, ranging from `1` to `6`.
     </ParamField>
 
-    <ParamField body="output_format" type="string" default="png">
-      出力形式。現在は `png` に固定されています。
-
-      <Warning>
-        現在の AIReiter 接続チャネルでは JPEG 出力オプションは提供されていません。
-      </Warning>
+    <ParamField body="prompt_extend" type="boolean" default="false">
+      Intelligent prompt rewriting. Disabled by default to ensure predictable results. Set to `true` when intelligent rewriting is needed.
     </ParamField>
 
-    <ParamField body="prompt_extend" type="boolean" default="true">
-      インテリジェントなプロンプト拡張を有効にするかどうか。デフォルトで有効で、短いプロンプトに適しています。
+    <ParamField body="prompt_extend_mode" type="string" default="direct">
+      Prompt rewriting mode. Effective only when `prompt_extend` is `true`.
+
+      * `direct` - Balanced rewriting, supports both text-to-image and image-to-image
+      * `agent` - Aggressive rewriting, text-to-image only
     </ParamField>
 
     <ParamField body="negative_prompt" type="string">
-      ネガティブプロンプト。結果に表示してほしくない内容を記述するために使用します。たとえば、ぼやけ、文字化け、詰まったレイアウト、構造の変形などです。
+      Negative prompt, used to describe content that should not appear in the result, such as blur, garbled text, crowded layouts, or structural distortion.
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  呼び出し元がカスタマイズしたタスク ID。冪等な送信と結果の照会に使用します。
+  Caller-defined task ID, used for idempotent submission and result querying.
 
-  * 長さは 1〜64 文字
-  * 英字、数字、アンダースコア、ハイフンのみを使用することを推奨します
-  * 同じ API Key では重複して使用しないでください
+  * Length: 1-64 characters
+  * Recommended to use only letters, numbers, underscores, and hyphens
+  * Do not reuse the same ID under the same API Key
 </ParamField>
-
-## 計費
-
-| 計費項目 | 価格 |
-| --- | ---: |
-| 1K 出力ごと | 3.20 クレジット（$0.032） |
-| 2K 出力ごと | 6.00 クレジット（$0.060） |
-| 入力参考画像ごと | 0.25 クレジット（$0.0025） |
-
-計費式：
-
-* 1K：`3.20 × output_n + 0.25 × 参考画像数`
-* 2K：`6.00 × output_n + 0.25 × 参考画像数`
-
-たとえば、1枚の1K画像を生成し、1枚の参考画像を渡す場合、予想消費は `3.45` クレジットです。1枚の2K画像を生成し、1枚の参考画像を渡す場合、予想消費は `6.25` クレジットです。送信成功時、Response の `estimated_credits` は予想消費量です。タスク完了後、Query Response の `credits_used` は実際の消費量です。タスクが失敗した場合、最終的な課金は発生しません。
 
 ## Response
 
 <ResponseField name="out_task_id" type="string">
-  呼び出し元のタスクID。タスクのステータスと結果の照会に使用できます。
+  呼び出し元のタスク ID。タスクの状態と結果の問い合わせに使用できます。
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  初期ステータス。通常は `"pending"` です。
-</ResponseField>
-
-<ResponseField name="estimated_credits" type="number">
-  今回のタスクで予想される消費ポイント。
+  初期状態で、通常は `"pending"` です。
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  タスク作成時刻。ISO 8601 形式。
+  タスク作成時刻、ISO 8601 形式。
 </ResponseField>
 
-## クエリ結果
+## Query Results
 
-送信成功後、同じ `out_task_id` を使用してクエリインターフェースを呼び出します:
+After submission succeeds, call the query endpoint using the same `out_task_id`:
 
 ```bash
 curl --request POST \
@@ -151,10 +127,10 @@ curl --request POST \
   }'
 ```
 
-タスクのステータスには `pending`、`processing`、`completed`、`failed` が含まれます。タスク完了後、画像配列は `data.output` にあり、実際の消費ポイントは `data.credits_used` にあります。
+Task statuses include `pending`, `processing`, `completed`, and `failed`. After the task is completed, the image array is located in `data.output`.
 
 <RequestExample>
-  ```bash cURL（Text-to-Image）
+  ```bash cURL (Text-to-Image)
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
@@ -162,19 +138,19 @@ curl --request POST \
     --data '{
       "model": "qwen_image_3_pro",
       "params": {
-        "prompt": "プレミアムコーヒーショップ向けの縦長メニューポスターをデザインしてください。タイトルは MORNING ROAST。見やすい価格階層、モダンな編集レイアウト、リアルなコーヒー写真",
+        "prompt": "Design a vertical menu poster for a specialty coffee shop, with the title MORNING ROAST, clear price tiers, modern editorial typography, and realistic coffee photography",
         "resolution": "2K",
         "aspect_ratio": "3:4",
         "output_n": 1,
-        "output_format": "png",
         "prompt_extend": true,
-        "negative_prompt": "文字化け、ぼやけ、レイアウトの詰まり、ウォーターマーク"
+        "prompt_extend_mode": "agent",
+        "negative_prompt": "garbled text, blur, crowded layout, watermark"
       },
       "out_task_id": "qwen_image_3_pro_task_001"
     }'
   ```
 
-  ```bash cURL（複数参考画像編集）
+  ```bash cURL (Multi-reference Image Editing)
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
@@ -182,7 +158,7 @@ curl --request POST \
     --data '{
       "model": "qwen_image_3_pro",
       "params": {
-        "prompt": "1枚目の画像の商品主体、2枚目の画像の配色、3枚目の画像のレイアウトを使用して、高級感のある横長広告を生成し、ラベル文字を鮮明に保つ",
+        "prompt": "Use the product subject from the first image, the color palette from the second image, and the layout from the third image to generate a premium landscape ad, keeping the label text clear",
         "image_url": [
           "https://example.com/product.png",
           "https://example.com/color-reference.png",
@@ -190,8 +166,7 @@ curl --request POST \
         ],
         "resolution": "2K",
         "aspect_ratio": "16:9",
-        "output_n": 1,
-        "output_format": "png"
+        "output_n": 1
       },
       "out_task_id": "qwen_image_3_pro_edit_001"
     }'
@@ -209,7 +184,7 @@ curl --request POST \
       json={
           "model": "qwen_image_3_pro",
           "params": {
-              "prompt": "モダンなテクノロジー製品発表ポスター、タイトルが明確で、情報階層がはっきりしている、ダーク背景",
+              "prompt": "Modern tech product launch poster, clear title, distinct information hierarchy, dark background",
               "resolution": "2K",
               "aspect_ratio": "16:9",
               "output_n": 1
@@ -231,7 +206,7 @@ curl --request POST \
     body: JSON.stringify({
       model: "qwen_image_3_pro",
       params: {
-        prompt: "モダンなテクノロジー製品発表ポスター、タイトルが明確で、情報階層がはっきりしている、ダーク背景",
+        prompt: "Modern tech product launch poster, clear title, distinct information hierarchy, dark background",
         resolution: "2K",
         aspect_ratio: "16:9",
         output_n: 1

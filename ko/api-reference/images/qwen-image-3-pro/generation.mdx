@@ -1,12 +1,11 @@
 ---
 title: 'Qwen Image 3.0 Pro 이미지 생성 및 편집'
 description: |
-    - 포스터, 텍스트 레이아웃, 메뉴, 인포그래픽, 고세부 이미지 편집에 적합
+    - 포스터, 텍스트 레이아웃, 메뉴, 인포그래픽 및 고디테일 이미지 편집에 적합
     - 비동기 처리 모드로, 후속 조회를 위한 작업 ID를 반환합니다
-    - 텍스트-이미지 생성을 지원하며, 최대 3장의 참고 이미지를 사용할 수 있고 한 번에 1-6장의 이미지를 생성할 수 있습니다
+    - 텍스트-이미지 생성, 최대 3장의 참고 이미지, 한 번에 1-6장의 이미지 생성을 지원합니다
     - 1K / 2K 해상도와 7가지 일반적인 이미지 비율을 지원합니다
-    - 출력 형식은 PNG로 고정되어 있으며, 사용자 지정 픽셀 크기는 지원하지 않습니다
-    - 제출된 prompt는 플랫폼 민감어 / 안전 검사를 거치며, 위반 콘텐츠는 직접 거부됩니다
+    - 제출된 prompt는 플랫폼 민감어 / 안전 검사를 거치며, 위반 콘텐츠는 직접 거절됩니다
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -26,120 +25,97 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  모델 이름, 고정 값: `"qwen_image_3_pro"`.
+  Model name, fixed value: `"qwen_image_3_pro"`.
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  모델 Parameters 객체.
+  Model parameters object.
 
-  <Expandable title="params 객체 속성">
+  <Expandable title="Properties of the params object">
     <ParamField body="prompt" type="string" required>
-      이미지 생성 또는 편집 지침. 중국어와 영어를 지원합니다.
+      Image generation or editing instruction. Supports Chinese and English.
 
-      Pro 모델은 읽을 수 있는 텍스트, 복잡한 계층 구조, 밀집된 레이아웃, 높은 디테일 표현이 필요한 작업에 적합합니다. 텍스트 내용, 글꼴 스타일, 계층 구조, 위치, 여백, 유지해야 할 참고 이미지의 특징을 구체적으로 설명하는 것이 좋습니다.
+      The Pro model is suitable for tasks that require readable text, complex hierarchy, dense layouts, and high-detail rendering. It is recommended to clearly describe the text content, font style, hierarchy, position, whitespace, and the reference image features that need to be preserved.
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      참고 이미지 배열. 전달하면 이미지-투-이미지 모드를 사용하고, 전달하지 않으면 텍스트-투-이미지 모드를 사용합니다.
+      Array of reference images. When provided, image-to-image mode is used; when omitted, text-to-image mode is used.
 
-      * 최대 3장까지 참고 이미지 허용
-      * 단일 이미지 최대 10MB
-      * jpeg, png, webp 지원
-      * 공개적으로 접근 가능한 URL 또는 완전한 Base64 Data URI 지원
+      * Up to 3 reference images
+      * Maximum size of a single image is 10MB
+      * Supports jpeg, png, webp
+      * Supports publicly accessible URLs or complete Base64 Data URIs
 
       <Warning>
-        이미지 URL은 공용 네트워크에서 직접 접근할 수 있어야 하며, 로그인 상태, Cookie 또는 페이지의 임시 권한에 의존할 수 없습니다.
+        Image URLs must be directly accessible from the public internet and cannot rely on login status, cookies, or temporary page authorization.
       </Warning>
     </ParamField>
 
     <ParamField body="resolution" type="string" default="1K">
-      출력 해상도 등급.
+      Output resolution tier.
 
-      * `1K` - 기본 해상도(기본값)
-      * `2K` - 고해상도, 텍스트, 포스터 및 밀집된 레이아웃에 적합
+      * `1K` - Base resolution (default)
+      * `2K` - High-definition resolution, suitable for text, posters, and dense layouts
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="1:1">
-      출력 이미지의 가로세로 비율.
+      Output image aspect ratio.
 
-      다음 값을 지원합니다:
+      Supported values:
 
-      * `1:1` - 정사각형(기본값)
-      * `3:2` / `2:3` - 클래식 가로형 / 세로형
-      * `4:3` / `3:4` - 표준 가로형 / 세로형
-      * `16:9` / `9:16` - 와이드스크린 가로형 / 세로형
+      * `1:1` - Square (default)
+      * `3:2` / `2:3` - Classic landscape / portrait
+      * `4:3` / `3:4` - Standard landscape / portrait
+      * `16:9` / `9:16` - Widescreen landscape / portrait
 
-      <Warning>
-        현재 인터페이스는 `21:9`를 지원하지 않으며, `1024x1024` 같은 사용자 지정 픽셀 크기도 지원하지 않습니다.
-      </Warning>
     </ParamField>
 
     <ParamField body="output_n" type="integer" default="1">
-      이번 작업에서 생성되는 이미지 수이며, 범위는 `1`에서 `6`까지입니다.
+      Number of images generated for this task, ranging from `1` to `6`.
     </ParamField>
 
-    <ParamField body="output_format" type="string" default="png">
-      출력 형식이며, 현재는 `png`로 고정되어 있습니다.
-
-      <Warning>
-        현재 AIReiter 연동 채널은 JPEG 출력 옵션을 제공하지 않습니다.
-      </Warning>
+    <ParamField body="prompt_extend" type="boolean" default="false">
+      Smart prompt rewriting. Disabled by default to keep results predictable. Set to `true` when smart rewriting is needed.
     </ParamField>
 
-    <ParamField body="prompt_extend" type="boolean" default="true">
-      지능형 프롬프트 확장을 활성화할지 여부입니다. 기본적으로 켜져 있으며, 짧은 프롬프트에 적합합니다.
+    <ParamField body="prompt_extend_mode" type="string" default="direct">
+      Prompt rewriting mode. Effective only when `prompt_extend` is `true`.
+
+      * `direct` - Balanced rewriting, supports both text-to-image and image-to-image
+      * `agent` - Aggressive rewriting, text-to-image only
     </ParamField>
 
     <ParamField body="negative_prompt" type="string">
-      네거티브 프롬프트로, 흐림, 깨진 문자, 혼잡한 레이아웃, 구조 변형처럼 결과에 나타나지 않기를 원하는 내용을 설명하는 데 사용합니다.
+      Negative prompt, used to describe content you do not want to appear in the result, such as blur, garbled text, crowded layout, or structural distortion.
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  호출자가 지정하는 task ID로, 멱등성 제출과 결과 조회에 사용됩니다.
+  Caller-defined task ID, used for idempotent submission and result queries.
 
-  * 길이는 1-64자
-  * 문자, 숫자, 밑줄, 하이픈만 사용하는 것이 좋습니다
-  * 동일한 API Key 아래에서는 중복 사용하지 마십시오
+  * Length: 1-64 characters
+  * It is recommended to use only letters, numbers, underscores, and hyphens
+  * Do not reuse the same ID under the same API Key
 </ParamField>
-
-## 청구
-
-| 청구 항목 | 가격 |
-| --- | ---: |
-| 이미지당 1K 출력 | 3.20 크레딧($0.032) |
-| 이미지당 2K 출력 | 6.00 크레딧($0.060) |
-| 입력 참고 이미지당 | 0.25 크레딧($0.0025) |
-
-청구 공식:
-
-* 1K: `3.20 × output_n + 0.25 × 참고 이미지 수`
-* 2K: `6.00 × output_n + 0.25 × 참고 이미지 수`
-
-예를 들어, 1장의 1K 이미지를 생성하고 1장의 참고 이미지를 전달하면 예상 소모량은 `3.45` 크레딧입니다. 1장의 2K 이미지를 생성하고 1장의 참고 이미지를 전달하면 예상 소모량은 `6.25` 크레딧입니다. 제출 성공 시, 응답의 `estimated_credits`는 예상 소모량이며, 작업 완료 후 조회 응답의 `credits_used`는 실제 소모량입니다. 작업 실패 시에는 최종 청구가 발생하지 않습니다.
 
 ## Response
 
 <ResponseField name="out_task_id" type="string">
-  호출 측 작업 ID로, 작업 상태와 결과를 조회하는 데 사용할 수 있습니다.
+  호출자 작업 ID로, 작업 상태와 결과를 조회하는 데 사용할 수 있습니다.
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  초기 상태이며, 일반적으로 `"pending"`입니다.
-</ResponseField>
-
-<ResponseField name="estimated_credits" type="number">
-  이번 작업의 예상 소모 포인트입니다.
+  초기 상태로, 일반적으로 `"pending"`입니다.
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
   작업 생성 시간, ISO 8601 형식입니다.
 </ResponseField>
 
-## Query Results
+## 검색 결과
 
-After a successful submission, call the query endpoint using the same `out_task_id`:
+제출이 성공한 후, 동일한 `out_task_id`를 사용하여 조회 API를 호출합니다:
 
 ```bash
 curl --request POST \
@@ -151,10 +127,10 @@ curl --request POST \
   }'
 ```
 
-The task status includes `pending`, `processing`, `completed`, and `failed`. After the task is completed, the image array is located in `data.output`, and the actual credits consumed are located in `data.credits_used`.
+작업 상태에는 `pending`, `processing`, `completed`, `failed`가 포함됩니다. 작업이 완료되면 이미지 배열은 `data.output`에 있습니다.
 
 <RequestExample>
-  ```bash cURL (Text-to-Image)
+  ```bash cURL（文生图）
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
@@ -162,19 +138,19 @@ The task status includes `pending`, `processing`, `completed`, and `failed`. Aft
     --data '{
       "model": "qwen_image_3_pro",
       "params": {
-        "prompt": "Design a vertical menu poster for a specialty coffee shop, titled MORNING ROAST, with clear and readable price tiers, modern editorial layout, and realistic coffee photography",
+        "prompt": "프리미엄 커피숍을 위한 세로형 메뉴 포스터를 디자인해 주세요. 제목은 MORNING ROAST로 하고, 가격 단계는 읽기 쉽게 표시하며, 현대적인 편집 디자인과 사실적인 커피 사진 스타일로 표현해 주세요",
         "resolution": "2K",
         "aspect_ratio": "3:4",
         "output_n": 1,
-        "output_format": "png",
         "prompt_extend": true,
-        "negative_prompt": "garbled text, blur, cramped layout, watermark"
+        "prompt_extend_mode": "agent",
+        "negative_prompt": "글자 깨짐, 흐림, 답답한 레이아웃, 워터마크"
       },
       "out_task_id": "qwen_image_3_pro_task_001"
     }'
   ```
 
-  ```bash cURL (Multi-reference Image Editing)
+  ```bash cURL（多参考图编辑）
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
@@ -182,7 +158,7 @@ The task status includes `pending`, `processing`, `completed`, and `failed`. Aft
     --data '{
       "model": "qwen_image_3_pro",
       "params": {
-        "prompt": "Use the product subject from the first image, the color scheme from the second image, and the layout from the third image to generate a premium landscape ad, keeping the label text clear",
+        "prompt": "첫 번째 이미지의 상품 본체, 두 번째 이미지의 색감, 세 번째 이미지의 레이아웃을 사용하여 고급스러운 가로형 광고를 생성하고, 라벨 텍스트는 선명하게 유지해 주세요",
         "image_url": [
           "https://example.com/product.png",
           "https://example.com/color-reference.png",
@@ -190,8 +166,7 @@ The task status includes `pending`, `processing`, `completed`, and `failed`. Aft
         ],
         "resolution": "2K",
         "aspect_ratio": "16:9",
-        "output_n": 1,
-        "output_format": "png"
+        "output_n": 1
       },
       "out_task_id": "qwen_image_3_pro_edit_001"
     }'
@@ -209,7 +184,7 @@ The task status includes `pending`, `processing`, `completed`, and `failed`. Aft
       json={
           "model": "qwen_image_3_pro",
           "params": {
-              "prompt": "Modern tech product launch poster, clear title, well-defined information hierarchy, dark background",
+              "prompt": "현대적인 테크 제품 출시 포스터, 제목은 선명하게, 정보 계층은 명확하게, 어두운 배경",
               "resolution": "2K",
               "aspect_ratio": "16:9",
               "output_n": 1
@@ -231,7 +206,7 @@ The task status includes `pending`, `processing`, `completed`, and `failed`. Aft
     body: JSON.stringify({
       model: "qwen_image_3_pro",
       params: {
-        prompt: "Modern tech product launch poster, clear title, well-defined information hierarchy, dark background",
+        prompt: "현대적인 테크 제품 출시 포스터, 제목은 선명하게, 정보 계층은 명확하게, 어두운 배경",
         resolution: "2K",
         aspect_ratio: "16:9",
         output_n: 1
