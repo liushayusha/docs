@@ -1,0 +1,313 @@
+---
+title: 'Midjourney V8.1 整图再描画'
+description: |
+    - 非同期処理モードで、後続のクエリ用にタスクIDを返します
+    - 元画像の構図を保持したまま、新しいテクスチャまたはスタイルで画像を再生成します
+    - Fast速度 + Standard画質を固定
+    - 1回のリクエストで4枚の画像を生成し、実際には1〜4枚を返します
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  すべてのインターフェースは Bearer Token を使用して認証する必要があります。
+
+  API Key の取得:
+
+  <a href={apiKeyUrl} target="_blank">API Key 管理ページ</a> にアクセスして、API Key を取得してください。
+
+  使用時はリクエストヘッダーに次を追加します:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  モデル名。
+
+  固定値: `"mj_v8_1_retexture"`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  モデルパラメータオブジェクト。
+
+  <Expandable title="params オブジェクトの Properties">
+    <ParamField body="image_url" type="string[]" required>
+      元画像配列。再描画の基礎として1枚の画像を渡す必要があります。
+
+      * 最大1枚の画像
+      * 1枚あたりの最大サイズは10MB
+      * jpeg、png、webpをサポート
+      * 次の2つの形式をサポート:
+        1. 公開アクセス可能なURL
+        2. 完全なBase64 Data URI。例: `data:image/jpeg;base64,/9j/4AAQ...`
+
+      <Warning>
+        URLはインターネットから直接アクセス可能である必要があり、ログイン、Cookie、または一時的なページ認証を要求してはいけません。
+      </Warning>
+    </ParamField>
+
+    <ParamField body="prompt" type="string" required>
+      再描画指示。対象のスタイルまたはテクスチャ変換を説明します。ネイティブのMidjourney構文（--ar、--s、--noなど）をサポートします。
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  呼び出し側が定義するタスクID。冪等な送信と結果の取得に使用します。
+
+  * 長さは1〜64文字
+  * 英字、数字、アンダースコア、ハイフンのみ使用可能
+  * 同じAPI Key内で重複使用できません
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  呼び出し元のタスク ID。結果の取得に使用できます。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  初期状態。固定で `"pending"` です。
+</ResponseField>
+
+<ResponseField name="estimated_credits" type="number">
+  予想消費ポイント。
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  作成時刻、ISO 8601 形式。
+</ResponseField>
+
+## クエリ結果
+
+送信成功後、同じ `out_task_id` を使用して呼び出します:
+
+```bash
+curl --request POST \
+  --url https://aireiter.com/api/openapi/query \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "out_task_id": "mj_v8_1_retexture_task_001"
+  }'
+```
+
+タスクのステータスには `pending`、`processing`、`completed`、`failed` が含まれます。タスク完了後、結果画像は `data.output` にあり、実際に消費されたクレジットは `data.credits_used` にあります。
+
+<RequestExample>
+  ```bash cURL
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "mj_v8_1_retexture",
+      "params": {
+        "prompt": "transform into an oil painting with bold brush strokes",
+        "image_url": ["https://example.com/original.png"]
+      },
+      "out_task_id": "mj_v8_1_retexture_task_001"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "mj_v8_1_retexture",
+      "params": {
+          "prompt": "transform into an oil painting with bold brush strokes",
+          "image_url": ["https://example.com/original.png"]
+      },
+      "out_task_id": "mj_v8_1_retexture_python_001"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const response = await fetch("https://aireiter.com/api/openapi/submit", {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer <token>",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: "mj_v8_1_retexture",
+      params: {
+        prompt: "transform into an oil painting with bold brush strokes",
+        image_url: ["https://example.com/original.png"]
+      },
+      out_task_id: "mj_v8_1_retexture_javascript_001"
+    })
+  });
+
+  console.log(await response.json());
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "fmt"
+      "io"
+      "net/http"
+  )
+
+  func main() {
+      payload := []byte(`{
+        "model":"mj_v8_1_retexture",
+        "params":{
+          "prompt":"transform into an oil painting with bold brush strokes",
+          "image_url":["https://example.com/original.png"]
+        },
+        "out_task_id":"mj_v8_1_retexture_go_001"
+      }`)
+
+      req, _ := http.NewRequest(
+          http.MethodPost,
+          "https://aireiter.com/api/openapi/submit",
+          bytes.NewBuffer(payload),
+      )
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      response, err := http.DefaultClient.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer response.Body.Close()
+
+      body, _ := io.ReadAll(response.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.URI;
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String payload = """
+          {
+            "model": "mj_v8_1_retexture",
+            "params": {
+              "prompt": "transform into an oil painting with bold brush strokes",
+              "image_url": ["https://example.com/original.png"]
+            },
+            "out_task_id": "mj_v8_1_retexture_java_001"
+          }
+          """;
+
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create("https://aireiter.com/api/openapi/submit"))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = HttpClient.newHttpClient().send(
+              request,
+              HttpResponse.BodyHandlers.ofString()
+          );
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $payload = [
+      "model" => "mj_v8_1_retexture",
+      "params" => [
+          "prompt" => "transform into an oil painting with bold brush strokes",
+          "image_url" => ["https://example.com/original.png"]
+      ],
+      "out_task_id" => "mj_v8_1_retexture_php_001"
+  ];
+
+  $ch = curl_init("https://aireiter.com/api/openapi/submit");
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  echo curl_exec($ch);
+  curl_close($ch);
+  ?>
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+  {
+    "statusCode": 200,
+    "message": "",
+    "data": {
+      "task_id": "",
+      "status": "pending",
+      "created_at": "2026-08-12T10:00:00.000Z",
+      "out_task_id": "mj_v8_1_retexture_task_001",
+      "estimated_credits": 0
+    },
+    "ok": true
+  }
+  ```
+
+  ```json 400
+  {
+    "statusCode": 400,
+    "message": "image_url is required",
+    "ok": false
+  }
+  ```
+
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "認証に失敗しました。APIキーを確認してください"
+    }
+  }
+  ```
+
+  ```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "アカウント残高が不足しています。チャージしてから再試行してください"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "サーバー内部エラーが発生しました。しばらくしてから再試行してください"
+    }
+  }
+  ```
+</ResponseExample>

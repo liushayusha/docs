@@ -1,0 +1,32 @@
+[
+  {
+    "id": "__frontmatter__",
+    "hash": "4c4f8416",
+    "index": 0
+  },
+  {
+    "id": "__prologue__",
+    "hash": "5c3ee9f8",
+    "index": 1
+  },
+  {
+    "id": "section-0-authorizations",
+    "hash": "e5ca9803",
+    "index": 2
+  },
+  {
+    "id": "section-1-body",
+    "hash": "45c58171",
+    "index": 3
+  },
+  {
+    "id": "section-2-response",
+    "hash": "e69b377f",
+    "index": 4
+  },
+  {
+    "id": "section-3-查询结果",
+    "hash": "aa496af7",
+    "index": 5
+  }
+]

@@ -115,6 +115,24 @@
                 "pages": [
                   "zh/api-reference/images/flux-2-pro/generation"
                 ]
+              },
+              {
+                "group": "Midjourney V7",
+                "icon": "image",
+                "pages": [
+                  "zh/api-reference/images/midjourney-v7/generation",
+                  "zh/api-reference/images/midjourney-v7/retexture",
+                  "zh/api-reference/images/midjourney-v7/remove-bg"
+                ]
+              },
+              {
+                "group": "Midjourney V8.1",
+                "icon": "image",
+                "pages": [
+                  "zh/api-reference/images/midjourney-v8-1/generation",
+                  "zh/api-reference/images/midjourney-v8-1/retexture",
+                  "zh/api-reference/images/midjourney-v8-1/remove-bg"
+                ]
               }
             ]
           },
@@ -371,6 +389,24 @@
                 "icon": "image",
                 "pages": [
                   "en/api-reference/images/flux-2-pro/generation"
+                ]
+              },
+              {
+                "group": "Midjourney V7",
+                "icon": "image",
+                "pages": [
+                  "en/api-reference/images/midjourney-v7/generation",
+                  "en/api-reference/images/midjourney-v7/retexture",
+                  "en/api-reference/images/midjourney-v7/remove-bg"
+                ]
+              },
+              {
+                "group": "Midjourney V8.1",
+                "icon": "image",
+                "pages": [
+                  "en/api-reference/images/midjourney-v8-1/generation",
+                  "en/api-reference/images/midjourney-v8-1/retexture",
+                  "en/api-reference/images/midjourney-v8-1/remove-bg"
                 ]
               }
             ]
@@ -629,6 +665,24 @@
                 "pages": [
                   "ja/api-reference/images/flux-2-pro/generation"
                 ]
+              },
+              {
+                "group": "Midjourney V7",
+                "icon": "image",
+                "pages": [
+                  "ja/api-reference/images/midjourney-v7/generation",
+                  "ja/api-reference/images/midjourney-v7/retexture",
+                  "ja/api-reference/images/midjourney-v7/remove-bg"
+                ]
+              },
+              {
+                "group": "Midjourney V8.1",
+                "icon": "image",
+                "pages": [
+                  "ja/api-reference/images/midjourney-v8-1/generation",
+                  "ja/api-reference/images/midjourney-v8-1/retexture",
+                  "ja/api-reference/images/midjourney-v8-1/remove-bg"
+                ]
               }
             ]
           },
@@ -885,6 +939,24 @@
                 "icon": "image",
                 "pages": [
                   "ko/api-reference/images/flux-2-pro/generation"
+                ]
+              },
+              {
+                "group": "Midjourney V7",
+                "icon": "image",
+                "pages": [
+                  "ko/api-reference/images/midjourney-v7/generation",
+                  "ko/api-reference/images/midjourney-v7/retexture",
+                  "ko/api-reference/images/midjourney-v7/remove-bg"
+                ]
+              },
+              {
+                "group": "Midjourney V8.1",
+                "icon": "image",
+                "pages": [
+                  "ko/api-reference/images/midjourney-v8-1/generation",
+                  "ko/api-reference/images/midjourney-v8-1/retexture",
+                  "ko/api-reference/images/midjourney-v8-1/remove-bg"
                 ]
               }
             ]

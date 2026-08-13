@@ -1,0 +1,302 @@
+---
+title: 'Midjourney V7 Remove Background'
+description: |
+    - Asynchronous processing mode, returns a task ID for subsequent queries
+    - Remove the image background with one click, generating a clean subject cutout
+    - No prompt required, just upload one image
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  All endpoints require Bearer Token authentication.
+
+  Get the API key:
+
+  Visit the <a href={apiKeyUrl} target="_blank">API Key management page</a> to get your API key.
+
+  When using it, add the following to the request header:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  Model name.
+
+  Fixed value: `"mj_v7_remove_bg"`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  Model parameters object.
+
+  <Expandable title="params Object Properties">
+    <ParamField body="image_url" type="string[]" required>
+      Array of images to be processed. Exactly 1 image must be provided.
+
+      * Up to 1 image
+      * Maximum size per image: 10MB
+      * Supports jpeg, png, webp
+      * Supports the following two formats:
+        1. Publicly accessible URL
+        2. Complete Base64 Data URI, for example `data:image/jpeg;base64,/9j/4AAQ...`
+
+      <Warning>
+        The URL must be directly accessible from the public internet and cannot require login, cookies, or temporary page authorization.
+      </Warning>
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  Custom task ID from the caller, used for idempotent submission and result retrieval.
+
+  * Length: 1-64 characters
+  * Only letters, numbers, underscores, and hyphens are allowed
+  * Cannot be reused under the same API Key
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  Caller task ID, which can be used to query the result.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Initial status, fixed as `"pending"`.
+</ResponseField>
+
+<ResponseField name="estimated_credits" type="number">
+  Estimated credits consumed.
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  Creation time, in ISO 8601 format.
+</ResponseField>
+
+## Query Results
+
+After a successful submission, call the endpoint with the same `out_task_id`:
+
+```bash
+curl --request POST \
+  --url https://aireiter.com/api/openapi/query \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "out_task_id": "mj_v7_removebg_task_001"
+  }'
+```
+
+Task statuses include `pending`, `processing`, `completed`, and `failed`. After the task is completed, the result image is located in `data.output`, and the actual credits used are located in `data.credits_used`.
+
+<RequestExample>
+  ```bash cURL
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "mj_v7_remove_bg",
+      "params": {
+        "image_url": ["https://example.com/product-photo.png"]
+      },
+      "out_task_id": "mj_v7_removebg_task_001"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "mj_v7_remove_bg",
+      "params": {
+          "image_url": ["https://example.com/product-photo.png"]
+      },
+      "out_task_id": "mj_v7_removebg_python_001"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const response = await fetch("https://aireiter.com/api/openapi/submit", {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer <token>",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: "mj_v7_remove_bg",
+      params: {
+        image_url: ["https://example.com/product-photo.png"]
+      },
+      out_task_id: "mj_v7_removebg_javascript_001"
+    })
+  });
+
+  console.log(await response.json());
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "fmt"
+      "io"
+      "net/http"
+  )
+
+  func main() {
+      payload := []byte(`{
+        "model":"mj_v7_remove_bg",
+        "params":{
+          "image_url":["https://example.com/product-photo.png"]
+        },
+        "out_task_id":"mj_v7_removebg_go_001"
+      }`)
+
+      req, _ := http.NewRequest(
+          http.MethodPost,
+          "https://aireiter.com/api/openapi/submit",
+          bytes.NewBuffer(payload),
+      )
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      response, err := http.DefaultClient.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer response.Body.Close()
+
+      body, _ := io.ReadAll(response.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.URI;
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String payload = """
+          {
+            "model": "mj_v7_remove_bg",
+            "params": {
+              "image_url": ["https://example.com/product-photo.png"]
+            },
+            "out_task_id": "mj_v7_removebg_java_001"
+          }
+          """;
+
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create("https://aireiter.com/api/openapi/submit"))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = HttpClient.newHttpClient().send(
+              request,
+              HttpResponse.BodyHandlers.ofString()
+          );
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $payload = [
+      "model" => "mj_v7_remove_bg",
+      "params" => [
+          "image_url" => ["https://example.com/product-photo.png"]
+      ],
+      "out_task_id" => "mj_v7_removebg_php_001"
+  ];
+
+  $ch = curl_init("https://aireiter.com/api/openapi/submit");
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  echo curl_exec($ch);
+  curl_close($ch);
+  ?>
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+  {
+    "statusCode": 200,
+    "message": "",
+    "data": {
+      "task_id": "",
+      "status": "pending",
+      "created_at": "2026-08-12T10:00:00.000Z",
+      "out_task_id": "mj_v7_removebg_task_001",
+      "estimated_credits": 0
+    },
+    "ok": true
+  }
+  ```
+
+  ```json 400
+  {
+    "statusCode": 400,
+    "message": "image_url is required",
+    "ok": false
+  }
+  ```
+
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "Authentication failed, please check your API key"
+    }
+  }
+  ```
+
+  ```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "Insufficient account balance, please top up and try again"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "Internal server error, please try again later"
+    }
+  }
+  ```
+</ResponseExample>
