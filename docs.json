@@ -133,6 +133,13 @@
                   "zh/api-reference/images/midjourney-v8-1/retexture",
                   "zh/api-reference/images/midjourney-v8-1/remove-bg"
                 ]
+              },
+              {
+                "group": "Krea 2 Turbo",
+                "icon": "image",
+                "pages": [
+                  "zh/api-reference/images/krea-2-turbo/generation"
+                ]
               }
             ]
           },
@@ -407,6 +414,13 @@
                   "en/api-reference/images/midjourney-v8-1/generation",
                   "en/api-reference/images/midjourney-v8-1/retexture",
                   "en/api-reference/images/midjourney-v8-1/remove-bg"
+                ]
+              },
+              {
+                "group": "Krea 2 Turbo",
+                "icon": "image",
+                "pages": [
+                  "en/api-reference/images/krea-2-turbo/generation"
                 ]
               }
             ]
@@ -683,6 +697,13 @@
                   "ja/api-reference/images/midjourney-v8-1/retexture",
                   "ja/api-reference/images/midjourney-v8-1/remove-bg"
                 ]
+              },
+              {
+                "group": "Krea 2 Turbo",
+                "icon": "image",
+                "pages": [
+                  "ja/api-reference/images/krea-2-turbo/generation"
+                ]
               }
             ]
           },
@@ -957,6 +978,13 @@
                   "ko/api-reference/images/midjourney-v8-1/generation",
                   "ko/api-reference/images/midjourney-v8-1/retexture",
                   "ko/api-reference/images/midjourney-v8-1/remove-bg"
+                ]
+              },
+              {
+                "group": "Krea 2 Turbo",
+                "icon": "image",
+                "pages": [
+                  "ko/api-reference/images/krea-2-turbo/generation"
                 ]
               }
             ]
