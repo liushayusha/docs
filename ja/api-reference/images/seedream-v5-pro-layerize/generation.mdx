@@ -1,0 +1,689 @@
+---
+title: 'Seedream 5.0 Pro Layerize レイヤー分解'
+description: |
+    - 非同期処理モードで、後続の照会に使用するタスクIDを返します
+    - 1枚の画像を、個別に編集可能な複数の透明PNGレイヤーに分解します
+    - 各レイヤーには、名前、説明、z_index、bounding_boxが含まれます
+    - 後払い課金モード: 提出時に残高を確認し、タスク完了後に実際の出力に基づいて精算します
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  すべてのAPIは認証にBearer Tokenを使用する必要があります
+
+  API Keyを取得:
+
+  <a href={apiKeyUrl} target="_blank">API Key管理ページ</a>にアクセスして、API Keyを取得してください
+
+  使用時はリクエストヘッダーに次を追加します:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  モデル名
+
+  固定値: `"seedream_v5_pro_layerize"`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  モデルパラメータオブジェクト
+
+  <Expandable title="params オブジェクト属性">
+    <ParamField body="image_url" type="string" required>
+      分解対象の元画像 URL
+
+      * 必須で、**1枚**のみ送信できます
+      * 次の2つの形式をサポートします:
+        1. 公開アクセス可能な URL
+        2. Base64 エンコード形式
+           * 完全な Data URI 形式を使用する必要があります: `data:image/{格式};base64,{base64数据}`
+           * サポートされる画像形式: jpeg、png、webp
+           * 例: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+           * ⚠️ 注意: `data:image/jpeg;base64,` プレフィックス部分を含める必要があります。base64 画像サイズは 10MB を超えてはいけません
+      * 画像の最小サイズは ≥ 300px である必要があります
+    </ParamField>
+
+    <ParamField body="prompt" type="string">
+      テキストプロンプト（オプション）
+
+      レイヤー名と説明の生成言語を指定するために使用できます。たとえば `Return name and description in english.` を入力すると、レイヤー名と説明が英語で返されます。
+
+      指定しない場合はデフォルトの言語が使用されます。
+    </ParamField>
+
+    <ParamField body="image_size" type="string" default="auto">
+      出力解像度の段階
+
+      * `auto` - 自動選択（デフォルト）
+      * `auto_1K` - 1K 解像度
+      * `auto_1.5K` - 1.5K 解像度
+      * `auto_2K` - 2K 解像度
+    </ParamField>
+
+    <ParamField body="enhance_prompt_mode" type="string" default="standard">
+      プロンプト強化モード（API のみ利用可能）
+
+      * `standard` - 標準モード（デフォルト）
+      * `fast` - 高速モード
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="callback_url" type="string">
+  タスク完了後のコールバック URL
+</ParamField>
+
+<ParamField body="metadata" type="object">
+  カスタムメタデータ。元の内容をそのまま返します
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  送信元タスク ID
+
+  ユーザー定義のタスク識別子。必須
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  発行元のTask ID。結果の照会に使用できます
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  初期状態。`"pending"` に固定されています
+</ResponseField>
+
+<ResponseField name="estimated_credits" type="number">
+  推定消費クレジット
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  作成時刻（ISO形式）
+</ResponseField>
+
+<RequestExample>
+  ```bash cURL
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "seedream_v5_pro_layerize",
+      "params": {
+        "image_url": "https://static.aireiter.com/tmp/seedream_v5_pro_layerize/20260811/qSgcBvY4mLLuR_XPBEKfU.png",
+        "image_size": "auto",
+        "prompt": "名前と説明を英語で返してください。"
+      },
+      "out_task_id": "my_task_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "seedream_v5_pro_layerize",
+      "params": {
+          "image_url": "https://static.aireiter.com/tmp/seedream_v5_pro_layerize/20260811/qSgcBvY4mLLuR_XPBEKfU.png",
+          "image_size": "auto",
+          "prompt": "名前と説明を英語で返してください。"
+      },
+      "out_task_id": "my_task_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "seedream_v5_pro_layerize",
+    params: {
+      image_url: "https://static.aireiter.com/tmp/seedream_v5_pro_layerize/20260811/qSgcBvY4mLLuR_XPBEKfU.png",
+      image_size: "auto",
+      prompt: "名前と説明を英語で返してください。"
+    },
+    out_task_id: "my_task_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "seedream_v5_pro_layerize",
+          "params": map[string]interface{}{
+              "image_url":  "https://static.aireiter.com/tmp/seedream_v5_pro_layerize/20260811/qSgcBvY4mLLuR_XPBEKfU.png",
+              "image_size": "auto",
+              "prompt":     "名前と説明を英語で返してください。",
+          },
+          "out_task_id": "my_task_123456",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/openapi/submit";
+
+          String payload = """
+          {
+            "model": "seedream_v5_pro_layerize",
+            "params": {
+              "image_url": "https://static.aireiter.com/tmp/seedream_v5_pro_layerize/20260811/qSgcBvY4mLLuR_XPBEKfU.png",
+              "image_size": "auto",
+              "prompt": "名前と説明を英語で返してください。"
+            },
+            "out_task_id": "my_task_123456"
+          }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = [
+      "model" => "seedream_v5_pro_layerize",
+      "params" => [
+          "image_url" => "https://static.aireiter.com/tmp/seedream_v5_pro_layerize/20260811/qSgcBvY4mLLuR_XPBEKfU.png",
+          "image_size" => "auto",
+          "prompt" => "名前と説明を英語で返してください。"
+      ],
+      "out_task_id" => "my_task_123456"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url = URI("https://aireiter.com/api/openapi/submit")
+
+  payload = {
+    model: "seedream_v5_pro_layerize",
+    params: {
+      image_url: "https://static.aireiter.com/tmp/seedream_v5_pro_layerize/20260811/qSgcBvY4mLLuR_XPBEKfU.png",
+      image_size: "auto",
+      prompt: "名前と説明を英語で返してください。"
+    },
+    out_task_id: "my_task_123456"
+  }
+
+  http = Net::HTTP.new(url.host, url.port)
+
+  request = Net::HTTP::Post.new(url)
+  request["Authorization"] = "Bearer <token>"
+  request["Content-Type"] = "application/json"
+  request.body = payload.to_json
+
+  response = http.request(request)
+  puts response.body
+  ```
+
+  ```swift Swift
+  import Foundation
+
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
+
+  let payload: [String: Any] = [
+      "model": "seedream_v5_pro_layerize",
+      "params": [
+          "image_url": "https://static.aireiter.com/tmp/seedream_v5_pro_layerize/20260811/qSgcBvY4mLLuR_XPBEKfU.png",
+          "image_size": "auto",
+          "prompt": "名前と説明を英語で返してください。"
+      ] as [String: Any],
+      "out_task_id": "my_task_123456"
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      if let error = error {
+          print("Error: \(error)")
+          return
+      }
+
+      if let data = data, let responseString = String(data: data, encoding: .utf8) {
+          print(responseString)
+      }
+  }
+
+  task.resume()
+  ```
+
+  ```csharp C#
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url = "https://aireiter.com/api/openapi/submit";
+
+          var payload = @"{
+              ""model"": ""seedream_v5_pro_layerize"",
+              ""params"": {
+                  ""image_url"": ""https://static.aireiter.com/tmp/seedream_v5_pro_layerize/20260811/qSgcBvY4mLLuR_XPBEKfU.png"",
+                  ""image_size"": ""auto"",
+                  ""prompt"": ""名前と説明を英語で返してください。""
+              },
+              ""out_task_id"": ""my_task_123456""
+          }";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+
+          var content = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          var result = await response.Content.ReadAsStringAsync();
+
+          Console.WriteLine(result);
+      }
+  }
+  ```
+
+  ```c C
+  #include <stdio.h>
+  #include <curl/curl.h>
+
+  int main(void) {
+      CURL *curl;
+      CURLcode res;
+
+      curl_global_init(CURL_GLOBAL_DEFAULT);
+      curl = curl_easy_init();
+
+      if(curl) {
+          const char *url = "https://aireiter.com/api/openapi/submit";
+          const char *payload = "{"
+              "\"model\":\"seedream_v5_pro_layerize\","
+              "\"params\":{"
+                  "\"image_url\":\"https://static.aireiter.com/tmp/seedream_v5_pro_layerize/20260811/qSgcBvY4mLLuR_XPBEKfU.png\","
+                  "\"image_size\":\"auto\","
+                  "\"prompt\":\"名前と説明を英語で返してください。\""
+              "},"
+              "\"out_task_id\":\"my_task_123456\""
+          "}";
+
+          struct curl_slist *headers = NULL;
+          headers = curl_slist_append(headers, "Authorization: Bearer <token>");
+          headers = curl_slist_append(headers, "Content-Type: application/json");
+
+          curl_easy_setopt(curl, CURLOPT_URL, url);
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
+          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+          res = curl_easy_perform(curl);
+
+          if(res != CURLE_OK) {
+              fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                      curl_easy_strerror(res));
+          }
+
+          curl_slist_free_all(headers);
+          curl_easy_cleanup(curl);
+      }
+
+      curl_global_cleanup();
+      return 0;
+  }
+  ```
+
+  ```dart Dart
+  import 'dart:convert';
+  import 'package:http/http.dart' as http;
+
+  void main() async {
+    final url = Uri.parse('https://aireiter.com/api/openapi/submit');
+
+    final payload = {
+      'model': 'seedream_v5_pro_layerize',
+      'params': {
+        'image_url': 'https://static.aireiter.com/tmp/seedream_v5_pro_layerize/20260811/qSgcBvY4mLLuR_XPBEKfU.png',
+        'image_size': 'auto',
+        'prompt': '名前と説明を英語で返してください。'
+      },
+      'out_task_id': 'my_task_123456'
+    };
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer <token>',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(payload),
+    );
+
+    print(response.body);
+  }
+  ```
+
+  ```r R
+  library(httr)
+  library(jsonlite)
+
+  url <- "https://aireiter.com/api/openapi/submit"
+
+  payload <- list(
+    model = "seedream_v5_pro_layerize",
+    params = list(
+      image_url = "https://static.aireiter.com/tmp/seedream_v5_pro_layerize/20260811/qSgcBvY4mLLuR_XPBEKfU.png",
+      image_size = "auto",
+      prompt = "名前と説明を英語で返してください。"
+    ),
+    out_task_id = "my_task_123456"
+  )
+
+  response <- POST(
+    url,
+    add_headers(
+      Authorization = "Bearer <token>",
+      `Content-Type` = "application/json"
+    ),
+    body = toJSON(payload, auto_unbox = TRUE),
+    encode = "raw"
+  )
+
+  cat(content(response, "text"))
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "out_task_id": "my_task_123456",
+        "status": "pending",
+        "estimated_credits": 0,
+        "created_at": "2026-08-12T06:03:28.242Z"
+    }
+}
+  ```
+
+  ```json 400
+    {
+        "statusCode": 400,
+        "message": "リクエストパラメータが無効です",
+        "ok": false
+    }
+  ```
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "認証に失敗しました。APIキーを確認してください"
+    }
+  }
+  ```
+```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "アカウント残高が不足しています。チャージしてから再試行してください"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "サーバー内部エラーです。しばらくしてから再試行してください"
+    }
+  }
+  ```
+</ResponseExample>
+
+## タスク結果の取得
+
+タスク送信後、`POST /api/openapi/query` エンドポイントを使用してタスク状態をポーリングします。タスク完了後、`output` フィールドはレイヤー一覧を返します。
+
+<RequestExample>
+  ```bash cURL
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/query \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "out_task_id": "my_task_123456"
+    }'
+  ```
+</RequestExample>
+
+### クエリレスポンス - レイヤー出力構造
+
+タスク完了後、`output` はレイヤーオブジェクトの配列で、各レイヤーには `url` と `metadata` が含まれます:
+
+<ResponseField name="output" type="array">
+  レイヤー一覧。各要素は1つのレイヤーオブジェクトです
+
+  <Expandable title="レイヤーオブジェクトの属性">
+    <ResponseField name="url" type="string">
+      このレイヤーの透過 PNG 画像 URL
+    </ResponseField>
+
+    <ResponseField name="metadata" type="object">
+      レイヤーメタデータ
+
+      <Expandable title="metadata の属性">
+        <ResponseField name="kind" type="string">
+          固定値 `"layer"`。これはレイヤー出力であることを示します
+        </ResponseField>
+
+        <ResponseField name="z_index" type="number">
+          レイヤーの階層インデックス
+
+          * `z_index = 0`: 最下層（再構成された完全な背景画像）、`bounding_box` は `null`
+          * `z_index ≥ 1`: 前景レイヤー。奥から手前の順に並びます
+        </ResponseField>
+
+        <ResponseField name="bounding_box" type="object | null">
+          元画像内におけるレイヤーの位置領域
+
+          最下層（z_index=0）は `null` で、それ以外のレイヤーは座標オブジェクトを返します:
+
+          <Expandable title="bounding_box の属性">
+            <ResponseField name="absolute" type="array">
+              絶対ピクセル座標 `[x1, y1, x2, y2]`。元画像の解像度に基づきます
+            </ResponseField>
+
+            <ResponseField name="normalized" type="array">
+              正規化座標 `[x1, y1, x2, y2]`。範囲は 0–1000 です
+            </ResponseField>
+          </Expandable>
+        </ResponseField>
+
+        <ResponseField name="name" type="string | null">
+          レイヤー名（例: `"Sky background"`、`"Moss platform"`）
+        </ResponseField>
+
+        <ResponseField name="description" type="string | null">
+          レイヤーの説明（例: `"Soft light blue sky with scattered fluffy white clouds"`）
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="credits_used" type="number">
+  実際に消費されたクレジット
+</ResponseField>
+
+### クエリレスポンス例
+
+<ResponseExample>
+  ```json 200
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "out_task_id": "my_task_123456",
+        "status": "completed",
+        "created_at": "2026-08-12T06:03:28.000Z",
+        "completed_at": "2026-08-12T06:05:41.000Z",
+        "credits_used": 81,
+        "output": [
+            {
+                "url": "https://static.aireiter.com/content/model-seo/seedream-v5-pro-layerize/layer-0.png",
+                "metadata": {
+                    "kind": "layer",
+                    "z_index": 0,
+                    "bounding_box": null,
+                    "name": null,
+                    "description": null
+                }
+            },
+            {
+                "url": "https://static.aireiter.com/content/model-seo/seedream-v5-pro-layerize/layer-1.png",
+                "metadata": {
+                    "kind": "layer",
+                    "z_index": 1,
+                    "bounding_box": {
+                        "absolute": [0, 142, 928, 535],
+                        "normalized": [0, 115, 999, 433]
+                    },
+                    "name": "Sky background",
+                    "description": "Soft light blue sky with scattered fluffy white clouds"
+                }
+            },
+            {
+                "url": "https://static.aireiter.com/content/model-seo/seedream-v5-pro-layerize/layer-2.png",
+                "metadata": {
+                    "kind": "layer",
+                    "z_index": 2,
+                    "bounding_box": {
+                        "absolute": [761, 1075, 849, 1144],
+                        "normalized": [820, 873, 914, 928]
+                    },
+                    "name": "Water and bubbles",
+                    "description": "Clear calm water surface with transparent floating water droplets and bubbles"
+                }
+            },
+            {
+                "url": "https://static.aireiter.com/content/model-seo/seedream-v5-pro-layerize/layer-3.png",
+                "metadata": {
+                    "kind": "layer",
+                    "z_index": 3,
+                    "bounding_box": {
+                        "absolute": [28, 962, 887, 1141],
+                        "normalized": [30, 781, 955, 925]
+                    },
+                    "name": "Moss platform",
+                    "description": "Lush green moss growing above the water surface"
+                }
+            }
+        ]
+    }
+}
+  ```
+
+  > 上記の例では 4 つのレイヤーのみを示していますが、実際の返却は 2〜17 個のレイヤーです。`z_index = 0` は最下層の背景画像で、それ以外は階層順に奥から手前へ並びます。
+</ResponseExample>
