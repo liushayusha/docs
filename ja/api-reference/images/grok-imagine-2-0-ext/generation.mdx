@@ -1,0 +1,154 @@
+---
+title: 'Grok Imagine 2.0 Ext 画像生成'
+description: |
+    - 非同期のテキストから画像生成。送信後、タスク照会インターフェースを通じて結果を取得します
+    - 7種類の一般的な画像比率をサポートします
+    - 1回で1〜12枚の画像生成をサポートし、数量は範囲内で任意の整数を使用できます
+    - テキストから画像生成のみをサポートし、参考画像の入力はサポートしません
+    - 送信された prompt はプラットフォームの敏感語 / 安全審査を通過し、違反コンテンツは直接拒否されます
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  すべてのインターフェースでは Bearer Token 認証が必要です。
+
+  <a href={apiKeyUrl} target="_blank">API Key 管理ページ</a> にアクセスして API Key を取得し、リクエストヘッダーに次を追加してください:
+
+  ```text
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  モデル名。固定値: `"grok_imagine_2_0_ext"`。
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  モデルパラメーターオブジェクト。
+
+  <Expandable title="params オブジェクトの属性">
+    <ParamField body="prompt" type="string" required>
+      画像生成指示。中国語と英語に対応しており、前後の空白を除去した後に空であってはなりません。
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="1:1">
+      出力画像のアスペクト比。対応: 
+
+      * `1:1`（デフォルト）
+      * `2:3` / `3:2`
+      * `3:4` / `4:3`
+      * `9:16` / `16:9`
+
+      <Warning>
+        `auto`、カスタムのピクセルサイズ、またはその他の比率はサポートされていません。
+      </Warning>
+    </ParamField>
+
+    <ParamField body="output_n" type="integer" default="1">
+      出力画像の枚数。値の範囲は `1` から `12` です。
+
+      範囲内の任意の整数を使用できます。たとえば `3`、`5`、`7` で、`1`、`4`、`8`、`12` に限りません。
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  呼び出し元がカスタムするタスクID。冪等な送信と結果の取得に使用します。
+
+  * 長さは1〜64文字
+  * 英字、数字、アンダースコア、ハイフンのみサポート
+  * 同じAPI Keyでの重複使用は不可
+</ParamField>
+
+<Warning>
+  このモデルはテキストから画像の生成のみをサポートします。`image_url`、`resolution`、`quality`、`size`、または出力形式のパラメーターは渡さないでください。
+</Warning>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  呼び出し元のタスクID。タスクの状態と結果の照会に使用できます。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  初期状態で、通常は `"pending"` です。
+</ResponseField>
+
+<ResponseField name="estimated_credits" type="number">
+  今回のタスクの推定消費クレジット。
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  タスク作成時間。ISO 8601 形式。
+</ResponseField>
+
+## クエリ結果
+
+送信が成功した後、[タスク状態の取得](/en/api-reference/tasks/status) を呼び出し、同じ `out_task_id` を使用してクエリします。タスク完了後、画像結果は `data.output` にあります。
+
+<RequestExample>
+  ```bash cURL
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "grok_imagine_2_0_ext",
+      "params": {
+        "prompt": "白い陶器の皿の上の赤いリンゴ、クリーンなスタジオ撮影の製品画像",
+        "aspect_ratio": "1:1",
+        "output_n": 3
+      },
+      "out_task_id": "grok_image_2_ext_001"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  response = requests.post(
+      "https://aireiter.com/api/openapi/submit",
+      headers={
+          "Authorization": "Bearer <token>",
+          "Content-Type": "application/json"
+      },
+      json={
+          "model": "grok_imagine_2_0_ext",
+          "params": {
+              "prompt": "日の出の時間帯の野花の草原にあるガラス温室、エディトリアル写真スタイル",
+              "aspect_ratio": "2:3",
+              "output_n": 3
+          },
+          "out_task_id": "grok_image_2_ext_python_001"
+      }
+  )
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const response = await fetch("https://aireiter.com/api/openapi/submit", {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer <token>",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: "grok_imagine_2_0_ext",
+      params: {
+        prompt: "夜の雨の中の未来都市の通り、ネオンの反射",
+        aspect_ratio: "16:9",
+        output_n: 1
+      },
+      out_task_id: "grok_image_2_ext_js_001"
+    })
+  });
+
+  console.log(await response.json());
+  ```
+</RequestExample>

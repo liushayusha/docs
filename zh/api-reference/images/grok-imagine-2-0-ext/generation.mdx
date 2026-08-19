@@ -1,0 +1,155 @@
+---
+title: 'Grok Imagine 2.0 Ext 图片生成'
+description: |
+    - 异步文生图，提交后通过任务查询接口获取结果
+    - 支持 7 种常用图片比例
+    - 单次支持生成 1-12 张图片，数量可使用范围内任意整数
+    - 仅支持文生图，不支持参考图输入
+    - 提交的 prompt 会经过平台敏感词 / 安全审核，违规内容会被直接拒绝
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  所有接口均需要使用 Bearer Token 认证。
+
+  访问 <a href={apiKeyUrl} target="_blank">API Key 管理页面</a> 获取 API Key，并在请求头中添加：
+
+  ```text
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  模型名称，固定值：`"grok_imagine_2_0_ext"`。
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  模型参数对象。
+
+  <Expandable title="params 对象属性">
+    <ParamField body="prompt" type="string" required>
+      图片生成指令。支持中文和英文，去除首尾空格后不能为空。
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="1:1">
+      输出图片宽高比。支持：
+
+      * `1:1`（默认）
+      * `2:3` / `3:2`
+      * `3:4` / `4:3`
+      * `9:16` / `16:9`
+
+      <Warning>
+        不支持 `auto`、自定义像素尺寸或其他比例。
+      </Warning>
+    </ParamField>
+
+    <ParamField body="output_n" type="integer" default="1">
+      输出图片数量，取值范围为 `1` 到 `12`。
+
+      范围内任意整数均可使用，例如 `3`、`5`、`7`，不限于 `1`、`4`、`8`、`12`。
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  调用方自定义任务 ID，用于幂等提交和查询结果。
+
+  * 长度为 1-64 个字符
+  * 仅支持字母、数字、下划线和连字符
+  * 同一个 API Key 下不能重复使用
+</ParamField>
+
+<Warning>
+  此模型仅支持文生图。不要传入 `image_url`、`resolution`、`quality`、`size` 或输出格式参数。
+</Warning>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  调用方任务 ID，可用于查询任务状态和结果。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  初始状态，通常为 `"pending"`。
+</ResponseField>
+
+<ResponseField name="estimated_credits" type="number">
+  本次任务的预估消耗积分。
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  任务创建时间，ISO 8601 格式。
+</ResponseField>
+
+## 查询结果
+
+提交成功后，调用 [获取任务状态](/zh/api-reference/tasks/status)，使用相同的 `out_task_id` 查询。任务完成后，图片结果位于 `data.output`。
+
+<RequestExample>
+  ```bash cURL
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "grok_imagine_2_0_ext",
+      "params": {
+        "prompt": "白色陶瓷盘上的红苹果，干净的棚拍产品图",
+        "aspect_ratio": "1:1",
+        "output_n": 3
+      },
+      "out_task_id": "grok_image_2_ext_001"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  response = requests.post(
+      "https://aireiter.com/api/openapi/submit",
+      headers={
+          "Authorization": "Bearer <token>",
+          "Content-Type": "application/json"
+      },
+      json={
+          "model": "grok_imagine_2_0_ext",
+          "params": {
+              "prompt": "日出时分野花草地中的玻璃温室，编辑摄影风格",
+              "aspect_ratio": "2:3",
+              "output_n": 3
+          },
+          "out_task_id": "grok_image_2_ext_python_001"
+      }
+  )
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const response = await fetch("https://aireiter.com/api/openapi/submit", {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer <token>",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: "grok_imagine_2_0_ext",
+      params: {
+        prompt: "夜晚雨中的未来城市街道，霓虹灯反射",
+        aspect_ratio: "16:9",
+        output_n: 1
+      },
+      out_task_id: "grok_image_2_ext_js_001"
+    })
+  });
+
+  console.log(await response.json());
+  ```
+</RequestExample>

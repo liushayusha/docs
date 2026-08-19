@@ -1,0 +1,179 @@
+---
+title: 'Grok Imagine Image 2.0 이미지 생성 및 편집'
+description: |
+    - 비동기 이미지 생성, 제출 후 작업 조회 인터페이스를 통해 결과를 가져옵니다
+    - 텍스트-이미지, 이미지-이미지 및 이미지 편집을 지원합니다
+    - 1K / 2K, Low / Medium 품질 및 최대 10장 출력을 지원합니다
+    - 최대 3장의 참조 이미지와 14가지 가로세로 비율 옵션을 지원합니다
+    - 제출된 prompt는 플랫폼 민감어 / 안전 검토를 거치며, 위반 콘텐츠는 직접 거부됩니다
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  모든 엔드포인트는 Bearer Token 인증이 필요합니다.
+
+  <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a>에 접속하여 API Key를 얻고, 요청 헤더에 다음을 추가하세요:
+
+  ```text
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  Model name, fixed value: `"grok_imagine_image_2_0"`.
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  Model parameter object.
+
+  <Expandable title="params Object Properties">
+    <ParamField body="prompt" type="string" required>
+      Image generation or editing instructions. Supports Chinese and English.
+
+      When using multiple reference images, you can use `<IMAGE_0>`, `<IMAGE_1>`, and `<IMAGE_2>` in the prompt to refer to the corresponding images.
+    </ParamField>
+
+    <ParamField body="image_url" type="string[]">
+      Reference image array. Omitted for text-to-image; after being passed in, it automatically uses image-to-image or image editing mode.
+
+      * Up to 3 images
+      * Maximum 10MB per image
+      * Supports JPG, PNG, and WebP
+      * Supports public URLs, complete Base64 Data URIs, or plain Base64
+
+      <Warning>
+        When using a URL, the image must be directly accessible from the public internet and cannot depend on login status, cookies, or temporary page authorization.
+      </Warning>
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="auto">
+      Output image aspect ratio. Supports:
+
+      * `auto` (default)
+      * `1:1`
+      * `4:3` / `3:4`
+      * `3:2` / `2:3`
+      * `16:9` / `9:16`
+      * `2:1` / `1:2`
+      * `19.5:9` / `9:19.5`
+      * `20:9` / `9:20`
+
+      Custom `WIDTHxHEIGHT` pixel dimensions are not supported.
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="1K">
+      Output resolution level: `1K` (default) or `2K`. `4K` is not supported.
+    </ParamField>
+
+    <ParamField body="quality" type="string" default="medium">
+      Generation quality level:
+
+      * `low` - faster and lower cost
+      * `medium` - better details (default)
+    </ParamField>
+
+    <ParamField body="output_n" type="integer" default="1">
+      Number of output images, ranging from `1` to `10`. Each image is billed separately.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  Caller-defined task ID, used for idempotent submission and result querying.
+
+  * Length: 1-64 characters
+  * Only letters, numbers, underscores, and hyphens are supported
+  * Cannot be reused under the same API Key
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  호출자 작업 ID로, 작업 상태와 결과를 조회하는 데 사용할 수 있습니다.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  초기 상태로, 보통 `"pending"`입니다.
+</ResponseField>
+
+<ResponseField name="estimated_credits" type="number">
+  이번 작업의 예상 소모 포인트입니다.
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  작업 생성 시간, ISO 8601 형식입니다.
+</ResponseField>
+
+## 查询结果
+
+제출 성공 후, [작업 상태 가져오기](/en/api-reference/tasks/status)를 호출하고, 동일한 `out_task_id`를 사용하여 조회합니다. 작업이 완료되면 이미지 결과는 `data.output`에 있습니다.
+
+<RequestExample>
+  ```bash cURL（文生图）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "grok_imagine_image_2_0",
+      "params": {
+        "prompt": "비 오는 밤 도쿄 거리, 젖은 도로에 반사되는 네온사인, 영화 같은 사진",
+        "aspect_ratio": "16:9",
+        "resolution": "2K",
+        "quality": "medium",
+        "output_n": 1
+      },
+      "out_task_id": "grok_image_2_text_001"
+    }'
+  ```
+
+  ```bash cURL（图片编辑）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "grok_imagine_image_2_0",
+      "params": {
+        "prompt": "<IMAGE_0>의 인물을 <IMAGE_1>의 장면에 넣고, 조명은 동일하게 유지합니다",
+        "image_url": [
+          "https://example.com/person.png",
+          "https://example.com/scene.png"
+        ],
+        "aspect_ratio": "16:9",
+        "resolution": "1K",
+        "quality": "medium",
+        "output_n": 1
+      },
+      "out_task_id": "grok_image_2_edit_001"
+    }'
+  ```
+
+  ```javascript JavaScript
+  const response = await fetch("https://aireiter.com/api/openapi/submit", {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer <token>",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: "grok_imagine_image_2_0",
+      params: {
+        prompt: "미니멀한 흰색 사진 스튜디오의 파란색 세라믹 컵, 부드러운 제품 조명",
+        aspect_ratio: "1:1",
+        resolution: "1K",
+        quality: "low",
+        output_n: 1
+      },
+      out_task_id: "grok_image_2_js_001"
+    })
+  });
+
+  console.log(await response.json());
+  ```
+</RequestExample>

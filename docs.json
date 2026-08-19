@@ -140,6 +140,14 @@
                 "pages": [
                   "zh/api-reference/images/krea-2-turbo/generation"
                 ]
+              },
+              {
+                "group": "Grok Imagine Image 2.0",
+                "icon": "image",
+                "pages": [
+                  "zh/api-reference/images/grok-imagine-image-2-0/generation",
+                  "zh/api-reference/images/grok-imagine-2-0-ext/generation"
+                ]
               }
             ]
           },
@@ -421,6 +429,14 @@
                 "icon": "image",
                 "pages": [
                   "en/api-reference/images/krea-2-turbo/generation"
+                ]
+              },
+              {
+                "group": "Grok Imagine Image 2.0",
+                "icon": "image",
+                "pages": [
+                  "en/api-reference/images/grok-imagine-image-2-0/generation",
+                  "en/api-reference/images/grok-imagine-2-0-ext/generation"
                 ]
               }
             ]
@@ -704,6 +720,14 @@
                 "pages": [
                   "ja/api-reference/images/krea-2-turbo/generation"
                 ]
+              },
+              {
+                "group": "Grok Imagine Image 2.0",
+                "icon": "image",
+                "pages": [
+                  "ja/api-reference/images/grok-imagine-image-2-0/generation",
+                  "ja/api-reference/images/grok-imagine-2-0-ext/generation"
+                ]
               }
             ]
           },
@@ -985,6 +1009,14 @@
                 "icon": "image",
                 "pages": [
                   "ko/api-reference/images/krea-2-turbo/generation"
+                ]
+              },
+              {
+                "group": "Grok Imagine Image 2.0",
+                "icon": "image",
+                "pages": [
+                  "ko/api-reference/images/grok-imagine-image-2-0/generation",
+                  "ko/api-reference/images/grok-imagine-2-0-ext/generation"
                 ]
               }
             ]

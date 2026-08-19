@@ -1,0 +1,180 @@
+---
+title: 'Grok Imagine Image 2.0 图片生成与编辑'
+description: |
+    - 异步图片生成，提交后通过任务查询接口获取结果
+    - 支持文生图、图生图和图片编辑
+    - 支持 1K / 2K、Low / Medium 质量及最多 10 张输出
+    - 支持最多 3 张参考图和 14 种宽高比选项
+    - 提交的 prompt 会经过平台敏感词 / 安全审核，违规内容会被直接拒绝
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  所有接口均需要使用 Bearer Token 认证。
+
+  访问 <a href={apiKeyUrl} target="_blank">API Key 管理页面</a> 获取 API Key，并在请求头中添加：
+
+  ```text
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  模型名称，固定值：`"grok_imagine_image_2_0"`。
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  模型参数对象。
+
+  <Expandable title="params 对象属性">
+    <ParamField body="prompt" type="string" required>
+      图片生成或编辑指令。支持中文和英文。
+
+      使用多张参考图时，可以在提示词中使用 `<IMAGE_0>`、`<IMAGE_1>`、`<IMAGE_2>` 指代对应图片。
+    </ParamField>
+
+    <ParamField body="image_url" type="string[]">
+      参考图数组。省略时为文生图；传入后自动使用图生图或图片编辑模式。
+
+      * 最多 3 张
+      * 单张最大 10MB
+      * 支持 JPG、PNG、WebP
+      * 支持公开 URL、完整 Base64 Data URI 或纯 Base64
+
+      <Warning>
+        使用 URL 时，图片必须能被公网直接访问，不能依赖登录状态、Cookie 或临时页面授权。
+      </Warning>
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="auto">
+      输出图片宽高比。支持：
+
+      * `auto`（默认）
+      * `1:1`
+      * `4:3` / `3:4`
+      * `3:2` / `2:3`
+      * `16:9` / `9:16`
+      * `2:1` / `1:2`
+      * `19.5:9` / `9:19.5`
+      * `20:9` / `9:20`
+
+      不支持自定义 `WIDTHxHEIGHT` 像素尺寸。
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="1K">
+      输出分辨率档位：`1K`（默认）或 `2K`。不支持 `4K`。
+    </ParamField>
+
+    <ParamField body="quality" type="string" default="medium">
+      生成质量档位：
+
+      * `low` - 速度更快、费用更低
+      * `medium` - 细节更好（默认）
+    </ParamField>
+
+    <ParamField body="output_n" type="integer" default="1">
+      输出图片数量，取值范围为 `1` 到 `10`。每张图片独立计费。
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  调用方自定义任务 ID，用于幂等提交和查询结果。
+
+  * 长度为 1-64 个字符
+  * 仅支持字母、数字、下划线和连字符
+  * 同一个 API Key 下不能重复使用
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  调用方任务 ID，可用于查询任务状态和结果。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  初始状态，通常为 `"pending"`。
+</ResponseField>
+
+<ResponseField name="estimated_credits" type="number">
+  本次任务的预估消耗积分。
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  任务创建时间，ISO 8601 格式。
+</ResponseField>
+
+## 查询结果
+
+提交成功后，调用 [获取任务状态](/zh/api-reference/tasks/status)，使用相同的 `out_task_id` 查询。任务完成后，图片结果位于 `data.output`。
+
+<RequestExample>
+  ```bash cURL（文生图）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "grok_imagine_image_2_0",
+      "params": {
+        "prompt": "雨夜东京街头，霓虹灯倒映在湿润路面，电影感摄影",
+        "aspect_ratio": "16:9",
+        "resolution": "2K",
+        "quality": "medium",
+        "output_n": 1
+      },
+      "out_task_id": "grok_image_2_text_001"
+    }'
+  ```
+
+  ```bash cURL（图片编辑）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "grok_imagine_image_2_0",
+      "params": {
+        "prompt": "将 <IMAGE_0> 中的人物放入 <IMAGE_1> 的场景，并保持光线一致",
+        "image_url": [
+          "https://example.com/person.png",
+          "https://example.com/scene.png"
+        ],
+        "aspect_ratio": "16:9",
+        "resolution": "1K",
+        "quality": "medium",
+        "output_n": 1
+      },
+      "out_task_id": "grok_image_2_edit_001"
+    }'
+  ```
+
+  ```javascript JavaScript
+  const response = await fetch("https://aireiter.com/api/openapi/submit", {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer <token>",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: "grok_imagine_image_2_0",
+      params: {
+        prompt: "极简白色摄影棚中的蓝色陶瓷杯，柔和产品光",
+        aspect_ratio: "1:1",
+        resolution: "1K",
+        quality: "low",
+        output_n: 1
+      },
+      out_task_id: "grok_image_2_js_001"
+    })
+  });
+
+  console.log(await response.json());
+  ```
+</RequestExample>

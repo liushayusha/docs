@@ -1,9 +1,9 @@
 ---
 title: 'Krea 2 Turbo 画像生成'
 description: |
-    - 非同期処理モード、タスクIDを返し後続のクエリに使用
-    - 超高速テキスト生成画像、スピードとシネマティックな品質に最適化
-    - 1Kおよび2K解像度、11種類のアスペクト比に対応、テキスト生成画像のみ
+    - 非同期処理モードで、後続の照会に使用するタスクIDを返します
+    - 超高速なテキストから画像生成で、速度と映画品質の画質向けに最適化されています
+    - 1Kと2Kの解像度、11種類のアスペクト比をサポート；テキストから画像生成のみサポートします
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -11,13 +11,13 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  すべてのエンドポイントはBearer Tokenによる認証が必要です。
+  すべてのエンドポイントはBearer Tokenを使用して認証する必要があります
 
-  APIキーの取得方法：
+  API Keyを取得する：
 
-  <a href={apiKeyUrl} target="_blank">APIキー管理ページ</a>にアクセスして、APIキーを取得してください。
+  <a href={apiKeyUrl} target="_blank">API Key管理ページ</a>にアクセスして、API Keyを取得してください
 
-  使用時はリクエストヘッダーに以下を追加します：
+  使用時はリクエストヘッダーに次を追加します：
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -29,39 +29,50 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="model" type="string" required>
   モデル名
 
-  固定値：`"krea_2_turbo"`
+  固定値: `"krea_2_turbo"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  モデルパラメーターオブジェクト
+  モデルパラメータオブジェクト
 
   <Expandable title="params オブジェクトのプロパティ">
     <ParamField body="prompt" type="string" required>
-      画像生成のテキスト説明。英語のプロンプトが最適、最大640トークン。
+      画像生成のテキスト説明
+
+      英語のプロンプトが最も効果的で、最大 640 tokens
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string">
-      画像生成のアスペクト比。サポート値（全11種）：
+      画像生成のアスペクト比
+
+      対応するアスペクト比（全11種類）:
 
       * `1:1` - 正方形
-      * `4:3` - 横向き4:3
-      * `3:4` - 縦向き3:4
-      * `5:4` - 横向き5:4
-      * `4:5` - 縦向き4:5
-      * `3:2` - 横向き3:2
-      * `2:3` - 縦向き2:3
-      * `16:9` - 横長ワイドスクリーン
-      * `9:16` - 縦長スクリーン
+      * `4:3` - 横向き 4:3
+      * `3:4` - 縦向き 3:4
+      * `5:4` - 横向き 5:4
+      * `4:5` - 縦向き 4:5
+      * `3:2` - 横向き 3:2
+      * `2:3` - 縦向き 2:3
+      * `16:9` - 横向きワイド
+      * `9:16` - 縦向き縦長
       * `2:1` - パノラマ
       * `1:2` - 縦長
     </ParamField>
 
     <ParamField body="resolution" type="string" default="1K">
-      画像解像度。サポート：`1K`（デフォルト）、`2K`
+      画像解像度
+
+      対応する解像度:
+
+      * `1K` - 1K 解像度（デフォルト）
+      * `2K` - 2K 解像度
     </ParamField>
 
     <ParamField body="seed" type="integer">
-      オプション。再現可能な生成のためのランダムシード。範囲0-1048576。省略または0でランダム生成。
+      オプション。再現可能な生成のための乱数シード
+
+      範囲は 0-1048576。省略するか 0 を指定するとランダムに生成されます
     </ParamField>
   </Expandable>
 </ParamField>
@@ -71,31 +82,31 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="metadata" type="object">
-  カスタムメタデータ、そのまま返されます
+  カスタムメタデータ。元のまま返されます
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発行者のタスクID
+  依頼側タスクID
 
-  ユーザー定義のタスク識別子、必須
+  ユーザー定義のタスク識別子。必須
 </ParamField>
 
 ## Response
 
 <ResponseField name="out_task_id" type="string">
-  発信側タスクIDで、結果の取得に使用できます
+  リクエスト元のタスクID。結果の検索に使用できます
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  初期状態で常に `"pending"`
+  初期ステータス。固定で `"pending"` です
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  予測消費クレジット
+  推定消費クレジット
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  作成日時（ISOフォーマット）
+  作成時刻（ISO形式）
 </ResponseField>
 
 <RequestExample>
@@ -107,7 +118,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     --data '{
       "model": "krea_2_turbo",
       "params": {
-        "prompt": "一匹のオレンジ猫が窓辺に座っていて、窓の外は東京の夜景、サイバーパンクスタイル",
+        "prompt": "窓辺に座るオレンジ色の猫。窓の外は東京の夜景で、サイバーパンク風",
         "aspect_ratio": "16:9",
         "resolution": "2K"
       },
@@ -123,7 +134,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
       "model": "krea_2_turbo",
       "params": {
-          "prompt": "一匹のオレンジ猫が窓辺に座っていて、窓の外は東京の夜景、サイバーパンクスタイル",
+          "prompt": "窓辺に座るオレンジ色の猫。窓の外は東京の夜景で、サイバーパンク風",
           "aspect_ratio": "16:9",
           "resolution": "2K"
       },
@@ -146,7 +157,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   const payload = {
     model: "krea_2_turbo",
     params: {
-      prompt: "一匹のオレンジ猫が窓辺に座っていて、窓の外は東京の夜景、サイバーパンクスタイル",
+      prompt: "窓辺に座るオレンジ色の猫。窓の外は東京の夜景で、サイバーパンク風",
       aspect_ratio: "16:9",
       resolution: "2K"
     },
@@ -185,7 +196,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       payload := map[string]interface{}{
           "model": "krea_2_turbo",
           "params": map[string]interface{}{
-              "prompt":       "一匹のオレンジ猫が窓辺に座っていて、窓の外は東京の夜景、サイバーパンクスタイル",
+              "prompt":       "窓辺に座るオレンジ色の猫。窓の外は東京の夜景で、サイバーパンク風",
               "aspect_ratio": "16:9",
               "resolution":   "2K",
           },
@@ -224,7 +235,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           {
             "model": "krea_2_turbo",
             "params": {
-              "prompt": "一匹のオレンジ猫が窓辺に座っていて、窓の外は東京の夜景、サイバーパンクスタイル",
+              "prompt": "窓辺に座るオレンジ色の猫。窓の外は東京の夜景で、サイバーパンク風",
               "aspect_ratio": "16:9",
               "resolution": "2K"
             },
@@ -256,7 +267,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   $payload = [
       "model" => "krea_2_turbo",
       "params" => [
-          "prompt" => "一匹のオレンジ猫が窓辺に座っていて、窓の外は東京の夜景、サイバーパンクスタイル",
+          "prompt" => "窓辺に座るオレンジ色の猫。窓の外は東京の夜景で、サイバーパンク風",
           "aspect_ratio" => "16:9",
           "resolution" => "2K"
       ],
@@ -289,7 +300,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
     model: "krea_2_turbo",
     params: {
-      prompt: "一匹のオレンジ猫が窓辺に座っていて、窓の外は東京の夜景、サイバーパンクスタイル",
+      prompt: "窓辺に座るオレンジ色の猫。窓の外は東京の夜景で、サイバーパンク風",
       aspect_ratio: "16:9",
       resolution: "2K"
     },
@@ -315,7 +326,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload: [String: Any] = [
       "model": "krea_2_turbo",
       "params": [
-          "prompt": "一匹のオレンジ猫が窓辺に座っていて、窓の外は東京の夜景、サイバーパンクスタイル",
+          "prompt": "窓辺に座るオレンジ色の猫。窓の外は東京の夜景で、サイバーパンク風",
           "aspect_ratio": "16:9",
           "resolution": "2K"
       ] as [String: Any],
@@ -357,7 +368,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           var payload = @"{
               ""model"": ""krea_2_turbo"",
               ""params"": {
-                  ""prompt"": ""一匹のオレンジ猫が窓辺に座っていて、窓の外は東京の夜景、サイバーパンクスタイル"",
+                  ""prompt"": ""窓辺に座るオレンジ色の猫。窓の外は東京の夜景で、サイバーパンク風"",
                   ""aspect_ratio"": ""16:9"",
                   ""resolution"": ""2K""
               },
@@ -392,7 +403,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           const char *payload = "{"
               "\"model\":\"krea_2_turbo\","
               "\"params\":{"
-                  "\"prompt\":\"一匹のオレンジ猫が窓辺に座っていて、窓の外は東京の夜景、サイバーパンクスタイル\","
+                  "\"prompt\":\"窓辺に座るオレンジ色の猫。窓の外は東京の夜景で、サイバーパンク風\","
                   "\"aspect_ratio\":\"16:9\","
                   "\"resolution\":\"2K\""
               "},"
@@ -433,7 +444,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           NSDictionary *payload = @{
               @"model": @"krea_2_turbo",
               @"params": @{
-                  @"prompt": @"一匹のオレンジ猫が窓辺に座っていて、窓の外は東京の夜景、サイバーパンクスタイル",
+                  @"prompt": @"窓辺に座るオレンジ色の猫。窓の外は東京の夜景で、サイバーパンク風",
                   @"aspect_ratio": @"16:9",
                   @"resolution": @"2K"
               },
@@ -471,7 +482,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```
 
   ```ocaml OCaml
-  (* cohttp と yojson ライブラリが必要です *)
+  (* Requires cohttp and yojson libraries *)
   open Lwt
   open Cohttp
   open Cohttp_lwt_unix
@@ -481,7 +492,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload = {|{
     "model": "krea_2_turbo",
     "params": {
-      "prompt": "一匹のオレンジ猫が窓辺に座っていて、窓の外は東京の夜景、サイバーパンクスタイル",
+      "prompt": "窓辺に座るオレンジ色の猫。窓の外は東京の夜景で、サイバーパンク風",
       "aspect_ratio": "16:9",
       "resolution": "2K"
     },
@@ -512,7 +523,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     final payload = {
       'model': 'krea_2_turbo',
       'params': {
-        'prompt': '一匹のオレンジ猫が窓辺に座っていて、窓の外は東京の夜景、サイバーパンクスタイル',
+        'prompt': '窓辺に座るオレンジ色の猫。窓の外は東京の夜景で、サイバーパンク風',
         'aspect_ratio': '16:9',
         'resolution': '2K'
       },
@@ -541,7 +552,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload <- list(
     model = "krea_2_turbo",
     params = list(
-      prompt = "一匹のオレンジ猫が窓辺に座っていて、窓の外は東京の夜景、サイバーパンクスタイル",
+      prompt = "窓辺に座るオレンジ色の猫。窓の外は東京の夜景で、サイバーパンク風",
       aspect_ratio = "16:9",
       resolution = "2K"
     ),
@@ -564,7 +575,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 <ResponseExample>
   ```json 200
-{
+  {
     "statusCode": 200,
     "message": "",
     "data": {
@@ -595,7 +606,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 433,
-      "message": "アカウント残高が不足しています。チャージ後に再試行してください"
+      "message": "アカウント残高が不足しています。チャージしてから再試行してください"
     }
   }
   ```
@@ -604,7 +615,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 500,
-      "message": "サーバ内部エラーです。後でもう一度お試しください"
+      "message": "サーバー内部エラーです。しばらくしてから再試行してください"
     }
   }
   ```

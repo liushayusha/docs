@@ -1,0 +1,179 @@
+---
+title: 'Grok Imagine Image 2.0 Image Generation and Editing'
+description: |
+    - Asynchronous image generation; retrieve results through the task query API after submission
+    - Supports text-to-image, image-to-image, and image editing
+    - Supports 1K / 2K, Low / Medium quality, and up to 10 output images
+    - Supports up to 3 reference images and 14 aspect ratio options
+    - Submitted prompts are subject to platform sensitive word / safety review, and violating content will be directly rejected
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  All endpoints require Bearer Token authentication.
+
+  Visit the <a href={apiKeyUrl} target="_blank">API Key management page</a> to get your API Key, and add the following to the request header:
+
+  ```text
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  Model name, fixed value: `"grok_imagine_image_2_0"`.
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  Model parameters object.
+
+  <Expandable title="params Object Properties">
+    <ParamField body="prompt" type="string" required>
+      Image generation or editing instructions. Chinese and English are supported.
+
+      When using multiple reference images, you can use `<IMAGE_0>`, `<IMAGE_1>`, and `<IMAGE_2>` in the prompt to refer to the corresponding images.
+    </ParamField>
+
+    <ParamField body="image_url" type="string[]">
+      Array of reference images. If omitted, text-to-image is used; after passing it in, image-to-image or image editing mode is used automatically.
+
+      * Up to 3 images
+      * Maximum 10MB per image
+      * JPG, PNG, and WebP are supported
+      * Public URLs, full Base64 Data URIs, or raw Base64 are supported
+
+      <Warning>
+        When using a URL, the image must be directly accessible from the public internet and cannot rely on login status, cookies, or temporary page authorization.
+      </Warning>
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="auto">
+      Output image aspect ratio. Supported values:
+
+      * `auto` (default)
+      * `1:1`
+      * `4:3` / `3:4`
+      * `3:2` / `2:3`
+      * `16:9` / `9:16`
+      * `2:1` / `1:2`
+      * `19.5:9` / `9:19.5`
+      * `20:9` / `9:20`
+
+      Custom `WIDTHxHEIGHT` pixel dimensions are not supported.
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="1K">
+      Output resolution tier: `1K` (default) or `2K`. `4K` is not supported.
+    </ParamField>
+
+    <ParamField body="quality" type="string" default="medium">
+      Generation quality tier:
+
+      * `low` - faster and lower cost
+      * `medium` - better detail (default)
+    </ParamField>
+
+    <ParamField body="output_n" type="integer" default="1">
+      Number of output images, ranging from `1` to `10`. Each image is billed separately.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  Caller-defined task ID, used for idempotent submission and result retrieval.
+
+  * Length: 1-64 characters
+  * Only letters, numbers, underscores, and hyphens are supported
+  * Cannot be reused under the same API Key
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  The caller's task ID, which can be used to query the task status and results.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Initial status, usually `"pending"`.
+</ResponseField>
+
+<ResponseField name="estimated_credits" type="number">
+  Estimated credits consumed by this task.
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  Task creation time, in ISO 8601 format.
+</ResponseField>
+
+## Query Results
+
+After submission succeeds, call [Get Task Status](/en/api-reference/tasks/status) using the same `out_task_id` to query. Once the task is completed, the image results are located in `data.output`.
+
+<RequestExample>
+  ```bash cURL（Text-to-Image）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "grok_imagine_image_2_0",
+      "params": {
+        "prompt": "Tokyo streets on a rainy night, neon lights reflecting on the wet pavement, cinematic photography",
+        "aspect_ratio": "16:9",
+        "resolution": "2K",
+        "quality": "medium",
+        "output_n": 1
+      },
+      "out_task_id": "grok_image_2_text_001"
+    }'
+  ```
+
+  ```bash cURL（Image Editing）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "grok_imagine_image_2_0",
+      "params": {
+        "prompt": "Place the person in <IMAGE_0> into the scene of <IMAGE_1> while keeping the lighting consistent",
+        "image_url": [
+          "https://example.com/person.png",
+          "https://example.com/scene.png"
+        ],
+        "aspect_ratio": "16:9",
+        "resolution": "1K",
+        "quality": "medium",
+        "output_n": 1
+      },
+      "out_task_id": "grok_image_2_edit_001"
+    }'
+  ```
+
+  ```javascript JavaScript
+  const response = await fetch("https://aireiter.com/api/openapi/submit", {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer <token>",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: "grok_imagine_image_2_0",
+      params: {
+        prompt: "A blue ceramic cup in a minimalist white studio, soft product lighting",
+        aspect_ratio: "1:1",
+        resolution: "1K",
+        quality: "low",
+        output_n: 1
+      },
+      out_task_id: "grok_image_2_js_001"
+    })
+  });
+
+  console.log(await response.json());
+  ```
+</RequestExample>
