@@ -20,18 +20,13 @@
     "index": 3
   },
   {
-    "id": "section-2-计费",
-    "hash": "31dbf14a",
+    "id": "section-2-response",
+    "hash": "eb8a3f8b",
     "index": 4
   },
   {
-    "id": "section-3-response",
-    "hash": "eb8a3f8b",
+    "id": "section-3-查询结果",
+    "hash": "cbe1904e",
     "index": 5
-  },
-  {
-    "id": "section-4-查询结果",
-    "hash": "ea72d048",
-    "index": 6
   }
 ]

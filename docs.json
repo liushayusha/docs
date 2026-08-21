@@ -254,6 +254,20 @@
                 ]
               },
               {
+                "group": "HappyHorse 1.0",
+                "icon": "video",
+                "pages": [
+                  "zh/api-reference/videos/happyhorse-1-0/generation"
+                ]
+              },
+              {
+                "group": "HappyHorse 1.1",
+                "icon": "video",
+                "pages": [
+                  "zh/api-reference/videos/happyhorse-1-1/generation"
+                ]
+              },
+              {
                 "group": "MiniMax H3",
                 "icon": "video",
                 "pages": [

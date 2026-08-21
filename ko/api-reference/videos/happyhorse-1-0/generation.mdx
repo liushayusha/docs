@@ -1,0 +1,753 @@
+---
+title: 'HappyHorse 1.0 비디오 생성 및 편집'
+description: |
+  - 텍스트-비디오, 이미지-비디오, 다중 참조 이미지-비디오 및 비디오 편집 지원
+  - 720p / 1080p 출력 및 3-15초 비디오 생성 지원
+  - 텍스트-비디오 및 다중 참조 이미지-비디오는 9가지 종횡비 지원
+  - 비동기 처리 모드, 후속 조회를 위한 작업 ID 반환
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+<Note>
+HappyHorse 1.0은 AIReiter에서의 모델 이름이 `happyhorse_1_0`입니다.
+</Note>
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  모든 인터페이스는 Bearer Token을 사용하여 인증해야 합니다.
+
+  <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a>에 접속하여 API Key를 가져온 다음, 요청 헤더에 추가하세요:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  모델 이름으로, 고정값 `happyhorse_1_0`을 사용합니다.
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  모델 파라미터 객체입니다.
+
+  <Expandable title="params 객체 속성">
+    <ParamField body="type" type="string" default="text_to_video" required>
+      비디오 워크플로우:
+
+      * `text_to_video` - 텍스트에 따라 비디오 생성
+      * `image_to_video` - 한 장의 첫 프레임 이미지로 비디오 생성
+      * `reference_to_video` - 1-9장의 참고 이미지로 비디오 생성
+      * `video_edit` - 지시에 따라 원본 비디오 편집
+    </ParamField>
+
+    <ParamField body="prompt" type="string">
+      비디오 콘텐츠 설명 또는 편집 지시사항입니다. `text_to_video`, `reference_to_video` 및 `video_edit`는 필수이며, `image_to_video`는 선택 사항입니다.
+
+      최대 2500개의 중국어 문자 또는 5000개의 비중국어 문자를 지원하며, 초과분은 잘립니다.
+
+      `reference_to_video` 모드에서는 이미지 순서에 따라 `character1`, `character2` 등의 이름으로 참고 이미지를 지칭합니다.
+    </ParamField>
+
+    <ParamField body="image_url" type="string | string[]">
+      이미지 URL로, 공개 네트워크에서 직접 접근 가능해야 합니다.
+
+      * `image_to_video` - 필수, 첫 번째 이미지를 첫 프레임으로 사용
+      * `reference_to_video` - 필수, 1-9장의 순서가 있는 참고 이미지를 지원
+      * `video_edit` - 선택 사항, 최대 5장의 스타일 또는 피사체 참고 이미지
+
+      JPEG, JPG, PNG, WEBP를 지원합니다. 이미지로 비디오 생성 및 비디오 편집용 이미지는 가로·세로 길이가 모두 300px 이상이어야 하며, 다중 참고 이미지 모드는 짧은 변이 400px 이상이어야 합니다. 단일 이미지는 10MB를 초과할 수 없습니다.
+    </ParamField>
+
+    <ParamField body="video_url" type="string | string[]">
+      `video_edit` 모드에서 필수이며, 단 하나의 원본 비디오만 사용합니다.
+
+      MP4, MOV를 지원하며, H.264 인코딩 사용을 권장합니다. 원본 비디오 요구사항:
+
+      * 길이 3-60초, 15초를 초과하면 앞부분 15초만 처리
+      * 파일은 100MB를 초과할 수 없음
+      * 긴 변은 2160px을 초과할 수 없고, 짧은 변은 320px 이상이어야 함
+      * 가로세로 비율 범위는 1:2.5에서 2.5:1까지
+      * 프레임률은 8 FPS보다 커야 함
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="720p">
+      출력 해상도: `720p` 또는 `1080p`.
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="16:9">
+      `text_to_video` 및 `reference_to_video` 모드의 출력 가로세로 비율입니다.
+
+      지원: `16:9`, `9:16`, `1:1`, `4:3`, `3:4`, `4:5`, `5:4`, `9:21`, `21:9`.
+
+      <Warning>`video_edit`는 이 파라미터를 지원하지 않으므로 전달하지 마세요. `image_to_video`의 출력 가로세로 비율은 입력 이미지에 따릅니다.</Warning>
+    </ParamField>
+
+    <ParamField body="video_length" type="integer" default="5">
+      출력 비디오 길이로, 단위는 초입니다. 3-15 사이의 정수를 지원합니다.
+
+      <Warning>`video_edit`는 이 파라미터를 지원하지 않으므로 전달하지 마세요. 출력 길이는 원본 비디오에 의해 자동으로 결정되며, `min(입력 비디오 길이, 15초)`와 같습니다.</Warning>
+    </ParamField>
+
+    <ParamField body="seed" type="integer" default="0">
+      랜덤 시드로, 범위는 0-2147483647입니다. `0`을 전달하거나 생략하면 랜덤 시드를 사용합니다.
+    </ParamField>
+
+    <ParamField body="keep_original_sound" type="boolean" default="false">
+      `video_edit` 모드에서만 유효합니다. `true`로 설정하면 원본 비디오 오디오 트랙을 강제로 유지하며, `false`로 설정하거나 생략하면 모델이 자동으로 결정합니다.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  호출 측에서 생성한 고유한 작업 ID이며, 이후 이 ID로 작업 상태와 결과를 조회합니다.
+
+  영문자, 숫자, 밑줄, 하이픈만 지원하며, 길이는 1-64자입니다.
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  호출자 작업 ID로, 결과를 조회하는 데 사용할 수 있습니다.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  초기 상태이며, 일반적으로 `pending`입니다.
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  생성 시간, ISO 8601 형식입니다.
+</ResponseField>
+
+## Query Task
+
+작업 제출이 성공한 후, 동일한 `out_task_id`를 통해 상태를 조회합니다. 작업 상태에는 `pending`, `processing`, `completed`, `failed`가 포함됩니다. 완료 후 `output` 배열에는 비디오 결과가 포함됩니다.
+
+```bash
+curl --request POST \
+  --url https://aireiter.com/api/openapi/query \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "out_task_id": "happyhorse_1_0_task_123456"
+  }'
+```
+
+## Request Examples
+
+<RequestExample>
+  ```bash cURL（텍스트-투-비디오）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "happyhorse_1_0",
+      "params": {
+        "type": "text_to_video",
+        "prompt": "밝은 흰색 스튜디오를 천천히 지나가는 빨간 종이비행기 한 대, 고정 카메라, 부드러운 자연광",
+        "resolution": "720p",
+        "aspect_ratio": "16:9",
+        "video_length": 5,
+        "seed": 0
+      },
+      "out_task_id": "happyhorse_1_0_t2v_123456"
+    }'
+  ```
+
+  ```bash cURL（이미지-투-비디오）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "happyhorse_1_0",
+      "params": {
+        "type": "image_to_video",
+        "prompt": "화면 속 고양이가 잔디밭에서 자연스럽게 달리도록 하고, 카메라는 부드럽게 따라가게 해주세요",
+        "image_url": ["https://example.com/cat.png"],
+        "resolution": "720p",
+        "video_length": 5
+      },
+      "out_task_id": "happyhorse_1_0_i2v_123456"
+    }'
+  ```
+
+  ```bash cURL（다중 참고 이미지-투-비디오）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "happyhorse_1_0",
+      "params": {
+        "type": "reference_to_video",
+        "prompt": "character1이 character2의 장면으로 들어가 character3의 소품을 집어 들고, 매끄러운 3D 카툰 스타일을 유지하세요",
+        "image_url": [
+          "https://example.com/character.jpg",
+          "https://example.com/scene.jpg",
+          "https://example.com/prop.jpg"
+        ],
+        "resolution": "1080p",
+        "aspect_ratio": "16:9",
+        "video_length": 8
+      },
+      "out_task_id": "happyhorse_1_0_r2v_123456"
+    }'
+  ```
+
+  ```bash cURL（비디오 편집）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "happyhorse_1_0",
+      "params": {
+        "type": "video_edit",
+        "prompt": "영상 속 빨간 종이비행기를 파란색으로 바꾸고, 원본 배경과 카메라 움직임은 유지하세요",
+        "video_url": ["https://example.com/source.mp4"],
+        "image_url": ["https://example.com/blue-paper-plane.jpg"],
+        "resolution": "720p",
+        "keep_original_sound": true,
+        "seed": 42
+      },
+      "out_task_id": "happyhorse_1_0_edit_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "happyhorse_1_0",
+      "params": {
+          "type": "text_to_video",
+          "prompt": "밝은 흰색 스튜디오를 천천히 지나가는 빨간 종이비행기 한 대, 고정 카메라, 부드러운 자연광",
+          "resolution": "720p",
+          "aspect_ratio": "16:9",
+          "video_length": 5,
+          "seed": 0
+      },
+      "out_task_id": "happyhorse_1_0_t2v_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "happyhorse_1_0",
+    params: {
+      type: "text_to_video",
+      prompt: "밝은 흰색 스튜디오를 천천히 지나가는 빨간 종이비행기 한 대, 고정 카메라, 부드러운 자연광",
+      resolution: "720p",
+      aspect_ratio: "16:9",
+      video_length: 5,
+      seed: 0
+    },
+    out_task_id: "happyhorse_1_0_t2v_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "happyhorse_1_0",
+          "params": map[string]interface{}{
+              "type": "text_to_video",
+              "prompt": "밝은 흰색 스튜디오를 천천히 지나가는 빨간 종이비행기 한 대, 고정 카메라, 부드러운 자연광",
+              "resolution": "720p",
+              "aspect_ratio": "16:9",
+              "video_length": 5,
+              "seed": 0,
+          },
+          "out_task_id": "happyhorse_1_0_t2v_123456",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/openapi/submit";
+
+          String payload = """
+              {
+                "model": "happyhorse_1_0",
+                "params": {
+                  "type": "text_to_video",
+                  "prompt": "밝은 흰색 스튜디오를 천천히 지나가는 빨간 종이비행기 한 대, 고정 카메라, 부드러운 자연광",
+                  "resolution": "720p",
+                  "aspect_ratio": "16:9",
+                  "video_length": 5,
+                  "seed": 0
+                },
+                "out_task_id": "happyhorse_1_0_t2v_123456"
+              }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = [
+      "model" => "happyhorse_1_0",
+      "params" => [
+          "type" => "text_to_video",
+          "prompt" => "밝은 흰색 스튜디오를 천천히 지나가는 빨간 종이비행기 한 대, 고정 카메라, 부드러운 자연광",
+          "resolution" => "720p",
+          "aspect_ratio" => "16:9",
+          "video_length" => 5,
+          "seed" => 0
+      ],
+      "out_task_id" => "happyhorse_1_0_t2v_123456"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url = URI("https://aireiter.com/api/openapi/submit")
+
+  payload = {
+    model: "happyhorse_1_0",
+    params: {
+      type: "text_to_video",
+      prompt: "밝은 흰색 스튜디오를 천천히 지나가는 빨간 종이비행기 한 대, 고정 카메라, 부드러운 자연광",
+      resolution: "720p",
+      aspect_ratio: "16:9",
+      video_length: 5,
+      seed: 0
+    },
+    out_task_id: "happyhorse_1_0_t2v_123456"
+  }
+
+  http = Net::HTTP.new(url.host, url.port)
+
+  request = Net::HTTP::Post.new(url)
+  request["Authorization"] = "Bearer <token>"
+  request["Content-Type"] = "application/json"
+  request.body = payload.to_json
+
+  response = http.request(request)
+  puts response.body
+  ```
+
+  ```swift Swift
+  import Foundation
+
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
+
+  let payload: [String: Any] = [
+      "model": "happyhorse_1_0",
+      "params": [
+          "type": "text_to_video",
+          "prompt": "밝은 흰색 스튜디오를 천천히 지나가는 빨간 종이비행기 한 대, 고정 카메라, 부드러운 자연광",
+          "resolution": "720p",
+          "aspect_ratio": "16:9",
+          "video_length": 5,
+          "seed": 0
+      ],
+      "out_task_id": "happyhorse_1_0_t2v_123456"
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      if let error = error {
+          print("Error: \(error)")
+          return
+      }
+
+      if let data = data, let responseString = String(data: data, encoding: .utf8) {
+          print(responseString)
+      }
+  }
+
+  task.resume()
+  ```
+
+  ```csharp C#
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url = "https://aireiter.com/api/openapi/submit";
+
+          var payload = @"
+                {
+                    ""model"": ""happyhorse_1_0"",
+                    ""params"": {
+                        ""type"": ""text_to_video"",
+                        ""prompt"": ""밝은 흰색 스튜디오를 천천히 지나가는 빨간 종이비행기 한 대, 고정 카메라, 부드러운 자연광"",
+                        ""resolution"": ""720p"",
+                        ""aspect_ratio"": ""16:9"",
+                        ""video_length"": 5,
+                        ""seed"": 0
+                    },
+                    ""out_task_id"": ""happyhorse_1_0_t2v_123456""
+                }";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+
+          var content = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          var result = await response.Content.ReadAsStringAsync();
+
+          Console.WriteLine(result);
+      }
+  }
+  ```
+
+  ```c C
+  #include <stdio.h>
+  #include <curl/curl.h>
+
+  int main(void) {
+      CURL *curl;
+      CURLcode res;
+
+      curl_global_init(CURL_GLOBAL_DEFAULT);
+      curl = curl_easy_init();
+
+      if(curl) {
+          const char *url = "https://aireiter.com/api/openapi/submit";
+          const char *payload = "{\"model\":\"happyhorse_1_0\",\"params\":{\"type\":\"text_to_video\",\"prompt\":\"밝은 흰색 스튜디오를 천천히 지나가는 빨간 종이비행기 한 대, 고정 카메라, 부드러운 자연광\",\"resolution\":\"720p\",\"aspect_ratio\":\"16:9\",\"video_length\":5,\"seed\":0},\"out_task_id\":\"happyhorse_1_0_t2v_123456\"}";
+
+          struct curl_slist *headers = NULL;
+          headers = curl_slist_append(headers, "Authorization: Bearer <token>");
+          headers = curl_slist_append(headers, "Content-Type: application/json");
+
+          curl_easy_setopt(curl, CURLOPT_URL, url);
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
+          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+          res = curl_easy_perform(curl);
+
+          if(res != CURLE_OK) {
+              fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                      curl_easy_strerror(res));
+          }
+
+          curl_slist_free_all(headers);
+          curl_easy_cleanup(curl);
+      }
+
+      curl_global_cleanup();
+      return 0;
+  }
+  ```
+
+  ```objectivec Objective-C
+  #import <Foundation/Foundation.h>
+
+  int main(int argc, const char * argv[]) {
+      @autoreleasepool {
+          NSURL *url = [NSURL URLWithString:@"https://aireiter.com/api/openapi/submit"];
+
+          NSDictionary *payload = @{
+              @"model": @"happyhorse_1_0",
+              @"params": @{
+                  @"type": @"text_to_video",
+                  @"prompt": @"밝은 흰색 스튜디오를 천천히 지나가는 빨간 종이비행기 한 대, 고정 카메라, 부드러운 자연광",
+                  @"resolution": @"720p",
+                  @"aspect_ratio": @"16:9",
+                  @"video_length": @5,
+                  @"seed": @0
+              },
+              @"out_task_id": @"happyhorse_1_0_t2v_123456"
+          };
+
+          NSError *error;
+          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
+                                                            options:0
+                                                              error:&error];
+
+          NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+          [request setHTTPMethod:@"POST"];
+          [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
+          [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+          [request setHTTPBody:jsonData];
+
+          NSURLSessionDataTask *task = [[NSURLSession sharedSession]
+              dataTaskWithRequest:request
+              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+                  if (error) {
+                      NSLog(@"Error: %@", error);
+                      return;
+                  }
+                  NSString *result = [[NSString alloc] initWithData:data
+                                                          encoding:NSUTF8StringEncoding];
+                  NSLog(@"%@", result);
+              }];
+
+          [task resume];
+          [[NSRunLoop mainRunLoop] run];
+      }
+      return 0;
+  }
+  ```
+
+  ```ocaml OCaml
+  (* Requires cohttp and yojson libraries *)
+  open Lwt
+  open Cohttp
+  open Cohttp_lwt_unix
+
+  let url = "https://aireiter.com/api/openapi/submit"
+
+  let payload = {|{
+    "model": "happyhorse_1_0",
+    "params": {
+      "type": "text_to_video",
+      "prompt": "밝은 흰색 스튜디오를 천천히 지나가는 빨간 종이비행기 한 대, 고정 카메라, 부드러운 자연광",
+      "resolution": "720p",
+      "aspect_ratio": "16:9",
+      "video_length": 5,
+      "seed": 0
+    },
+    "out_task_id": "happyhorse_1_0_t2v_123456"
+  }|}
+
+  let () =
+    let headers = Header.init ()
+      |> fun h -> Header.add h "Authorization" "Bearer <token>"
+      |> fun h -> Header.add h "Content-Type" "application/json"
+    in
+    let body = Cohttp_lwt.Body.of_string payload in
+
+    let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
+      body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
+      print_endline body_str
+    in
+    Lwt_main.run response
+  ```
+
+  ```dart Dart
+  import 'dart:convert';
+  import 'package:http/http.dart' as http;
+
+  void main() async {
+    final url = Uri.parse('https://aireiter.com/api/openapi/submit');
+
+    final payload = {
+          "model": "happyhorse_1_0",
+          "params": {
+              "type": "text_to_video",
+              "prompt": "밝은 흰색 스튜디오를 천천히 지나가는 빨간 종이비행기 한 대, 고정 카메라, 부드러운 자연광",
+              "resolution": "720p",
+              "aspect_ratio": "16:9",
+              "video_length": 5,
+              "seed": 0
+          },
+          "out_task_id": "happyhorse_1_0_t2v_123456"
+      };
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer <token>',
+        'Content-Type': 'application/json'
+      },
+      body: jsonEncode(payload),
+    );
+
+    print(response.body);
+  }
+  ```
+
+  ```r R
+  library(httr)
+  library(jsonlite)
+
+  url <- "https://aireiter.com/api/openapi/submit"
+
+  payload <- list(
+    model = "happyhorse_1_0",
+    params = list(
+      type = "text_to_video",
+      prompt = "밝은 흰색 스튜디오를 천천히 지나가는 빨간 종이비행기 한 대, 고정 카메라, 부드러운 자연광",
+      resolution = "720p",
+      aspect_ratio = "16:9",
+      video_length = 5,
+      seed = 0
+    ),
+    out_task_id = "happyhorse_1_0_t2v_123456"
+  )
+
+  response <- POST(
+    url,
+    add_headers(
+      Authorization = "Bearer <token>",
+      `Content-Type` = "application/json"
+    ),
+    body = toJSON(payload, auto_unbox = TRUE),
+    encode = "raw"
+  )
+
+  cat(content(response, "text"))
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "out_task_id": "happyhorse_1_0_t2v_123456",
+        "status": "pending",
+        "estimated_credits": 100,
+        "created_at": "2025-12-22T06:03:28.242Z"
+    }
+}
+  ```
+
+  ```json 400
+    {
+        "statusCode": 400,
+        "message": "요청 매개변수가 유효하지 않습니다",
+        "ok": false
+    }
+  ```
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "인증 실패. API 키를 확인하세요"
+    }
+  }
+  ```
+```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "잔액이 부족합니다. 충전 후 다시 시도하세요"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "서버 내부 오류입니다. 나중에 다시 시도하세요"
+    }
+  }
+  ```
+</ResponseExample>
+
+## 워크플로우 매개변수 비교
+
+| `type` | 필수 소재 | 길이 및 가로세로 비율 |
+|---|---|---|
+| `text_to_video` | `prompt` | `video_length` 3-15초, 선택 사항 `aspect_ratio` |
+| `image_to_video` | `image_url` | `video_length` 3-15초, 가로세로 비율은 이미지를 따름 |
+| `reference_to_video` | `prompt`、`image_url` | `video_length` 3-15초, 선택 사항 `aspect_ratio` |
+| `video_edit` | `prompt`、`video_url` | 길이와 가로세로 비율은 원본 비디오를 따르며, 출력은 최대 15초 |

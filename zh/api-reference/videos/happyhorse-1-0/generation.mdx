@@ -1,0 +1,754 @@
+---
+title: 'HappyHorse 1.0 视频生成与编辑'
+description: |
+  - 支持文生视频、图生视频、多参考图生视频和视频编辑
+  - 支持 720p / 1080p 输出及 3-15 秒视频生成
+  - 文生视频和多参考图生视频支持 9 种宽高比
+  - 异步处理模式，返回任务 ID 用于后续查询
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+<Note>
+HappyHorse 1.0 在 AIReiter 中的模型名称为 `happyhorse_1_0`。
+</Note>
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  所有接口均需要使用 Bearer Token 进行认证。
+
+  访问 <a href={apiKeyUrl} target="_blank">API Key 管理页面</a> 获取 API Key，并在请求头中添加：
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  模型名称，固定使用 `happyhorse_1_0`。
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  模型参数对象。
+
+  <Expandable title="params 对象属性">
+    <ParamField body="type" type="string" default="text_to_video" required>
+      视频工作流：
+
+      * `text_to_video` - 根据文本生成视频
+      * `image_to_video` - 使用一张首帧图片生成视频
+      * `reference_to_video` - 使用 1-9 张参考图片生成视频
+      * `video_edit` - 根据指令编辑一个源视频
+    </ParamField>
+
+    <ParamField body="prompt" type="string">
+      视频内容描述或编辑指令。`text_to_video`、`reference_to_video` 和 `video_edit` 必填，`image_to_video` 可选。
+
+      最多支持 2500 个中文字符或 5000 个非中文字符，超出部分会被截断。
+
+      `reference_to_video` 模式中，按图片顺序使用 `character1`、`character2` 等名称指代参考图片。
+    </ParamField>
+
+    <ParamField body="image_url" type="string | string[]">
+      图片 URL，必须可由公网直接访问。
+
+      * `image_to_video` - 必填，使用第一张图片作为首帧
+      * `reference_to_video` - 必填，支持 1-9 张有序参考图片
+      * `video_edit` - 可选，最多 5 张风格或主体参考图片
+
+      支持 JPEG、JPG、PNG、WEBP。图生视频和视频编辑图片要求宽高均不小于 300px；多参考图模式要求短边不小于 400px。单张图片不超过 10MB。
+    </ParamField>
+
+    <ParamField body="video_url" type="string | string[]">
+      `video_edit` 模式必填，仅使用一个源视频。
+
+      支持 MP4、MOV，建议使用 H.264 编码。源视频要求：
+
+      * 时长 3-60 秒，超过 15 秒时仅处理前 15 秒
+      * 文件不超过 100MB
+      * 长边不超过 2160px，短边不小于 320px
+      * 宽高比范围为 1:2.5 到 2.5:1
+      * 帧率大于 8 FPS
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="720p">
+      输出分辨率：`720p` 或 `1080p`。
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="16:9">
+      `text_to_video` 和 `reference_to_video` 模式的输出宽高比。
+
+      支持：`16:9`、`9:16`、`1:1`、`4:3`、`3:4`、`4:5`、`5:4`、`9:21`、`21:9`。
+
+      <Warning>`video_edit` 不支持此参数，请勿传入。`image_to_video` 的输出宽高比跟随输入图片。</Warning>
+    </ParamField>
+
+    <ParamField body="video_length" type="integer" default="5">
+      输出视频时长，单位为秒。支持 3-15 之间的整数。
+
+      <Warning>`video_edit` 不支持此参数，请勿传入。输出时长由源视频自动决定，等于 `min(输入视频时长, 15 秒)`。</Warning>
+    </ParamField>
+
+    <ParamField body="seed" type="integer" default="0">
+      随机种子，范围为 0-2147483647。传入 `0` 或省略时使用随机种子。
+    </ParamField>
+
+    <ParamField body="keep_original_sound" type="boolean" default="false">
+      仅 `video_edit` 模式有效。设为 `true` 时强制保留源视频音轨；设为 `false` 或省略时由模型自动决定。
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  调用方生成的唯一任务 ID，后续使用该 ID 查询任务状态和结果。
+
+  仅支持字母、数字、下划线和横线，长度为 1-64 个字符。
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  调用方任务 ID，可用于查询结果。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  初始状态，通常为 `pending`。
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  创建时间，ISO 8601 格式。
+</ResponseField>
+
+## Query Task
+
+任务提交成功后，通过同一个 `out_task_id` 查询状态。任务状态包括 `pending`、`processing`、`completed` 和 `failed`；完成后 `output` 数组包含视频结果。
+
+```bash
+curl --request POST \
+  --url https://aireiter.com/api/openapi/query \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "out_task_id": "happyhorse_1_0_task_123456"
+  }'
+```
+
+## Request Examples
+
+<RequestExample>
+  ```bash cURL（文生视频）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "happyhorse_1_0",
+      "params": {
+        "type": "text_to_video",
+        "prompt": "一架红色纸飞机缓慢飞过明亮的白色摄影棚，固定镜头，柔和日光",
+        "resolution": "720p",
+        "aspect_ratio": "16:9",
+        "video_length": 5,
+        "seed": 0
+      },
+      "out_task_id": "happyhorse_1_0_t2v_123456"
+    }'
+  ```
+
+  ```bash cURL（图生视频）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "happyhorse_1_0",
+      "params": {
+        "type": "image_to_video",
+        "prompt": "让画面中的猫在草地上自然奔跑，镜头平滑跟随",
+        "image_url": ["https://example.com/cat.png"],
+        "resolution": "720p",
+        "video_length": 5
+      },
+      "out_task_id": "happyhorse_1_0_i2v_123456"
+    }'
+  ```
+
+  ```bash cURL（多参考图生视频）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "happyhorse_1_0",
+      "params": {
+        "type": "reference_to_video",
+        "prompt": "character1 走进 character2 的场景，并拿起 character3 中的道具，保持流畅的 3D 卡通风格",
+        "image_url": [
+          "https://example.com/character.jpg",
+          "https://example.com/scene.jpg",
+          "https://example.com/prop.jpg"
+        ],
+        "resolution": "1080p",
+        "aspect_ratio": "16:9",
+        "video_length": 8
+      },
+      "out_task_id": "happyhorse_1_0_r2v_123456"
+    }'
+  ```
+
+  ```bash cURL（视频编辑）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "happyhorse_1_0",
+      "params": {
+        "type": "video_edit",
+        "prompt": "把视频中的红色纸飞机改为蓝色，保留原始背景和镜头运动",
+        "video_url": ["https://example.com/source.mp4"],
+        "image_url": ["https://example.com/blue-paper-plane.jpg"],
+        "resolution": "720p",
+        "keep_original_sound": true,
+        "seed": 42
+      },
+      "out_task_id": "happyhorse_1_0_edit_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "happyhorse_1_0",
+      "params": {
+          "type": "text_to_video",
+          "prompt": "一架红色纸飞机缓慢飞过明亮的白色摄影棚，固定镜头，柔和日光",
+          "resolution": "720p",
+          "aspect_ratio": "16:9",
+          "video_length": 5,
+          "seed": 0
+      },
+      "out_task_id": "happyhorse_1_0_t2v_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "happyhorse_1_0",
+    params: {
+      type: "text_to_video",
+      prompt: "一架红色纸飞机缓慢飞过明亮的白色摄影棚，固定镜头，柔和日光",
+      resolution: "720p",
+      aspect_ratio: "16:9",
+      video_length: 5,
+      seed: 0
+    },
+    out_task_id: "happyhorse_1_0_t2v_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "happyhorse_1_0",
+          "params": map[string]interface{}{
+              "type": "text_to_video",
+              "prompt": "一架红色纸飞机缓慢飞过明亮的白色摄影棚，固定镜头，柔和日光",
+              "resolution": "720p",
+              "aspect_ratio": "16:9",
+              "video_length": 5,
+              "seed": 0,
+          },
+          "out_task_id": "happyhorse_1_0_t2v_123456",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/openapi/submit";
+
+          String payload = """
+              {
+                "model": "happyhorse_1_0",
+                "params": {
+                  "type": "text_to_video",
+                  "prompt": "一架红色纸飞机缓慢飞过明亮的白色摄影棚，固定镜头，柔和日光",
+                  "resolution": "720p",
+                  "aspect_ratio": "16:9",
+                  "video_length": 5,
+                  "seed": 0
+                },
+                "out_task_id": "happyhorse_1_0_t2v_123456"
+              }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = [
+      "model" => "happyhorse_1_0",
+      "params" => [
+          "type" => "text_to_video",
+          "prompt" => "一架红色纸飞机缓慢飞过明亮的白色摄影棚，固定镜头，柔和日光",
+          "resolution" => "720p",
+          "aspect_ratio" => "16:9",
+          "video_length" => 5,
+          "seed" => 0
+      ],
+      "out_task_id" => "happyhorse_1_0_t2v_123456"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url = URI("https://aireiter.com/api/openapi/submit")
+
+  payload = {
+    model: "happyhorse_1_0",
+    params: {
+      type: "text_to_video",
+      prompt: "一架红色纸飞机缓慢飞过明亮的白色摄影棚，固定镜头，柔和日光",
+      resolution: "720p",
+      aspect_ratio: "16:9",
+      video_length: 5,
+      seed: 0
+    },
+    out_task_id: "happyhorse_1_0_t2v_123456"
+  }
+
+  http = Net::HTTP.new(url.host, url.port)
+
+  request = Net::HTTP::Post.new(url)
+  request["Authorization"] = "Bearer <token>"
+  request["Content-Type"] = "application/json"
+  request.body = payload.to_json
+
+  response = http.request(request)
+  puts response.body
+  ```
+
+  ```swift Swift
+  import Foundation
+
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
+
+  let payload: [String: Any] = [
+      "model": "happyhorse_1_0",
+      "params": [
+          "type": "text_to_video",
+          "prompt": "一架红色纸飞机缓慢飞过明亮的白色摄影棚，固定镜头，柔和日光",
+          "resolution": "720p",
+          "aspect_ratio": "16:9",
+          "video_length": 5,
+          "seed": 0
+      ],
+      "out_task_id": "happyhorse_1_0_t2v_123456"
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      if let error = error {
+          print("Error: \(error)")
+          return
+      }
+
+      if let data = data, let responseString = String(data: data, encoding: .utf8) {
+          print(responseString)
+      }
+  }
+
+  task.resume()
+  ```
+
+  ```csharp C#
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url = "https://aireiter.com/api/openapi/submit";
+
+          var payload = @"
+                {
+                    ""model"": ""happyhorse_1_0"",
+                    ""params"": {
+                        ""type"": ""text_to_video"",
+                        ""prompt"": ""一架红色纸飞机缓慢飞过明亮的白色摄影棚，固定镜头，柔和日光"",
+                        ""resolution"": ""720p"",
+                        ""aspect_ratio"": ""16:9"",
+                        ""video_length"": 5,
+                        ""seed"": 0
+                    },
+                    ""out_task_id"": ""happyhorse_1_0_t2v_123456""
+                }";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+
+          var content = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          var result = await response.Content.ReadAsStringAsync();
+
+          Console.WriteLine(result);
+      }
+  }
+  ```
+
+  ```c C
+  #include <stdio.h>
+  #include <curl/curl.h>
+
+  int main(void) {
+      CURL *curl;
+      CURLcode res;
+
+      curl_global_init(CURL_GLOBAL_DEFAULT);
+      curl = curl_easy_init();
+
+      if(curl) {
+          const char *url = "https://aireiter.com/api/openapi/submit";
+          const char *payload = "{\"model\":\"happyhorse_1_0\",\"params\":{\"type\":\"text_to_video\",\"prompt\":\"一架红色纸飞机缓慢飞过明亮的白色摄影棚，固定镜头，柔和日光\",\"resolution\":\"720p\",\"aspect_ratio\":\"16:9\",\"video_length\":5,\"seed\":0},\"out_task_id\":\"happyhorse_1_0_t2v_123456\"}";
+
+          struct curl_slist *headers = NULL;
+          headers = curl_slist_append(headers, "Authorization: Bearer <token>");
+          headers = curl_slist_append(headers, "Content-Type: application/json");
+
+          curl_easy_setopt(curl, CURLOPT_URL, url);
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
+          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+          res = curl_easy_perform(curl);
+
+          if(res != CURLE_OK) {
+              fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                      curl_easy_strerror(res));
+          }
+
+          curl_slist_free_all(headers);
+          curl_easy_cleanup(curl);
+      }
+
+      curl_global_cleanup();
+      return 0;
+  }
+  ```
+
+  ```objectivec Objective-C
+  #import <Foundation/Foundation.h>
+
+  int main(int argc, const char * argv[]) {
+      @autoreleasepool {
+          NSURL *url = [NSURL URLWithString:@"https://aireiter.com/api/openapi/submit"];
+
+          NSDictionary *payload = @{
+              @"model": @"happyhorse_1_0",
+              @"params": @{
+                  @"type": @"text_to_video",
+                  @"prompt": @"一架红色纸飞机缓慢飞过明亮的白色摄影棚，固定镜头，柔和日光",
+                  @"resolution": @"720p",
+                  @"aspect_ratio": @"16:9",
+                  @"video_length": @5,
+                  @"seed": @0
+              },
+              @"out_task_id": @"happyhorse_1_0_t2v_123456"
+          };
+
+          NSError *error;
+          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
+                                                            options:0
+                                                              error:&error];
+
+          NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+          [request setHTTPMethod:@"POST"];
+          [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
+          [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+          [request setHTTPBody:jsonData];
+
+          NSURLSessionDataTask *task = [[NSURLSession sharedSession]
+              dataTaskWithRequest:request
+              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+                  if (error) {
+                      NSLog(@"Error: %@", error);
+                      return;
+                  }
+                  NSString *result = [[NSString alloc] initWithData:data
+                                                          encoding:NSUTF8StringEncoding];
+                  NSLog(@"%@", result);
+              }];
+
+          [task resume];
+          [[NSRunLoop mainRunLoop] run];
+      }
+      return 0;
+  }
+  ```
+
+  ```ocaml OCaml
+  (* Requires cohttp and yojson libraries *)
+  open Lwt
+  open Cohttp
+  open Cohttp_lwt_unix
+
+  let url = "https://aireiter.com/api/openapi/submit"
+
+  let payload = {|{
+    "model": "happyhorse_1_0",
+    "params": {
+      "type": "text_to_video",
+      "prompt": "一架红色纸飞机缓慢飞过明亮的白色摄影棚，固定镜头，柔和日光",
+      "resolution": "720p",
+      "aspect_ratio": "16:9",
+      "video_length": 5,
+      "seed": 0
+    },
+    "out_task_id": "happyhorse_1_0_t2v_123456"
+  }|}
+
+  let () =
+    let headers = Header.init ()
+      |> fun h -> Header.add h "Authorization" "Bearer <token>"
+      |> fun h -> Header.add h "Content-Type" "application/json"
+    in
+    let body = Cohttp_lwt.Body.of_string payload in
+
+    let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
+      body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
+      print_endline body_str
+    in
+    Lwt_main.run response
+  ```
+
+  ```dart Dart
+  import 'dart:convert';
+  import 'package:http/http.dart' as http;
+
+  void main() async {
+    final url = Uri.parse('https://aireiter.com/api/openapi/submit');
+
+    final payload = {
+          "model": "happyhorse_1_0",
+          "params": {
+              "type": "text_to_video",
+              "prompt": "一架红色纸飞机缓慢飞过明亮的白色摄影棚，固定镜头，柔和日光",
+              "resolution": "720p",
+              "aspect_ratio": "16:9",
+              "video_length": 5,
+              "seed": 0
+          },
+          "out_task_id": "happyhorse_1_0_t2v_123456"
+      };
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer <token>',
+        'Content-Type': 'application/json'
+      },
+      body: jsonEncode(payload),
+    );
+
+    print(response.body);
+  }
+  ```
+
+  ```r R
+  library(httr)
+  library(jsonlite)
+
+  url <- "https://aireiter.com/api/openapi/submit"
+
+  payload <- list(
+    model = "happyhorse_1_0",
+    params = list(
+      type = "text_to_video",
+      prompt = "一架红色纸飞机缓慢飞过明亮的白色摄影棚，固定镜头，柔和日光",
+      resolution = "720p",
+      aspect_ratio = "16:9",
+      video_length = 5,
+      seed = 0
+    ),
+    out_task_id = "happyhorse_1_0_t2v_123456"
+  )
+
+  response <- POST(
+    url,
+    add_headers(
+      Authorization = "Bearer <token>",
+      `Content-Type` = "application/json"
+    ),
+    body = toJSON(payload, auto_unbox = TRUE),
+    encode = "raw"
+  )
+
+  cat(content(response, "text"))
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "out_task_id": "happyhorse_1_0_t2v_123456",
+        "status": "pending",
+        "estimated_credits": 100,
+        "created_at": "2025-12-22T06:03:28.242Z"
+    }
+}
+  ```
+
+  ```json 400
+    {
+        "statusCode": 400,
+        "message": "请求参数无效",
+        "ok": false
+    }
+  ```
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "身份验证失败，请检查您的API密钥"
+    }
+  }
+  ```
+```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "账户余额不足，请充值后再试"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "服务器内部错误，请稍后重试"
+    }
+  }
+  ```
+</ResponseExample>
+
+## 工作流参数对照
+
+| `type` | 必需素材 | 时长与宽高比 |
+|---|---|---|
+| `text_to_video` | `prompt` | `video_length` 3-15 秒，可选 `aspect_ratio` |
+| `image_to_video` | `image_url` | `video_length` 3-15 秒，宽高比跟随图片 |
+| `reference_to_video` | `prompt`、`image_url` | `video_length` 3-15 秒，可选 `aspect_ratio` |
+| `video_edit` | `prompt`、`video_url` | 时长和宽高比跟随源视频，输出最长 15 秒 |

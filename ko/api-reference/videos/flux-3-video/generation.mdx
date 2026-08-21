@@ -132,35 +132,625 @@ AIReiter에서 FLUX 3 Video의 모델 이름은 `flux_3_video`입니다. 현재 
   생성 시간, ISO 8601 형식입니다.
 </ResponseField>
 
-## Query Task
+## 작업 조회
 
-FLUX 3 Video는 비동기 처리를 사용합니다. 제출에 성공한 후, 동일한 `out_task_id`로 작업을 조회하세요:
+FLUX 3 Video는 비동기 처리를 사용합니다. 제출이 성공하면 동일한 `out_task_id`를 사용하여 작업을 조회하세요:
+
+```bash
+curl --request POST \
+  --url https://aireiter.com/api/openapi/query \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "out_task_id": "flux_3_video_task_123456"
+  }'
+```
+
+작업이 완료되면 응답의 `output` 배열에 생성된 비디오 URL이 포함됩니다. 전체 필드는 [작업 상태 가져오기](/en/api-reference/tasks/status)를 참조하세요.
+
+## Request Examples
 
 <RequestExample>
-  ```bash cURL
+  ```bash cURL（文生视频）
   curl --request POST \
-    --url https://aireiter.com/api/openapi/query \
+    --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
-      "out_task_id": "flux_3_video_task_123456"
+      "model": "flux_3_video",
+      "params": {
+        "mode": "t2v",
+        "prompt": "电影感跟拍镜头：一只赤狐穿过薄雾森林，伴随自然环境声与轻柔脚步声",
+        "video_length": 5,
+        "resolution": "hd",
+        "aspect_ratio": "16:9",
+        "generate_audio": true,
+        "safety_tolerance": 2
+      },
+      "out_task_id": "flux_3_video_t2v_123456"
     }'
+  ```
+
+  ```bash cURL（有序关键帧）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "flux_3_video",
+      "params": {
+        "mode": "i2v",
+        "prompt": "在两张关键帧之间生成自然连贯的动作和运镜，保持主体外观一致",
+        "image_url": [
+          "https://example.com/first-frame.jpg",
+          "https://example.com/last-frame.jpg"
+        ],
+        "video_length": 5,
+        "resolution": "fhd",
+        "aspect_ratio": "1:1",
+        "generate_audio": true,
+        "safety_tolerance": 2
+      },
+      "out_task_id": "flux_3_video_i2v_123456"
+    }'
+  ```
+
+  ```bash cURL（视频续写）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "flux_3_video",
+      "params": {
+        "mode": "v2v",
+        "prompt": "延续源视频的运动方向、构图和光线，让镜头自然进入下一段森林场景",
+        "video_url": "https://example.com/source-video.mp4",
+        "video_length": 5,
+        "resolution": "hd",
+        "aspect_ratio": "auto",
+        "generate_audio": true,
+        "safety_tolerance": 2
+      },
+      "out_task_id": "flux_3_video_v2v_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "flux_3_video",
+      "params": {
+          "mode": "t2v",
+          "prompt": "电影感跟拍镜头：一只赤狐穿过薄雾森林，伴随自然环境声与轻柔脚步声",
+          "video_length": 5,
+          "resolution": "hd",
+          "aspect_ratio": "16:9",
+          "generate_audio": True,
+          "safety_tolerance": 2
+      },
+      "out_task_id": "flux_3_video_t2v_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "flux_3_video",
+    params: {
+      mode: "t2v",
+      prompt: "电影感跟拍镜头：一只赤狐穿过薄雾森林，伴随自然环境声与轻柔脚步声",
+      video_length: 5,
+      resolution: "hd",
+      aspect_ratio: "16:9",
+      generate_audio: true,
+      safety_tolerance: 2
+    },
+    out_task_id: "flux_3_video_t2v_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "flux_3_video",
+          "params": map[string]interface{}{
+              "mode": "t2v",
+              "prompt": "电影感跟拍镜头：一只赤狐穿过薄雾森林，伴随自然环境声与轻柔脚步声",
+              "video_length": 5,
+              "resolution": "hd",
+              "aspect_ratio": "16:9",
+              "generate_audio": true,
+              "safety_tolerance": 2,
+          },
+          "out_task_id": "flux_3_video_t2v_123456",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/openapi/submit";
+
+          String payload = """
+              {
+                "model": "flux_3_video",
+                "params": {
+                  "mode": "t2v",
+                  "prompt": "电影感跟拍镜头：一只赤狐穿过薄雾森林，伴随自然环境声与轻柔脚步声",
+                  "video_length": 5,
+                  "resolution": "hd",
+                  "aspect_ratio": "16:9",
+                  "generate_audio": true,
+                  "safety_tolerance": 2
+                },
+                "out_task_id": "flux_3_video_t2v_123456"
+              }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = [
+      "model" => "flux_3_video",
+      "params" => [
+          "mode" => "t2v",
+          "prompt" => "电影感跟拍镜头：一只赤狐穿过薄雾森林，伴随自然环境声与轻柔脚步声",
+          "video_length" => 5,
+          "resolution" => "hd",
+          "aspect_ratio" => "16:9",
+          "generate_audio" => true,
+          "safety_tolerance" => 2
+      ],
+      "out_task_id" => "flux_3_video_t2v_123456"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url = URI("https://aireiter.com/api/openapi/submit")
+
+  payload = {
+    model: "flux_3_video",
+    params: {
+      mode: "t2v",
+      prompt: "电影感跟拍镜头：一只赤狐穿过薄雾森林，伴随自然环境声与轻柔脚步声",
+      video_length: 5,
+      resolution: "hd",
+      aspect_ratio: "16:9",
+      generate_audio: true,
+      safety_tolerance: 2
+    },
+    out_task_id: "flux_3_video_t2v_123456"
+  }
+
+  http = Net::HTTP.new(url.host, url.port)
+
+  request = Net::HTTP::Post.new(url)
+  request["Authorization"] = "Bearer <token>"
+  request["Content-Type"] = "application/json"
+  request.body = payload.to_json
+
+  response = http.request(request)
+  puts response.body
+  ```
+
+  ```swift Swift
+  import Foundation
+
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
+
+  let payload: [String: Any] = [
+      "model": "flux_3_video",
+      "params": [
+          "mode": "t2v",
+          "prompt": "电影感跟拍镜头：一只赤狐穿过薄雾森林，伴随自然环境声与轻柔脚步声",
+          "video_length": 5,
+          "resolution": "hd",
+          "aspect_ratio": "16:9",
+          "generate_audio": true,
+          "safety_tolerance": 2
+      ],
+      "out_task_id": "flux_3_video_t2v_123456"
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      if let error = error {
+          print("Error: \(error)")
+          return
+      }
+
+      if let data = data, let responseString = String(data: data, encoding: .utf8) {
+          print(responseString)
+      }
+  }
+
+  task.resume()
+  ```
+
+  ```csharp C#
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url = "https://aireiter.com/api/openapi/submit";
+
+          var payload = @"
+                {
+                    ""model"": ""flux_3_video"",
+                    ""params"": {
+                        ""mode"": ""t2v"",
+                        ""prompt"": ""电影感跟拍镜头：一只赤狐穿过薄雾森林，伴随自然环境声与轻柔脚步声"",
+                        ""video_length"": 5,
+                        ""resolution"": ""hd"",
+                        ""aspect_ratio"": ""16:9"",
+                        ""generate_audio"": true,
+                        ""safety_tolerance"": 2
+                    },
+                    ""out_task_id"": ""flux_3_video_t2v_123456""
+                }";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+
+          var content = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          var result = await response.Content.ReadAsStringAsync();
+
+          Console.WriteLine(result);
+      }
+  }
+  ```
+
+  ```c C
+  #include <stdio.h>
+  #include <curl/curl.h>
+
+  int main(void) {
+      CURL *curl;
+      CURLcode res;
+
+      curl_global_init(CURL_GLOBAL_DEFAULT);
+      curl = curl_easy_init();
+
+      if(curl) {
+          const char *url = "https://aireiter.com/api/openapi/submit";
+          const char *payload = "{\"model\":\"flux_3_video\",\"params\":{\"mode\":\"t2v\",\"prompt\":\"电影感跟拍镜头：一只赤狐穿过薄雾森林，伴随自然环境声与轻柔脚步声\",\"video_length\":5,\"resolution\":\"hd\",\"aspect_ratio\":\"16:9\",\"generate_audio\":true,\"safety_tolerance\":2},\"out_task_id\":\"flux_3_video_t2v_123456\"}";
+
+          struct curl_slist *headers = NULL;
+          headers = curl_slist_append(headers, "Authorization: Bearer <token>");
+          headers = curl_slist_append(headers, "Content-Type: application/json");
+
+          curl_easy_setopt(curl, CURLOPT_URL, url);
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
+          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+          res = curl_easy_perform(curl);
+
+          if(res != CURLE_OK) {
+              fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                      curl_easy_strerror(res));
+          }
+
+          curl_slist_free_all(headers);
+          curl_easy_cleanup(curl);
+      }
+
+      curl_global_cleanup();
+      return 0;
+  }
+  ```
+
+  ```objectivec Objective-C
+  #import <Foundation/Foundation.h>
+
+  int main(int argc, const char * argv[]) {
+      @autoreleasepool {
+          NSURL *url = [NSURL URLWithString:@"https://aireiter.com/api/openapi/submit"];
+
+          NSDictionary *payload = @{
+              @"model": @"flux_3_video",
+              @"params": @{
+                  @"mode": @"t2v",
+                  @"prompt": @"电影感跟拍镜头：一只赤狐穿过薄雾森林，伴随自然环境声与轻柔脚步声",
+                  @"video_length": @5,
+                  @"resolution": @"hd",
+                  @"aspect_ratio": @"16:9",
+                  @"generate_audio": @YES,
+                  @"safety_tolerance": @2
+              },
+              @"out_task_id": @"flux_3_video_t2v_123456"
+          };
+
+          NSError *error;
+          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
+                                                            options:0
+                                                              error:&error];
+
+          NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+          [request setHTTPMethod:@"POST"];
+          [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
+          [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+          [request setHTTPBody:jsonData];
+
+          NSURLSessionDataTask *task = [[NSURLSession sharedSession]
+              dataTaskWithRequest:request
+              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+                  if (error) {
+                      NSLog(@"Error: %@", error);
+                      return;
+                  }
+                  NSString *result = [[NSString alloc] initWithData:data
+                                                          encoding:NSUTF8StringEncoding];
+                  NSLog(@"%@", result);
+              }];
+
+          [task resume];
+          [[NSRunLoop mainRunLoop] run];
+      }
+      return 0;
+  }
+  ```
+
+  ```ocaml OCaml
+  (* Requires cohttp and yojson libraries *)
+  open Lwt
+  open Cohttp
+  open Cohttp_lwt_unix
+
+  let url = "https://aireiter.com/api/openapi/submit"
+
+  let payload = {|{
+    "model": "flux_3_video",
+    "params": {
+      "mode": "t2v",
+      "prompt": "电影感跟拍镜头：一只赤狐穿过薄雾森林，伴随自然环境声与轻柔脚步声",
+      "video_length": 5,
+      "resolution": "hd",
+      "aspect_ratio": "16:9",
+      "generate_audio": true,
+      "safety_tolerance": 2
+    },
+    "out_task_id": "flux_3_video_t2v_123456"
+  }|}
+
+  let () =
+    let headers = Header.init ()
+      |> fun h -> Header.add h "Authorization" "Bearer <token>"
+      |> fun h -> Header.add h "Content-Type" "application/json"
+    in
+    let body = Cohttp_lwt.Body.of_string payload in
+
+    let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
+      body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
+      print_endline body_str
+    in
+    Lwt_main.run response
+  ```
+
+  ```dart Dart
+  import 'dart:convert';
+  import 'package:http/http.dart' as http;
+
+  void main() async {
+    final url = Uri.parse('https://aireiter.com/api/openapi/submit');
+
+    final payload = {
+          "model": "flux_3_video",
+          "params": {
+              "mode": "t2v",
+              "prompt": "电影感跟拍镜头：一只赤狐穿过薄雾森林，伴随自然环境声与轻柔脚步声",
+              "video_length": 5,
+              "resolution": "hd",
+              "aspect_ratio": "16:9",
+              "generate_audio": true,
+              "safety_tolerance": 2
+          },
+          "out_task_id": "flux_3_video_t2v_123456"
+      };
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer <token>',
+        'Content-Type': 'application/json'
+      },
+      body: jsonEncode(payload),
+    );
+
+    print(response.body);
+  }
+  ```
+
+  ```r R
+  library(httr)
+  library(jsonlite)
+
+  url <- "https://aireiter.com/api/openapi/submit"
+
+  payload <- list(
+    model = "flux_3_video",
+    params = list(
+      mode = "t2v",
+      prompt = "电影感跟拍镜头：一只赤狐穿过薄雾森林，伴随自然环境声与轻柔脚步声",
+      video_length = 5,
+      resolution = "hd",
+      aspect_ratio = "16:9",
+      generate_audio = TRUE,
+      safety_tolerance = 2
+    ),
+    out_task_id = "flux_3_video_t2v_123456"
+  )
+
+  response <- POST(
+    url,
+    add_headers(
+      Authorization = "Bearer <token>",
+      `Content-Type` = "application/json"
+    ),
+    body = toJSON(payload, auto_unbox = TRUE),
+    encode = "raw"
+  )
+
+  cat(content(response, "text"))
   ```
 </RequestExample>
 
-작업이 완료되면, 응답의 `output` 배열에 생성된 비디오 URL이 포함됩니다. 전체 필드는 [작업 상태 가져오기](/en/api-reference/tasks/status)를 참조하세요.
+<ResponseExample>
+  ```json 200
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "out_task_id": "flux_3_video_t2v_123456",
+        "status": "pending",
+        "estimated_credits": 100,
+        "created_at": "2025-12-22T06:03:28.242Z"
+    }
+}
+  ```
 
-## Mode Rules
+  ```json 400
+    {
+        "statusCode": 400,
+        "message": "请求参数无效",
+        "ok": false
+    }
+  ```
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "身份验证失败，请检查您的API密钥"
+    }
+  }
+  ```
+```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "账户余额不足，请充值后再试"
+    }
+  }
+  ```
 
-| mode | 필수 소재 | 소재 제한 |
-| --- | --- | --- |
-| `t2v` | 없음 | `image_url` 또는 `video_url`을 전송하지 마세요 |
-| `i2v` | `image_url` | 순서가 지정된 이미지 1-10장 |
-| `v2v` | `video_url` | 최대 원본 비디오 1개 |
-
-<Warning>
-이미지와 비디오 URL은 공용 네트워크에서 직접 접근 가능해야 합니다. 작업은 비동기 처리이므로, 최종 비디오를 기다리기 위해 제출 요청의 HTTP 연결을 사용하지 마세요.
-</Warning>
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "服务器内部错误，请稍后重试"
+    }
+  }
+  ```
+</ResponseExample>
 
 ## Mode Rules
 
