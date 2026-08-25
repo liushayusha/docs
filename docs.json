@@ -273,6 +273,13 @@
                 "pages": [
                   "zh/api-reference/videos/minimax-h3/generation"
                 ]
+              },
+              {
+                "group": "Wan 3.0",
+                "icon": "video",
+                "pages": [
+                  "zh/api-reference/videos/wan-3-0/generation"
+                ]
               }
             ]
           },
@@ -562,6 +569,13 @@
                 "icon": "video",
                 "pages": [
                   "en/api-reference/videos/minimax-h3/generation"
+                ]
+              },
+              {
+                "group": "Wan 3.0",
+                "icon": "video",
+                "pages": [
+                  "en/api-reference/videos/wan-3-0/generation"
                 ]
               }
             ]
@@ -853,6 +867,13 @@
                 "pages": [
                   "ja/api-reference/videos/minimax-h3/generation"
                 ]
+              },
+              {
+                "group": "Wan 3.0",
+                "icon": "video",
+                "pages": [
+                  "ja/api-reference/videos/wan-3-0/generation"
+                ]
               }
             ]
           },
@@ -1142,6 +1163,13 @@
                 "icon": "video",
                 "pages": [
                   "ko/api-reference/videos/minimax-h3/generation"
+                ]
+              },
+              {
+                "group": "Wan 3.0",
+                "icon": "video",
+                "pages": [
+                  "ko/api-reference/videos/wan-3-0/generation"
                 ]
               }
             ]

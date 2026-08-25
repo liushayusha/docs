@@ -1,0 +1,836 @@
+---
+title: 'Wan 3.0 Video Generation'
+description: |
+  - Tongyi Wanxiang 3.0, also commonly known as Wanxiang 3.0
+  - Asynchronous processing mode, returns a task ID for later querying
+  - Supports three generation modes: text/reference, first and last frame, and file/webpage
+  - Supports 480p / 720p / 1080p output, video duration 2-30 seconds, default native audio track
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+<Note>
+The model name of Wan 3.0 in AIReiter is `wan3_0`. This model is also commonly searched as Wanxiang 3.0 or Wanxiang 3.0.
+</Note>
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  All endpoints require Bearer Token authentication.
+
+  Get the API Key:
+
+  Visit the <a href={apiKeyUrl} target="_blank">API Key Management page</a> to get your API Key.
+
+  When using it, add the following to the request header:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  Model name, fixed value:
+
+  * `wan3_0`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  Model parameters object.
+
+  <Expandable title="params Object Properties">
+    <ParamField body="prompt" type="string">
+      Text description for video generation.
+
+      For `all_reference`, it is recommended to provide a prompt, or at least one image, video, or audio reference. For `first_last_frame` and `file_web`, the prompt is optional, but providing it will make the control more precise.
+
+      When using reference materials, you can refer to uploaded content in the prompt using "Image 1 / Video 1 / Audio 1" according to type and order.
+    </ParamField>
+
+    <ParamField body="type" type="string" default="all_reference">
+      Generation mode, which determines which video generation method to use. The same request cannot mix the three modes:
+
+      * `all_reference` - Text/reference, can use only a prompt or also include images, videos, and audio
+      * `first_last_frame` - First and last frames, uses a required first frame and an optional last frame
+      * `file_web` - File/web, pass in a document URL or a public web page URL
+
+      <Warning>
+        First and last frames cannot appear in the same request as reference images, reference videos, reference audio, documents, or web pages. `file_url` and `link_url` cannot be passed at the same time either.
+      </Warning>
+    </ParamField>
+
+    <ParamField body="video_length" type="integer" default="5">
+      Video duration to generate, in seconds.
+
+      Integer values supported: `2` to `30`. When using reference video, the sum of input seconds and output seconds cannot exceed 30.
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="720p">
+      Output resolution:
+
+      * `480p`
+      * `720p` - Default value
+      * `1080p`
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="auto">
+      Video aspect ratio.
+
+      Supported aspect ratios:
+
+      * `auto` - Follows the reference material or prompt, default value
+      * `16:9` - Landscape
+      * `9:16` - Portrait
+      * `4:3` - Standard landscape
+      * `3:4` - Standard portrait
+      * `1:1` - Square
+    </ParamField>
+
+    <ParamField body="generate_audio" type="boolean" default="true">
+      Whether to generate a native audio track.
+
+      * `true` - Generate audio track, default value
+      * `false` - Output a video without audio track
+    </ParamField>
+
+    <ParamField body="image_url" type="string | string[]">
+      Image URL, must be directly accessible from the public internet.
+
+      The meaning differs under different `type` values:
+
+      * `all_reference` - Optional reference images, up to 10 images
+      * `first_last_frame` - The first image is the first frame (required), the second image is the last frame (optional)
+      * `file_web` - Do not pass this parameter
+
+      Image requirements:
+
+      * The short side must be at least 240px, and the long side must not exceed 8000px
+      * Each image must not exceed 20MB
+    </ParamField>
+
+    <ParamField body="end_image_url" type="string">
+      Last-frame image URL.
+
+      Only valid in `first_last_frame` mode. You can also pass the last frame as the second image in the `image_url` array.
+    </ParamField>
+
+    <ParamField body="video_url" type="string | string[]">
+      Reference video URL.
+
+      Only valid in `all_reference` mode, up to 5 clips.
+
+      Video requirements:
+
+      * Formats: MP4, MOV
+      * Each clip 1-15 seconds, total not exceeding 15 seconds
+      * Each clip must not exceed 100MB
+      * The short side must be at least 240px, and the long side must not exceed 4096px
+
+      Reference video duration will be counted toward billing duration: billed seconds = final video seconds + reference video seconds (rounded up).
+
+      <Warning>Do not pass this parameter in `first_last_frame` or `file_web`. Make sure the URL is publicly accessible and that the video duration metadata can be read.</Warning>
+    </ParamField>
+
+    <ParamField body="audio_url" type="string | string[]">
+      Reference audio URL.
+
+      Only valid in `all_reference` mode, up to 5 clips.
+
+      Audio requirements:
+
+      * Formats: WAV, MP3
+      * Each clip 1-15 seconds, total not exceeding 15 seconds
+      * Each clip must not exceed 15MB
+
+      Reference audio is not counted toward billing duration.
+
+      <Warning>Do not pass this parameter in `first_last_frame` or `file_web`.</Warning>
+    </ParamField>
+
+    <ParamField body="file_url" type="string">
+      Document URL.
+
+      Only valid in `file_web` mode, and must be directly accessible from the public internet.
+
+      Supports DOC(X), XLS(X), PPT(X), PDF, TXT, KEY, Pages, Numbers, MD; no more than 100MB and 50 pages. Documents are not counted toward billing duration.
+
+      <Warning>Mutually exclusive with `link_url`; do not pass both.</Warning>
+    </ParamField>
+
+    <ParamField body="link_url" type="string">
+      Public web page URL.
+
+      Only valid in `file_web` mode. Web pages are not counted toward billing duration.
+
+      <Warning>Mutually exclusive with `file_url`; do not pass both.</Warning>
+    </ParamField>
+
+    <ParamField body="watermark" type="boolean" default="false">
+      Whether to add a watermark to the final video. Default `false`.
+    </ParamField>
+
+    <ParamField body="seed" type="integer">
+      Random seed. Takes effect when an integer greater than or equal to `0` is passed; omitted values will be random.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  Initiator task ID.
+
+  A user-defined task identifier, required. Only letters, numbers, underscores, and hyphens are supported, with a length of 1-64 characters. You can use this ID later to query task status and results.
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  Requestor task ID, which can be used to query the result.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Initial status, usually `"pending"`.
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  Creation time, in ISO format.
+</ResponseField>
+
+## Query Task
+
+Wan 3.0 is an asynchronous video generation model. After submitting the task, use `out_task_id` to query the task status.
+
+<ParamField body="out_task_id" type="string" required>
+  The originator task ID passed when the task was submitted.
+</ParamField>
+
+```bash
+curl --request POST \
+  --url https://aireiter.com/api/openapi/query \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "out_task_id": "wan3_0_t2v_123456"
+  }'
+```
+
+After the query succeeds and the task is completed, the `output` array in the Response will contain the generated video, and each element includes a `video` field.
+
+## Request Examples
+
+<RequestExample>
+  ```bash cURL (text/reference)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "wan3_0",
+      "params": {
+        "prompt": "A red paper airplane slowly glides through a bright white studio, fixed camera, soft daylight, cinematic, no text",
+        "type": "all_reference",
+        "resolution": "720p",
+        "aspect_ratio": "16:9",
+        "video_length": 5,
+        "generate_audio": true
+      },
+      "out_task_id": "wan3_0_t2v_123456"
+    }'
+  ```
+
+  ```bash cURL (first and last frames)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "wan3_0",
+      "params": {
+        "prompt": "Slowly push in on the shot, cinematic lighting, no text",
+        "type": "first_last_frame",
+        "image_url": [
+          "https://example.com/first-frame.jpg",
+          "https://example.com/last-frame.jpg"
+        ],
+        "resolution": "720p",
+        "aspect_ratio": "auto",
+        "video_length": 5,
+        "generate_audio": true
+      },
+      "out_task_id": "wan3_0_frames_123456"
+    }'
+  ```
+
+  ```bash cURL (reference video)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "wan3_0",
+      "params": {
+        "prompt": "Keep the subject and camera movement from Video 1, with cleaner lighting, no text",
+        "type": "all_reference",
+        "video_url": ["https://example.com/reference.mp4"],
+        "resolution": "480p",
+        "aspect_ratio": "16:9",
+        "video_length": 2,
+        "generate_audio": true
+      },
+      "out_task_id": "wan3_0_refv_123456"
+    }'
+  ```
+
+  ```bash cURL (web page to video)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "wan3_0",
+      "params": {
+        "prompt": "Turn the key points of the page into a landscape explanatory short video",
+        "type": "file_web",
+        "link_url": "https://example.com/article",
+        "resolution": "720p",
+        "aspect_ratio": "16:9",
+        "video_length": 8,
+        "generate_audio": true
+      },
+      "out_task_id": "wan3_0_web_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "wan3_0",
+      "params": {
+          "prompt": "A red paper airplane slowly glides through a bright white studio, fixed camera, soft daylight, cinematic, no text",
+          "type": "all_reference",
+          "resolution": "720p",
+          "aspect_ratio": "16:9",
+          "video_length": 5,
+          "generate_audio": True
+      },
+      "out_task_id": "wan3_0_t2v_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "wan3_0",
+    params: {
+      prompt: "A red paper airplane slowly glides through a bright white studio, fixed camera, soft daylight, cinematic, no text",
+      type: "all_reference",
+      resolution: "720p",
+      aspect_ratio: "16:9",
+      video_length: 5,
+      generate_audio: true
+    },
+    out_task_id: "wan3_0_t2v_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "wan3_0",
+          "params": map[string]interface{}{
+              "prompt": "A red paper airplane slowly glides through a bright white studio, fixed camera, soft daylight, cinematic, no text",
+              "type": "all_reference",
+              "resolution": "720p",
+              "aspect_ratio": "16:9",
+              "video_length": 5,
+              "generate_audio": true,
+          },
+          "out_task_id": "wan3_0_t2v_123456",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/openapi/submit";
+
+          String payload = """
+              {
+                "model": "wan3_0",
+                "params": {
+                  "prompt": "A red paper airplane slowly glides through a bright white studio, fixed camera, soft daylight, cinematic, no text",
+                  "type": "all_reference",
+                  "resolution": "720p",
+                  "aspect_ratio": "16:9",
+                  "video_length": 5,
+                  "generate_audio": true
+                },
+                "out_task_id": "wan3_0_t2v_123456"
+              }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = [
+      "model" => "wan3_0",
+      "params" => [
+          "prompt" => "A red paper airplane slowly glides through a bright white studio, fixed camera, soft daylight, cinematic, no text",
+          "type" => "all_reference",
+          "resolution" => "720p",
+          "aspect_ratio" => "16:9",
+          "video_length" => 5,
+          "generate_audio" => true
+      ],
+      "out_task_id" => "wan3_0_t2v_123456"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url = URI("https://aireiter.com/api/openapi/submit")
+
+  payload = {
+    model: "wan3_0",
+    params: {
+      prompt: "A red paper airplane slowly glides through a bright white studio, fixed camera, soft daylight, cinematic, no text",
+      type: "all_reference",
+      resolution: "720p",
+      aspect_ratio: "16:9",
+      video_length: 5,
+      generate_audio: true
+    },
+    out_task_id: "wan3_0_t2v_123456"
+  }
+
+  http = Net::HTTP.new(url.host, url.port)
+
+  request = Net::HTTP::Post.new(url)
+  request["Authorization"] = "Bearer <token>"
+  request["Content-Type"] = "application/json"
+  request.body = payload.to_json
+
+  response = http.request(request)
+  puts response.body
+  ```
+
+  ```swift Swift
+  import Foundation
+
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
+
+  let payload: [String: Any] = [
+      "model": "wan3_0",
+      "params": [
+          "prompt": "A red paper airplane slowly glides through a bright white studio, fixed camera, soft daylight, cinematic, no text",
+          "type": "all_reference",
+          "resolution": "720p",
+          "aspect_ratio": "16:9",
+          "video_length": 5,
+          "generate_audio": true
+      ],
+      "out_task_id": "wan3_0_t2v_123456"
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      if let error = error {
+          print("Error: \(error)")
+          return
+      }
+
+      if let data = data, let responseString = String(data: data, encoding: .utf8) {
+          print(responseString)
+      }
+  }
+
+  task.resume()
+  ```
+
+  ```csharp C#
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url = "https://aireiter.com/api/openapi/submit";
+
+          var payload = @"
+                {
+                    ""model"": ""wan3_0"",
+                    ""params"": {
+                        ""prompt"": ""A red paper airplane slowly glides through a bright white studio, fixed camera, soft daylight, cinematic, no text"",
+                        ""type"": ""all_reference"",
+                        ""resolution"": ""720p"",
+                        ""aspect_ratio"": ""16:9"",
+                        ""video_length"": 5,
+                        ""generate_audio"": true
+                    },
+                    ""out_task_id"": ""wan3_0_t2v_123456""
+                }";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+
+          var content = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          var result = await response.Content.ReadAsStringAsync();
+
+          Console.WriteLine(result);
+      }
+  }
+  ```
+
+  ```c C
+  #include <stdio.h>
+  #include <curl/curl.h>
+
+  int main(void) {
+      CURL *curl;
+      CURLcode res;
+
+      curl_global_init(CURL_GLOBAL_DEFAULT);
+      curl = curl_easy_init();
+
+      if(curl) {
+          const char *url = "https://aireiter.com/api/openapi/submit";
+          const char *payload = "{\"model\":\"wan3_0\",\"params\":{\"prompt\":\"A red paper airplane slowly glides through a bright white studio, fixed camera, soft daylight, cinematic, no text\",\"type\":\"all_reference\",\"resolution\":\"720p\",\"aspect_ratio\":\"16:9\",\"video_length\":5,\"generate_audio\":true},\"out_task_id\":\"wan3_0_t2v_123456\"}";
+
+          struct curl_slist *headers = NULL;
+          headers = curl_slist_append(headers, "Authorization: Bearer <token>");
+          headers = curl_slist_append(headers, "Content-Type: application/json");
+
+          curl_easy_setopt(curl, CURLOPT_URL, url);
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
+          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+          res = curl_easy_perform(curl);
+
+          if(res != CURLE_OK) {
+              fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                      curl_easy_strerror(res));
+          }
+
+          curl_slist_free_all(headers);
+          curl_easy_cleanup(curl);
+      }
+
+      curl_global_cleanup();
+      return 0;
+  }
+  ```
+
+  ```objectivec Objective-C
+  #import <Foundation/Foundation.h>
+
+  int main(int argc, const char * argv[]) {
+      @autoreleasepool {
+          NSURL *url = [NSURL URLWithString:@"https://aireiter.com/api/openapi/submit"];
+
+          NSDictionary *payload = @{
+              @"model": @"wan3_0",
+              @"params": @{
+                  @"prompt": @"A red paper airplane slowly glides through a bright white studio, fixed camera, soft daylight, cinematic, no text",
+                  @"type": @"all_reference",
+                  @"resolution": @"720p",
+                  @"aspect_ratio": @"16:9",
+                  @"video_length": @5,
+                  @"generate_audio": @YES
+              },
+              @"out_task_id": @"wan3_0_t2v_123456"
+          };
+
+          NSError *error;
+          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
+                                                            options:0
+                                                              error:&error];
+
+          NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+          [request setHTTPMethod:@"POST"];
+          [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
+          [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+          [request setHTTPBody:jsonData];
+
+          NSURLSessionDataTask *task = [[NSURLSession sharedSession]
+              dataTaskWithRequest:request
+              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+                  if (error) {
+                      NSLog(@"Error: %@", error);
+                      return;
+                  }
+                  NSString *result = [[NSString alloc] initWithData:data
+                                                          encoding:NSUTF8StringEncoding];
+                  NSLog(@"%@", result);
+              }];
+
+          [task resume];
+          [[NSRunLoop mainRunLoop] run];
+      }
+      return 0;
+  }
+  ```
+
+  ```ocaml OCaml
+  (* Requires cohttp and yojson libraries *)
+  open Lwt
+  open Cohttp
+  open Cohttp_lwt_unix
+
+  let url = "https://aireiter.com/api/openapi/submit"
+
+  let payload = {|{
+    "model": "wan3_0",
+    "params": {
+      "prompt": "A red paper airplane slowly glides through a bright white studio, fixed camera, soft daylight, cinematic, no text",
+      "type": "all_reference",
+      "resolution": "720p",
+      "aspect_ratio": "16:9",
+      "video_length": 5,
+      "generate_audio": true
+    },
+    "out_task_id": "wan3_0_t2v_123456"
+  }|}
+
+  let () =
+    let headers = Header.init ()
+      |> fun h -> Header.add h "Authorization" "Bearer <token>"
+      |> fun h -> Header.add h "Content-Type" "application/json"
+    in
+    let body = Cohttp_lwt.Body.of_string payload in
+
+    let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
+      body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
+      print_endline body_str
+    in
+    Lwt_main.run response
+  ```
+
+  ```dart Dart
+  import 'dart:convert';
+  import 'package:http/http.dart' as http;
+
+  void main() async {
+    final url = Uri.parse('https://aireiter.com/api/openapi/submit');
+
+    final payload = {
+          "model": "wan3_0",
+          "params": {
+              "prompt": "A red paper airplane slowly glides through a bright white studio, fixed camera, soft daylight, cinematic, no text",
+              "type": "all_reference",
+              "resolution": "720p",
+              "aspect_ratio": "16:9",
+              "video_length": 5,
+              "generate_audio": true
+          },
+          "out_task_id": "wan3_0_t2v_123456"
+      };
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer <token>',
+        'Content-Type': 'application/json'
+      },
+      body: jsonEncode(payload),
+    );
+
+    print(response.body);
+  }
+  ```
+
+  ```r R
+  library(httr)
+  library(jsonlite)
+
+  url <- "https://aireiter.com/api/openapi/submit"
+
+  payload <- list(
+    model = "wan3_0",
+    params = list(
+      prompt = "A red paper airplane slowly glides through a bright white studio, fixed camera, soft daylight, cinematic, no text",
+      type = "all_reference",
+      resolution = "720p",
+      aspect_ratio = "16:9",
+      video_length = 5,
+      generate_audio = TRUE
+    ),
+    out_task_id = "wan3_0_t2v_123456"
+  )
+
+  response <- POST(
+    url,
+    add_headers(
+      Authorization = "Bearer <token>",
+      `Content-Type` = "application/json"
+    ),
+    body = toJSON(payload, auto_unbox = TRUE),
+    encode = "raw"
+  )
+
+  cat(content(response, "text"))
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "out_task_id": "wan3_0_t2v_123456",
+        "status": "pending",
+        "created_at": "2026-08-24T10:33:30.511Z"
+    }
+}
+  ```
+
+  ```json 400
+    {
+        "statusCode": 400,
+        "message": "Invalid request parameters",
+        "ok": false
+    }
+  ```
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "Authentication failed, please check your API key"
+    }
+  }
+  ```
+```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "Insufficient account balance, please top up and try again"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "Internal server error, please try again later"
+    }
+  }
+  ```
+</ResponseExample>
+
+## Mode Notes
+
+<Note>
+`all_reference` can be generated from prompt only, or with additional image, video, and audio references; `first_last_frame` uses a first frame and an optional last frame; `file_web` uses `file_url` or `link_url` to convert a document or web page into a video.
+</Note>
+
+<Warning>
+When `type` is `first_last_frame`, do not pass `video_url`, `audio_url`, `file_url`, or `link_url` at the same time. When `type` is `file_web`, only one of `file_url` and `link_url` can be passed.
+</Warning>

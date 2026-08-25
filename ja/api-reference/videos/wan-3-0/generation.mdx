@@ -1,0 +1,837 @@
+---
+title: 'Wan 3.0 ビデオ生成'
+description: |
+  - 通義万相 3.0、Wanxiang 3.0 とも呼ばれます
+  - 非同期処理モード、後続の検索用にタスク ID を返します
+  - テキスト/参照、最初と最後のフレーム、ファイル/ウェブページの3種類の生成モードをサポートします
+  - 480p / 720p / 1080p 出力をサポートし、動画の長さは 2-30 秒、デフォルトでネイティブ音声トラックを使用します
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+<Note>
+AIReiter における Wan 3.0 のモデル名は `wan3_0` です。このモデルは、万相 3.0 または Wanxiang 3.0 としてもよく検索されます。
+</Note>
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  すべてのエンドポイントは Bearer Token を使用して認証する必要があります。
+
+  API Key の取得:
+
+  <a href={apiKeyUrl} target="_blank">API Key 管理ページ</a>にアクセスして、API Key を取得してください。
+
+  使用時はリクエストヘッダーに次を追加します:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  モデル名。固定値を使用:
+
+  * `wan3_0`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  モデルパラメーターオブジェクト。
+
+  <Expandable title="params オブジェクトの Properties">
+    <ParamField body="prompt" type="string">
+      動画生成のテキスト説明。
+
+      `all_reference` では、プロンプトを入力することを推奨します。少なくとも1つの画像、動画、または音声の参照を提供してください。`first_last_frame` と `file_web` ではプロンプトは Optional ですが、入力すると制御精度が向上します。
+
+      参照素材を使用する場合、プロンプト内で「画像1 / 動画1 / 音声1」のように、種類と順序に応じてアップロード内容を指すことができます。
+    </ParamField>
+
+    <ParamField body="type" type="string" default="all_reference">
+      生成モード。どの動画生成方式を使用するかを決定します。同一 Request で3つのモードを混在させることはできません:
+
+      * `all_reference` - テキスト/参照。プロンプトのみでも使用でき、画像、動画、音声を追加することもできます
+      * `first_last_frame` - 先頭・末尾フレーム。必須の先頭フレームと Optional の末尾フレームを使用します
+      * `file_web` - ファイル/ウェブ。ドキュメント URL または公開ウェブページ URL を渡します
+
+      <Warning>
+        先頭・末尾フレームは、参照画像、参照動画、参照音声、ドキュメント、またはウェブページと同じ Request に含めることはできません。`file_url` と `link_url` も同時に渡せません。
+      </Warning>
+    </ParamField>
+
+    <ParamField body="video_length" type="integer" default="5">
+      生成する動画の長さ。単位は秒です。
+
+      整数をサポート: `2` から `30`。参照動画がある場合、入力秒数と出力秒数の合計は 30 秒を超えられません。
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="720p">
+      出力解像度:
+
+      * `480p`
+      * `720p` - デフォルト値
+      * `1080p`
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="auto">
+      動画のアスペクト比。
+
+      サポートされているアスペクト比:
+
+      * `auto` - 参照素材またはプロンプトに従う、デフォルト値
+      * `16:9` - 横向き
+      * `9:16` - 縦向き
+      * `4:3` - 標準横向き
+      * `3:4` - 標準縦向き
+      * `1:1` - 正方形
+    </ParamField>
+
+    <ParamField body="generate_audio" type="boolean" default="true">
+      ネイティブ音声トラックを生成するかどうか。
+
+      * `true` - 音声トラックを生成、デフォルト値
+      * `false` - 音声トラックなしの動画を出力
+    </ParamField>
+
+    <ParamField body="image_url" type="string | string[]">
+      画像 URL。パブリックネットワークから直接アクセスできる必要があります。
+
+      `type` によって意味が異なります:
+
+      * `all_reference` - Optional の参照画像、最大 10 枚
+      * `first_last_frame` - 1 枚目が先頭フレーム（必須）、2 枚目が末尾フレーム（Optional）
+      * `file_web` - 渡さないでください
+
+      画像の要件:
+
+      * 短辺は 240px 以上、長辺は 8000px 以下
+      * 1 枚あたり 20MB 以下
+    </ParamField>
+
+    <ParamField body="end_image_url" type="string">
+      末尾フレームの画像 URL。
+
+      `first_last_frame` モードでのみ有効です。末尾フレームを `image_url` 配列の2枚目の画像として渡すこともできます。
+    </ParamField>
+
+    <ParamField body="video_url" type="string | string[]">
+      参照動画 URL。
+
+      `all_reference` モードでのみ有効、最大 5 本まで。
+
+      動画の要件:
+
+      * 形式は MP4、MOV
+      * 1 本あたり 1-15 秒、合計は 15 秒以下
+      * 1 本あたり 100MB 以下
+      * 短辺は 240px 以上、長辺は 4096px 以下
+
+      参照動画の長さは課金対象時間に含まれます: 課金秒数 = 生成物の秒数 + 参照動画の秒数（切り上げ）。
+
+      <Warning>`first_last_frame` と `file_web` ではこのパラメーターを渡さないでください。URL が公開アクセス可能で、動画の長さメタデータを読み取れることを確認してください。</Warning>
+    </ParamField>
+
+    <ParamField body="audio_url" type="string | string[]">
+      参照音声 URL。
+
+      `all_reference` モードでのみ有効、最大 5 本まで。
+
+      音声の要件:
+
+      * 形式は WAV、MP3
+      * 1 本あたり 1-15 秒、合計は 15 秒以下
+      * 1 本あたり 15MB 以下
+
+      参照音声は課金対象時間に含まれません。
+
+      <Warning>`first_last_frame` と `file_web` ではこのパラメーターを渡さないでください。</Warning>
+    </ParamField>
+
+    <ParamField body="file_url" type="string">
+      ドキュメント URL。
+
+      `file_web` モードでのみ有効、パブリックネットワークから直接アクセスできる必要があります。
+
+      DOC(X)、XLS(X)、PPT(X)、PDF、TXT、KEY、Pages、Numbers、MD をサポート。100MB 以下、50ページ以下。ドキュメントは課金対象時間に含まれません。
+
+      <Warning>`link_url` とは排他的です。同時に渡さないでください。</Warning>
+    </ParamField>
+
+    <ParamField body="link_url" type="string">
+      公開ウェブページ URL。
+
+      `file_web` モードでのみ有効です。ウェブページは課金対象時間に含まれません。
+
+      <Warning>`file_url` とは排他的です。同時に渡さないでください。</Warning>
+    </ParamField>
+
+    <ParamField body="watermark" type="boolean" default="false">
+      生成物にウォーターマークを追加するかどうか。デフォルトは `false` です。
+    </ParamField>
+
+    <ParamField body="seed" type="integer">
+      乱数シード。`0` 以上の整数を渡した場合に有効。省略するとランダムになります。
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  発行元の Task ID。
+
+  ユーザー定義の Task 識別子で、Required です。英字、数字、アンダースコア、ハイフンのみ使用でき、長さは 1-64 文字です。後続でこの ID を使用して Task の Status と結果を Query できます。
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  送信側タスク ID。結果の照会に使用できます。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  初期ステータス。通常は `"pending"` です。
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  作成日時、ISO 形式。
+</ResponseField>
+
+## Query Task
+
+Wan 3.0 は非同期動画生成モデルです。タスクを送信した後は、`out_task_id` を使用してタスクの状態を確認してください。
+
+<ParamField body="out_task_id" type="string" required>
+  タスク送信時に渡される送信元タスク ID です。
+</ParamField>
+
+```bash
+curl --request POST \
+  --url https://aireiter.com/api/openapi/query \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "out_task_id": "wan3_0_t2v_123456"
+  }'
+```
+
+クエリが成功して完了すると、レスポンスの `output` 配列に生成された動画が含まれ、要素には `video` フィールドが含まれます。
+
+## Request Examples
+
+<RequestExample>
+  ```bash cURL（text/reference）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "wan3_0",
+      "params": {
+        "prompt": "明るい白い写真スタジオで、赤い紙飛行機がゆっくりと滑空する。固定カメラ、柔らかな日光、シネマティック、文字なし",
+        "type": "all_reference",
+        "resolution": "720p",
+        "aspect_ratio": "16:9",
+        "video_length": 5,
+        "generate_audio": true
+      },
+      "out_task_id": "wan3_0_t2v_123456"
+    }'
+  ```
+
+  ```bash cURL（first and last frames）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "wan3_0",
+      "params": {
+        "prompt": "画面がゆっくり前進し、シネマティックな光と影、文字なし",
+        "type": "first_last_frame",
+        "image_url": [
+          "https://example.com/first-frame.jpg",
+          "https://example.com/last-frame.jpg"
+        ],
+        "resolution": "720p",
+        "aspect_ratio": "auto",
+        "video_length": 5,
+        "generate_audio": true
+      },
+      "out_task_id": "wan3_0_frames_123456"
+    }'
+  ```
+
+  ```bash cURL（reference video）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "wan3_0",
+      "params": {
+        "prompt": "動画1の被写体とカメラワークを維持し、よりクリーンなライティング、文字なし",
+        "type": "all_reference",
+        "video_url": ["https://example.com/reference.mp4"],
+        "resolution": "480p",
+        "aspect_ratio": "16:9",
+        "video_length": 2,
+        "generate_audio": true
+      },
+      "out_task_id": "wan3_0_refv_123456"
+    }'
+  ```
+
+  ```bash cURL（web page to video）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "wan3_0",
+      "params": {
+        "prompt": "ページの要点を横長の解説ショート動画にする",
+        "type": "file_web",
+        "link_url": "https://example.com/article",
+        "resolution": "720p",
+        "aspect_ratio": "16:9",
+        "video_length": 8,
+        "generate_audio": true
+      },
+      "out_task_id": "wan3_0_web_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "wan3_0",
+      "params": {
+          "prompt": "明るい白い写真スタジオで、赤い紙飛行機がゆっくりと滑空する。固定カメラ、柔らかな日光、シネマティック、文字なし",
+          "type": "all_reference",
+          "resolution": "720p",
+          "aspect_ratio": "16:9",
+          "video_length": 5,
+          "generate_audio": True
+      },
+      "out_task_id": "wan3_0_t2v_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "wan3_0",
+    params: {
+      prompt: "明るい白い写真スタジオで、赤い紙飛行機がゆっくりと滑空する。固定カメラ、柔らかな日光、シネマティック、文字なし",
+      type: "all_reference",
+      resolution: "720p",
+      aspect_ratio: "16:9",
+      video_length: 5,
+      generate_audio: true
+    },
+    out_task_id: "wan3_0_t2v_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "wan3_0",
+          "params": map[string]interface{}{
+              "prompt": "明るい白い写真スタジオで、赤い紙飛行機がゆっくりと滑空する。固定カメラ、柔らかな日光、シネマティック、文字なし",
+              "type": "all_reference",
+              "resolution": "720p",
+              "aspect_ratio": "16:9",
+              "video_length": 5,
+              "generate_audio": true,
+          },
+          "out_task_id": "wan3_0_t2v_123456",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/openapi/submit";
+
+          String payload = """
+              {
+                "model": "wan3_0",
+                "params": {
+                  "prompt": "明るい白い写真スタジオで、赤い紙飛行機がゆっくりと滑空する。固定カメラ、柔らかな日光、シネマティック、文字なし",
+                  "type": "all_reference",
+                  "resolution": "720p",
+                  "aspect_ratio": "16:9",
+                  "video_length": 5,
+                  "generate_audio": true
+                },
+                "out_task_id": "wan3_0_t2v_123456"
+              }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = [
+      "model" => "wan3_0",
+      "params" => [
+          "prompt" => "明るい白い写真スタジオで、赤い紙飛行機がゆっくりと滑空する。固定カメラ、柔らかな日光、シネマティック、文字なし",
+          "type" => "all_reference",
+          "resolution" => "720p",
+          "aspect_ratio" => "16:9",
+          "video_length" => 5,
+          "generate_audio" => true
+      ],
+      "out_task_id" => "wan3_0_t2v_123456"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url = URI("https://aireiter.com/api/openapi/submit")
+
+  payload = {
+    model: "wan3_0",
+    params: {
+      prompt: "明るい白い写真スタジオで、赤い紙飛行機がゆっくりと滑空する。固定カメラ、柔らかな日光、シネマティック、文字なし",
+      type: "all_reference",
+      resolution: "720p",
+      aspect_ratio: "16:9",
+      video_length: 5,
+      generate_audio: true
+    },
+    out_task_id: "wan3_0_t2v_123456"
+  }
+
+  http = Net::HTTP.new(url.host, url.port)
+
+  request = Net::HTTP::Post.new(url)
+  request["Authorization"] = "Bearer <token>"
+  request["Content-Type"] = "application/json"
+  request.body = payload.to_json
+
+  response = http.request(request)
+  puts response.body
+  ```
+
+  ```swift Swift
+  import Foundation
+
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
+
+  let payload: [String: Any] = [
+      "model": "wan3_0",
+      "params": [
+          "prompt": "明るい白い写真スタジオで、赤い紙飛行機がゆっくりと滑空する。固定カメラ、柔らかな日光、シネマティック、文字なし",
+          "type": "all_reference",
+          "resolution": "720p",
+          "aspect_ratio": "16:9",
+          "video_length": 5,
+          "generate_audio": true
+      ],
+      "out_task_id": "wan3_0_t2v_123456"
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      if let error = error {
+          print("Error: \(error)")
+          return
+      }
+
+      if let data = data, let responseString = String(data: data, encoding: .utf8) {
+          print(responseString)
+      }
+  }
+
+  task.resume()
+  ```
+
+  ```csharp C#
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url = "https://aireiter.com/api/openapi/submit";
+
+          var payload = @"
+                {
+                    ""model"": ""wan3_0"",
+                    ""params"": {
+                        ""prompt"": ""明るい白い写真スタジオで、赤い紙飛行機がゆっくりと滑空する。固定カメラ、柔らかな日光、シネマティック、文字なし"",
+                        ""type"": ""all_reference"",
+                        ""resolution"": ""720p"",
+                        ""aspect_ratio"": ""16:9"",
+                        ""video_length"": 5,
+                        ""generate_audio"": true
+                    },
+                    ""out_task_id"": ""wan3_0_t2v_123456""
+                }";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>")
+;
+
+          var content = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          var result = await response.Content.ReadAsStringAsync();
+
+          Console.WriteLine(result);
+      }
+  }
+  ```
+
+  ```c C
+  #include <stdio.h>
+  #include <curl/curl.h>
+
+  int main(void) {
+      CURL *curl;
+      CURLcode res;
+
+      curl_global_init(CURL_GLOBAL_DEFAULT);
+      curl = curl_easy_init();
+
+      if(curl) {
+          const char *url = "https://aireiter.com/api/openapi/submit";
+          const char *payload = "{\"model\":\"wan3_0\",\"params\":{\"prompt\":\"明るい白い写真スタジオで、赤い紙飛行機がゆっくりと滑空する。固定カメラ、柔らかな日光、シネマティック、文字なし\",\"type\":\"all_reference\",\"resolution\":\"720p\",\"aspect_ratio\":\"16:9\",\"video_length\":5,\"generate_audio\":true},\"out_task_id\":\"wan3_0_t2v_123456\"}";
+
+          struct curl_slist *headers = NULL;
+          headers = curl_slist_append(headers, "Authorization: Bearer <token>");
+          headers = curl_slist_append(headers, "Content-Type: application/json");
+
+          curl_easy_setopt(curl, CURLOPT_URL, url);
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
+          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+          res = curl_easy_perform(curl);
+
+          if(res != CURLE_OK) {
+              fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                      curl_easy_strerror(res));
+          }
+
+          curl_slist_free_all(headers);
+          curl_easy_cleanup(curl);
+      }
+
+      curl_global_cleanup();
+      return 0;
+  }
+  ```
+
+  ```objectivec Objective-C
+  #import <Foundation/Foundation.h>
+
+  int main(int argc, const char * argv[]) {
+      @autoreleasepool {
+          NSURL *url = [NSURL URLWithString:@"https://aireiter.com/api/openapi/submit"];
+
+          NSDictionary *payload = @{
+              @"model": @"wan3_0",
+              @"params": @{
+                  @"prompt": @"明るい白い写真スタジオで、赤い紙飛行機がゆっくりと滑空する。固定カメラ、柔らかな日光、シネマティック、文字なし",
+                  @"type": @"all_reference",
+                  @"resolution": @"720p",
+                  @"aspect_ratio": @"16:9",
+                  @"video_length": @5,
+                  @"generate_audio": @YES
+              },
+              @"out_task_id": @"wan3_0_t2v_123456"
+          };
+
+          NSError *error;
+          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
+                                                            options:0
+                                                              error:&error];
+
+          NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+          [request setHTTPMethod:@"POST"];
+          [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
+          [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+          [request setHTTPBody:jsonData];
+
+          NSURLSessionDataTask *task = [[NSURLSession sharedSession]
+              dataTaskWithRequest:request
+              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+                  if (error) {
+                      NSLog(@"Error: %@", error);
+                      return;
+                  }
+                  NSString *result = [[NSString alloc] initWithData:data
+                                                          encoding:NSUTF8StringEncoding];
+                  NSLog(@"%@", result);
+              }];
+
+          [task resume];
+          [[NSRunLoop mainRunLoop] run];
+      }
+      return 0;
+  }
+  ```
+
+  ```ocaml OCaml
+  (* Requires cohttp and yojson libraries *)
+  open Lwt
+  open Cohttp
+  open Cohttp_lwt_unix
+
+  let url = "https://aireiter.com/api/openapi/submit"
+
+  let payload = {|{
+    "model": "wan3_0",
+    "params": {
+      "prompt": "明るい白い写真スタジオで、赤い紙飛行機がゆっくりと滑空する。固定カメラ、柔らかな日光、シネマティック、文字なし",
+      "type": "all_reference",
+      "resolution": "720p",
+      "aspect_ratio": "16:9",
+      "video_length": 5,
+      "generate_audio": true
+    },
+    "out_task_id": "wan3_0_t2v_123456"
+  }|}
+
+  let () =
+    let headers = Header.init ()
+      |> fun h -> Header.add h "Authorization" "Bearer <token>"
+      |> fun h -> Header.add h "Content-Type" "application/json"
+    in
+    let body = Cohttp_lwt.Body.of_string payload in
+
+    let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
+      body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
+      print_endline body_str
+    in
+    Lwt_main.run response
+  ```
+
+  ```dart Dart
+  import 'dart:convert';
+  import 'package:http/http.dart' as http;
+
+  void main() async {
+    final url = Uri.parse('https://aireiter.com/api/openapi/submit');
+
+    final payload = {
+          "model": "wan3_0",
+          "params": {
+              "prompt": "明るい白い写真スタジオで、赤い紙飛行機がゆっくりと滑空する。固定カメラ、柔らかな日光、シネマティック、文字なし",
+              "type": "all_reference",
+              "resolution": "720p",
+              "aspect_ratio": "16:9",
+              "video_length": 5,
+              "generate_audio": true
+          },
+          "out_task_id": "wan3_0_t2v_123456"
+      };
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer <token>',
+        'Content-Type': 'application/json'
+      },
+      body: jsonEncode(payload),
+    );
+
+    print(response.body);
+  }
+  ```
+
+  ```r R
+  library(httr)
+  library(jsonlite)
+
+  url <- "https://aireiter.com/api/openapi/submit"
+
+  payload <- list(
+    model = "wan3_0",
+    params = list(
+      prompt = "明るい白い写真スタジオで、赤い紙飛行機がゆっくりと滑空する。固定カメラ、柔らかな日光、シネマティック、文字なし",
+      type = "all_reference",
+      resolution = "720p",
+      aspect_ratio = "16:9",
+      video_length = 5,
+      generate_audio = TRUE
+    ),
+    out_task_id = "wan3_0_t2v_123456"
+  )
+
+  response <- POST(
+    url,
+    add_headers(
+      Authorization = "Bearer <token>",
+      `Content-Type` = "application/json"
+    ),
+    body = toJSON(payload, auto_unbox = TRUE),
+    encode = "raw"
+  )
+
+  cat(content(response, "text"))
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "out_task_id": "wan3_0_t2v_123456",
+        "status": "pending",
+        "created_at": "2026-08-24T10:33:30.511Z"
+    }
+}
+  ```
+
+  ```json 400
+    {
+        "statusCode": 400,
+        "message": "Request parameters are invalid",
+        "ok": false
+    }
+  ```
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "Authentication failed. Please check your API key."
+    }
+  }
+  ```
+```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "Insufficient account balance. Please top up and try again."
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "Internal server error. Please try again later."
+    }
+  }
+  ```
+</ResponseExample>
+
+## Mode Notes
+
+<Note>
+`all_reference` can be generated purely from prompts, or with additional image, video, and audio references; `first_last_frame` uses the first frame and an optional last frame; `file_web` uses `file_url` or `link_url` to convert a document or web page into a video.
+</Note>
+
+<Warning>
+When `type` is `first_last_frame`, do not pass `video_url`, `audio_url`, `file_url`, or `link_url` at the same time. When `type` is `file_web`, only one of `file_url` and `link_url` can be passed.
+</Warning>
