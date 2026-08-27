@@ -284,6 +284,29 @@
             ]
           },
           {
+            "group": "音频系列",
+            "icon": "music",
+            "pages": [
+              {
+                "group": "Seed Audio 1.0",
+                "icon": "music",
+                "pages": [
+                  "zh/api-reference/audios/seed-audio-1-0/generation"
+                ]
+              },
+              {
+                "group": "Suno",
+                "icon": "music",
+                "pages": [
+                  "zh/api-reference/audios/suno/generation",
+                  "zh/api-reference/audios/suno/lyrics",
+                  "zh/api-reference/audios/suno/extend",
+                  "zh/api-reference/audios/suno/cover"
+                ]
+              }
+            ]
+          },
+          {
             "group": "文字系列",
             "icon": "message",
             "pages": [
@@ -576,6 +599,29 @@
                 "icon": "video",
                 "pages": [
                   "en/api-reference/videos/wan-3-0/generation"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Audio Series",
+            "icon": "music",
+            "pages": [
+              {
+                "group": "Seed Audio 1.0",
+                "icon": "music",
+                "pages": [
+                  "en/api-reference/audios/seed-audio-1-0/generation"
+                ]
+              },
+              {
+                "group": "Suno",
+                "icon": "music",
+                "pages": [
+                  "en/api-reference/audios/suno/generation",
+                  "en/api-reference/audios/suno/lyrics",
+                  "en/api-reference/audios/suno/extend",
+                  "en/api-reference/audios/suno/cover"
                 ]
               }
             ]
@@ -878,6 +924,29 @@
             ]
           },
           {
+            "group": "オーディオシリーズ",
+            "icon": "music",
+            "pages": [
+              {
+                "group": "Seed Audio 1.0",
+                "icon": "music",
+                "pages": [
+                  "ja/api-reference/audios/seed-audio-1-0/generation"
+                ]
+              },
+              {
+                "group": "Suno",
+                "icon": "music",
+                "pages": [
+                  "ja/api-reference/audios/suno/generation",
+                  "ja/api-reference/audios/suno/lyrics",
+                  "ja/api-reference/audios/suno/extend",
+                  "ja/api-reference/audios/suno/cover"
+                ]
+              }
+            ]
+          },
+          {
             "group": "テキストシリーズ",
             "icon": "message",
             "pages": [
@@ -1170,6 +1239,29 @@
                 "icon": "video",
                 "pages": [
                   "ko/api-reference/videos/wan-3-0/generation"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "오디오 시리즈",
+            "icon": "music",
+            "pages": [
+              {
+                "group": "Seed Audio 1.0",
+                "icon": "music",
+                "pages": [
+                  "ko/api-reference/audios/seed-audio-1-0/generation"
+                ]
+              },
+              {
+                "group": "Suno",
+                "icon": "music",
+                "pages": [
+                  "ko/api-reference/audios/suno/generation",
+                  "ko/api-reference/audios/suno/lyrics",
+                  "ko/api-reference/audios/suno/extend",
+                  "ko/api-reference/audios/suno/cover"
                 ]
               }
             ]

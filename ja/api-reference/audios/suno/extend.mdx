@@ -1,0 +1,683 @@
+---
+title: 'Suno 続き生成'
+description: |
+  - 1つの公開音声をより長い曲として続き生成します
+  - 非同期処理モードで、後続のクエリに使用するタスク ID を返します
+  - 公開音声 URL を使用するため、上流のタスク ID は不要です
+  - 元の曲の何秒目から続けるかを指定できます
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+<Note>
+Suno Extend の AIReiter におけるモデル名は `suno_extend` です。音声トラックをアップロードするか、前回生成結果の音声 URL を再利用すると、そのまま続きを作成できます。
+</Note>
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  すべての API エンドポイントは Bearer Token による認証が必要です。
+
+  API Key の取得：
+
+  <a href={apiKeyUrl} target="_blank">API Key 管理ページ</a> にアクセスして、API Key を取得してください。
+
+  使用する際はリクエストヘッダーに以下を追加してください：
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  モデル名。固定で使用：
+
+  * `suno_extend`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  モデルパラメータオブジェクト。
+
+  <Expandable title="params オブジェクトの Properties">
+    <ParamField body="audio_url" type="string | string[]" required>
+      続き書きする音声URL。公開アクセス可能である必要があります。配列を渡す場合は先頭の項目を使用します。
+
+      音声要件：
+
+      * 形式 MP3、WAV
+      * 長さは8分以内
+      * 20MB以下
+    </ParamField>
+
+    <ParamField body="prompt" type="string">
+      任意。続き部分をどのように展開したいかを説明します。たとえば、サビをより大きく、アウトロをより静かに、新しい楽器を追加するなどです。
+    </ParamField>
+
+    <ParamField body="continue_at" type="number" default="60">
+      元の曲の何秒目から続けるか。範囲は `0` から `240` で、元の音声の長さより短くなければなりません。デフォルトは `60` で、通常はAメロまたはサビの後に接続します。
+    </ParamField>
+
+    <ParamField body="suno_model" type="string" default="V5">
+      Suno バージョン：
+
+      * `V4`
+      * `V4_5`
+      * `V4_5PLUS`
+      * `V4_5ALL`
+      * `V5` - デフォルト値
+      * `V5_5`
+    </ParamField>
+
+    <ParamField body="instrumental" type="boolean" default="false">
+      続き部分がインストゥルメンタルかどうか。
+
+      * `false` - ボーカルありで継続
+      * `true` - 伴奏のみ出力
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  発行元タスクID。
+
+  ユーザー定義のタスク識別子。必須です。英字、数字、アンダースコア、ハイフンのみ使用でき、長さは1-64文字です。後続でこのIDを使用してタスクのステータスと結果を取得できます。
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  発行元のタスク ID。結果の取得に使用できます。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  初期状態で、通常は `"pending"` です。
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  作成時刻、ISO 形式。
+</ResponseField>
+
+## Query Task
+
+Suno Extend は非同期の音楽継続生成モデルです。タスクを送信した後、`out_task_id` を使用してタスクのステータスを確認してください。完了後、`output` には通常 2 件の継続結果が含まれ、各項目には `audio`、`url`、`title`、`text` が含まれます。
+
+<ParamField body="out_task_id" type="string" required>
+  タスク送信時に渡される送信元のタスク ID。
+</ParamField>
+
+```bash
+curl --request POST \
+  --url https://aireiter.com/api/openapi/query \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "out_task_id": "suno_extend_123456"
+  }'
+```
+
+検索が成功し、完了した後の `output` の例:
+
+```json
+{
+  "statusCode": 200,
+  "message": "",
+  "data": {
+    "out_task_id": "suno_extend_123456",
+    "status": "completed",
+    "created_at": "2026-08-26T10:12:11.000Z",
+    "completed_at": "2026-08-26T10:14:41.000Z",
+    "output": [
+      {
+        "audio": "https://s1.pxz.ai/upload/audio-generator/20260826/suno-extend-0.mp3",
+        "url": "https://s1.pxz.ai/upload/audio-generator/20260826/suno-extend-cover-0.jpeg",
+        "title": "朝のコーヒー（拡張版）",
+        "text": "[サビ]\\nギターを鳴らし続けて..."
+      }
+    ]
+  }
+}
+```
+
+## Request Examples
+
+<RequestExample>
+  ```bash cURL
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "suno_extend",
+      "params": {
+        "audio_url": "https://example.com/song.mp3",
+        "prompt": "より明るいサビに切り替え、ギターはそのまま維持",
+        "continue_at": 60,
+        "suno_model": "V5",
+        "instrumental": false
+      },
+      "out_task_id": "suno_extend_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "suno_extend",
+      "params": {
+          "audio_url": "https://example.com/song.mp3",
+          "prompt": "より明るいサビに切り替え、ギターはそのまま維持",
+          "continue_at": 60,
+          "suno_model": "V5",
+          "instrumental": False
+      },
+      "out_task_id": "suno_extend_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "suno_extend",
+    params: {
+      audio_url: "https://example.com/song.mp3",
+      prompt: "より明るいサビに切り替え、ギターはそのまま維持",
+      continue_at: 60,
+      suno_model: "V5",
+      instrumental: false
+    },
+    out_task_id: "suno_extend_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "suno_extend",
+          "params": map[string]interface{}{
+              "audio_url": "https://example.com/song.mp3",
+              "prompt": "より明るいサビに切り替え、ギターはそのまま維持",
+              "continue_at": 60,
+              "suno_model": "V5",
+              "instrumental": false,
+          },
+          "out_task_id": "suno_extend_123456",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/openapi/submit";
+
+          String payload = """
+{
+                "model": "suno_extend",
+                "params": {
+                  "audio_url": "https://example.com/song.mp3",
+                  "prompt": "より明るいサビに切り替え、ギターはそのまま維持",
+                  "continue_at": 60,
+                  "suno_model": "V5",
+                  "instrumental": false
+                },
+                "out_task_id": "suno_extend_123456"
+              }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = [
+      "model" => "suno_extend",
+      "params" => [
+          "audio_url" => "https://example.com/song.mp3",
+          "prompt" => "より明るいサビに切り替え、ギターはそのまま維持",
+          "continue_at" => 60,
+          "suno_model" => "V5",
+          "instrumental" => false
+      ],
+      "out_task_id" => "suno_extend_123456"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url = URI("https://aireiter.com/api/openapi/submit")
+
+  payload = {
+    model: "suno_extend",
+    params: {
+      audio_url: "https://example.com/song.mp3",
+      prompt: "より明るいサビに切り替え、ギターはそのまま維持",
+      continue_at: 60,
+      suno_model: "V5",
+      instrumental: false
+    },
+    out_task_id: "suno_extend_123456"
+  }
+
+  http = Net::HTTP.new(url.host, url.port)
+
+  request = Net::HTTP::Post.new(url)
+  request["Authorization"] = "Bearer <token>"
+  request["Content-Type"] = "application/json"
+  request.body = payload.to_json
+
+  response = http.request(request)
+  puts response.body
+  ```
+
+  ```swift Swift
+  import Foundation
+
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
+
+  let payload: [String: Any] = [
+      "model": "suno_extend",
+      "params": [
+          "audio_url": "https://example.com/song.mp3",
+          "prompt": "より明るいサビに切り替え、ギターはそのまま維持",
+          "continue_at": 60,
+          "suno_model": "V5",
+          "instrumental": false
+      ],
+      "out_task_id": "suno_extend_123456"
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      if let error = error {
+          print("Error: \(error)")
+          return
+      }
+
+      if let data = data, let responseString = String(data: data, encoding: .utf8) {
+          print(responseString)
+      }
+  }
+
+  task.resume()
+  ```
+
+  ```csharp C#
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url = "https://aireiter.com/api/openapi/submit";
+
+          var payload = @"
+{
+                      "model": "suno_extend",
+                      "params": {
+                        "audio_url": "https://example.com/song.mp3",
+                        "prompt": "より明るいサビに切り替え、ギターはそのまま維持",
+                        "continue_at": 60,
+                        "suno_model": "V5",
+                        "instrumental": false
+                      },
+                      "out_task_id": "suno_extend_123456"
+                    }";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+
+          var content = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          var result = await response.Content.ReadAsStringAsync();
+
+          Console.WriteLine(result);
+      }
+  }
+  ```
+
+  ```c C
+  #include <stdio.h>
+  #include <curl/curl.h>
+
+  int main(void) {
+      CURL *curl;
+      CURLcode res;
+
+      curl_global_init(CURL_GLOBAL_DEFAULT);
+      curl = curl_easy_init();
+
+      if(curl) {
+          const char *url = "https://aireiter.com/api/openapi/submit";
+          const char *payload = "{\"model\":\"suno_extend\",\"params\":{\"audio_url\":\"https://example.com/song.mp3\",\"prompt\":\"より明るいサビに切り替え、ギターはそのまま維持\",\"continue_at\":60,\"suno_model\":\"V5\",\"instrumental\":false},\"out_task_id\":\"suno_extend_123456\"}";
+
+          struct curl_slist *headers = NULL;
+          headers = curl_slist_append(headers, "Authorization: Bearer <token>");
+          headers = curl_slist_append(headers, "Content-Type: application/json");
+
+          curl_easy_setopt(curl, CURLOPT_URL, url);
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
+          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+          res = curl_easy_perform(curl);
+
+          if(res != CURLE_OK) {
+              fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                      curl_easy_strerror(res));
+          }
+
+          curl_slist_free_all(headers);
+          curl_easy_cleanup(curl);
+      }
+
+      curl_global_cleanup();
+      return 0;
+  }
+  ```
+
+  ```objectivec Objective-C
+  #import <Foundation/Foundation.h>
+
+  int main(int argc, const char * argv[]) {
+      @autoreleasepool {
+          NSURL *url = [NSURL URLWithString:@"https://aireiter.com/api/openapi/submit"];
+
+          NSDictionary *payload = @{
+              @"model": @"suno_extend",
+              @"params": @{
+                  @"audio_url": @"https://example.com/song.mp3",
+                  @"prompt": @"より明るいサビに切り替え、ギターはそのまま維持",
+                  @"continue_at": @60,
+                  @"suno_model": @"V5",
+                  @"instrumental": @NO
+              },
+              @"out_task_id": @"suno_extend_123456"
+          };
+
+          NSError *error;
+          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
+                                                            options:0
+                                                              error:&error];
+
+          NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+          [request setHTTPMethod:@"POST"];
+          [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
+          [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+          [request setHTTPBody:jsonData];
+
+          NSURLSessionDataTask *task = [[NSURLSession sharedSession]
+              dataTaskWithRequest:request
+              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+                  if (error) {
+                      NSLog(@"Error: %@", error);
+                      return;
+                  }
+                  NSString *result = [[NSString alloc] initWithData:data
+                                                          encoding:NSUTF8StringEncoding];
+                  NSLog(@"%@", result);
+              }];
+
+          [task resume];
+          [[NSRunLoop mainRunLoop] run];
+      }
+      return 0;
+  }
+  ```
+
+  ```ocaml OCaml
+  (* Requires cohttp and yojson libraries *)
+  open Lwt
+  open Cohttp
+  open Cohttp_lwt_unix
+
+  let url = "https://aireiter.com/api/openapi/submit"
+
+  let payload = {|{
+  "model": "suno_extend",
+  "params": {
+    "audio_url": "https://example.com/song.mp3",
+    "prompt": "より明るいサビに切り替え、ギターはそのまま維持",
+    "continue_at": 60,
+    "suno_model": "V5",
+    "instrumental": false
+  },
+  "out_task_id": "suno_extend_123456"
+}|}
+
+  let () =
+    let headers = Header.init ()
+      |> fun h -> Header.add h "Authorization" "Bearer <token>"
+      |> fun h -> Header.add h "Content-Type" "application/json"
+    in
+    let body = Cohttp_lwt.Body.of_string payload in
+
+    let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
+      body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
+      print_endline body_str
+    in
+    Lwt_main.run response
+  ```
+
+  ```dart Dart
+  import 'dart:convert';
+  import 'package:http/http.dart' as http;
+
+  void main() async {
+    final url = Uri.parse('https://aireiter.com/api/openapi/submit');
+
+    final payload = {
+      model: "suno_extend",
+      params: {
+        audio_url: "https://example.com/song.mp3",
+        prompt: "より明るいサビに切り替え、ギターはそのまま維持",
+        continue_at: 60,
+        suno_model: "V5",
+        instrumental: false
+      },
+      out_task_id: "suno_extend_123456"
+    };
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer <token>',
+        'Content-Type': 'application/json'
+      },
+      body: jsonEncode(payload),
+    );
+
+    print(response.body);
+  }
+  ```
+
+  ```r R
+  library(httr)
+  library(jsonlite)
+
+  url <- "https://aireiter.com/api/openapi/submit"
+
+  payload <- list(
+    model = "suno_extend",
+    params = list(
+      audio_url = "https://example.com/song.mp3",
+      prompt = "より明るいサビに切り替え、ギターはそのまま維持",
+      continue_at = 60,
+      suno_model = "V5",
+      instrumental = FALSE
+    ),
+    out_task_id = "suno_extend_123456"
+  )
+
+  response <- POST(
+    url,
+    add_headers(
+      Authorization = "Bearer <token>",
+      `Content-Type` = "application/json"
+    ),
+    body = toJSON(payload, auto_unbox = TRUE),
+    encode = "raw"
+  )
+
+  cat(content(response, "text"))
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "out_task_id": "suno_extend_123456",
+        "status": "pending",
+        "created_at": "2026-08-26T10:12:11.000Z"
+    }
+}
+  ```
+
+  ```json 400
+    {
+        "statusCode": 400,
+        "message": "リクエストパラメータが無効です",
+        "ok": false
+    }
+  ```
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "認証に失敗しました。APIキーを確認してください"
+    }
+  }
+  ```
+```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "アカウント残高が不足しています。チャージしてから再試行してください"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "サーバー内部エラーです。しばらくしてから再試行してください"
+    }
+  }
+  ```
+</ResponseExample>
+
+## Mode Notes
+
+<Note>
+`continue_at` は元の曲上の時点であり、継続後の合計長さではありません。その秒数が元の音声の長さ以内に収まるようにしてください。
+</Note>
+
+<Warning>
+公開アクセス可能な音声 URL を指定してください。ローカルファイルは、まず公開ネットワークから読み取れるアドレスにアップロードする必要があります。
+</Warning>

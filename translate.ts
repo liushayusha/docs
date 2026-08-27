@@ -2,7 +2,7 @@
  * @Author: yusha
  * @Date: 2025-12-17 14:16:31
  * @LastEditors: yusha
- * @LastEditTime: 2026-03-31 16:30:18
+ * @LastEditTime: 2026-08-27 17:18:23
  * @Description: 
  */
 /**
@@ -78,9 +78,11 @@ const languageMap: Record<string, string> = {
 languageMap.tw = "Traditional Chinese";
 
 const openai = new OpenAI({
-  baseURL: "http://135.181.3.185:18356/v1",
-  apiKey: "sk-3b550da056f4bee2684f03f724b6290f85a8d8cc6f111137ff3364a34778a769",
+  baseURL: "http://95.216.117.43:8317/v1",
+  apiKey: "sk-k8UV6AHCIQQ1iVHyBvJZbWPOj60MXCMe7H6PWanb2C07hEC7Vg7Zr05cEMHL89D2",
 });
+
+
 
 // 生成翻译系统提示词（包含配置文件中的不翻译词汇）
 function generateTranslateSystemPrompt(): string {

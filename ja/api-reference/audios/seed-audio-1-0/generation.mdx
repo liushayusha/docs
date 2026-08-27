@@ -1,0 +1,780 @@
+---
+title: 'Seed Audio 1.0 音声生成'
+description: |
+  - ByteDanceのSeed Audio 1.0。Doubao Seed Audioとも呼ばれます
+  - 非同期処理モード。後続の問い合わせに使用するタスクIDを返します
+  - テキストから音声生成、参照音声による声色クローン、参照画像によるガイダンスをサポート
+  - 1回あたり最大120秒。話速、音量、音調、出力形式を調整可能
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+<Note>
+AIReiter での Seed Audio 1.0 のモデル名は `seed_audio_1_0` です。このモデルは Doubao Seed Audio または Seed Audio API として検索されることもあります。
+</Note>
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  すべての API は Bearer Token を使用して認証する必要があります。
+
+  API Key の取得：
+
+  <a href={apiKeyUrl} target="_blank">API Key 管理ページ</a> にアクセスして、API Key を取得してください。
+
+  使用時はリクエストヘッダーに以下を追加します：
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  モデル名。固定値は次のとおりです：
+
+  * `seed_audio_1_0`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  モデルパラメータのオブジェクト。
+
+  <Expandable title="params オブジェクトのプロパティ">
+    <ParamField body="prompt" type="string" required>
+      合成するテキスト、または音声シーンの説明。最大1500文字です。
+
+      参考音声を使用する場合は、プロンプト内で `@audio1` / `@audio2` / `@audio3` を順番に使って参考音色を指定できます。
+    </ParamField>
+
+    <ParamField body="reference_mode" type="string" default="text">
+      参考モード。今回のリクエストで使用する参考素材の種類を決定します：
+
+      * `text` - プロンプトのみで生成し、参考音声や参考画像は送信しません
+      * `audio` - 参考音声を使って音色をクローンします
+      * `image` - 1枚の参考画像で雰囲気と表現をガイドします
+
+      <Warning>参考音声と参考画像は同時に使用できません。参考素材を使う場合は、対応する `reference_mode` を明示的に送信する必要があります。そうしないと、参考フィールドは無視されます。</Warning>
+    </ParamField>
+
+    <ParamField body="audio_url" type="string | string[]">
+      参考音声 URL。
+
+      `reference_mode` が `audio` の場合のみ有効で、最大3件まで指定できます。順序は `@audio1` / `@audio2` / `@audio3` に対応します。
+
+      参考音声の要件：
+
+      * 形式は WAV、MP3、PCM、OGG Opus
+      * 1件あたり30秒以内
+      * 1件あたり10MB以内
+      * URL は公開アクセス可能であること
+    </ParamField>
+
+    <ParamField body="image_url" type="string | string[]">
+      参考画像 URL。
+
+      `reference_mode` が `image` の場合のみ有効で、最大1枚です。
+
+      画像の要件：
+
+      * 形式は JPEG、PNG、WEBP
+      * 10MB以下
+      * URL は公開アクセス可能であること
+    </ParamField>
+
+    <ParamField body="speech_rate" type="number" default="1">
+      話速倍率。範囲は `0.5` から `2` で、小数点以下2桁まで対応しています。`1` は通常の話速です。
+    </ParamField>
+
+    <ParamField body="loudness_rate" type="number" default="1">
+      音量倍率。範囲は `0.5` から `2` で、小数点以下2桁まで対応しています。`1` は通常の音量です。
+    </ParamField>
+
+    <ParamField body="pitch_rate" type="integer" default="0">
+      音程。単位は半音です。範囲は `-12` から `12` です。`0` は原調、`12` は1オクターブ上、`-12` は1オクターブ下を意味します。
+    </ParamField>
+
+    <ParamField body="sample_rate" type="string" default="24000">
+      出力サンプルレート（Hz）：
+
+      * `8000`
+      * `16000`
+      * `24000` - デフォルト値
+      * `32000`
+      * `44100`
+      * `48000`
+    </ParamField>
+
+    <ParamField body="format" type="string" default="wav">
+      出力音声フォーマット：
+
+      * `wav` - デフォルト値
+      * `mp3`
+      * `ogg_opus`
+      * `pcm`
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  発行側のタスク ID。
+
+  ユーザー定義のタスク識別子で、必須です。使用できるのは英字、数字、アンダースコア、ハイフンのみで、長さは1〜64文字です。後続でこの ID を使ってタスクの状態と結果を照会できます。
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  発行元のタスク ID。結果の照会に使用できます。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  初期状態で、通常は `"pending"` です。
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  作成時刻。ISO 形式です。
+</ResponseField>
+
+## Query Task
+
+Seed Audio 1.0 は非同期音声生成モデルです。タスク送信後、`out_task_id` を使用してタスクの状態を照会してください。
+
+<ParamField body="out_task_id" type="string" required>
+  タスク送信時に渡す送信元タスク ID。
+</ParamField>
+
+```bash
+curl --request POST \
+  --url https://aireiter.com/api/openapi/query \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "out_task_id": "seed_audio_text_123456"
+  }'
+```
+
+照会が成功し、完了した後の、`output` の例：
+
+```json
+{
+  "statusCode": 200,
+  "message": "",
+  "data": {
+    "out_task_id": "seed_audio_text_123456",
+    "status": "completed",
+    "created_at": "2026-08-26T10:12:11.000Z",
+    "completed_at": "2026-08-26T10:12:48.000Z",
+    "output": [
+      {
+        "audio": "https://s1.pxz.ai/upload/audio-generator/20260826/seed-audio-item-0.wav"
+      }
+    ]
+  }
+}
+```
+
+## Request Examples
+
+<RequestExample>
+  ```bash cURL（テキストから音声）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "seed_audio_1_0",
+      "params": {
+        "prompt": "音声生成サービスへようこそ。今日は天気がとてもよく、散歩に出かけるのにぴったりです。",
+        "reference_mode": "text",
+        "format": "wav",
+        "sample_rate": "24000",
+        "speech_rate": 1,
+        "loudness_rate": 1,
+        "pitch_rate": 0
+      },
+      "out_task_id": "seed_audio_text_123456"
+    }'
+  ```
+
+  ```bash cURL（参照音声）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "seed_audio_1_0",
+      "params": {
+        "prompt": "@audio1 こんにちは、お会いできてうれしいです。@audio2 今日はどうでしたか？",
+        "reference_mode": "audio",
+        "audio_url": [
+          "https://example.com/ref-voice.mp3"
+        ],
+        "format": "mp3",
+        "sample_rate": "24000"
+      },
+      "out_task_id": "seed_audio_clone_123456"
+    }'
+  ```
+
+  ```bash cURL（参照画像）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "seed_audio_1_0",
+      "params": {
+        "prompt": "画像の雰囲気に基づいてナレーションを生成してください。落ち着いた口調で。",
+        "reference_mode": "image",
+        "image_url": "https://example.com/scene.jpg",
+        "format": "wav"
+      },
+      "out_task_id": "seed_audio_image_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "seed_audio_1_0",
+      "params": {
+          "prompt": "音声生成サービスへようこそ。今日は天気がとてもよく、散歩に出かけるのにぴったりです。",
+          "reference_mode": "text",
+          "format": "wav",
+          "sample_rate": "24000",
+          "speech_rate": 1,
+          "loudness_rate": 1,
+          "pitch_rate": 0
+      },
+      "out_task_id": "seed_audio_text_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "seed_audio_1_0",
+    params: {
+      prompt: "音声生成サービスへようこそ。今日は天気がとてもよく、散歩に出かけるのにぴったりです。",
+      reference_mode: "text",
+      format: "wav",
+      sample_rate: "24000",
+      speech_rate: 1,
+      loudness_rate: 1,
+      pitch_rate: 0
+    },
+    out_task_id: "seed_audio_text_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "seed_audio_1_0",
+          "params": map[string]interface{}{
+              "prompt": "音声生成サービスへようこそ。今日は天気がとてもよく、散歩に出かけるのにぴったりです。",
+              "reference_mode": "text",
+              "format": "wav",
+              "sample_rate": "24000",
+              "speech_rate": 1,
+              "loudness_rate": 1,
+              "pitch_rate": 0,
+          },
+          "out_task_id": "seed_audio_text_123456",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/openapi/submit";
+
+          String payload = """
+{
+                "model": "seed_audio_1_0",
+                "params": {
+                  "prompt": "音声生成サービスへようこそ。今日は天気がとてもよく、散歩に出かけるのにぴったりです。",
+                  "reference_mode": "text",
+                  "format": "wav",
+                  "sample_rate": "24000",
+                  "speech_rate": 1,
+                  "loudness_rate": 1,
+                  "pitch_rate": 0
+                },
+                "out_task_id": "seed_audio_text_123456"
+              }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = [
+      "model" => "seed_audio_1_0",
+      "params" => [
+          "prompt" => "音声生成サービスへようこそ。今日は天気がとてもよく、散歩に出かけるのにぴったりです。",
+          "reference_mode" => "text",
+          "format" => "wav",
+          "sample_rate" => "24000",
+          "speech_rate" => 1,
+          "loudness_rate" => 1,
+          "pitch_rate" => 0
+      ],
+      "out_task_id" => "seed_audio_text_123456"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url = URI("https://aireiter.com/api/openapi/submit")
+
+  payload = {
+    model: "seed_audio_1_0",
+    params: {
+      prompt: "音声生成サービスへようこそ。今日は天気がとてもよく、散歩に出かけるのにぴったりです。",
+      reference_mode: "text",
+      format: "wav",
+      sample_rate: "24000",
+      speech_rate: 1,
+      loudness_rate: 1,
+      pitch_rate: 0
+    },
+    out_task_id: "seed_audio_text_123456"
+  }
+
+  http = Net::HTTP.new(url.host, url.port)
+
+  request = Net::HTTP::Post.new(url)
+  request["Authorization"] = "Bearer <token>"
+  request["Content-Type"] = "application/json"
+  request.body = payload.to_json
+
+  response = http.request(request)
+  puts response.body
+  ```
+
+  ```swift Swift
+  import Foundation
+
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
+
+  let payload: [String: Any] = [
+      "model": "seed_audio_1_0",
+      "params": [
+          "prompt": "音声生成サービスへようこそ。今日は天気がとてもよく、散歩に出かけるのにぴったりです。",
+          "reference_mode": "text",
+          "format": "wav",
+          "sample_rate": "24000",
+          "speech_rate": 1,
+          "loudness_rate": 1,
+          "pitch_rate": 0
+      ],
+      "out_task_id": "seed_audio_text_123456"
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      if let error = error {
+          print("Error: \(error)")
+          return
+      }
+
+      if let data = data, let responseString = String(data: data, encoding: .utf8) {
+          print(responseString)
+      }
+  }
+
+  task.resume()
+  ```
+
+  ```csharp C#
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url = "https://aireiter.com/api/openapi/submit";
+
+          var payload = @"
+{
+                      "model": "seed_audio_1_0",
+                      "params": {
+                        "prompt": "音声生成サービスへようこそ。今日は天気がとてもよく、散歩に出かけるのにぴったりです。",
+                        "reference_mode": "text",
+                        "format": "wav",
+                        "sample_rate": "24000",
+                        "speech_rate": 1,
+                        "loudness_rate": 1,
+                        "pitch_rate": 0
+                      },
+                      "out_task_id": "seed_audio_text_123456"
+                    }";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+
+          var content = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          var result = await response.Content.ReadAsStringAsync();
+
+          Console.WriteLine(result);
+      }
+  }
+  ```
+
+  ```c C
+  #include <stdio.h>
+  #include <curl/curl.h>
+
+  int main(void) {
+      CURL *curl;
+      CURLcode res;
+
+      curl_global_init(CURL_GLOBAL_DEFAULT);
+      curl = curl_easy_init();
+
+      if(curl) {
+          const char *url = "https://aireiter.com/api/openapi/submit";
+          const char *payload = "{\"model\":\"seed_audio_1_0\",\"params\":{\"prompt\":\"音声生成サービスへようこそ。今日は天気がとてもよく、散歩に出かけるのにぴったりです。\",\"reference_mode\":\"text\",\"format\":\"wav\",\"sample_rate\":\"24000\",\"speech_rate\":1,\"loudness_rate\":1,\"pitch_rate\":0},\"out_task_id\":\"seed_audio_text_123456\"}";
+
+          struct curl_slist *headers = NULL;
+          headers = curl_slist_append(headers, "Authorization: Bearer <token>");
+          headers = curl_slist_append(headers, "Content-Type: application/json");
+
+          curl_easy_setopt(curl, CURLOPT_URL, url);
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
+          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+          res = curl_easy_perform(curl);
+
+          if(res != CURLE_OK) {
+              fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                      curl_easy_strerror(res));
+          }
+
+          curl_slist_free_all(headers);
+          curl_easy_cleanup(curl);
+      }
+
+      curl_global_cleanup();
+      return 0;
+  }
+  ```
+
+  ```objectivec Objective-C
+  #import <Foundation/Foundation.h>
+
+  int main(int argc, const char * argv[]) {
+      @autoreleasepool {
+          NSURL *url = [NSURL URLWithString:@"https://aireiter.com/api/openapi/submit"];
+
+          NSDictionary *payload = @{
+              @"model": @"seed_audio_1_0",
+              @"params": @{
+                  @"prompt": @"音声生成サービスへようこそ。今日は天気がとてもよく、散歩に出かけるのにぴったりです。",
+                  @"reference_mode": @"text",
+                  @"format": @"wav",
+                  @"sample_rate": @"24000",
+                  @"speech_rate": @1,
+                  @"loudness_rate": @1,
+                  @"pitch_rate": @0
+              },
+              @"out_task_id": @"seed_audio_text_123456"
+          };
+
+          NSError *error;
+          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
+                                                            options:0
+                                                              error:&error];
+
+          NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+          [request setHTTPMethod:@"POST"];
+          [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
+          [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+          [request setHTTPBody:jsonData];
+
+          NSURLSessionDataTask *task = [[NSURLSession sharedSession]
+              dataTaskWithRequest:request
+              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+                  if (error) {
+                      NSLog(@"Error: %@", error);
+                      return;
+                  }
+                  NSString *result = [[NSString alloc] initWithData:data
+                                                          encoding:NSUTF8StringEncoding];
+                  NSLog(@"%@", result);
+              }];
+
+          [task resume];
+          [[NSRunLoop mainRunLoop] run];
+      }
+      return 0;
+  }
+  ```
+
+  ```ocaml OCaml
+  (* Requires cohttp and yojson libraries *)
+  open Lwt
+  open Cohttp
+  open Cohttp_lwt_unix
+
+  let url = "https://aireiter.com/api/openapi/submit"
+
+  let payload = {|{
+  "model": "seed_audio_1_0",
+  "params": {
+    "prompt": "音声生成サービスへようこそ。今日は天気がとてもよく、散歩に出かけるのにぴったりです。",
+    "reference_mode": "text",
+    "format": "wav",
+    "sample_rate": "24000",
+    "speech_rate": 1,
+    "loudness_rate": 1,
+    "pitch_rate": 0
+  },
+  "out_task_id": "seed_audio_text_123456"
+}|}
+
+  let () =
+    let headers = Header.init ()
+      |> fun h -> Header.add h "Authorization" "Bearer <token>"
+      |> fun h -> Header.add h "Content-Type" "application/json"
+    in
+    let body = Cohttp_lwt.Body.of_string payload in
+
+    let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
+      body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
+      print_endline body_str
+    in
+    Lwt_main.run response
+  ```
+
+  ```dart Dart
+  import 'dart:convert';
+  import 'package:http/http.dart' as http;
+
+  void main() async {
+    final url = Uri.parse('https://aireiter.com/api/openapi/submit');
+
+    final payload = {
+      model: "seed_audio_1_0",
+      params: {
+        prompt: "音声生成サービスへようこそ。今日は天気がとてもよく、散歩に出かけるのにぴったりです。",
+        reference_mode: "text",
+        format: "wav",
+        sample_rate: "24000",
+        speech_rate: 1,
+        loudness_rate: 1,
+        pitch_rate: 0
+      },
+      out_task_id: "seed_audio_text_123456"
+    };
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer <token>',
+        'Content-Type': 'application/json'
+      },
+      body: jsonEncode(payload),
+    );
+
+    print(response.body);
+  }
+  ```
+
+  ```r R
+  library(httr)
+  library(jsonlite)
+
+  url <- "https://aireiter.com/api/openapi/submit"
+
+  payload <- list(
+    model = "seed_audio_1_0",
+    params = list(
+      prompt = "音声生成サービスへようこそ。今日は天気がとてもよく、散歩に出かけるのにぴったりです。",
+      reference_mode = "text",
+      format = "wav",
+      sample_rate = "24000",
+      speech_rate = 1,
+      loudness_rate = 1,
+      pitch_rate = 0
+    ),
+    out_task_id = "seed_audio_text_123456"
+  )
+
+  response <- POST(
+    url,
+    add_headers(
+      Authorization = "Bearer <token>",
+      `Content-Type` = "application/json"
+    ),
+    body = toJSON(payload, auto_unbox = TRUE),
+    encode = "raw"
+  )
+
+  cat(content(response, "text"))
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "out_task_id": "seed_audio_text_123456",
+        "status": "pending",
+        "created_at": "2026-08-26T10:12:11.000Z"
+    }
+}
+  ```
+
+  ```json 400
+    {
+        "statusCode": 400,
+        "message": "リクエストパラメータが無効です",
+        "ok": false
+    }
+  ```
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "認証に失敗しました。APIキーを確認してください"
+    }
+  }
+  ```
+```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "残高が不足しています。チャージしてから再度お試しください"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "サーバー内部エラーです。しばらくしてから再度お試しください"
+    }
+  }
+  ```
+</ResponseExample>
+
+## Mode Notes
+
+<Note>
+`text` モードはプロンプトに基づいてのみ音声、セリフ、または効果音を生成します。`audio` モードは参照音声を使って音色をクローンします。`image` モードは1枚の参照画像で表現をガイドします。
+</Note>
+
+<Warning>
+`reference_mode` が `audio` の場合は、`image_url` を送信しないでください。`reference_mode` が `image` の場合は、`audio_url` を送信しないでください。1回のリクエストの最大長は120秒です。
+</Warning>

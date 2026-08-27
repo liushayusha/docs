@@ -1,0 +1,724 @@
+---
+title: 'Suno 커버'
+description: |
+  - 공개 오디오를 새로운 스타일로 커버하되, 멜로디는 원곡에 가깝게 유지
+  - 비동기 처리 모드로, 후속 조회를 위한 작업 ID를 반환
+  - 공개 오디오 URL을 사용하며, 상위 clip ID는 전달하지 않음
+  - 간단 모드와 사용자 지정 모드를 지원
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+<Note>
+AIReiter에서 Suno Cover의 모델 이름은 `suno_cover`입니다. 멜로디는 원곡에 가깝게 유지되며, 프롬프트는 주로 장르, 보컬, 그리고 프로덕션을 조정하는 데 사용됩니다.
+</Note>
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  모든 인터페이스는 Bearer Token을 사용하여 인증해야 합니다.
+
+  API Key 가져오기:
+
+  <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a>에 방문하여 API Key를 가져오세요.
+
+  사용 시 요청 헤더에 추가하세요:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  모델 이름, 고정 사용:
+
+  * `suno_cover`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  모델 매개변수 객체.
+
+  <Expandable title="params 객체 속성">
+    <ParamField body="prompt" type="string" required>
+      리메이크 후 어떤 분위기를 원하나요. 멜로디는 원곡에 가깝게 유지되며, 여기서는 장르, 보컬, 프로덕션을 바꿉니다.
+
+      사용자 정의 모드를 켜고 순수 음악이 아닐 경우, 프롬프트는 가사로 처리됩니다. V5 / V5.5 / V4.5 시리즈는 최대 5000자입니다.
+    </ParamField>
+
+    <ParamField body="audio_url" type="string | string[]" required>
+      리메이크할 오디오 URL, 공개적으로 접근 가능해야 합니다. 배열을 전달하면 첫 번째 항목을 사용합니다.
+
+      오디오 요구 사항:
+
+      * 형식 MP3, WAV
+      * 길이는 8분을 초과할 수 없습니다.
+      * 20MB를 초과할 수 없습니다.
+    </ParamField>
+
+    <ParamField body="suno_model" type="string" default="V5">
+      Suno 버전:
+
+      * `V4`
+      * `V4_5`
+      * `V4_5PLUS`
+      * `V4_5ALL`
+      * `V5` - 기본값
+      * `V5_5`
+    </ParamField>
+
+    <ParamField body="custom_mode" type="boolean" default="false">
+      사용자 정의 모드를 켤지 여부.
+
+      * `false` - 간단 모드, `prompt`와 `audio_url`만 필요
+      * `true` - 사용자 정의 모드, `title`과 `style`을 지정해야 함
+    </ParamField>
+
+    <ParamField body="instrumental" type="boolean" default="false">
+      순수 음악으로 변환할지 여부.
+
+      * `false` - 보컬 유지
+      * `true` - 반주만 생성
+    </ParamField>
+
+    <ParamField body="vocal_gender" type="string" default="m">
+      보컬 성별 선호. 순수 음악일 때는 무시됩니다.
+
+      * `m` - 남성 보컬, 기본값
+      * `f` - 여성 보컬
+    </ParamField>
+
+    <ParamField body="title" type="string">
+      곡 제목. 사용자 정의 모드에서만 유효하며, 최대 100자입니다. `custom_mode`를 켰을 때 필수입니다.
+    </ParamField>
+
+    <ParamField body="style" type="string">
+      새로운 장르와 프로덕션 방향. 사용자 정의 모드에서만 유효하며, 최대 1000자입니다. `custom_mode`를 켰을 때 필수입니다.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  요청 측 작업 ID.
+
+  사용자가 정의한 작업 식별자이며, 필수입니다. 영문자, 숫자, 밑줄, 하이픈만 지원하며 길이는 1-64자입니다. 이후 이 ID로 작업 상태와 결과를 조회할 수 있습니다.
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  요청 주체의 작업 ID로, 결과 조회에 사용할 수 있습니다.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  초기 상태로, 일반적으로 `"pending"`입니다.
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  생성 시간, ISO 형식.
+</ResponseField>
+
+## Query Task
+
+Suno Cover는 비동기 커버 생성 모델입니다. 작업을 제출한 후에는 `out_task_id`를 사용하여 작업 상태를 조회하세요. 완료되면 `output`에는 일반적으로 2개의 커버 결과가 포함되며, 각 항목에는 `audio`, `url`, `title`, `text`가 포함됩니다.
+
+<ParamField body="out_task_id" type="string" required>
+  작업을 제출할 때 전달한 호출 측 작업 ID입니다.
+</ParamField>
+
+```bash
+curl --request POST \
+  --url https://aireiter.com/api/openapi/query \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "out_task_id": "suno_cover_123456"
+  }'
+```
+
+조회가 성공하고 완료되면, `output` 예시는 다음과 같습니다:
+
+```json
+{
+  "statusCode": 200,
+  "message": "",
+  "data": {
+    "out_task_id": "suno_cover_123456",
+    "status": "completed",
+    "created_at": "2026-08-26T10:12:11.000Z",
+    "completed_at": "2026-08-26T10:14:41.000Z",
+    "output": [
+      {
+        "audio": "https://s1.pxz.ai/upload/audio-generator/20260826/suno-cover-0.mp3",
+        "url": "https://s1.pxz.ai/upload/audio-generator/20260826/suno-cover-art-0.jpeg",
+        "title": "Rainy Night Jazz",
+        "text": "[Verse]\\nStreetlights pull the rain into long lines..."
+      }
+    ]
+  }
+}
+```
+
+## Request Examples
+
+<RequestExample>
+  ```bash cURL (간단 모드)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "suno_cover",
+      "params": {
+        "audio_url": "https://example.com/song.mp3",
+        "prompt": "비 오는 밤 재즈, 근접 보컬, lo-fi",
+        "suno_model": "V5",
+        "custom_mode": false,
+        "instrumental": false
+      },
+      "out_task_id": "suno_cover_123456"
+    }'
+  ```
+
+  ```bash cURL (커스텀 모드)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "suno_cover",
+      "params": {
+        "audio_url": "https://example.com/song.mp3",
+        "prompt": "[Verse]\\n가로등이 빗줄기를 길게 늘이고\\n[Chorus]\\n이 오래된 노래가 새 옷을 입었어",
+        "suno_model": "V5",
+        "custom_mode": true,
+        "instrumental": false,
+        "title": "비 오는 밤 커버",
+        "style": "lo-fi 재즈, 근접 마이크 보컬",
+        "vocal_gender": "f"
+      },
+      "out_task_id": "suno_cover_custom_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "suno_cover",
+      "params": {
+          "audio_url": "https://example.com/song.mp3",
+          "prompt": "비 오는 밤 재즈, 근접 보컬, lo-fi",
+          "suno_model": "V5",
+          "custom_mode": False,
+          "instrumental": False
+      },
+      "out_task_id": "suno_cover_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "suno_cover",
+    params: {
+      audio_url: "https://example.com/song.mp3",
+      prompt: "비 오는 밤 재즈, 근접 보컬, lo-fi",
+      suno_model: "V5",
+      custom_mode: false,
+      instrumental: false
+    },
+    out_task_id: "suno_cover_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('오류:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "suno_cover",
+          "params": map[string]interface{}{
+              "audio_url": "https://example.com/song.mp3",
+              "prompt": "비 오는 밤 재즈, 근접 보컬, lo-fi",
+              "suno_model": "V5",
+              "custom_mode": false,
+              "instrumental": false,
+          },
+          "out_task_id": "suno_cover_123456",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/openapi/submit";
+
+          String payload = """
+{
+                "model": "suno_cover",
+                "params": {
+                  "audio_url": "https://example.com/song.mp3",
+                  "prompt": "비 오는 밤 재즈, 근접 보컬, lo-fi",
+                  "suno_model": "V5",
+                  "custom_mode": false,
+                  "instrumental": false
+                },
+                "out_task_id": "suno_cover_123456"
+              }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = [
+      "model" => "suno_cover",
+      "params" => [
+          "audio_url" => "https://example.com/song.mp3",
+          "prompt" => "비 오는 밤 재즈, 근접 보컬, lo-fi",
+          "suno_model" => "V5",
+          "custom_mode" => false,
+          "instrumental" => false
+      ],
+      "out_task_id" => "suno_cover_123456"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url = URI("https://aireiter.com/api/openapi/submit")
+
+  payload = {
+    model: "suno_cover",
+    params: {
+      audio_url: "https://example.com/song.mp3",
+      prompt: "비 오는 밤 재즈, 근접 보컬, lo-fi",
+      suno_model: "V5",
+      custom_mode: false,
+      instrumental: false
+    },
+    out_task_id: "suno_cover_123456"
+  }
+
+  http = Net::HTTP.new(url.host, url.port)
+
+  request = Net::HTTP::Post.new(url)
+  request["Authorization"] = "Bearer <token>"
+  request["Content-Type"] = "application/json"
+  request.body = payload.to_json
+
+  response = http.request(request)
+  puts response.body
+  ```
+
+  ```swift Swift
+  import Foundation
+
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
+
+  let payload: [String: Any] = [
+      "model": "suno_cover",
+      "params": [
+          "audio_url": "https://example.com/song.mp3",
+          "prompt": "비 오는 밤 재즈, 근접 보컬, lo-fi",
+          "suno_model": "V5",
+          "custom_mode": false,
+          "instrumental": false
+      ],
+      "out_task_id": "suno_cover_123456"
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      if let error = error {
+          print("오류: \(error)")
+          return
+      }
+
+      if let data = data, let responseString = String(data: data, encoding: .utf8) {
+          print(responseString)
+      }
+  }
+
+  task.resume()
+  ```
+
+  ```csharp C#
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url = "https://aireiter.com/api/openapi/submit";
+
+          var payload = @"
+{
+                      "model": "suno_cover",
+                      "params": {
+                        "audio_url": "https://example.com/song.mp3",
+                        "prompt": "비 오는 밤 재즈, 근접 보컬, lo-fi",
+                        "suno_model": "V5",
+                        "custom_mode": false,
+                        "instrumental": false
+                      },
+                      "out_task_id": "suno_cover_123456"
+                    }";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+
+          var content = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          var result = await response.Content.ReadAsStringAsync();
+
+          Console.WriteLine(result);
+      }
+  }
+  ```
+
+  ```c C
+  #include <stdio.h>
+  #include <curl/curl.h>
+
+  int main(void) {
+      CURL *curl;
+      CURLcode res;
+
+      curl_global_init(CURL_GLOBAL_DEFAULT);
+      curl = curl_easy_init();
+
+      if(curl) {
+          const char *url = "https://aireiter.com/api/openapi/submit";
+          const char *payload = "{\"model\":\"suno_cover\",\"params\":{\"audio_url\":\"https://example.com/song.mp3\",\"prompt\":\"비 오는 밤 재즈, 근접 보컬, lo-fi\",\"suno_model\":\"V5\",\"custom_mode\":false,\"instrumental\":false},\"out_task_id\":\"suno_cover_123456\"}";
+
+          struct curl_slist *headers = NULL;
+          headers = curl_slist_append(headers, "Authorization: Bearer <token>");
+          headers = curl_slist_append(headers, "Content-Type: application/json");
+
+          curl_easy_setopt(curl, CURLOPT_URL, url);
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
+          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+          res = curl_easy_perform(curl);
+
+          if(res != CURLE_OK) {
+              fprintf(stderr, "curl_easy_perform() 실행 실패: %s\n",
+                      curl_easy_strerror(res));
+          }
+
+          curl_slist_free_all(headers);
+          curl_easy_cleanup(curl);
+      }
+
+      curl_global_cleanup();
+      return 0;
+  }
+  ```
+
+  ```objectivec Objective-C
+  #import <Foundation/Foundation.h>
+
+  int main(int argc, const char * argv[]) {
+      @autoreleasepool {
+          NSURL *url = [NSURL URLWithString:@"https://aireiter.com/api/openapi/submit"];
+
+          NSDictionary *payload = @{
+              @"model": @"suno_cover",
+              @"params": @{
+                  @"audio_url": @"https://example.com/song.mp3",
+                  @"prompt": @"비 오는 밤 재즈, 근접 보컬, lo-fi",
+                  @"suno_model": @"V5",
+                  @"custom_mode": @NO,
+                  @"instrumental": @NO
+              },
+              @"out_task_id": @"suno_cover_123456"
+          };
+
+          NSError *error;
+          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
+                                                            options:0
+                                                              error:&error];
+
+          NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+          [request setHTTPMethod:@"POST"];
+          [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
+          [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+          [request setHTTPBody:jsonData];
+
+          NSURLSessionDataTask *task = [[NSURLSession sharedSession]
+              dataTaskWithRequest:request
+              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+                  if (error) {
+                      NSLog(@"오류: %@", error);
+                      return;
+                  }
+                  NSString *result = [[NSString alloc] initWithData:data
+                                                          encoding:NSUTF8StringEncoding];
+                  NSLog(@"%@", result);
+              }];
+
+          [task resume];
+          [[NSRunLoop mainRunLoop] run];
+      }
+      return 0;
+  }
+  ```
+
+  ```ocaml OCaml
+  (* Requires cohttp and yojson libraries *)
+  open Lwt
+  open Cohttp
+  open Cohttp_lwt_unix
+
+  let url = "https://aireiter.com/api/openapi/submit"
+
+  let payload = {|{
+  "model": "suno_cover",
+  "params": {
+    "audio_url": "https://example.com/song.mp3",
+    "prompt": "비 오는 밤 재즈, 근접 보컬, lo-fi",
+    "suno_model": "V5",
+    "custom_mode": false,
+    "instrumental": false
+  },
+  "out_task_id": "suno_cover_123456"
+}|}
+
+  let () =
+    let headers = Header.init ()
+      |> fun h -> Header.add h "Authorization" "Bearer <token>"
+      |> fun h -> Header.add h "Content-Type" "application/json"
+    in
+    let body = Cohttp_lwt.Body.of_string payload in
+
+    let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
+      body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
+      print_endline body_str
+    in
+    Lwt_main.run response
+  ```
+
+  ```dart Dart
+  import 'dart:convert';
+  import 'package:http/http.dart' as http;
+
+  void main() async {
+    final url = Uri.parse('https://aireiter.com/api/openapi/submit');
+
+    final payload = {
+      model: "suno_cover",
+      params: {
+        audio_url: "https://example.com/song.mp3",
+        prompt: "비 오는 밤 재즈, 근접 보컬, lo-fi",
+        suno_model: "V5",
+        custom_mode: false,
+        instrumental: false
+      },
+      out_task_id: "suno_cover_123456"
+    };
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer <token>',
+        'Content-Type': 'application/json'
+      },
+      body: jsonEncode(payload),
+    );
+
+    print(response.body);
+  }
+  ```
+
+  ```r R
+  library(httr)
+  library(jsonlite)
+
+  url <- "https://aireiter.com/api/openapi/submit"
+
+  payload <- list(
+    model = "suno_cover",
+    params = list(
+      audio_url = "https://example.com/song.mp3",
+      prompt = "비 오는 밤 재즈, 근접 보컬, lo-fi",
+      suno_model = "V5",
+      custom_mode = FALSE,
+      instrumental = FALSE
+    ),
+    out_task_id = "suno_cover_123456"
+  )
+
+  response <- POST(
+    url,
+    add_headers(
+      Authorization = "Bearer <token>",
+      `Content-Type` = "application/json"
+    ),
+    body = toJSON(payload, auto_unbox = TRUE),
+    encode = "raw"
+  )
+
+  cat(content(response, "text"))
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "out_task_id": "suno_cover_123456",
+        "status": "pending",
+        "created_at": "2026-08-26T10:12:11.000Z"
+    }
+}
+  ```
+
+  ```json 400
+    {
+        "statusCode": 400,
+        "message": "요청 매개변수가 유효하지 않습니다",
+        "ok": false
+    }
+  ```
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "인증에 실패했습니다. API 키를 확인하세요"
+    }
+  }
+  ```
+```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "계정 잔액이 부족합니다. 충전한 후 다시 시도하세요"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "서버 내부 오류입니다. 잠시 후 다시 시도하세요"
+    }
+  }
+  ```
+</ResponseExample>
+
+## Mode Notes
+
+<Note>
+간단 모드에서는 `prompt`와 `audio_url`만 필요합니다. 커스텀 모드에서는 `title`과 `style`도 함께 전달하세요.
+</Note>
+
+<Warning>
+공개적으로 접근 가능한 오디오 URL을 전달하세요. 로컬 파일은 먼저 공개 인터넷에서 읽을 수 있는 주소에 업로드해야 합니다.
+</Warning>

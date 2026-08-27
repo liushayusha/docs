@@ -1,0 +1,708 @@
+---
+title: 'Suno 음악 생성'
+description: |
+  - Suno 텍스트-투-뮤직, 한 번에 2곡의 오리지널 곡을 반환
+  - 비동기 처리 모드, 후속 조회를 위한 작업 ID를 반환
+  - 간단한 모드와 사용자 정의 모드를 지원하며, 보컬 또는 순수 음악을 생성 가능
+  - V4 / V4.5 / V4.5+ / V4.5 All / V5 / V5.5 지원
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+<Note>
+Suno의 AIReiter 내 모델 이름은 `suno`입니다. 가사, 이어쓰기, 커버는 각각 `suno_lyrics`, `suno_extend`, `suno_cover`를 사용하세요.
+</Note>
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  모든 API는 Bearer Token을 사용하여 인증해야 합니다.
+
+  API Key 가져오기:
+
+  <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a>에 접속하여 API Key를 받으세요.
+
+  사용할 때 요청 헤더에 다음을 추가하세요:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  모델 이름, 고정값으로 사용:
+
+  * `suno`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  모델 파라미터 객체.
+
+  <Expandable title="params 객체 속성">
+    <ParamField body="prompt" type="string" required>
+      곡 설명. 주제, 감정, 악기와 리듬을 작성할 수 있습니다.
+
+      커스텀 모드를 끄면 모델이 이를 바탕으로 제목, 스타일, 가사를 자동으로 작성합니다. 커스텀 모드를 켜고 순수 음악이 아닌 경우, 프롬프트는 가사로 처리됩니다.
+
+      V5 / V5.5 / V4.5 시리즈는 최대 5000자까지 지원합니다.
+    </ParamField>
+
+    <ParamField body="suno_model" type="string" default="V5">
+      Suno 버전:
+
+      * `V4`
+      * `V4_5`
+      * `V4_5PLUS`
+      * `V4_5ALL`
+      * `V5` - 기본값
+      * `V5_5`
+    </ParamField>
+
+    <ParamField body="custom_mode" type="boolean" default="false">
+      커스텀 모드를 켤지 여부입니다.
+
+      * `false` - 간단한 모드로, 프롬프트만 입력하면 제목, 스타일, 가사는 모델이 생성합니다
+      * `true` - 커스텀 모드로, `title`과 `style`을 지정해야 합니다. 보컬이 있는 경우 `prompt`는 가사로 사용됩니다
+    </ParamField>
+
+    <ParamField body="instrumental" type="boolean" default="false">
+      순수 음악을 생성할지 여부입니다.
+
+      * `false` - 보컬이 있는 곡을 생성합니다
+      * `true` - 반주만 생성하며, 보컬과 가사는 없습니다
+    </ParamField>
+
+    <ParamField body="vocal_gender" type="string" default="m">
+      보컬 성별 선호입니다. 순수 음악일 때는 무시됩니다.
+
+      * `m` - 남성 보컬, 기본값
+      * `f` - 여성 보컬
+    </ParamField>
+
+    <ParamField body="title" type="string">
+      곡 제목입니다. 커스텀 모드에서만 유효하며, 최대 100자까지 가능합니다. `custom_mode`를 켜면 필수입니다.
+    </ParamField>
+
+    <ParamField body="style" type="string">
+      곡 스타일과 제작 방향입니다. 예: indie folk, lo-fi hip hop, 80s synthwave. 커스텀 모드에서만 유효하며, 최대 1000자까지 가능합니다. `custom_mode`를 켜면 필수입니다.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  요청 측 작업 ID.
+
+  사용자가 직접 정의한 작업 식별자이며, 필수입니다. 문자, 숫자, 밑줄, 하이픈만 지원하며 길이는 1-64자입니다. 이후 이 ID로 작업 상태와 결과를 조회할 수 있습니다.
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  요청 측 task ID로, 결과를 조회하는 데 사용할 수 있습니다.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  초기 상태이며, 일반적으로 `"pending"` 입니다.
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  생성 시간, ISO 형식.
+</ResponseField>
+
+## Query Task
+
+Suno는 비동기 음악 생성 모델입니다. 작업을 제출한 후 `out_task_id`를 사용하여 작업 상태를 조회하세요. 완료되면 `output`에는 일반적으로 2곡이 포함되며, 각 항목에는 `audio`(오디오 URL), `url`(커버 이미지), `title`, `text`(가사)가 포함됩니다.
+
+<ParamField body="out_task_id" type="string" required>
+  작업을 제출할 때 전달한 발신 측 작업 ID입니다.
+</ParamField>
+
+```bash
+curl --request POST \
+  --url https://aireiter.com/api/openapi/query \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "out_task_id": "suno_gen_123456"
+  }'
+```
+
+조회가 성공하고 완료된 후, `output` 예시는 다음과 같습니다:
+
+```json
+{
+  "statusCode": 200,
+  "message": "",
+  "data": {
+    "out_task_id": "suno_gen_123456",
+    "status": "completed",
+    "created_at": "2026-08-26T10:12:11.000Z",
+    "completed_at": "2026-08-26T10:14:41.000Z",
+    "output": [
+      {
+        "audio": "https://s1.pxz.ai/upload/audio-generator/20260826/suno-audio-0.mp3",
+        "url": "https://s1.pxz.ai/upload/audio-generator/20260826/suno-cover-0.jpeg",
+        "title": "모닝 커피",
+        "text": "[Verse]\\n따뜻한 어쿠스틱한 아침..."
+      },
+      {
+        "audio": "https://s1.pxz.ai/upload/audio-generator/20260826/suno-audio-1.mp3",
+        "url": "https://s1.pxz.ai/upload/audio-generator/20260826/suno-cover-1.jpeg",
+        "title": "모닝 커피",
+        "text": "[Verse]\\n부엌 테이블 위의 햇살..."
+      }
+    ]
+  }
+}
+```
+
+## Request Examples
+
+<RequestExample>
+  ```bash cURL(간단 모드)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "suno",
+      "params": {
+        "prompt": "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
+        "suno_model": "V5",
+        "custom_mode": false,
+        "instrumental": false
+      },
+      "out_task_id": "suno_gen_123456"
+    }'
+  ```
+
+  ```bash cURL(사용자 정의 모드)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "suno",
+      "params": {
+        "prompt": "[Verse]\\n아침 창턱에 뜨거운 커피 한 잔이 있어요\\n[Chorus]\\n이 노래가 천천히 깨어나게 해줘",
+        "suno_model": "V5",
+        "custom_mode": true,
+        "instrumental": false,
+        "title": "아침 커피",
+        "style": "indie folk, warm female vocals, acoustic guitar",
+        "vocal_gender": "f"
+      },
+      "out_task_id": "suno_custom_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "suno",
+      "params": {
+          "prompt": "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
+          "suno_model": "V5",
+          "custom_mode": False,
+          "instrumental": False
+      },
+      "out_task_id": "suno_gen_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "suno",
+    params: {
+      prompt: "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
+      suno_model: "V5",
+      custom_mode: false,
+      instrumental: false
+    },
+    out_task_id: "suno_gen_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "suno",
+          "params": map[string]interface{}{
+              "prompt": "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
+              "suno_model": "V5",
+              "custom_mode": false,
+              "instrumental": false,
+          },
+          "out_task_id": "suno_gen_123456",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/openapi/submit";
+
+          String payload = """
+{
+                "model": "suno",
+                "params": {
+                  "prompt": "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
+                  "suno_model": "V5",
+                  "custom_mode": false,
+                  "instrumental": false
+                },
+                "out_task_id": "suno_gen_123456"
+              }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = [
+      "model" => "suno",
+      "params" => [
+          "prompt" => "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
+          "suno_model" => "V5",
+          "custom_mode" => false,
+          "instrumental" => false
+      ],
+      "out_task_id" => "suno_gen_123456"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url = URI("https://aireiter.com/api/openapi/submit")
+
+  payload = {
+    model: "suno",
+    params: {
+      prompt: "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
+      suno_model: "V5",
+      custom_mode: false,
+      instrumental: false
+    },
+    out_task_id: "suno_gen_123456"
+  }
+
+  http = Net::HTTP.new(url.host, url.port)
+
+  request = Net::HTTP::Post.new(url)
+  request["Authorization"] = "Bearer <token>"
+  request["Content-Type"] = "application/json"
+  request.body = payload.to_json
+
+  response = http.request(request)
+  puts response.body
+  ```
+
+  ```swift Swift
+  import Foundation
+
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
+
+  let payload: [String: Any] = [
+      "model": "suno",
+      "params": [
+          "prompt": "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
+          "suno_model": "V5",
+          "custom_mode": false,
+          "instrumental": false
+      ],
+      "out_task_id": "suno_gen_123456"
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      if let error = error {
+          print("Error: \(error)")
+          return
+      }
+
+      if let data = data, let responseString = String(data: data, encoding: .utf8) {
+          print(responseString)
+      }
+  }
+
+  task.resume()
+  ```
+
+  ```csharp C#
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url = "https://aireiter.com/api/openapi/submit";
+
+          var payload = @"
+{
+                      "model": "suno",
+                      "params": {
+                        "prompt": "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
+                        "suno_model": "V5",
+                        "custom_mode": false,
+                        "instrumental": false
+                      },
+                      "out_task_id": "suno_gen_123456"
+                    }";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+
+          var content = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          var result = await response.Content.ReadAsStringAsync();
+
+          Console.WriteLine(result);
+      }
+  }
+  ```
+
+  ```c C
+  #include <stdio.h>
+  #include <curl/curl.h>
+
+  int main(void) {
+      CURL *curl;
+      CURLcode res;
+
+      curl_global_init(CURL_GLOBAL_DEFAULT);
+      curl = curl_easy_init();
+
+      if(curl) {
+          const char *url = "https://aireiter.com/api/openapi/submit";
+          const char *payload = "{\"model\":\"suno\",\"params\":{\"prompt\":\"아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼\",\"suno_model\":\"V5\",\"custom_mode\":false,\"instrumental\":false},\"out_task_id\":\"suno_gen_123456\"}";
+
+          struct curl_slist *headers = NULL;
+          headers = curl_slist_append(headers, "Authorization: Bearer <token>");
+          headers = curl_slist_append(headers, "Content-Type: application/json");
+
+          curl_easy_setopt(curl, CURLOPT_URL, url);
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
+          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+          res = curl_easy_perform(curl);
+
+          if(res != CURLE_OK) {
+              fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                      curl_easy_strerror(res));
+          }
+
+          curl_slist_free_all(headers);
+          curl_easy_cleanup(curl);
+      }
+
+      curl_global_cleanup();
+      return 0;
+  }
+  ```
+
+  ```objectivec Objective-C
+  #import <Foundation/Foundation.h>
+
+  int main(int argc, const char * argv[]) {
+      @autoreleasepool {
+          NSURL *url = [NSURL URLWithString:@"https://aireiter.com/api/openapi/submit"];
+
+          NSDictionary *payload = @{
+              @"model": @"suno",
+              @"params": @{
+                  @"prompt": @"아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
+                  @"suno_model": @"V5",
+                  @"custom_mode": @NO,
+                  @"instrumental": @NO
+              },
+              @"out_task_id": @"suno_gen_123456"
+          };
+
+          NSError *error;
+          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
+                                                            options:0
+                                                              error:&error];
+
+          NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+          [request setHTTPMethod:@"POST"];
+          [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
+          [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+          [request setHTTPBody:jsonData];
+
+          NSURLSessionDataTask *task = [[NSURLSession sharedSession]
+              dataTaskWithRequest:request
+              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+                  if (error) {
+                      NSLog(@"Error: %@", error);
+                      return;
+                  }
+                  NSString *result = [[NSString alloc] initWithData:data
+                                                          encoding:NSUTF8StringEncoding];
+                  NSLog(@"%@", result);
+              }];
+
+          [task resume];
+          [[NSRunLoop mainRunLoop] run];
+      }
+      return 0;
+  }
+  ```
+
+  ```ocaml OCaml
+  (* Requires cohttp and yojson libraries *)
+  open Lwt
+  open Cohttp
+  open Cohttp_lwt_unix
+
+  let url = "https://aireiter.com/api/openapi/submit"
+
+  let payload = {|{
+  "model": "suno",
+  "params": {
+    "prompt": "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
+    "suno_model": "V5",
+    "custom_mode": false,
+    "instrumental": false
+  },
+  "out_task_id": "suno_gen_123456"
+}|}
+
+  let () =
+    let headers = Header.init ()
+      |> fun h -> Header.add h "Authorization" "Bearer <token>"
+      |> fun h -> Header.add h "Content-Type" "application/json"
+    in
+    let body = Cohttp_lwt.Body.of_string payload in
+
+    let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
+      body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
+      print_endline body_str
+    in
+    Lwt_main.run response
+  ```
+
+  ```dart Dart
+  import 'dart:convert';
+  import 'package:http/http.dart' as http;
+
+  void main() async {
+    final url = Uri.parse('https://aireiter.com/api/openapi/submit');
+
+    final payload = {
+      model: "suno",
+      params: {
+        prompt: "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
+        suno_model: "V5",
+        custom_mode: false,
+        instrumental: false
+      },
+      out_task_id: "suno_gen_123456"
+    };
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer <token>',
+        'Content-Type': 'application/json'
+      },
+      body: jsonEncode(payload),
+    );
+
+    print(response.body);
+  }
+  ```
+
+  ```r R
+  library(httr)
+  library(jsonlite)
+
+  url <- "https://aireiter.com/api/openapi/submit"
+
+  payload <- list(
+    model = "suno",
+    params = list(
+      prompt = "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
+      suno_model = "V5",
+      custom_mode = FALSE,
+      instrumental = FALSE
+    ),
+    out_task_id = "suno_gen_123456"
+  )
+
+  response <- POST(
+    url,
+    add_headers(
+      Authorization = "Bearer <token>",
+      `Content-Type` = "application/json"
+    ),
+    body = toJSON(payload, auto_unbox = TRUE),
+    encode = "raw"
+  )
+
+  cat(content(response, "text"))
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "out_task_id": "suno_gen_123456",
+        "status": "pending",
+        "created_at": "2026-08-26T10:12:11.000Z"
+    }
+}
+  ```
+
+  ```json 400
+    {
+        "statusCode": 400,
+        "message": "요청 매개변수가 유효하지 않습니다",
+        "ok": false
+    }
+  ```
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "인증에 실패했습니다. API 키를 확인하세요."
+    }
+  }
+  ```
+```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "계정 잔액이 부족합니다. 충전 후 다시 시도하세요."
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "서버 내부 오류입니다. 잠시 후 다시 시도하세요."
+    }
+  }
+  ```
+</ResponseExample>
+
+## Mode Notes
+
+<Note>
+간단 모드에서는 `prompt`만 필요합니다. 커스텀 모드에서는 `title`과 `style`도 함께 전달하세요. 보컬이 있을 때는 가사를 `prompt`에 적으세요.
+</Note>
+
+<Warning>
+`vocal_gender`는 `instrumental`이 `false`일 때만 적용됩니다. 한 번의 요청은 보통 두 곡의 후보 노래를 반환합니다.
+</Warning>
