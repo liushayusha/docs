@@ -1,0 +1,108 @@
+---
+title: 'Z-Image Turbo 画像生成'
+description: |
+    - 非同期処理モードで、後続の検索に使用するタスクIDを返します
+    - Alibaba Tongyi の高速 text-to-image モデルで、約8ステップのサンプリングで画像を生成し、写実的な質感を重視しています
+    - 中国語と英語の文字レンダリングが鮮明で、タイトル付きのポスター、バナー、ソーシャルメディア素材に適しています
+    - 9種類の画像比率に対応し、1回の実行で固定して1枚を返します
+    - text-to-image のみ対応しており、参照画像、画像編集、カスタムピクセルサイズには対応していません
+    - 提出された prompt はプラットフォームの機微な単語 / 安全審査を通過し、規約違反の内容は直接拒否されます
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  すべてのエンドポイントは Bearer Token を使用して認証する必要があります。
+
+  API Key を取得:
+
+  <a href={apiKeyUrl} target="_blank">API Key 管理ページ</a> にアクセスして、API Key を取得してください。
+
+  使用時はリクエストヘッダーに追加してください:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  モデル名。
+
+  固定値：`"z_image_turbo"`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  モデルパラメータオブジェクト。
+
+  <Expandable title="params オブジェクトの Properties">
+    <ParamField body="prompt" type="string" required>
+      画像生成プロンプト。最大 2000 文字。
+
+      * 中国語と英語の両方をサポートします。主体、シーン、構図、光、素材を明確に記述することを推奨します
+      * モデルはやや写実寄りのスタイルです。実際の光と影、素材を描写したプロンプトのほうがより良い結果になります
+      * 画面内に文字を表示したい場合は、文字内容を引用符で囲んでください。中国語・英語のどちらでも構いません
+      * 送信前にプラットフォームのセンシティブワード / 安全審査が行われ、違反コンテンツに該当した場合はそのままエラーが返されます
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="1:1">
+      画像のアスペクト比。
+
+      以下の値をサポートします：
+
+      * `1:1` - 正方形（デフォルト）
+      * `16:9` / `9:16` - ワイド横向き / 縦向き
+      * `4:3` / `3:4` - 標準横向き / 縦向き
+      * `3:2` / `2:3` - クラシック横向き / 縦向き
+      * `2:1` / `1:2` - パノラマ横向き / ロング縦向き
+
+      <Warning>
+        `aspect_ratio` はモデルの目標アスペクト比の枠を表し、固定のピクセルサイズは保証されません。返されるのはその比率に近いモデルのネイティブサイズです。たとえば、実測では 16:9 の場合 1536×864 が返されます。
+      </Warning>
+    </ParamField>
+
+    <ParamField body="seed" type="integer">
+      ランダムシード。結果の再現に使用します。範囲は 1-2147483647 です。
+
+      * 同じ `prompt` + `seed` の組み合わせでは、構図が近い画像が生成されます
+      * 指定しない場合は毎回ランダムな結果が生成されます
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  呼び出し側が指定するカスタムタスク ID で、冪等な送信と結果の取得に使用します。
+
+  * 長さは 1-64 文字です
+  * 英字、数字、アンダースコア、ハイフンのみ使用できます
+  * 同じ API Key では重複して使用できません
+</ParamField>
+
+<Note>
+  Z-Image Turbo はテキストから画像生成のみをサポートします。参照画像（`image_url`）、画像編集、解像度のプリセット（`resolution`）、一括画像生成（`output_n`）はいずれもサポートされません。カスタムピクセルサイズ `size` を渡すと、`Model "z_image_turbo" does not support size parameter` が直接返されます。各リクエストで返される画像は 1 枚に固定されています。複数枚必要な場合は、異なる `seed` で複数回送信してください。
+
+  参照画像、画像から画像生成、またはより大きなキャンバスが必要な場合は、GPT-Image 2、Seedream 5.0 Pro、または Nano Banana Pro をご利用ください。
+</Note>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  呼び出し元のタスクID。結果の照会に使用できます。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  初期状態で、`"pending"` に固定されています。
+</ResponseField>
+
+<ResponseField name="estimated_credits" type="number">
+  今回のタスクの推定消費量です。
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  作成時刻、ISO 8601 形式です。
+</ResponseField>
+
+## 查询结果\n\n送信成功後、同じ `out_task_id` を使用して呼び出します：\n\n```bash\ncurl --request POST \\\n  --url https://aireiter.com/api/openapi/query \\\n  --header 'Authorization: Bearer <token>' \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"out_task_id\": \"z_image_turbo_task_001\"\n  }'\n```\n\nタスクの状態には `pending`、`processing`、`completed`、`failed` が含まれます。タスク完了後、結果画像は `data.output` にあり、実際の消費クレジットは `data.credits_used` にあります。タスク生成に失敗した場合、システムはこのタスクの事前差し引きクレジットを自動で返却します。\n\n<RequestExample>\n  ```bash cURL\n  curl --request POST \\\n    --url https://aireiter.com/api/openapi/submit \\\n    --header 'Authorization: Bearer <token>' \\\n    --header 'Content-Type: application/json' \\\n    --data '{\n      \"model\": \"z_image_turbo\",\n      \"params\": {\n        \"prompt\": \"朝のサイドライトの下、陶器のコーヒーカップが大理石の天板の上に置かれている、浅い被写界深度、リアルな質感と自然な影、商業製品写真\",\n        \"aspect_ratio\": \"16:9\"\n      },\n      \"out_task_id\": \"z_image_turbo_task_001\"\n    }'\n  ```\n\n  ```bash cURL（固定 seed で再現）\n  curl --request POST \\\n    --url https://aireiter.com/api/openapi/submit \\\n    --header 'Authorization: Bearer <token>' \\\n    --header 'Content-Type: application/json' \\\n    --data '{\n      \"model\": \"z_image_turbo\",\n      \"params\": {\n        \"prompt\": \"ダークな背景のスキンケア製品ポスター、ボトル正面に「新発売」と書かれている、クールトーンのリムライト、リアルなガラス反射\",\n        \"aspect_ratio\": \"9:16\",\n        \"seed\": 20260827\n      },\n      \"out_task_id\": \"z_image_turbo_seed_001\"\n    }'\n  ```\n\n  ```python Python\n  import requests\n\n  url = \"https://aireiter.com/api/openapi/submit\"\n\n  payload = {\n      \"model\": \"z_image_turbo\",\n      \"params\": {\n          \"prompt\": \"朝のサイドライトの下、陶器のコーヒーカップが大理石の天板の上に置かれている、浅い被写界深度、リアルな質感と自然な影、商業製品写真\",\n          \"aspect_ratio\": \"16:9\"\n      },\n      \"out_task_id\": \"z_image_turbo_python_001\"\n  }\n\n  headers = {\n      \"Authorization\": \"Bearer <token>\",\n      \"Content-Type\": \"application/json\"\n  }\n\n  response = requests.post(url, json=payload, headers=headers)\n  print(response.json())\n  ```\n\n  ```javascript JavaScript\n  const response = await fetch(\"https://aireiter.com/api/openapi/submit\", {\n    method: \"POST\",\n    headers: {\n      Authorization: \"Bearer <token>\",\n      \"Content-Type\": \"application/json\"\n    },\n    body: JSON.stringify({\n      model: \"z_image_turbo\",\n      params: {\n        prompt: \"朝のサイドライトの下、陶器のコーヒーカップが大理石の天板の上に置かれている、浅い被写界深度、リアルな質感と自然な影、商業製品写真\",\n        aspect_ratio: \"16:9\"\n      },\n      out_task_id: \"z_image_turbo_javascript_001\"\n    })\n  });\n\n  console.log(await response.json());\n  ```\n\n  ```go Go\n  package main\n\n  import (\n      \"bytes\"\n      \"fmt\"\n      \"io\"\n      \"net/http\"\n  )\n\n  func main() {\n      payload := []byte(`{\n        \"model\":\"z_image_turbo\",\n        \"params\":{\n          \"prompt\":\"朝のサイドライトの下、陶器のコーヒーカップが大理石の天板の上に置かれている、浅い被写界深度、リアルな質感と自然な影、商業製品写真\",\n          \"aspect_ratio\":\"16:9\"\n        },\n        \"out_task_id\":\"z_image_turbo_go_001\"\n      }`)\n\n      req, _ := http.NewRequest(\n          http.MethodPost,\n          \"https://aireiter.com/api/openapi/submit\",\n          bytes.NewBuffer(payload),\n      )\n      req.Header.Set(\"Authorization\", \"Bearer <token>\")\n      req.Header.Set(\"Content-Type\", \"application/json\")\n\n      response, err := http.DefaultClient.Do(req)\n      if err != nil {\n          panic(err)\n      }\n      defer response.Body.Close()\n\n      body, _ := io.ReadAll(response.Body)\n      fmt.Println(string(body))\n  }\n  ```\n\n  ```java Java\n  import java.net.URI;\n  import java.net.http.HttpClient;\n  import java.net.http.HttpRequest;\n  import java.net.http.HttpResponse;\n\n  public class Main {\n      public static void main(String[] args) throws Exception {\n          String payload = \"\"\"\n          {\n            \"model\": \"z_image_turbo\",\n            \"params\": {\n              \"prompt\": \"朝のサイドライトの下、陶器のコーヒーカップが大理石の天板の上に置かれている、浅い被写界深度、リアルな質感と自然な影、商業製品写真\",\n              \"aspect_ratio\": \"16:9\"\n            },\n            \"out_task_id\": \"z_image_turbo_java_001\"\n          }\n          \"\"\";\n\n          HttpRequest request = HttpRequest.newBuilder()\n              .uri(URI.create(\"https://aireiter.com/api/openapi/submit\"))\n              .header(\"Authorization\", \"Bearer <token>\")\n              .header(\"Content-Type\", \"application/json\")\n              .POST(HttpRequest.BodyPublishers.ofString(payload))\n              .build();\n\n          HttpResponse<String> response = HttpClient.newHttpClient().send(\n              request,\n              HttpResponse.BodyHandlers.ofString()\n          );\n          System.out.println(response.body());\n      }\n  }\n  ```\n\n  ```php PHP\n  <?php\n\n  $url = \"https://aireiter.com/api/openapi/submit\";\n\n  $payload = [\n      \"model\" => \"z_image_turbo\",\n      \"params\" => [\n          \"prompt\" => \"朝のサイドライトの下、陶器のコーヒーカップが大理石の天板の上に置かれている、浅い被写界深度、リアルな質感と自然な影、商業製品写真\",\n          \"aspect_ratio\" => \"16:9\"\n      ],\n      \"out_task_id\" => \"z_image_turbo_php_001\"\n  ];\n\n  $ch = curl_init($url);\n  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);\n  curl_setopt($ch, CURLOPT_POST, true);\n  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload, JSON_UNESCAPED_UNICODE));\n  curl_setopt($ch, CURLOPT_HTTPHEADER, [\n      \"Authorization: Bearer <token>\",\n      \"Content-Type: application/json\"\n  ]);\n\n  $response = curl_exec($ch);\n  curl_close($ch);\n\n  echo $response;\n  ?>\n  ```\n\n  ```ruby Ruby\n  require 'net/http'\n  require 'json'\n  require 'uri'\n\n  url = URI(\"https://aireiter.com/api/openapi/submit\")\n\n  payload = {\n    model: \"z_image_turbo\",\n    params: {\n      prompt: \"朝のサイドライトの下、陶器のコーヒーカップが大理石の天板の上に置かれている、浅い被写界深度、リアルな質感と自然な影、商業製品写真\",\n      aspect_ratio: \"16:9\"\n    },\n    out_task_id: \"z_image_turbo_ruby_001\"\n  }\n\n  http = Net::HTTP.new(url.host, url.port)\n  http.use_ssl = true\n\n  request = Net::HTTP::Post.new(url)\n  request[\"Authorization\"] = \"Bearer <token>\"\n  request[\"Content-Type\"] = \"application/json\"\n  request.body = payload.to_json\n\n  response = http.request(request)\n  puts response.body\n  ```\n\n  ```dart Dart\n  import 'dart:convert';\n  import 'package:http/http.dart' as http;\n\n  void main() async {\n    final url = Uri.parse('https://aireiter.com/api/openapi/submit');\n\n    final payload = {\n      \"model\": \"z_image_turbo\",\n      \"params\": {\n        \"prompt\": \"朝のサイドライトの下、陶器のコーヒーカップが大理石の天板の上に置かれている、浅い被写界深度、リアルな質感と自然な影、商業製品写真\",\n        \"aspect_ratio\": \"16:9\"\n      },\n      \"out_task_id\": \"z_image_turbo_dart_001\"\n    };\n\n    final response = await http.post(\n      url,\n      headers: {\n        'Authorization': 'Bearer <token>',\n        'Content-Type': 'application/json'\n      },\n      body: jsonEncode(payload),\n    );\n\n    print(response.body);\n  }\n  ```\n\n  ```r R\n  library(httr)\n  library(jsonlite)\n\n  url <- \"https://aireiter.com/api/openapi/submit\"\n\n  payload <- list(\n    model = \"z_image_turbo\",\n    params = list(\n      prompt = \"朝のサイドライトの下、陶器のコーヒーカップが大理石の天板の上に置かれている、浅い被写界深度、リアルな質感と自然な影、商業製品写真\",\n      aspect_ratio = \"16:9\"\n    ),\n    out_task_id = \"z_image_turbo_task_001\"\n  )\n\n  response <- POST(\n    url,\n    add_headers(\n      Authorization = \"Bearer <token>\",\n      `Content-Type` = \"application/json\"\n    ),\n    body = toJSON(payload, auto_unbox = TRUE),\n    encode = \"raw\"\n  )\n\n  cat(content(response, \"text\"))\n  ```\n</RequestExample>\n\n<ResponseExample>\n  ```json 200\n  {\n    \"statusCode\": 200,\n    \"message\": \"\",\n    \"data\": {\n      \"task_id\": \"\",\n      \"status\": \"pending\",\n      \"created_at\": \"2026-08-27T09:47:44.021Z\",\n      \"out_task_id\": \"z_image_turbo_task_001\",\n      \"estimated_credits\": \"<推定消費クレジット>\"\n    },\n    \"ok\": true\n  }\n  ```\n\n  ```json 400\n  {\n    \"statusCode\": 400,\n    \"message\": \"無効な aspect_ratio: \\\"21:9\\\"。使用可能: [1:1, 16:9, 9:16, 4:3, 3:4, 3:2, 2:3, 2:1, 1:2]\",\n    \"ok\": false\n  }\n  ```\n\n  ```json 400\n  {\n    \"statusCode\": 400,\n    \"message\": \"モデル \\\"z_image_turbo\\\" は size パラメーターをサポートしていません\",\n    \"ok\": false\n  }\n  ```\n\n  ```json 401\n  {\n    \"error\": {\n      \"code\": 401,\n      \"message\": \"認証に失敗しました。APIキーを確認してください\"\n    }\n  }\n  ```\n\n  ```json 433\n  {\n    \"error\": {\n      \"code\": 433,\n      \"message\": \"残高が不足しています。チャージしてから再試行してください\"\n    }\n  }\n  ```\n\n  ```json 500\n  {\n    \"error\": {\n      \"code\": 500,\n      \"message\": \"サーバー内部エラーです。しばらくしてから再試行してください\"\n    }\n  }\n  ```\n</ResponseExample>

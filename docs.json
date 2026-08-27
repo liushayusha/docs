@@ -142,6 +142,13 @@
                 ]
               },
               {
+                "group": "Z-Image Turbo",
+                "icon": "image",
+                "pages": [
+                  "zh/api-reference/images/z-image-turbo/generation"
+                ]
+              },
+              {
                 "group": "Grok Imagine Image 2.0",
                 "icon": "image",
                 "pages": [
@@ -476,6 +483,13 @@
                 ]
               },
               {
+                "group": "Z-Image Turbo",
+                "icon": "image",
+                "pages": [
+                  "en/api-reference/images/z-image-turbo/generation"
+                ]
+              },
+              {
                 "group": "Grok Imagine Image 2.0",
                 "icon": "image",
                 "pages": [
@@ -796,6 +810,13 @@
                 ]
               },
               {
+                "group": "Z-Image Turbo",
+                "icon": "image",
+                "pages": [
+                  "ja/api-reference/images/z-image-turbo/generation"
+                ]
+              },
+              {
                 "group": "Grok Imagine Image 2.0",
                 "icon": "image",
                 "pages": [
@@ -1113,6 +1134,13 @@
                 "icon": "image",
                 "pages": [
                   "ko/api-reference/images/krea-2-turbo/generation"
+                ]
+              },
+              {
+                "group": "Z-Image Turbo",
+                "icon": "image",
+                "pages": [
+                  "ko/api-reference/images/z-image-turbo/generation"
                 ]
               },
               {
