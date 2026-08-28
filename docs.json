@@ -170,6 +170,13 @@
                 ]
               },
               {
+                "group": "Kling v3 Omni",
+                "icon": "video",
+                "pages": [
+                  "zh/api-reference/videos/kling-v3-omni/generation"
+                ]
+              },
+              {
                 "group": "Kling 3.0 Turbo",
                 "icon": "video",
                 "pages": [
@@ -511,6 +518,13 @@
                 ]
               },
               {
+                "group": "Kling v3 Omni",
+                "icon": "video",
+                "pages": [
+                  "en/api-reference/videos/kling-v3-omni/generation"
+                ]
+              },
+              {
                 "group": "Kling 3.0 Turbo",
                 "icon": "video",
                 "pages": [
@@ -838,6 +852,13 @@
                 ]
               },
               {
+                "group": "Kling v3 Omni",
+                "icon": "video",
+                "pages": [
+                  "ja/api-reference/videos/kling-v3-omni/generation"
+                ]
+              },
+              {
                 "group": "Kling 3.0 Turbo",
                 "icon": "video",
                 "pages": [
@@ -1162,6 +1183,13 @@
                 "icon": "video",
                 "pages": [
                   "ko/api-reference/videos/kling-3-0/generation"
+                ]
+              },
+              {
+                "group": "Kling v3 Omni",
+                "icon": "video",
+                "pages": [
+                  "ko/api-reference/videos/kling-v3-omni/generation"
                 ]
               },
               {

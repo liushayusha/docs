@@ -1,0 +1,507 @@
+---
+title: 'Kling v3 Omni 비디오 생성'
+description: |
+  - Kuaishou Kling v3 Omni, Kling O3라고도 불립니다
+  - 비동기 처리 모드, 이후 조회용 작업 ID를 반환합니다
+  - 텍스트/참조, 첫/마지막 프레임 두 가지 생성 모드
+  - 720p / 1080p / 4K, 3-15초, 선택적 네이티브 오디오와 참조 비디오
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+<Note>
+AIReiter에서 Kling v3 Omni의 모델 이름은 `kling_v3_omni`입니다. Kling O3로도 검색됩니다.
+</Note>
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  모든 엔드포인트는 Bearer Token 인증이 필요합니다.
+
+  API Key 받기:
+
+  <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a>에서 API Key를 받으세요.
+
+  요청 헤더에 다음을 추가하세요:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  모델 이름, 고정 값:
+
+  * `kling_v3_omni`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  모델 파라미터 객체.
+
+  <Expandable title="params 객체 속성">
+    <ParamField body="prompt" type="string" required>
+      비디오 생성 텍스트 설명. 필수.
+
+      참조 이미지는 프롬프트에서 `<<<image_1>>>`, `<<<image_2>>>`로 `image_url` 순서에 맞춰 인용할 수 있습니다. 이미지는 보냈지만 인용이 없으면 앞에 `<<<image_1>>>`이 자동으로 붙습니다.
+    </ParamField>
+
+    <ParamField body="negative_prompt" type="string">
+      네거티브 프롬프트. 최대 2500자.
+    </ParamField>
+
+    <ParamField body="type" type="string" default="all_reference">
+      생성 모드. 한 요청에서 섞지 마세요:
+
+      * `all_reference` - 텍스트/참조. 프롬프트 필수. 참조 이미지 최대 7장, 참조 비디오 1개
+      * `first_last_frame` - 첫/마지막 프레임. 첫 프레임 필수, 마지막 프레임 선택
+
+      <Warning>
+        첫/마지막 프레임은 참조 이미지나 참조 비디오와 같은 요청에 넣을 수 없습니다.
+      </Warning>
+    </ParamField>
+
+    <ParamField body="video_length" type="integer" default="5">
+      출력 길이(초). 정수 `3`–`15`.
+
+      * 참조 비디오가 없거나 `refer_type=feature`: 출력은 이 필드를 따름
+      * `refer_type=base`: 출력은 업로드 클립을 따르며 이 필드에 의존하지 마세요
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="720p">
+      출력 해상도:
+
+      * `720p` - 기본값
+      * `1080p`
+      * `4K`
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="16:9">
+      화면비. 첫 프레임 또는 참조 비디오가 있으면 무시됩니다.
+
+      * `16:9` - 가로, 기본값
+      * `9:16` - 세로
+      * `1:1` - 정사각
+    </ParamField>
+
+    <ParamField body="generate_audio" type="boolean" default="false">
+      네이티브 오디오 트랙 생성 여부.
+
+      * `false` - 생성하지 않음, 기본값
+      * `true` - 생성
+
+      <Warning>
+        `video_url`이 있으면 무시됩니다. 참조 비디오와 함께 쓸 수 없습니다.
+      </Warning>
+    </ParamField>
+
+    <ParamField body="image_url" type="string | string[]">
+      이미지 URL. 공개 접근 가능해야 합니다.
+
+      * `all_reference` - 선택, 최대 7장
+      * `first_last_frame` - 첫 항목이 첫 프레임(필수), 둘째가 마지막 프레임(선택)
+
+      짧은 변 300px 이상, 장당 최대 20MB.
+    </ParamField>
+
+    <ParamField body="end_image_url" type="string">
+      마지막 프레임 이미지 URL.
+
+      `first_last_frame`에서만 유효합니다. `image_url` 두 번째 항목으로도 전달할 수 있습니다. 마지막 프레임만 있고 첫 프레임이 없으면 오류입니다.
+    </ParamField>
+
+    <ParamField body="video_url" type="string | string[]">
+      참조 비디오 URL. `all_reference`에서만, 최대 1개.
+
+      요구 사항:
+
+      * MP4 또는 MOV
+      * 3-10초
+      * 최대 200MB
+      * 짧은 변 720px 이상
+
+      <Warning>`first_last_frame`에서는 보내지 마세요. URL은 공개되어야 하고 길이 메타데이터를 읽을 수 있어야 합니다.</Warning>
+    </ParamField>
+
+    <ParamField body="refer_type" type="string" default="feature">
+      참조 비디오 사용 방식. `video_url`이 있을 때만:
+
+      * `feature` - 스타일/모션 참조. 출력 길이는 `video_length`
+      * `base` - 업로드 클립을 편집. 출력 길이는 원본을 따르고 `video_length`는 무시
+    </ParamField>
+
+    <ParamField body="keep_original_sound" type="boolean" default="false">
+      참조 비디오 원음 유지. `video_url`이 있을 때만.
+
+      * `false` - 유지하지 않음, 기본값
+      * `true` - 원음 유지
+    </ParamField>
+
+    <ParamField body="watermark" type="boolean" default="false">
+      워터마크. 기본값 `false`.
+    </ParamField>
+
+    <ParamField body="multi_shot" type="boolean" default="false">
+      멀티샷. `true`이면 모델이 프롬프트를 자동으로 샷으로 나눕니다.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  호출자 작업 ID.
+
+  필수. 영문, 숫자, 밑줄, 하이픈만, 1-64자. 같은 ID로 상태와 결과를 조회합니다.
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  호출자 작업 ID. 결과 조회에 사용합니다.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  초기 상태. 보통 `"pending"`.
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  생성 시각, ISO 형식.
+</ResponseField>
+
+## Query Task
+
+Kling v3 Omni는 비동기입니다. 제출 후 `out_task_id`로 상태를 조회하세요.
+
+<ParamField body="out_task_id" type="string" required>
+  제출 시 보낸 호출자 작업 ID.
+</ParamField>
+
+```bash
+curl --request POST \
+  --url https://aireiter.com/api/openapi/query \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "out_task_id": "kling_v3_omni_t2v_123456"
+  }'
+```
+
+완료되면 `output` 배열에 `video` 필드가 있는 생성 결과가 들어갑니다.
+
+## 모드 파라미터 대조
+
+| `type` / 참조 비디오 | 필수 | 길이 |
+|---|---|---|
+| `all_reference`, `video_url` 없음 | `prompt` | `video_length` 3-15초 |
+| `all_reference`, `refer_type=feature` | `prompt`, `video_url` | 출력은 `video_length` |
+| `all_reference`, `refer_type=base` | `prompt`, `video_url` | 출력은 업로드 클립 3-10초 |
+| `first_last_frame` | `prompt`, 첫 프레임 `image_url` | `video_length` 3-15초 |
+
+## Request Examples
+
+<RequestExample>
+  ```bash cURL (텍스트/참조)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "kling_v3_omni",
+      "params": {
+        "prompt": "A golden retriever running on a sunny beach, cinematic, natural lighting",
+        "type": "all_reference",
+        "resolution": "720p",
+        "aspect_ratio": "16:9",
+        "video_length": 5,
+        "generate_audio": false
+      },
+      "out_task_id": "kling_v3_omni_t2v_123456"
+    }'
+  ```
+
+  ```bash cURL (첫/마지막 프레임)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "kling_v3_omni",
+      "params": {
+        "prompt": "The person slowly turns and smiles, slight camera push-in",
+        "type": "first_last_frame",
+        "image_url": [
+          "https://example.com/first-frame.jpg",
+          "https://example.com/last-frame.jpg"
+        ],
+        "resolution": "1080p",
+        "video_length": 5
+      },
+      "out_task_id": "kling_v3_omni_frames_123456"
+    }'
+  ```
+
+  ```bash cURL (참조 비디오 feature)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "kling_v3_omni",
+      "params": {
+        "prompt": "Keep the subject and camera move from the reference clip, cleaner lighting",
+        "type": "all_reference",
+        "video_url": ["https://example.com/reference.mp4"],
+        "refer_type": "feature",
+        "resolution": "720p",
+        "video_length": 3
+      },
+      "out_task_id": "kling_v3_omni_feature_123456"
+    }'
+  ```
+
+  ```bash cURL (참조 비디오 base)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "kling_v3_omni",
+      "params": {
+        "prompt": "Keep the same scene, slightly brighter daylight",
+        "type": "all_reference",
+        "video_url": ["https://example.com/source.mp4"],
+        "refer_type": "base",
+        "resolution": "720p",
+        "keep_original_sound": false
+      },
+      "out_task_id": "kling_v3_omni_base_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "kling_v3_omni",
+      "params": {
+          "prompt": "A golden retriever running on a sunny beach, cinematic, natural lighting",
+          "type": "all_reference",
+          "resolution": "720p",
+          "aspect_ratio": "16:9",
+          "video_length": 5,
+          "generate_audio": False
+      },
+      "out_task_id": "kling_v3_omni_t2v_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "kling_v3_omni",
+    params: {
+      prompt: "A golden retriever running on a sunny beach, cinematic, natural lighting",
+      type: "all_reference",
+      resolution: "720p",
+      aspect_ratio: "16:9",
+      video_length: 5,
+      generate_audio: false
+    },
+    out_task_id: "kling_v3_omni_t2v_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "kling_v3_omni",
+          "params": map[string]interface{}{
+              "prompt":         "A golden retriever running on a sunny beach, cinematic, natural lighting",
+              "type":           "all_reference",
+              "resolution":     "720p",
+              "aspect_ratio":   "16:9",
+              "video_length":   5,
+              "generate_audio": false,
+          },
+          "out_task_id": "kling_v3_omni_t2v_123456",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/openapi/submit";
+
+          String payload = """
+              {
+                "model": "kling_v3_omni",
+                "params": {
+                  "prompt": "A golden retriever running on a sunny beach, cinematic, natural lighting",
+                  "type": "all_reference",
+                  "resolution": "720p",
+                  "aspect_ratio": "16:9",
+                  "video_length": 5,
+                  "generate_audio": false
+                },
+                "out_task_id": "kling_v3_omni_t2v_123456"
+              }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = [
+      "model" => "kling_v3_omni",
+      "params" => [
+          "prompt" => "A golden retriever running on a sunny beach, cinematic, natural lighting",
+          "type" => "all_reference",
+          "resolution" => "720p",
+          "aspect_ratio" => "16:9",
+          "video_length" => 5,
+          "generate_audio" => false
+      ],
+      "out_task_id" => "kling_v3_omni_t2v_123456"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "out_task_id": "kling_v3_omni_t2v_123456",
+        "status": "pending",
+        "created_at": "2026-08-28T06:03:28.242Z"
+    }
+}
+  ```
+
+  ```json 400
+    {
+        "statusCode": 400,
+        "message": "요청 파라미터가 유효하지 않습니다",
+        "ok": false
+    }
+  ```
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "인증에 실패했습니다. API 키를 확인하세요"
+    }
+  }
+  ```
+```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "계정 잔액이 부족합니다. 충전 후 다시 시도하세요"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "서버 내부 오류입니다. 잠시 후 다시 시도하세요"
+    }
+  }
+  ```
+</ResponseExample>
