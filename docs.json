@@ -219,6 +219,13 @@
                 ]
               },
               {
+                "group": "Gemini Omni Flash Ext",
+                "icon": "video",
+                "pages": [
+                  "zh/api-reference/videos/gemini-omni-flash-ext/generation"
+                ]
+              },
+              {
                 "group": "Seedance-1.5-pro",
                 "icon": "video",
                 "pages": [
@@ -316,6 +323,21 @@
                   "zh/api-reference/audios/suno/lyrics",
                   "zh/api-reference/audios/suno/extend",
                   "zh/api-reference/audios/suno/cover"
+                ]
+              },
+              {
+                "group": "Flow Music",
+                "icon": "music",
+                "pages": [
+                  "zh/api-reference/audios/flow-music/generation",
+                  "zh/api-reference/audios/flow-music/lyrics",
+                  "zh/api-reference/audios/flow-music/extend",
+                  "zh/api-reference/audios/flow-music/replace",
+                  "zh/api-reference/audios/flow-music/cover",
+                  "zh/api-reference/audios/flow-music/stems",
+                  "zh/api-reference/audios/flow-music/upload",
+                  "zh/api-reference/audios/flow-music/download",
+                  "zh/api-reference/audios/flow-music/video"
                 ]
               }
             ]
@@ -567,6 +589,13 @@
                 ]
               },
               {
+                "group": "Gemini Omni Flash Ext",
+                "icon": "video",
+                "pages": [
+                  "en/api-reference/videos/gemini-omni-flash-ext/generation"
+                ]
+              },
+              {
                 "group": "Seedance-1.5-pro",
                 "icon": "video",
                 "pages": [
@@ -616,6 +645,20 @@
                 ]
               },
               {
+                "group": "HappyHorse 1.0",
+                "icon": "video",
+                "pages": [
+                  "en/api-reference/videos/happyhorse-1-0/generation"
+                ]
+              },
+              {
+                "group": "HappyHorse 1.1",
+                "icon": "video",
+                "pages": [
+                  "en/api-reference/videos/happyhorse-1-1/generation"
+                ]
+              },
+              {
                 "group": "MiniMax H3",
                 "icon": "video",
                 "pages": [
@@ -650,6 +693,21 @@
                   "en/api-reference/audios/suno/lyrics",
                   "en/api-reference/audios/suno/extend",
                   "en/api-reference/audios/suno/cover"
+                ]
+              },
+              {
+                "group": "Flow Music",
+                "icon": "music",
+                "pages": [
+                  "en/api-reference/audios/flow-music/generation",
+                  "en/api-reference/audios/flow-music/lyrics",
+                  "en/api-reference/audios/flow-music/extend",
+                  "en/api-reference/audios/flow-music/replace",
+                  "en/api-reference/audios/flow-music/cover",
+                  "en/api-reference/audios/flow-music/stems",
+                  "en/api-reference/audios/flow-music/upload",
+                  "en/api-reference/audios/flow-music/download",
+                  "en/api-reference/audios/flow-music/video"
                 ]
               }
             ]
@@ -901,6 +959,13 @@
                 ]
               },
               {
+                "group": "Gemini Omni Flash Ext",
+                "icon": "video",
+                "pages": [
+                  "ja/api-reference/videos/gemini-omni-flash-ext/generation"
+                ]
+              },
+              {
                 "group": "Seedance-1.5-pro",
                 "icon": "video",
                 "pages": [
@@ -950,6 +1015,20 @@
                 ]
               },
               {
+                "group": "HappyHorse 1.0",
+                "icon": "video",
+                "pages": [
+                  "ja/api-reference/videos/happyhorse-1-0/generation"
+                ]
+              },
+              {
+                "group": "HappyHorse 1.1",
+                "icon": "video",
+                "pages": [
+                  "ja/api-reference/videos/happyhorse-1-1/generation"
+                ]
+              },
+              {
                 "group": "MiniMax H3",
                 "icon": "video",
                 "pages": [
@@ -984,6 +1063,21 @@
                   "ja/api-reference/audios/suno/lyrics",
                   "ja/api-reference/audios/suno/extend",
                   "ja/api-reference/audios/suno/cover"
+                ]
+              },
+              {
+                "group": "Flow Music",
+                "icon": "music",
+                "pages": [
+                  "ja/api-reference/audios/flow-music/generation",
+                  "ja/api-reference/audios/flow-music/lyrics",
+                  "ja/api-reference/audios/flow-music/extend",
+                  "ja/api-reference/audios/flow-music/replace",
+                  "ja/api-reference/audios/flow-music/cover",
+                  "ja/api-reference/audios/flow-music/stems",
+                  "ja/api-reference/audios/flow-music/upload",
+                  "ja/api-reference/audios/flow-music/download",
+                  "ja/api-reference/audios/flow-music/video"
                 ]
               }
             ]
@@ -1235,6 +1329,13 @@
                 ]
               },
               {
+                "group": "Gemini Omni Flash Ext",
+                "icon": "video",
+                "pages": [
+                  "ko/api-reference/videos/gemini-omni-flash-ext/generation"
+                ]
+              },
+              {
                 "group": "Seedance-1.5-pro",
                 "icon": "video",
                 "pages": [
@@ -1284,6 +1385,20 @@
                 ]
               },
               {
+                "group": "HappyHorse 1.0",
+                "icon": "video",
+                "pages": [
+                  "ko/api-reference/videos/happyhorse-1-0/generation"
+                ]
+              },
+              {
+                "group": "HappyHorse 1.1",
+                "icon": "video",
+                "pages": [
+                  "ko/api-reference/videos/happyhorse-1-1/generation"
+                ]
+              },
+              {
                 "group": "MiniMax H3",
                 "icon": "video",
                 "pages": [
@@ -1318,6 +1433,21 @@
                   "ko/api-reference/audios/suno/lyrics",
                   "ko/api-reference/audios/suno/extend",
                   "ko/api-reference/audios/suno/cover"
+                ]
+              },
+              {
+                "group": "Flow Music",
+                "icon": "music",
+                "pages": [
+                  "ko/api-reference/audios/flow-music/generation",
+                  "ko/api-reference/audios/flow-music/lyrics",
+                  "ko/api-reference/audios/flow-music/extend",
+                  "ko/api-reference/audios/flow-music/replace",
+                  "ko/api-reference/audios/flow-music/cover",
+                  "ko/api-reference/audios/flow-music/stems",
+                  "ko/api-reference/audios/flow-music/upload",
+                  "ko/api-reference/audios/flow-music/download",
+                  "ko/api-reference/audios/flow-music/video"
                 ]
               }
             ]

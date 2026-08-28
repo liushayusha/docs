@@ -1,0 +1,42 @@
+[
+  {
+    "id": "__frontmatter__",
+    "hash": "391b49f8",
+    "index": 0
+  },
+  {
+    "id": "__prologue__",
+    "hash": "ac6ea1aa",
+    "index": 1
+  },
+  {
+    "id": "section-0-authorizations",
+    "hash": "e5ca9803",
+    "index": 2
+  },
+  {
+    "id": "section-1-body",
+    "hash": "f7ecf6d4",
+    "index": 3
+  },
+  {
+    "id": "section-2-response",
+    "hash": "2a019797",
+    "index": 4
+  },
+  {
+    "id": "section-3-query-task",
+    "hash": "8a69d9e9",
+    "index": 5
+  },
+  {
+    "id": "section-4-request-examples",
+    "hash": "a078af18",
+    "index": 6
+  },
+  {
+    "id": "section-5-mode-notes",
+    "hash": "a5540cb6",
+    "index": 7
+  }
+]

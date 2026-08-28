@@ -1,0 +1,645 @@
+---
+title: 'Flow Music 音楽生成'
+description: |
+  - Google Lyria のテキストから音楽を生成し、毎回1曲の完成した楽曲を生成します
+  - 非同期処理モードで、後続の照会に使用するタスク ID を返します
+  - ボーカル付きまたはインストゥルメンタルに対応し、Lyria 3 Pro / 3.5 をサポートします
+  - 結果には clip_id が含まれ、続きの生成、カバー、差し替え、トラック分離、ダウンロード、MV 作成に使用できます
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+<Note>
+Flow Music の AIReiter におけるモデル名は `flow_music` です。歌詞、続き生成、置換、カバー、トラック分離、アップロード、ダウンロード、MV 作成には、それぞれ対応するモデルをご使用ください。
+</Note>
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  すべてのエンドポイントは Bearer Token を使用して認証する必要があります。
+
+  API Key の取得：
+
+  <a href={apiKeyUrl} target="_blank">API Key 管理ページ</a> にアクセスして、API Key を取得してください。
+
+  使用する際は、リクエストヘッダーに次を追加します：
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  モデル名。固定で使用：
+
+  * `flow_music`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  モデルのパラメータオブジェクト。
+
+  <Expandable title="params オブジェクトのプロパティ">
+    <ParamField body="prompt" type="string" required>
+      スタイルのプロンプト。音楽ジャンル、楽器、感情、ボイスを説明します。`lyrics` を同時に指定できます。
+    </ParamField>
+
+    <ParamField body="lyrics" type="string">
+      任意の歌詞。未入力の場合は、インストゥルメンタルを生成するか、モデルがボーカルを自動処理します。
+    </ParamField>
+
+    <ParamField body="title" type="string">
+      任意の曲タイトル。
+    </ParamField>
+
+    <ParamField body="bpm" type="string">
+      任意の BPM。1以上。文字列で指定します。たとえば `"120"`。
+    </ParamField>
+
+    <ParamField body="length" type="number" default="60">
+      希望する長さ。単位は秒、範囲は `1` から `240`。あくまで参考値で、上流側がこの秒数どおりに出力するとは限りません。課金は回数単位で、長さではありません。
+    </ParamField>
+
+    <ParamField body="version" type="string" default="lyria-3-pro">
+      Lyria のバージョン。料金は同じです：
+
+      * `lyria-3-pro` - デフォルト値
+      * `lyria-3.5` - 更新されたボイスモデル
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  送信側のタスク ID。
+
+  ユーザー定義のタスク識別子で、必須です。使用できるのは英字、数字、アンダースコア、ハイフンのみで、長さは1〜64文字です。後続では、この ID を使ってタスクのステータスと結果を照会できます。
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  発起側のタスク ID。結果の検索に使用できます。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  初期状態で、通常は `"pending"` です。
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  作成時間、ISO 形式。
+</ResponseField>
+
+## Query Task
+
+Flow Music は非同期の音楽生成モデルです。タスクを送信した後は、`out_task_id` を使用してタスクの状態を確認してください。完了後、`output` には通常 1 件が含まれ、フィールドは `audio`（音声 URL）、`url`（カバー画像）、`title`、`text`（歌詞の一部）、`clip_id` です。
+
+<ParamField body="out_task_id" type="string" required>
+  タスク送信時に渡される、送信元のタスク ID です。
+</ParamField>
+
+```bash
+curl --request POST \
+  --url https://aireiter.com/api/openapi/query \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "out_task_id": "flow_music_gen_123456"
+  }'
+```
+
+クエリが成功して完了した後の、`output` の例：
+
+```json
+{
+  "statusCode": 200,
+  "message": "",
+  "data": {
+    "out_task_id": "flow_music_gen_123456",
+    "status": "completed",
+    "created_at": "2026-08-28T07:44:48.000Z",
+    "completed_at": "2026-08-28T07:45:40.000Z",
+      "output": [
+      {
+        "url": "https://static.aireiter.com/tmp/audio-generator/20260828/mmPiP-MSedubqGEZ2Y6Ih-item-0.jpg",
+        "audio": "https://static.aireiter.com/tmp/audio-generator/20260828/mmPiP-MSedubqGEZ2Y6Ih-audio-0.m4a",
+        "title": "無題",
+        "text": "(end - 0:20)",
+        "clip_id": "cd984d09-5a77-4a06-9553-e47a55f009b0"
+      }
+    ]
+  }
+}
+```
+
+## Request Examples
+
+<RequestExample>
+  ```bash cURL
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+  "model": "flow_music",
+  "params": {
+    "prompt": "短いアコースティックギターのループ、ボーカルなし",
+    "length": 60,
+    "version": "lyria-3-pro"
+  },
+  "out_task_id": "flow_music_gen_123456"
+}'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "flow_music",
+      "params": {
+        "prompt": "短いアコースティックギターのループ、ボーカルなし",
+        "length": 60,
+        "version": "lyria-3-pro"
+},
+      "out_task_id": "flow_music_gen_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "flow_music",
+    params: {
+      "prompt": "短いアコースティックギターのループ、ボーカルなし",
+      "length": 60,
+      "version": "lyria-3-pro"
+},
+    out_task_id: "flow_music_gen_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('エラー:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "flow_music",
+          "params": map[string]interface{}{
+              "prompt": "短いアコースティックギターのループ、ボーカルなし",
+              "length": 60,
+              "version": "lyria-3-pro",
+          },
+          "out_task_id": "flow_music_gen_123456",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/openapi/submit";
+
+          String payload = """
+{
+  "model": "flow_music",
+  "params": {
+    "prompt": "短いアコースティックギターのループ、ボーカルなし",
+    "length": 60,
+    "version": "lyria-3-pro"
+  },
+  "out_task_id": "flow_music_gen_123456"
+}
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = [
+      "model" => "flow_music",
+      "params" => [
+          "prompt" => "短いアコースティックギターのループ、ボーカルなし",
+          "length" => 60,
+          "version" => "lyria-3-pro",
+      ],
+      "out_task_id" => "flow_music_gen_123456"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url = URI("https://aireiter.com/api/openapi/submit")
+
+  payload = {
+    model: "flow_music",
+    params: {
+      prompt: "短いアコースティックギターのループ、ボーカルなし",
+      length: 60,
+      version: "lyria-3-pro",
+    },
+    out_task_id: "flow_music_gen_123456"
+  }
+
+  http = Net::HTTP.new(url.host, url.port)
+
+  request = Net::HTTP::Post.new(url)
+  request["Authorization"] = "Bearer <token>"
+  request["Content-Type"] = "application/json"
+  request.body = payload.to_json
+
+  response = http.request(request)
+  puts response.body
+  ```
+
+  ```swift Swift
+  import Foundation
+
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
+
+  let payload: [String: Any] = [
+      "model": "flow_music",
+      "params": [
+          "prompt": "短いアコースティックギターのループ、ボーカルなし",
+          "length": 60,
+          "version": "lyria-3-pro",
+      ],
+      "out_task_id": "flow_music_gen_123456"
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      if let error = error {
+          print("エラー: \(error)")
+          return
+      }
+
+      if let data = data, let responseString = String(data: data, encoding: .utf8) {
+          print(responseString)
+      }
+  }
+
+  task.resume()
+  ```
+
+  ```csharp C#
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url = "https://aireiter.com/api/openapi/submit";
+
+          var payload = @"
+{
+  "model": "flow_music",
+  "params": {
+    "prompt": "短いアコースティックギターのループ、ボーカルなし",
+    "length": 60,
+    "version": "lyria-3-pro"
+  },
+  "out_task_id": "flow_music_gen_123456"
+}";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+
+          var content = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          var result = await response.Content.ReadAsStringAsync();
+
+          Console.WriteLine(result);
+      }
+  }
+  ```
+
+  ```c C
+  #include <stdio.h>
+  #include <curl/curl.h>
+
+  int main(void) {
+      CURL *curl;
+      CURLcode res;
+
+      curl_global_init(CURL_GLOBAL_DEFAULT);
+      curl = curl_easy_init();
+
+      if(curl) {
+          const char *url = "https://aireiter.com/api/openapi/submit";
+          const char *payload = "{\"model\": \"flow_music\", \"params\": {\"prompt\": \"短いアコースティックギターのループ、ボーカルなし\", \"length\": 60, \"version\": \"lyria-3-pro\"}, \"out_task_id\": \"flow_music_gen_123456\"}";
+
+          struct curl_slist *headers = NULL;
+          headers = curl_slist_append(headers, "Authorization: Bearer <token>");
+          headers = curl_slist_append(headers, "Content-Type: application/json");
+
+          curl_easy_setopt(curl, CURLOPT_URL, url);
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
+          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+          res = curl_easy_perform(curl);
+
+          if(res != CURLE_OK) {
+              fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                      curl_easy_strerror(res));
+          }
+
+          curl_slist_free_all(headers);
+          curl_easy_cleanup(curl);
+      }
+
+      curl_global_cleanup();
+      return 0;
+  }
+  ```
+
+  ```objectivec Objective-C
+  #import <Foundation/Foundation.h>
+
+  int main(int argc, const char * argv[]) {
+      @autoreleasepool {
+          NSURL *url = [NSURL URLWithString:@"https://aireiter.com/api/openapi/submit"];
+
+          NSDictionary *payload = @{
+              @"model": @"flow_music",
+              @"params": @{
+                  @"prompt": @"短いアコースティックギターのループ、ボーカルなし",
+                  @"length": @60,
+                  @"version": @"lyria-3-pro",
+              },
+              @"out_task_id": @"flow_music_gen_123456"
+          };
+
+          NSError *error;
+          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
+                                                            options:0
+                                                              error:&error];
+
+          NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+          [request setHTTPMethod:@"POST"];
+          [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
+          [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+          [request setHTTPBody:jsonData];
+
+          NSURLSessionDataTask *task = [[NSURLSession sharedSession]
+              dataTaskWithRequest:request
+              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+                  if (error) {
+                      NSLog(@"エラー: %@", error);
+                      return;
+                  }
+                  NSString *result = [[NSString alloc] initWithData:data
+                                                          encoding:NSUTF8StringEncoding];
+                  NSLog(@"%@", result);
+              }];
+
+          [task resume];
+          [[NSRunLoop mainRunLoop] run];
+      }
+      return 0;
+  }
+  ```
+
+  ```ocaml OCaml
+  (* cohttp と yojson ライブラリが必要です *)
+  open Lwt
+  open Cohttp
+  open Cohttp_lwt_unix
+
+  let url = "https://aireiter.com/api/openapi/submit"
+
+  let payload = {|{
+  "model": "flow_music",
+  "params": {
+    "prompt": "短いアコースティックギターのループ、ボーカルなし",
+    "length": 60,
+    "version": "lyria-3-pro"
+  },
+  "out_task_id": "flow_music_gen_123456"
+}|}
+
+  let () =
+    let headers = Header.init ()
+      |> fun h -> Header.add h "Authorization" "Bearer <token>"
+      |> fun h -> Header.add h "Content-Type" "application/json"
+    in
+    let body = Cohttp_lwt.Body.of_string payload in
+
+    let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
+      body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
+      print_endline body_str
+    in
+    Lwt_main.run response
+  ```
+
+  ```dart Dart
+  import 'dart:convert';
+  import 'package:http/http.dart' as http;
+
+  void main() async {
+    final url = Uri.parse('https://aireiter.com/api/openapi/submit');
+
+    final payload = {
+      model: "flow_music",
+      params: {
+        prompt: "短いアコースティックギターのループ、ボーカルなし",
+        length: 60,
+        version: "lyria-3-pro",
+      },
+      out_task_id: "flow_music_gen_123456"
+    };
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer <token>',
+        'Content-Type': 'application/json'
+      },
+      body: jsonEncode(payload),
+    );
+
+    print(response.body);
+  }
+  ```
+
+  ```r R
+  library(httr)
+  library(jsonlite)
+
+  url <- "https://aireiter.com/api/openapi/submit"
+
+  payload <- list(
+    model = "flow_music",
+    params = list(
+      prompt = "短いアコースティックギターのループ、ボーカルなし",
+      length = 60,
+      version = "lyria-3-pro",
+    ),
+    out_task_id = "flow_music_gen_123456"
+  )
+
+  response <- POST(
+    url,
+    add_headers(
+      Authorization = "Bearer <token>",
+      `Content-Type` = "application/json"
+    ),
+    body = toJSON(payload, auto_unbox = TRUE),
+    encode = "raw"
+  )
+
+  cat(content(response, "text"))
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "out_task_id": "flow_music_gen_123456",
+        "status": "pending",
+        "created_at": "2026-08-28T07:44:48.000Z"
+    }
+}
+  ```
+
+  ```json 400
+    {
+        "statusCode": 400,
+        "message": "リクエストパラメータが無効です",
+        "ok": false
+    }
+  ```
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "認証に失敗しました。APIキーを確認してください"
+    }
+  }
+  ```
+```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "アカウント残高が不足しています。チャージしてから再度お試しください"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "サーバー内部エラーです。しばらくしてから再試行してください"
+    }
+  }
+  ```
+</ResponseExample>
+
+## Mode Notes
+
+<Note>
+成功した結果の `clip_id` は `flow_music_extend` / `flow_music_replace` / `flow_music_cover` / `flow_music_stems` / `flow_music_download` / `flow_music_video` に使用されます。`length` は厳密な上限ではありません。
+</Note>

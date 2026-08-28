@@ -1,0 +1,479 @@
+---
+title: 'Gemini Omni Flash Ext Video Generation'
+description: |
+  - A standalone Omni Flash video SKU on AIReiter
+  - Asynchronous processing mode, returning a task ID for subsequent queries
+  - Two generation types: First Frame（`frame`）and Reference（`reference`）
+  - Supports 720p / 1080p / 4K, with durations of only 4 / 6 / 8 / 10 seconds
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+<Note>
+The model name of Gemini Omni Flash Ext in AIReiter is `gemini_omni_flash_ext`.
+
+It is not the site's official Omni Flash SKU (`gemini_omni_flash_preview`, output 720p). The SKU on this page outputs 720p / 1080p / 4K, and the duration is only 4, 6, 8, and 10 seconds.
+</Note>
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  All endpoints require Bearer Token authentication.
+
+  Get the API Key:
+
+  Visit <a href={apiKeyUrl} target="_blank">API Key management page</a> to get your API Key.
+
+  When using it, add the following to the request header:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  Model name, fixed value:
+
+  * `gemini_omni_flash_ext`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  Model parameter object.
+
+  <Expandable title="params object properties">
+    <ParamField body="prompt" type="string" required>
+      Text description for video generation. Required.
+    </ParamField>
+
+    <ParamField body="type" type="string" default="frame">
+      Generation type. Only the following two values are accepted:
+
+      * `frame` - First Frame. Prompt plus 0 or 1 image. Reference video cannot be passed.
+      * `reference` - Reference. Prompt plus 0, 1, or 3 images, with 1 reference video optional.
+
+      If no images are provided, it is text-to-video. Both types are supported.
+
+      <Warning>
+        Do not pass `type=text`. `frame` cannot be passed together with `video_url`.
+      </Warning>
+    </ParamField>
+
+    <ParamField body="video_length" type="string" default="6">
+      Generated video duration, in seconds. Only the following strings are accepted:
+
+      * `"4"`
+      * `"6"` - Default value
+      * `"8"`
+      * `"10"`
+
+      When a reference video is provided, do not pass this field. The output duration follows the uploaded video.
+
+      <Warning>
+        Do not pass `3`, `5`, `7`, `9`, or any other number of seconds. Enum validation requires a string, so pass `"6"` instead of the number `6`.
+      </Warning>
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="720p">
+      Output resolution:
+
+      * `720p` - Default value
+      * `1080p`
+      * `4K`
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="16:9">
+      Video aspect ratio:
+
+      * `16:9` - Landscape, default value
+      * `9:16` - Portrait
+    </ParamField>
+
+    <ParamField body="image_url" type="string | string[]">
+      Image URL, must be directly accessible from the public internet. A single string can also be passed.
+
+      * `frame` - Optional 0 or 1 image, used as the first frame. If omitted, it becomes text-to-video.
+      * `reference` - Optional 0, 1, or 3 images. If omitted, it becomes text-to-video.
+
+      Image requirements: the shorter side must be at least 300px, and each image must be no larger than 10MB.
+
+      <Warning>
+        Two images are not supported. Passing 2 images for `reference` returns `Invalid image_url count. Allowed: [1, 3]`. Do not pass 4 or more images either.
+      </Warning>
+    </ParamField>
+
+    <ParamField body="video_url" type="string | string[]">
+      Reference video URL. Valid only when `type=reference`, up to 1 video. A single string can also be passed.
+
+      Video requirements:
+
+      * Format MP4, MOV
+      * Duration no more than 10 seconds
+      * Size no more than 100MB
+      * Shorter side no less than 300px
+
+      When a reference video is provided, do not pass `video_length`. The output duration follows the uploaded video, up to 10 seconds.
+
+      <Warning>`type=frame` must not include this parameter; the API will reject it directly.</Warning>
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  Caller task ID.
+
+  User-defined task identifier, required. Only letters, numbers, underscores, and hyphens are supported, with a length of 1-64 characters. You can use this ID later to query the task status and results.
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  Initiator task ID, can be used to query the result.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Initial status, usually `"pending"`.
+</ResponseField>
+
+<ResponseField name="estimated_credits" type="number">
+  Estimated credits consumption for this task.
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  Creation time, in ISO format.
+</ResponseField>
+
+## Query Task
+
+Gemini Omni Flash Ext is an asynchronous video generation model. After submitting the task, use `out_task_id` to query the task status. Also see [Get Task Status](/en/api-reference/tasks/status).
+
+<ParamField body="out_task_id" type="string" required>
+  The originating task ID passed when submitting the task.
+</ParamField>
+
+```bash
+curl --request POST \
+  --url https://aireiter.com/api/openapi/query \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "out_task_id": "omni_ext_t2v_123456"
+  }'
+```
+
+After the query succeeds and completes, the `output` array in the response will contain the generated video, and each element includes a `video` field.
+
+## 模式参数对照
+
+| `type` | `image_url` | `video_url` | Duration |
+|---|---|---|---|
+| `frame`, no image | Do not send, or send an empty array | Do not send | `video_length` `"4"` / `"6"` / `"8"` / `"10"` |
+| `frame` | 1 image | Do not send | Same as above |
+| `reference`, no image | Do not send, or send an empty array | Do not send | Same as above |
+| `reference` | 1 image or 3 images | Do not send | Same as above |
+| `reference` | 0, 1, or 3 images | 1 clip, up to 10 seconds | Do not send `video_length`; follow the source video |
+
+## Request Examples
+
+<RequestExample>
+  ```bash cURL (Text-to-Video, First Frame)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gemini_omni_flash_ext",
+      "params": {
+        "prompt": "A girl happily dancing in a sunny garden, cinematic",
+        "type": "frame",
+        "resolution": "720p",
+        "aspect_ratio": "16:9",
+        "video_length": "6"
+      },
+      "out_task_id": "omni_ext_t2v_123456"
+    }'
+  ```
+
+  ```bash cURL (First Frame, 1 Image)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gemini_omni_flash_ext",
+      "params": {
+        "prompt": "The person slowly turns their head and smiles, with a slight camera push-in",
+        "type": "frame",
+        "image_url": ["https://example.com/first-frame.jpg"],
+        "resolution": "1080p",
+        "aspect_ratio": "16:9",
+        "video_length": "6"
+      },
+      "out_task_id": "omni_ext_frame_123456"
+    }'
+  ```
+
+  ```bash cURL (Reference, 3 Images)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gemini_omni_flash_ext",
+      "params": {
+        "prompt": "Keep the characters and clothing from the three reference images, walking in the garden",
+        "type": "reference",
+        "image_url": [
+          "https://example.com/ref-1.jpg",
+          "https://example.com/ref-2.jpg",
+          "https://example.com/ref-3.jpg"
+        ],
+        "resolution": "1080p",
+        "aspect_ratio": "16:9",
+        "video_length": "8"
+      },
+      "out_task_id": "omni_ext_refs_123456"
+    }'
+  ```
+
+  ```bash cURL (Reference, Reference Video)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gemini_omni_flash_ext",
+      "params": {
+        "prompt": "Keep the subject and camera movement from the reference video, with cleaner lighting",
+        "type": "reference",
+        "video_url": ["https://example.com/reference.mp4"],
+        "resolution": "4K",
+        "aspect_ratio": "16:9"
+      },
+      "out_task_id": "omni_ext_v2v_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "gemini_omni_flash_ext",
+      "params": {
+          "prompt": "A girl happily dancing in a sunny garden, cinematic",
+          "type": "frame",
+          "resolution": "720p",
+          "aspect_ratio": "16:9",
+          "video_length": "6"
+      },
+      "out_task_id": "omni_ext_t2v_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "gemini_omni_flash_ext",
+    params: {
+      prompt: "A girl happily dancing in a sunny garden, cinematic",
+      type: "frame",
+      resolution: "720p",
+      aspect_ratio: "16:9",
+      video_length: "6"
+    },
+    out_task_id: "omni_ext_t2v_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "gemini_omni_flash_ext",
+          "params": map[string]interface{}{
+              "prompt":       "A girl happily dancing in a sunny garden, cinematic",
+              "type":         "frame",
+              "resolution":   "720p",
+              "aspect_ratio": "16:9",
+              "video_length": "6",
+          },
+          "out_task_id": "omni_ext_t2v_123456",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/openapi/submit";
+
+          String payload = """
+              {
+                "model": "gemini_omni_flash_ext",
+                "params": {
+                  "prompt": "A girl happily dancing in a sunny garden, cinematic",
+                  "type": "frame",
+                  "resolution": "720p",
+                  "aspect_ratio": "16:9",
+                  "video_length": "6"
+                },
+                "out_task_id": "omni_ext_t2v_123456"
+              }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = [
+      "model" => "gemini_omni_flash_ext",
+      "params" => [
+          "prompt" => "A girl happily dancing in a sunny garden, cinematic",
+          "type" => "frame",
+          "resolution" => "720p",
+          "aspect_ratio" => "16:9",
+          "video_length" => "6"
+      ],
+      "out_task_id" => "omni_ext_t2v_123456"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "out_task_id": "omni_ext_t2v_123456",
+        "status": "pending",
+        "estimated_credits": "<Estimated credits>",
+        "created_at": "2026-08-28T06:03:28.242Z"
+    }
+}
+  ```
+
+  ```json 400
+    {
+        "statusCode": 400,
+        "message": "Invalid request parameters",
+        "ok": false
+    }
+  ```
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "Authentication failed, please check your API key"
+    }
+  }
+  ```
+```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "Insufficient account balance, please recharge and try again"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "Internal server error, please try again later"
+    }
+  }
+  ```
+</ResponseExample>

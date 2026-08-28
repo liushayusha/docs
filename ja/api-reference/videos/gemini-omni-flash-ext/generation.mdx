@@ -1,0 +1,479 @@
+---
+title: 'Gemini Omni Flash Ext 動画生成'
+description: |
+  - AIReiter 上の独立した Omni Flash 動画 SKU
+  - 非同期処理モードで、後続の照会用にタスク ID を返します
+  - 2つの生成タイプ: First Frame（`frame`）と Reference（`reference`）
+  - 720p / 1080p / 4K をサポートし、長さは 4 / 6 / 8 / 10 秒のみ
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+<Note>
+Gemini Omni Flash Ext の AIReiter におけるモデル名は `gemini_omni_flash_ext` です。
+
+これは当サイトの公式 Omni Flash SKU（`gemini_omni_flash_preview`、出力 720p）ではありません。このページの SKU は 720p / 1080p / 4K を出力でき、長さは 4、6、8、10 秒のみです。
+</Note>
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  すべてのAPIはBearer Tokenによる認証が必要です。
+
+  API Keyを取得するには：
+
+  <a href={apiKeyUrl} target="_blank">API Key管理ページ</a>にアクセスして、API Keyを取得してください。
+
+  使用時はリクエストヘッダーに以下を追加してください：
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  モデル名。固定で次を使用します:
+
+  * `gemini_omni_flash_ext`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  モデルパラメータオブジェクト。
+
+  <Expandable title="params オブジェクトの属性">
+    <ParamField body="prompt" type="string" required>
+      動画生成のテキスト説明。必須。
+    </ParamField>
+
+    <ParamField body="type" type="string" default="frame">
+      生成タイプ。以下の2つの値のみ受け付けます:
+
+      * `frame` - First Frame。プロンプトに0枚または1枚の画像を追加します。参考動画は渡せません
+      * `reference` - Reference。プロンプトに0枚、1枚、または3枚の画像を追加します。参考動画を1本任意で指定できます
+
+      画像を指定しない場合はテキストからの動画生成になります。どちらのタイプでも使用できます。
+
+      <Warning>
+        `type=text` は指定しないでください。`frame` は `video_url` と同時に指定できません。
+      </Warning>
+    </ParamField>
+
+    <ParamField body="video_length" type="string" default="6">
+      動画の長さ。単位は秒です。受け付けるのは文字列のみです:
+
+      * `"4"`
+      * `"6"` - デフォルト値
+      * `"8"`
+      * `"10"`
+
+      参考動画がある場合はこのフィールドを指定しないでください。出力の長さはアップロードした動画に従います。
+
+      <Warning>
+        `3`、`5`、`7`、`9`、またはその他の秒数は指定しないでください。列挙チェックでは文字列が必要です。数値の `6` ではなく `"6"` を指定してください。
+      </Warning>
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="720p">
+      出力解像度:
+
+      * `720p` - デフォルト値
+      * `1080p`
+      * `4K`
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="16:9">
+      動画のアスペクト比:
+
+      * `16:9` - 横向き、デフォルト値
+      * `9:16` - 縦向き
+    </ParamField>
+
+    <ParamField body="image_url" type="string | string[]">
+      画像 URL。公開インターネットから直接アクセスできる必要があります。単一の文字列でも指定できます。
+
+      * `frame` - オプションで0枚または1枚、最初のフレームとして使用します。指定しなければテキストからの生成になります
+      * `reference` - オプションで0枚、1枚、または3枚。指定しなければテキストからの生成になります
+
+      画像要件: 短辺は300px以上、1枚あたり10MB以下。
+
+      <Warning>
+        2枚の画像はサポートされません。`reference` に2枚指定すると `Invalid image_url count. Allowed: [1, 3]` が返されます。4枚以上も指定しないでください。
+      </Warning>
+    </ParamField>
+
+    <ParamField body="video_url" type="string | string[]">
+      参考動画 URL。`type=reference` の場合のみ有効で、最大1本です。単一の文字列でも指定できます。
+
+      動画要件:
+
+      * 形式 MP4、MOV
+      * 長さは10秒以内
+      * 100MB以下
+      * 短辺は300px以上
+
+      参考動画を指定する場合は `video_length` を指定しないでください。出力の長さはアップロードした動画に従い、最大10秒です。
+
+      <Warning>`type=frame` ではこのパラメータを指定しないでください。API はそのまま拒否します。</Warning>
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  発行元のタスク ID。
+
+  ユーザーが定義するタスク識別子で、必須です。英字、数字、アンダースコア、ハイフンのみ使用でき、長さは1-64文字です。後からこの ID でタスクの状態と結果を照会できます。
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  発行元のタスク ID。結果の照会に使用できます。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  初期状態。通常は `"pending"` です。
+</ResponseField>
+
+<ResponseField name="estimated_credits" type="number">
+  今回のタスクの推定消費クレジット。
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  作成時刻。ISO 形式です。
+</ResponseField>
+
+## Query Task
+
+Gemini Omni Flash Ext は非同期動画生成モデルです。タスクを送信した後は、`out_task_id` を使用してタスクの状態を確認してください。[タスクの状態を取得する](/en/api-reference/tasks/status) も参照してください。
+
+<ParamField body="out_task_id" type="string" required>
+  タスク送信時に渡す送信元タスク ID。
+</ParamField>
+
+```bash
+curl --request POST \
+  --url https://aireiter.com/api/openapi/query \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "out_task_id": "omni_ext_t2v_123456"
+  }'
+```
+
+クエリが成功して完了すると、レスポンス内の `output` 配列には生成された動画が含まれ、各要素には `video` フィールドがあります。
+
+## モードパラメータ対応表
+
+| `type` | `image_url` | `video_url` | 再生時間 |
+|---|---|---|---|
+| `frame`、画像なし | 送信しない、または空配列 | 送信しない | `video_length` `"4"` / `"6"` / `"8"` / `"10"` |
+| `frame` | 1枚 | 送信しない | 同上 |
+| `reference`、画像なし | 送信しない、または空配列 | 送信しない | 同上 |
+| `reference` | 1枚または3枚 | 送信しない | 同上 |
+| `reference` | 0、1、または3枚 | 1本、最長10秒 | `video_length` を送信せず、元動画に従う |
+
+## Request Examples
+
+<RequestExample>
+  ```bash cURL（テキスト生成、最初のフレーム）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gemini_omni_flash_ext",
+      "params": {
+        "prompt": "陽光の庭で女の子が楽しそうに踊っている、映画のような雰囲気",
+        "type": "frame",
+        "resolution": "720p",
+        "aspect_ratio": "16:9",
+        "video_length": "6"
+      },
+      "out_task_id": "omni_ext_t2v_123456"
+    }'
+  ```
+
+  ```bash cURL（最初のフレーム、1枚の画像）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gemini_omni_flash_ext",
+      "params": {
+        "prompt": "人物がゆっくり振り向いて微笑み、カメラが少し前進する",
+        "type": "frame",
+        "image_url": ["https://example.com/first-frame.jpg"],
+        "resolution": "1080p",
+        "aspect_ratio": "16:9",
+        "video_length": "6"
+      },
+      "out_task_id": "omni_ext_frame_123456"
+    }'
+  ```
+
+  ```bash cURL（Reference、3枚の画像）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gemini_omni_flash_ext",
+      "params": {
+        "prompt": "3枚の参考画像の人物と衣装を維持しながら、庭を歩く",
+        "type": "reference",
+        "image_url": [
+          "https://example.com/ref-1.jpg",
+          "https://example.com/ref-2.jpg",
+          "https://example.com/ref-3.jpg"
+        ],
+        "resolution": "1080p",
+        "aspect_ratio": "16:9",
+        "video_length": "8"
+      },
+      "out_task_id": "omni_ext_refs_123456"
+    }'
+  ```
+
+  ```bash cURL（Reference、参考動画）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gemini_omni_flash_ext",
+      "params": {
+        "prompt": "参考動画の主体とカメラワークを維持し、よりクリーンなライティングにする",
+        "type": "reference",
+        "video_url": ["https://example.com/reference.mp4"],
+        "resolution": "4K",
+        "aspect_ratio": "16:9"
+      },
+      "out_task_id": "omni_ext_v2v_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "gemini_omni_flash_ext",
+      "params": {
+          "prompt": "陽光の庭で女の子が楽しそうに踊っている、映画のような雰囲気",
+          "type": "frame",
+          "resolution": "720p",
+          "aspect_ratio": "16:9",
+          "video_length": "6"
+      },
+      "out_task_id": "omni_ext_t2v_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "gemini_omni_flash_ext",
+    params: {
+      prompt: "陽光の庭で女の子が楽しそうに踊っている、映画のような雰囲気",
+      type: "frame",
+      resolution: "720p",
+      aspect_ratio: "16:9",
+      video_length: "6"
+    },
+    out_task_id: "omni_ext_t2v_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('エラー:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "gemini_omni_flash_ext",
+          "params": map[string]interface{}{
+              "prompt":       "陽光の庭で女の子が楽しそうに踊っている、映画のような雰囲気",
+              "type":         "frame",
+              "resolution":   "720p",
+              "aspect_ratio": "16:9",
+              "video_length": "6",
+          },
+          "out_task_id": "omni_ext_t2v_123456",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/openapi/submit";
+
+          String payload = """
+              {
+                "model": "gemini_omni_flash_ext",
+                "params": {
+                  "prompt": "陽光の庭で女の子が楽しそうに踊っている、映画のような雰囲気",
+                  "type": "frame",
+                  "resolution": "720p",
+                  "aspect_ratio": "16:9",
+                  "video_length": "6"
+                },
+                "out_task_id": "omni_ext_t2v_123456"
+              }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = [
+      "model" => "gemini_omni_flash_ext",
+      "params" => [
+          "prompt" => "陽光の庭で女の子が楽しそうに踊っている、映画のような雰囲気",
+          "type" => "frame",
+          "resolution" => "720p",
+          "aspect_ratio" => "16:9",
+          "video_length" => "6"
+      ],
+      "out_task_id" => "omni_ext_t2v_123456"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "out_task_id": "omni_ext_t2v_123456",
+        "status": "pending",
+        "estimated_credits": "<推定消費クレジット>",
+        "created_at": "2026-08-28T06:03:28.242Z"
+    }
+}
+  ```
+
+  ```json 400
+    {
+        "statusCode": 400,
+        "message": "リクエストパラメータが無効です",
+        "ok": false
+    }
+  ```
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "認証に失敗しました。APIキーを確認してください"
+    }
+  }
+  ```
+```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "残高が不足しています。チャージしてから再試行してください"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "サーバー内部エラーです。しばらくしてから再試行してください"
+    }
+  }
+  ```
+</ResponseExample>
