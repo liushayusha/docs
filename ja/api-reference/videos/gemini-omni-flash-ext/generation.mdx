@@ -1,30 +1,32 @@
 ---
 title: 'Gemini Omni Flash Ext 動画生成'
 description: |
-  - AIReiter 上の独立した Omni Flash 動画 SKU
+  - 同じパラメータ、2つのモデル ID：`gemini_omni_flash_ext`（1.0）と `gemini_omni_1_1_flash_ext`（1.1）
   - 非同期処理モードで、後続の照会用にタスク ID を返します
-  - 2つの生成タイプ: First Frame（`frame`）と Reference（`reference`）
+  - テキスト生成、最大 7 枚の参照画像、任意の参照動画 1 本。画像と動画は同時に送れます
   - 720p / 1080p / 4K をサポートし、長さは 4 / 6 / 8 / 10 秒のみ
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
+
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 <Note>
-Gemini Omni Flash Ext の AIReiter におけるモデル名は `gemini_omni_flash_ext` です。
+1.0 と 1.1 は本ページのパラメータを共有します。SKU の切り替えは `model` だけ変えてください。
 
-これは当サイトの公式 Omni Flash SKU（`gemini_omni_flash_preview`、出力 720p）ではありません。このページの SKU は 720p / 1080p / 4K を出力でき、長さは 4、6、8、10 秒のみです。
+* `gemini_omni_flash_ext` — Gemini Omni Flash Ext（1.0）
+* `gemini_omni_1_1_flash_ext` — Gemini Omni 1.1 Flash Ext
 </Note>
 
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  すべてのAPIはBearer Tokenによる認証が必要です。
+  すべてのエンドポイントで Bearer Token 認証が必要です。
 
-  API Keyを取得するには：
+  API Key の取得：
 
-  <a href={apiKeyUrl} target="_blank">API Key管理ページ</a>にアクセスして、API Keyを取得してください。
+  <a href={apiKeyUrl} target="_blank">API Key 管理ページ</a> で API Key を取得してください。
 
-  使用時はリクエストヘッダーに以下を追加してください：
+  使用時はリクエストヘッダーに次を追加します：
 
   ```
   Authorization: Bearer YOUR_API_KEY
@@ -34,122 +36,108 @@ Gemini Omni Flash Ext の AIReiter におけるモデル名は `gemini_omni_flas
 ## Body
 
 <ParamField body="model" type="string" required>
-  モデル名。固定で次を使用します:
+  モデル名。次のいずれか：
 
   * `gemini_omni_flash_ext`
+  * `gemini_omni_1_1_flash_ext`
+
+  パラメータフィールドは同じです。`type` は送らないでください。
 </ParamField>
 
 <ParamField body="params" type="object" required>
   モデルパラメータオブジェクト。
 
-  <Expandable title="params オブジェクトの属性">
+  <Expandable title="params オブジェクトのプロパティ">
     <ParamField body="prompt" type="string" required>
       動画生成のテキスト説明。必須。
     </ParamField>
 
-    <ParamField body="type" type="string" default="frame">
-      生成タイプ。以下の2つの値のみ受け付けます:
-
-      * `frame` - First Frame。プロンプトに0枚または1枚の画像を追加します。参考動画は渡せません
-      * `reference` - Reference。プロンプトに0枚、1枚、または3枚の画像を追加します。参考動画を1本任意で指定できます
-
-      画像を指定しない場合はテキストからの動画生成になります。どちらのタイプでも使用できます。
-
-      <Warning>
-        `type=text` は指定しないでください。`frame` は `video_url` と同時に指定できません。
-      </Warning>
-    </ParamField>
-
     <ParamField body="video_length" type="string" default="6">
-      動画の長さ。単位は秒です。受け付けるのは文字列のみです:
+      生成動画の長さ（秒）。次の文字列のみ受け付けます：
 
       * `"4"`
-      * `"6"` - デフォルト値
+      * `"6"` - デフォルト
       * `"8"`
       * `"10"`
 
-      参考動画がある場合はこのフィールドを指定しないでください。出力の長さはアップロードした動画に従います。
+      参照動画がある場合はこのフィールドを送らないでください。出力長はアップロード動画に従います。
 
       <Warning>
-        `3`、`5`、`7`、`9`、またはその他の秒数は指定しないでください。列挙チェックでは文字列が必要です。数値の `6` ではなく `"6"` を指定してください。
+        `3`、`5`、`7`、`9` など他の秒数は送らないでください。列挙検証は文字列を要求します。数字の `6` ではなく `"6"` を送ってください。
       </Warning>
     </ParamField>
 
     <ParamField body="resolution" type="string" default="720p">
-      出力解像度:
+      出力解像度：
 
-      * `720p` - デフォルト値
+      * `720p` - デフォルト
       * `1080p`
       * `4K`
+
+      720p と 1080p は同価格、4K はより高価です。
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="16:9">
-      動画のアスペクト比:
+      動画のアスペクト比：
 
-      * `16:9` - 横向き、デフォルト値
+      * `16:9` - 横向き、デフォルト
       * `9:16` - 縦向き
     </ParamField>
 
     <ParamField body="image_url" type="string | string[]">
-      画像 URL。公開インターネットから直接アクセスできる必要があります。単一の文字列でも指定できます。
+      参照画像 URL。公開インターネットから直接アクセスできる必要があります。単一文字列でも可。省略するとテキスト生成になります。
 
-      * `frame` - オプションで0枚または1枚、最初のフレームとして使用します。指定しなければテキストからの生成になります
-      * `reference` - オプションで0枚、1枚、または3枚。指定しなければテキストからの生成になります
+      * 最大 7 枚、**2 枚も可**
+      * 短辺 300px 以上、1 枚あたり 10MB 以下
 
-      画像要件: 短辺は300px以上、1枚あたり10MB以下。
-
-      <Warning>
-        2枚の画像はサポートされません。`reference` に2枚指定すると `Invalid image_url count. Allowed: [1, 3]` が返されます。4枚以上も指定しないでください。
-      </Warning>
+      参照動画と同時に送る場合、画像数 + 2 は ≤ 7 である必要があります。
     </ParamField>
 
     <ParamField body="video_url" type="string | string[]">
-      参考動画 URL。`type=reference` の場合のみ有効で、最大1本です。単一の文字列でも指定できます。
+      参照動画 URL。任意、最大 1 本。単一文字列でも可。参照画像と同時に送れます。
 
-      動画要件:
+      動画要件：
 
       * 形式 MP4、MOV
-      * 長さは10秒以内
-      * 100MB以下
-      * 短辺は300px以上
+      * 長さ 10 秒以内
+      * 100MB 以内
+      * 短辺 300px 以上
 
-      参考動画を指定する場合は `video_length` を指定しないでください。出力の長さはアップロードした動画に従い、最大10秒です。
-
-      <Warning>`type=frame` ではこのパラメータを指定しないでください。API はそのまま拒否します。</Warning>
+      参照動画がある場合は `video_length` を送らないでください。出力長はアップロード動画に従い、最大 10 秒です。参照動画は 7 スロット枠のうち 2 を使います。
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  発行元のタスク ID。
+  呼び出し元タスク ID。
 
-  ユーザーが定義するタスク識別子で、必須です。英字、数字、アンダースコア、ハイフンのみ使用でき、長さは1-64文字です。後からこの ID でタスクの状態と結果を照会できます。
+  ユーザー定義のタスク識別子。必須。英数字、アンダースコア、ハイフンのみ、長さ 1-64 文字。後でこの ID でタスク状態と結果を照会できます。
 </ParamField>
 
 ## Response
 
 <ResponseField name="out_task_id" type="string">
-  発行元のタスク ID。結果の照会に使用できます。
+  呼び出し元タスク ID。結果照会に使えます。
 </ResponseField>
 
 <ResponseField name="status" type="string">
-  初期状態。通常は `"pending"` です。
+  初期状態。通常は `"pending"`。
 </ResponseField>
 
 <ResponseField name="estimated_credits" type="number">
-  今回のタスクの推定消費クレジット。
+  このタスクの推定消費クレジット。
 </ResponseField>
 
 <ResponseField name="created_at" type="string">
-  作成時刻。ISO 形式です。
+  作成時刻。ISO 形式。
 </ResponseField>
 
 ## Query Task
 
-Gemini Omni Flash Ext は非同期動画生成モデルです。タスクを送信した後は、`out_task_id` を使用してタスクの状態を確認してください。[タスクの状態を取得する](/en/api-reference/tasks/status) も参照してください。
+どちらのモデルも非同期動画生成です。送信後は `out_task_id` で状態を照会してください。[タスク状態の取得](/ja/api-reference/tasks/status) も参照してください。
 
 <ParamField body="out_task_id" type="string" required>
-  タスク送信時に渡す送信元タスク ID。
+  タスク送信時に渡した呼び出し元タスク ID。
 </ParamField>
 
 ```bash
@@ -162,22 +150,21 @@ curl --request POST \
   }'
 ```
 
-クエリが成功して完了すると、レスポンス内の `output` 配列には生成された動画が含まれ、各要素には `video` フィールドがあります。
+照会が成功して完了すると、レスポンスの `output` 配列に生成動画が含まれ、各要素に `video` フィールドがあります。
 
-## モードパラメータ対応表
+## パラメータ対照
 
-| `type` | `image_url` | `video_url` | 再生時間 |
+| 入力 | `image_url` | `video_url` | 長さ |
 |---|---|---|---|
-| `frame`、画像なし | 送信しない、または空配列 | 送信しない | `video_length` `"4"` / `"6"` / `"8"` / `"10"` |
-| `frame` | 1枚 | 送信しない | 同上 |
-| `reference`、画像なし | 送信しない、または空配列 | 送信しない | 同上 |
-| `reference` | 1枚または3枚 | 送信しない | 同上 |
-| `reference` | 0、1、または3枚 | 1本、最長10秒 | `video_length` を送信せず、元動画に従う |
+| テキスト生成 | 送らない、または空配列 | 送らない | `video_length` `"4"` / `"6"` / `"8"` / `"10"` |
+| 参照画像 | 1–7 枚（2 枚可） | 送らない | 同上 |
+| 参照動画 | 送らない、または空配列 | 1 本、最大 10 秒 | `video_length` を送らず、ソース動画に従う |
+| 画像 + 動画 | 最大 5 枚（画像数 + 2 ≤ 7） | 1 本、最大 10 秒 | `video_length` を送らず、ソース動画に従う |
 
 ## Request Examples
 
 <RequestExample>
-  ```bash cURL（テキスト生成、最初のフレーム）
+  ```bash cURL（テキスト生成、1.0）
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
@@ -185,8 +172,7 @@ curl --request POST \
     --data '{
       "model": "gemini_omni_flash_ext",
       "params": {
-        "prompt": "陽光の庭で女の子が楽しそうに踊っている、映画のような雰囲気",
-        "type": "frame",
+        "prompt": "日差しの庭で嬉しそうに踊る少女、シネマティック",
         "resolution": "720p",
         "aspect_ratio": "16:9",
         "video_length": "6"
@@ -195,26 +181,28 @@ curl --request POST \
     }'
   ```
 
-  ```bash cURL（最初のフレーム、1枚の画像）
+  ```bash cURL（参照画像 2 枚、1.1）
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
-      "model": "gemini_omni_flash_ext",
+      "model": "gemini_omni_1_1_flash_ext",
       "params": {
-        "prompt": "人物がゆっくり振り向いて微笑み、カメラが少し前進する",
-        "type": "frame",
-        "image_url": ["https://example.com/first-frame.jpg"],
+        "prompt": "2枚の参照画像の人物と服装を保ったまま、庭を歩く",
+        "image_url": [
+          "https://example.com/ref-1.jpg",
+          "https://example.com/ref-2.jpg"
+        ],
         "resolution": "1080p",
         "aspect_ratio": "16:9",
         "video_length": "6"
       },
-      "out_task_id": "omni_ext_frame_123456"
+      "out_task_id": "omni_11_img2_123456"
     }'
   ```
 
-  ```bash cURL（Reference、3枚の画像）
+  ```bash cURL（参照動画）
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
@@ -222,36 +210,30 @@ curl --request POST \
     --data '{
       "model": "gemini_omni_flash_ext",
       "params": {
-        "prompt": "3枚の参考画像の人物と衣装を維持しながら、庭を歩く",
-        "type": "reference",
-        "image_url": [
-          "https://example.com/ref-1.jpg",
-          "https://example.com/ref-2.jpg",
-          "https://example.com/ref-3.jpg"
-        ],
-        "resolution": "1080p",
-        "aspect_ratio": "16:9",
-        "video_length": "8"
-      },
-      "out_task_id": "omni_ext_refs_123456"
-    }'
-  ```
-
-  ```bash cURL（Reference、参考動画）
-  curl --request POST \
-    --url https://aireiter.com/api/openapi/submit \
-    --header 'Authorization: Bearer <token>' \
-    --header 'Content-Type: application/json' \
-    --data '{
-      "model": "gemini_omni_flash_ext",
-      "params": {
-        "prompt": "参考動画の主体とカメラワークを維持し、よりクリーンなライティングにする",
-        "type": "reference",
+        "prompt": "参照動画の被写体とカメラワークを保ち、光をよりクリーンに",
         "video_url": ["https://example.com/reference.mp4"],
         "resolution": "4K",
         "aspect_ratio": "16:9"
       },
       "out_task_id": "omni_ext_v2v_123456"
+    }'
+  ```
+
+  ```bash cURL（画像 + 参照動画）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gemini_omni_1_1_flash_ext",
+      "params": {
+        "prompt": "参照画像の人物を使い、参照動画のカメラワークに従う",
+        "image_url": ["https://example.com/ref-1.jpg"],
+        "video_url": ["https://example.com/reference.mp4"],
+        "resolution": "720p",
+        "aspect_ratio": "16:9"
+      },
+      "out_task_id": "omni_11_img_v2v_123456"
     }'
   ```
 
@@ -263,8 +245,7 @@ curl --request POST \
   payload = {
       "model": "gemini_omni_flash_ext",
       "params": {
-          "prompt": "陽光の庭で女の子が楽しそうに踊っている、映画のような雰囲気",
-          "type": "frame",
+          "prompt": "日差しの庭で嬉しそうに踊る少女、シネマティック",
           "resolution": "720p",
           "aspect_ratio": "16:9",
           "video_length": "6"
@@ -288,8 +269,7 @@ curl --request POST \
   const payload = {
     model: "gemini_omni_flash_ext",
     params: {
-      prompt: "陽光の庭で女の子が楽しそうに踊っている、映画のような雰囲気",
-      type: "frame",
+      prompt: "日差しの庭で嬉しそうに踊る少女、シネマティック",
       resolution: "720p",
       aspect_ratio: "16:9",
       video_length: "6"
@@ -309,7 +289,7 @@ curl --request POST \
   })
     .then(response => response.json())
     .then(data => console.log(data))
-    .catch(error => console.error('エラー:', error));
+    .catch(error => console.error('Error:', error));
   ```
 
   ```go Go
@@ -329,8 +309,7 @@ curl --request POST \
       payload := map[string]interface{}{
           "model": "gemini_omni_flash_ext",
           "params": map[string]interface{}{
-              "prompt":       "陽光の庭で女の子が楽しそうに踊っている、映画のような雰囲気",
-              "type":         "frame",
+              "prompt":       "日差しの庭で嬉しそうに踊る少女、シネマティック",
               "resolution":   "720p",
               "aspect_ratio": "16:9",
               "video_length": "6",
@@ -370,8 +349,7 @@ curl --request POST \
               {
                 "model": "gemini_omni_flash_ext",
                 "params": {
-                  "prompt": "陽光の庭で女の子が楽しそうに踊っている、映画のような雰囲気",
-                  "type": "frame",
+                  "prompt": "日差しの庭で嬉しそうに踊る少女、シネマティック",
                   "resolution": "720p",
                   "aspect_ratio": "16:9",
                   "video_length": "6"
@@ -404,8 +382,7 @@ curl --request POST \
   $payload = [
       "model" => "gemini_omni_flash_ext",
       "params" => [
-          "prompt" => "陽光の庭で女の子が楽しそうに踊っている、映画のような雰囲気",
-          "type" => "frame",
+          "prompt" => "日差しの庭で嬉しそうに踊る少女、シネマティック",
           "resolution" => "720p",
           "aspect_ratio" => "16:9",
           "video_length" => "6"

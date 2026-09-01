@@ -219,7 +219,7 @@
                 ]
               },
               {
-                "group": "Gemini Omni Flash Ext",
+                "group": "Gemini Omni Flash Ext / 1.1",
                 "icon": "video",
                 "pages": [
                   "zh/api-reference/videos/gemini-omni-flash-ext/generation"
@@ -589,7 +589,7 @@
                 ]
               },
               {
-                "group": "Gemini Omni Flash Ext",
+                "group": "Gemini Omni Flash Ext / 1.1",
                 "icon": "video",
                 "pages": [
                   "en/api-reference/videos/gemini-omni-flash-ext/generation"
@@ -959,7 +959,7 @@
                 ]
               },
               {
-                "group": "Gemini Omni Flash Ext",
+                "group": "Gemini Omni Flash Ext / 1.1",
                 "icon": "video",
                 "pages": [
                   "ja/api-reference/videos/gemini-omni-flash-ext/generation"
@@ -1329,7 +1329,7 @@
                 ]
               },
               {
-                "group": "Gemini Omni Flash Ext",
+                "group": "Gemini Omni Flash Ext / 1.1",
                 "icon": "video",
                 "pages": [
                   "ko/api-reference/videos/gemini-omni-flash-ext/generation"
@@ -1492,6 +1492,22 @@
     ]
   },
   "redirects": [
+    {
+      "source": "/zh/api-reference/videos/gemini-omni-1-1-flash-ext/generation",
+      "destination": "/zh/api-reference/videos/gemini-omni-flash-ext/generation"
+    },
+    {
+      "source": "/en/api-reference/videos/gemini-omni-1-1-flash-ext/generation",
+      "destination": "/en/api-reference/videos/gemini-omni-flash-ext/generation"
+    },
+    {
+      "source": "/ja/api-reference/videos/gemini-omni-1-1-flash-ext/generation",
+      "destination": "/ja/api-reference/videos/gemini-omni-flash-ext/generation"
+    },
+    {
+      "source": "/ko/api-reference/videos/gemini-omni-1-1-flash-ext/generation",
+      "destination": "/ko/api-reference/videos/gemini-omni-flash-ext/generation"
+    },
     {
       "source": "/zh/api-reference/videos/sora2/generation",
       "destination": "/zh/api-reference/videos/veo3-1/generation"

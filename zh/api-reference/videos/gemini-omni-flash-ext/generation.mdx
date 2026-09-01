@@ -1,9 +1,9 @@
 ---
 title: 'Gemini Omni Flash Ext 视频生成'
 description: |
-  - AIReiter 上独立的 Omni Flash 视频 SKU
+  - 同一套参数，两个模型 ID：`gemini_omni_flash_ext`（1.0）和 `gemini_omni_1_1_flash_ext`（1.1）
   - 异步处理模式，返回任务 ID 用于后续查询
-  - 两种生成类型：First Frame（`frame`）和 Reference（`reference`）
+  - 支持文生、最多 7 张参考图、可选 1 段参考视频；图和视频可以同时传
   - 支持 720p / 1080p / 4K，时长仅 4 / 6 / 8 / 10 秒
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
@@ -11,9 +11,10 @@ api: 'POST https://aireiter.com/api/openapi/submit'
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 <Note>
-Gemini Omni Flash Ext 在 AIReiter 中的模型名称为 `gemini_omni_flash_ext`。
+1.0 和 1.1 共用本页参数。换模型只改 `model` 字段。
 
-它不是本站官方 Omni Flash SKU（`gemini_omni_flash_preview`，输出 720p）。本页 SKU 输出 720p / 1080p / 4K，时长只有 4、6、8、10 秒。
+* `gemini_omni_flash_ext` — Gemini Omni Flash Ext（1.0）
+* `gemini_omni_1_1_flash_ext` — Gemini Omni 1.1 Flash Ext
 </Note>
 
 ## Authorizations
@@ -35,9 +36,12 @@ Gemini Omni Flash Ext 在 AIReiter 中的模型名称为 `gemini_omni_flash_ext`
 ## Body
 
 <ParamField body="model" type="string" required>
-  模型名称，固定使用：
+  模型名称，二选一：
 
   * `gemini_omni_flash_ext`
+  * `gemini_omni_1_1_flash_ext`
+
+  参数字段相同，不要再传 `type`。
 </ParamField>
 
 <ParamField body="params" type="object" required>
@@ -46,19 +50,6 @@ Gemini Omni Flash Ext 在 AIReiter 中的模型名称为 `gemini_omni_flash_ext`
   <Expandable title="params 对象属性">
     <ParamField body="prompt" type="string" required>
       视频生成的文本描述。必填。
-    </ParamField>
-
-    <ParamField body="type" type="string" default="frame">
-      生成类型。只接受下面两个值：
-
-      * `frame` - First Frame。提示词加 0 或 1 张图。不能传参考视频
-      * `reference` - Reference。提示词加 0、1 或 3 张图，可选 1 段参考视频
-
-      不传图就是文生视频，两种类型都可以。
-
-      <Warning>
-        不要传 `type=text`。`frame` 不能和 `video_url` 一起传。
-      </Warning>
     </ParamField>
 
     <ParamField body="video_length" type="string" default="6">
@@ -82,6 +73,8 @@ Gemini Omni Flash Ext 在 AIReiter 中的模型名称为 `gemini_omni_flash_ext`
       * `720p` - 默认值
       * `1080p`
       * `4K`
+
+      720p 与 1080p 同价，4K 更贵。
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="16:9">
@@ -92,20 +85,16 @@ Gemini Omni Flash Ext 在 AIReiter 中的模型名称为 `gemini_omni_flash_ext`
     </ParamField>
 
     <ParamField body="image_url" type="string | string[]">
-      图片 URL，必须可由公网直接访问。也可传单张字符串。
+      参考图 URL，必须可由公网直接访问。也可传单张字符串。不传就是文生视频。
 
-      * `frame` - 可选 0 或 1 张，作为首帧。不传就是文生
-      * `reference` - 可选 0、1 或 3 张。不传就是文生
+      * 最多 7 张，**允许 2 张**
+      * 短边不小于 300px，单张不超过 10MB
 
-      图片要求：短边不小于 300px，单张不超过 10MB。
-
-      <Warning>
-        不支持 2 张图。`reference` 传 2 张会返回 `Invalid image_url count. Allowed: [1, 3]`。也不要传 4 张及以上。
-      </Warning>
+      与参考视频同时传时，图片数 + 2 必须 ≤ 7。
     </ParamField>
 
     <ParamField body="video_url" type="string | string[]">
-      参考视频 URL。仅 `type=reference` 有效，最多 1 段。也可传单段字符串。
+      参考视频 URL，可选，最多 1 段。也可传单段字符串。可以和参考图一起传。
 
       视频要求：
 
@@ -114,9 +103,7 @@ Gemini Omni Flash Ext 在 AIReiter 中的模型名称为 `gemini_omni_flash_ext`
       * 不超过 100MB
       * 短边不小于 300px
 
-      传入参考视频时不要传 `video_length`，输出时长跟随上传视频，最长 10 秒。
-
-      <Warning>`type=frame` 请勿传入此参数，接口会直接拒绝。</Warning>
+      传入参考视频时不要传 `video_length`，输出时长跟随上传视频，最长 10 秒。参考视频按 2 个名额计入 7 槽配额。
     </ParamField>
   </Expandable>
 </ParamField>
@@ -147,7 +134,7 @@ Gemini Omni Flash Ext 在 AIReiter 中的模型名称为 `gemini_omni_flash_ext`
 
 ## Query Task
 
-Gemini Omni Flash Ext 是异步视频生成模型。提交任务后，请使用 `out_task_id` 查询任务状态。也可参见 [获取任务状态](/zh/api-reference/tasks/status)。
+这两个模型都是异步视频生成。提交任务后，请使用 `out_task_id` 查询任务状态。也可参见 [获取任务状态](/zh/api-reference/tasks/status)。
 
 <ParamField body="out_task_id" type="string" required>
   提交任务时传入的发起方任务 ID。
@@ -165,20 +152,19 @@ curl --request POST \
 
 查询成功并完成后，响应中的 `output` 数组会包含生成的视频，元素含 `video` 字段。
 
-## 模式参数对照
+## 参数对照
 
-| `type` | `image_url` | `video_url` | 时长 |
+| 输入 | `image_url` | `video_url` | 时长 |
 |---|---|---|---|
-| `frame`，不传图 | 不要传，或空数组 | 不要传 | `video_length` `"4"` / `"6"` / `"8"` / `"10"` |
-| `frame` | 1 张 | 不要传 | 同上 |
-| `reference`，不传图 | 不要传，或空数组 | 不要传 | 同上 |
-| `reference` | 1 张或 3 张 | 不要传 | 同上 |
-| `reference` | 0、1 或 3 张 | 1 段，最长 10 秒 | 不要传 `video_length`，跟随片源 |
+| 文生 | 不要传，或空数组 | 不要传 | `video_length` `"4"` / `"6"` / `"8"` / `"10"` |
+| 参考图 | 1–7 张（含 2 张） | 不要传 | 同上 |
+| 参考视频 | 不要传，或空数组 | 1 段，最长 10 秒 | 不要传 `video_length`，跟随片源 |
+| 图 + 视频 | 最多 5 张（图片数 + 2 ≤ 7） | 1 段，最长 10 秒 | 不要传 `video_length`，跟随片源 |
 
 ## Request Examples
 
 <RequestExample>
-  ```bash cURL（文生，First Frame）
+  ```bash cURL（文生，1.0）
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
@@ -187,7 +173,6 @@ curl --request POST \
       "model": "gemini_omni_flash_ext",
       "params": {
         "prompt": "一个女孩在阳光花园里高兴地跳舞，电影感",
-        "type": "frame",
         "resolution": "720p",
         "aspect_ratio": "16:9",
         "video_length": "6"
@@ -196,49 +181,28 @@ curl --request POST \
     }'
   ```
 
-  ```bash cURL（首帧 1 张图）
+  ```bash cURL（2 张参考图，1.1）
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
-      "model": "gemini_omni_flash_ext",
+      "model": "gemini_omni_1_1_flash_ext",
       "params": {
-        "prompt": "人物缓缓转头微笑，镜头轻微推进",
-        "type": "frame",
-        "image_url": ["https://example.com/first-frame.jpg"],
+        "prompt": "保持两张参考图的人物和服装，在花园里走路",
+        "image_url": [
+          "https://example.com/ref-1.jpg",
+          "https://example.com/ref-2.jpg"
+        ],
         "resolution": "1080p",
         "aspect_ratio": "16:9",
         "video_length": "6"
       },
-      "out_task_id": "omni_ext_frame_123456"
+      "out_task_id": "omni_11_img2_123456"
     }'
   ```
 
-  ```bash cURL（Reference，3 张图）
-  curl --request POST \
-    --url https://aireiter.com/api/openapi/submit \
-    --header 'Authorization: Bearer <token>' \
-    --header 'Content-Type: application/json' \
-    --data '{
-      "model": "gemini_omni_flash_ext",
-      "params": {
-        "prompt": "保持三张参考图的人物和服装，在花园里走路",
-        "type": "reference",
-        "image_url": [
-          "https://example.com/ref-1.jpg",
-          "https://example.com/ref-2.jpg",
-          "https://example.com/ref-3.jpg"
-        ],
-        "resolution": "1080p",
-        "aspect_ratio": "16:9",
-        "video_length": "8"
-      },
-      "out_task_id": "omni_ext_refs_123456"
-    }'
-  ```
-
-  ```bash cURL（Reference，参考视频）
+  ```bash cURL（参考视频）
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
@@ -247,12 +211,29 @@ curl --request POST \
       "model": "gemini_omni_flash_ext",
       "params": {
         "prompt": "保持参考视频的主体和运镜，光线更干净",
-        "type": "reference",
         "video_url": ["https://example.com/reference.mp4"],
         "resolution": "4K",
         "aspect_ratio": "16:9"
       },
       "out_task_id": "omni_ext_v2v_123456"
+    }'
+  ```
+
+  ```bash cURL（图 + 参考视频）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gemini_omni_1_1_flash_ext",
+      "params": {
+        "prompt": "用参考图里的人物，跟随参考视频的运镜",
+        "image_url": ["https://example.com/ref-1.jpg"],
+        "video_url": ["https://example.com/reference.mp4"],
+        "resolution": "720p",
+        "aspect_ratio": "16:9"
+      },
+      "out_task_id": "omni_11_img_v2v_123456"
     }'
   ```
 
@@ -265,7 +246,6 @@ curl --request POST \
       "model": "gemini_omni_flash_ext",
       "params": {
           "prompt": "一个女孩在阳光花园里高兴地跳舞，电影感",
-          "type": "frame",
           "resolution": "720p",
           "aspect_ratio": "16:9",
           "video_length": "6"
@@ -290,7 +270,6 @@ curl --request POST \
     model: "gemini_omni_flash_ext",
     params: {
       prompt: "一个女孩在阳光花园里高兴地跳舞，电影感",
-      type: "frame",
       resolution: "720p",
       aspect_ratio: "16:9",
       video_length: "6"
@@ -331,7 +310,6 @@ curl --request POST \
           "model": "gemini_omni_flash_ext",
           "params": map[string]interface{}{
               "prompt":       "一个女孩在阳光花园里高兴地跳舞，电影感",
-              "type":         "frame",
               "resolution":   "720p",
               "aspect_ratio": "16:9",
               "video_length": "6",
@@ -372,7 +350,6 @@ curl --request POST \
                 "model": "gemini_omni_flash_ext",
                 "params": {
                   "prompt": "一个女孩在阳光花园里高兴地跳舞，电影感",
-                  "type": "frame",
                   "resolution": "720p",
                   "aspect_ratio": "16:9",
                   "video_length": "6"
@@ -406,7 +383,6 @@ curl --request POST \
       "model" => "gemini_omni_flash_ext",
       "params" => [
           "prompt" => "一个女孩在阳光花园里高兴地跳舞，电影感",
-          "type" => "frame",
           "resolution" => "720p",
           "aspect_ratio" => "16:9",
           "video_length" => "6"
