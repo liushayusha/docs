@@ -1,0 +1,377 @@
+---
+title: 'GPT-Image-2.5 Image Generation'
+description: |
+    - Asynchronous processing mode, returns a task ID for subsequent querying
+    - OpenAI GPT-Image 2.5 family: Flare (faster daily tier) and Sunburst (more stable editing tier)
+    - Supports text-to-image / image-to-image / reference image editing, with up to 10 reference images
+    - Supports 14 aspect ratios (including auto), passed via aspect_ratio
+    - Supports resolution tiers 1K / 2K / 4K, as well as API-specific size custom pixels
+    - Supports background: `auto` / `opaque` / `transparent` (transparent background returns PNG)
+    - quality / output_n are not available on this page; each request returns 1 image
+    - Submitted prompts undergo platform sensitive word / safety moderation; non-compliant content will be directly rejected
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  All endpoints require authentication using a Bearer Token.
+
+  Get an API key:
+
+  Visit the <a href={apiKeyUrl} target="_blank">API Key Management page</a> to get your API key.
+
+  Add to the request header when using:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  Model name, choose one of two:
+
+  * `"gpt_image_2_5_flare"` — Flare, faster for daily text-to-image / image editing
+  * `"gpt_image_2_5_sunburst"` — Sunburst, more emphasis on editing fidelity (characters, layout, product appearance)
+
+  There is no bare `gpt-image-2.5` ID. When comparing the two tiers, please keep the prompt, reference images, aspect ratio, and resolution unchanged.
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  Model parameter object
+
+  <Expandable title="params Object Properties">
+    <ParamField body="prompt" type="string" required>
+      Text description for image generation
+
+      * Supports Chinese and English; detailed descriptions are recommended
+      * When editing images, clearly specify what to change and what must remain unchanged
+      * Submissions will undergo platform sensitive word / safety review before processing; violating content will return an error directly
+    </ParamField>
+
+    <ParamField body="image_url" type="string[]">
+      Reference image array; if provided, enters image-to-image / editing mode
+
+      * Up to 10 reference images
+      * If omitted, pure text-to-image mode is used
+      * Supports the following two formats:
+        1. Publicly accessible URL
+        2. Base64 encoding format
+           * Must use the full Data URI format: `data:image/{format};base64,{base64_data}`
+           * Supported image formats: jpeg, png, webp
+           * Example: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+           * ⚠️ Note: Must include the `data:image/jpeg;base64,` prefix
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="auto">
+      Aspect ratio for image generation, default `auto`
+
+      Supports the following values:
+
+      * `auto` - Automatically select the most appropriate aspect ratio
+      * `1:1` - Square
+      * `16:9` / `9:16` - Widescreen landscape / portrait
+      * `4:3` / `3:4` - Standard landscape / portrait
+      * `3:2` / `2:3` - Classic landscape / portrait
+      * `5:4` / `4:5` - Near-square landscape / portrait
+      * `2:1` / `1:2` - Wide landscape / tall portrait
+      * `21:9` / `9:21` - Ultra-wide landscape / ultra-tall portrait
+
+      <Warning>
+        Only aspect ratio strings or `auto` are supported; passing pixel dimensions (e.g., `1024x1024`) will directly result in an error. Use `size` for precise pixels.
+      </Warning>
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="1K">
+      Resolution tier, default `1K`
+
+      * `1K` - Approx. 1024 baseline
+      * `2K` - Approx. 2048 baseline
+      * `4K` - Approx. 3840 baseline
+
+      <Warning>
+        Do not pass `resolution` / `aspect_ratio` when passing `size`, otherwise a 400 error is returned.
+      </Warning>
+    </ParamField>
+
+    <ParamField body="size" type="string">
+      Custom pixel dimensions (API only, **mutually exclusive** with `aspect_ratio` / `resolution`)
+
+      Format is `widthxheight`, e.g., `2048x1536`, `3840x2160`.
+
+      **Limitations:**
+
+      * Format must be `^\d+x\d+$`
+      * Both width and height must be multiples of 16
+      * Neither side can exceed 3840
+      * Ratio of longer side / shorter side cannot exceed 3:1
+      * Total pixels (width × height) between **655,360 ~ 8,294,400**
+      * Mutually exclusive with `aspect_ratio` and `resolution`; passing them together returns 400
+    </ParamField>
+
+    <ParamField body="background" type="string" default="auto">
+      Image output background, default `auto`
+
+      * `auto` - Model determines whether it is transparent
+      * `opaque` - Opaque background
+      * `transparent` - Transparent background, returns PNG with alpha channel
+
+      <Warning>
+        When selecting `transparent`, the platform will automatically output in PNG format, no need to pass `output_format`. `output_format` is not available on this page.
+      </Warning>
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  Caller Task ID
+
+  User-defined task identifier, required. Use the same value to call `POST /api/openapi/query` when querying results.
+</ParamField>
+
+## Size × Resolution Mapping Table
+
+`aspect_ratio × resolution` → Actual pixels (`auto` is automatically selected by the model and is not listed in the table):
+
+| aspect\_ratio | `1K`      | `2K`      | `4K`      |
+| ------------- | --------- | --------- | --------- |
+| `1:1`         | 1024×1024 | 2048×2048 | 2880×2880 |
+| `3:2`         | 1536×1024 | 2048×1360 | 3520×2336 |
+| `2:3`         | 1024×1536 | 1360×2048 | 2336×3520 |
+| `4:3`         | 1024×768  | 2048×1536 | 3312×2480 |
+| `3:4`         | 768×1024  | 1536×2048 | 2480×3312 |
+| `5:4`         | 1280×1024 | 2560×2048 | 3216×2576 |
+| `4:5`         | 1024×1280 | 2048×2560 | 2576×3216 |
+| `16:9`        | 1536×864  | 2048×1152 | 3840×2160 |
+| `9:16`        | 864×1536  | 1152×2048 | 2160×3840 |
+| `2:1`         | 2048×1024 | 2688×1344 | 3840×1920 |
+| `1:2`         | 1024×2048 | 1344×2688 | 1920×3840 |
+| `21:9`        | 2016×864  | 2688×1152 | 3840×1648 |
+| `9:21`        | 864×2016  | 1152×2688 | 1648×3840 |
+
+> `3:2` / `2:3` @ 2K is actually 2048×1360 (approximate ratio). If you need aspect ratios not listed in the table, please use `size`.
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  Caller task ID, used for querying results
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Initial status, fixed as `"pending"`
+</ResponseField>
+
+<ResponseField name="estimated_credits" type="number">
+  Estimated credit cost
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  Creation time (ISO format)
+</ResponseField>
+
+To query the completion status, use `POST https://aireiter.com/api/openapi/query` with the same `out_task_id`. Failed tasks will not deduct credits.
+
+<RequestExample>
+  ```bash cURL (Flare + aspect_ratio)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gpt_image_2_5_flare",
+      "params": {
+        "prompt": "An orange cat sitting on a windowsill watching the sunset, watercolor style",
+        "aspect_ratio": "16:9",
+        "resolution": "1K"
+      },
+      "out_task_id": "my_task_123456"
+    }'
+  ```
+
+  ```bash cURL (Sunburst + reference image)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gpt_image_2_5_sunburst",
+      "params": {
+        "prompt": "Only change the bottle cap to gold, keep the rest of the image unchanged",
+        "image_url": ["https://example.com/product.png"],
+        "aspect_ratio": "1:1",
+        "resolution": "2K"
+      },
+      "out_task_id": "my_task_edit_001"
+    }'
+  ```
+
+  ```bash cURL (size custom dimensions)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gpt_image_2_5_flare",
+      "params": {
+        "prompt": "An orange cat sitting on a windowsill watching the sunset, watercolor style",
+        "size": "2048x1152"
+      },
+      "out_task_id": "my_task_size_001"
+    }'
+  ```
+
+  ```bash cURL (transparent background)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gpt_image_2_5_flare",
+      "params": {
+        "prompt": "An orange cat sitting on a windowsill watching the sunset, watercolor style",
+        "aspect_ratio": "1:1",
+        "resolution": "1K",
+        "background": "transparent"
+      },
+      "out_task_id": "my_task_bg_001"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "gpt_image_2_5_flare",
+      "params": {
+          "prompt": "An orange cat sitting on a windowsill watching the sunset, watercolor style",
+          "aspect_ratio": "16:9",
+          "resolution": "1K"
+      },
+      "out_task_id": "my_task_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "gpt_image_2_5_flare",
+    params: {
+      prompt: "An orange cat sitting on a windowsill watching the sunset, watercolor style",
+      aspect_ratio: "16:9",
+      resolution: "1K"
+    },
+    out_task_id: "my_task_123456"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer <token>",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  })
+    .then((response) => response.json())
+    .then((data) => console.log(data));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+      payload := map[string]interface{}{
+          "model": "gpt_image_2_5_flare",
+          "params": map[string]interface{}{
+              "prompt":       "An orange cat sitting on a windowsill watching the sunset, watercolor style",
+              "aspect_ratio": "16:9",
+              "resolution":   "1K",
+          },
+          "out_task_id": "my_task_123456",
+      }
+      jsonData, _ := json.Marshal(payload)
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+      resp, err := http.DefaultClient.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+      body, _ := io.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+  {
+      "statusCode": 200,
+      "message": "",
+      "data": {
+          "out_task_id": "my_task_123456",
+          "status": "pending",
+          "estimated_credits": 2,
+          "created_at": "2026-09-09T06:00:00.000Z"
+      }
+  }
+  ```
+
+  ```json 400
+  {
+      "statusCode": 400,
+      "message": "Invalid request parameters",
+      "ok": false
+  }
+  ```
+
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "Authentication failed, please check your API key"
+    }
+  }
+  ```
+
+  ```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "Insufficient account balance, please top up and try again"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "Internal server error, please try again later"
+    }
+  }
+  ```
+</ResponseExample>

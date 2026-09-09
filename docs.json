@@ -60,6 +60,13 @@
                 ]
               },
               {
+                "group": "GPT-Image-2.5",
+                "icon": "image",
+                "pages": [
+                  "zh/api-reference/images/gpt-image-2-5/generation"
+                ]
+              },
+              {
                 "group": "Qwen Image 3.0",
                 "icon": "image",
                 "pages": [
@@ -426,6 +433,13 @@
                 "pages": [
                   "en/api-reference/images/gpt-image-2/generation",
                   "en/api-reference/images/gpt-image-2-official/generation"
+                ]
+              },
+              {
+                "group": "GPT-Image-2.5",
+                "icon": "image",
+                "pages": [
+                  "en/api-reference/images/gpt-image-2-5/generation"
                 ]
               },
               {
@@ -799,6 +813,13 @@
                 ]
               },
               {
+                "group": "GPT-Image-2.5",
+                "icon": "image",
+                "pages": [
+                  "ja/api-reference/images/gpt-image-2-5/generation"
+                ]
+              },
+              {
                 "group": "Qwen Image 3.0",
                 "icon": "image",
                 "pages": [
@@ -1166,6 +1187,13 @@
                 "pages": [
                   "ko/api-reference/images/gpt-image-2/generation",
                   "ko/api-reference/images/gpt-image-2-official/generation"
+                ]
+              },
+              {
+                "group": "GPT-Image-2.5",
+                "icon": "image",
+                "pages": [
+                  "ko/api-reference/images/gpt-image-2-5/generation"
                 ]
               },
               {

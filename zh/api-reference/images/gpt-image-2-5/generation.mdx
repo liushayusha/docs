@@ -1,0 +1,378 @@
+---
+title: 'GPT-Image-2.5 图片生成'
+description: |
+    - 异步处理模式，返回任务 ID 用于后续查询
+    - OpenAI GPT-Image 2.5 家族：Flare（更快日常档）与 Sunburst（更稳编辑档）
+    - 支持文生图 / 图生图 / 参考图编辑，参考图最多 10 张
+    - 支持 14 种比例（含 auto），通过 aspect_ratio 传入
+    - 支持 resolution 档位 1K / 2K / 4K，以及 API 专用 size 自定义像素
+    - 支持 background：`auto` / `opaque` / `transparent`（透明背景返回 PNG）
+    - 本页不开放 quality / output_n；每次请求返回 1 张图
+    - 提交的 prompt 会经过平台敏感词 / 安全审核，违规内容会被直接拒绝
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  所有接口均需要使用 Bearer Token 进行认证
+
+  获取 API Key：
+
+  访问 <a href={apiKeyUrl} target="_blank">API Key 管理页面</a> 获取您的 API Key
+
+  使用时在请求头中添加：
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  模型名称，二选一：
+
+  * `"gpt_image_2_5_flare"` — Flare，更快的日常文生图 / 改图
+  * `"gpt_image_2_5_sunburst"` — Sunburst，更强调编辑保真（人物、版式、产品外形）
+
+  没有裸的 `gpt-image-2.5` ID。对比两个档位时请保持 prompt、参考图、比例和分辨率不变。
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  模型参数对象
+
+  <Expandable title="params 对象属性">
+    <ParamField body="prompt" type="string" required>
+      图像生成的文本描述
+
+      * 支持中英文，建议详细描述
+      * 改图时写清要改什么、哪些必须保持不变
+      * 提交前会经过平台敏感词 / 安全审核，命中违规内容会直接返回错误
+    </ParamField>
+
+    <ParamField body="image_url" type="string[]">
+      参考图数组，传入后走图生图 / 编辑模式
+
+      * 最多 10 张参考图
+      * 不传则走纯文生图
+      * 支持以下两种格式：
+        1. 公开可访问的 URL
+        2. Base64 编码格式
+           * 必须使用完整的 Data URI 格式：`data:image/{格式};base64,{base64数据}`
+           * 支持的图片格式：jpeg、png、webp
+           * 示例：`data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+           * ⚠️ 注意：必须包含 `data:image/jpeg;base64,` 前缀部分
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="auto">
+      图像生成的比例，默认 `auto`
+
+      支持以下取值：
+
+      * `auto` - 自动选择最合适的比例
+      * `1:1` - 正方形
+      * `16:9` / `9:16` - 宽屏横 / 竖
+      * `4:3` / `3:4` - 标屏横 / 竖
+      * `3:2` / `2:3` - 经典横 / 竖
+      * `5:4` / `4:5` - 近方横 / 竖
+      * `2:1` / `1:2` - 宽横 / 长竖
+      * `21:9` / `9:21` - 超宽横 / 超长竖
+
+      <Warning>
+        仅支持比例字符串或 `auto`；传像素尺寸（如 `1024x1024`）会直接报错。需要精确像素请用 `size`。
+      </Warning>
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="1K">
+      分辨率档位，默认 `1K`
+
+      * `1K` - 约 1024 基准
+      * `2K` - 约 2048 基准
+      * `4K` - 约 3840 基准
+
+      <Warning>
+        传入 `size` 时不要再传 `resolution` / `aspect_ratio`，否则返回 400。
+      </Warning>
+    </ParamField>
+
+    <ParamField body="size" type="string">
+      自定义像素尺寸（仅 API，与 `aspect_ratio` / `resolution` **互斥**）
+
+      格式为 `宽x高`，例如 `2048x1536`、`3840x2160`。
+
+      **使用限制：**
+
+      * 格式必须为 `^\d+x\d+$`
+      * 宽、高均为 16 的倍数
+      * 每边不超过 3840
+      * 长边 / 短边不超过 3:1
+      * 总像素（宽 × 高）在 **655,360 ~ 8,294,400**
+      * 与 `aspect_ratio`、`resolution` 互斥，同时传入返回 400
+    </ParamField>
+
+    <ParamField body="background" type="string" default="auto">
+      出图背景，默认 `auto`
+
+      * `auto` - 由模型决定是否透明
+      * `opaque` - 不透明背景
+      * `transparent` - 透明背景，返回带 alpha 的 PNG
+
+      <Warning>
+        选 `transparent` 时平台会自动以 PNG 输出，无需传 `output_format`。本页不开放 `output_format`。
+      </Warning>
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  发起方任务 ID
+
+  用户自定义的任务标识，必填。查询结果时用同一个值调用 `POST /api/openapi/query`。
+</ParamField>
+
+## 尺寸 × 分辨率映射表
+
+`aspect_ratio × resolution` → 实际像素（`auto` 由模型自选，不在表内）：
+
+| aspect\_ratio | `1K`      | `2K`      | `4K`      |
+| ------------- | --------- | --------- | --------- |
+| `1:1`         | 1024×1024 | 2048×2048 | 2880×2880 |
+| `3:2`         | 1536×1024 | 2048×1360 | 3520×2336 |
+| `2:3`         | 1024×1536 | 1360×2048 | 2336×3520 |
+| `4:3`         | 1024×768  | 2048×1536 | 3312×2480 |
+| `3:4`         | 768×1024  | 1536×2048 | 2480×3312 |
+| `5:4`         | 1280×1024 | 2560×2048 | 3216×2576 |
+| `4:5`         | 1024×1280 | 2048×2560 | 2576×3216 |
+| `16:9`        | 1536×864  | 2048×1152 | 3840×2160 |
+| `9:16`        | 864×1536  | 1152×2048 | 2160×3840 |
+| `2:1`         | 2048×1024 | 2688×1344 | 3840×1920 |
+| `1:2`         | 1024×2048 | 1344×2688 | 1920×3840 |
+| `21:9`        | 2016×864  | 2688×1152 | 3840×1648 |
+| `9:21`        | 864×2016  | 1152×2688 | 1648×3840 |
+
+> `3:2` / `2:3` @ 2K 实际是 2048×1360（近似比例）。需要表外比例请用 `size`。
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  发起方任务 ID，可用于查询结果
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  初始状态，固定为 `"pending"`
+</ResponseField>
+
+<ResponseField name="estimated_credits" type="number">
+  预估消耗积分
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  创建时间（ISO 格式）
+</ResponseField>
+
+查询完成态请使用 `POST https://aireiter.com/api/openapi/query`，传入相同的 `out_task_id`。失败任务不扣积分。
+
+<RequestExample>
+  ```bash cURL（Flare + aspect_ratio）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gpt_image_2_5_flare",
+      "params": {
+        "prompt": "一只橘猫坐在窗台上看夕阳，水彩画风格",
+        "aspect_ratio": "16:9",
+        "resolution": "1K"
+      },
+      "out_task_id": "my_task_123456"
+    }'
+  ```
+
+  ```bash cURL（Sunburst + 参考图）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gpt_image_2_5_sunburst",
+      "params": {
+        "prompt": "只把瓶盖改成金色，其余画面保持不变",
+        "image_url": ["https://example.com/product.png"],
+        "aspect_ratio": "1:1",
+        "resolution": "2K"
+      },
+      "out_task_id": "my_task_edit_001"
+    }'
+  ```
+
+  ```bash cURL（size 自定义尺寸）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gpt_image_2_5_flare",
+      "params": {
+        "prompt": "一只橘猫坐在窗台上看夕阳，水彩画风格",
+        "size": "2048x1152"
+      },
+      "out_task_id": "my_task_size_001"
+    }'
+  ```
+
+  ```bash cURL（透明背景）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gpt_image_2_5_flare",
+      "params": {
+        "prompt": "一只橘猫坐在窗台上看夕阳，水彩画风格",
+        "aspect_ratio": "1:1",
+        "resolution": "1K",
+        "background": "transparent"
+      },
+      "out_task_id": "my_task_bg_001"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "gpt_image_2_5_flare",
+      "params": {
+          "prompt": "一只橘猫坐在窗台上看夕阳，水彩画风格",
+          "aspect_ratio": "16:9",
+          "resolution": "1K"
+      },
+      "out_task_id": "my_task_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "gpt_image_2_5_flare",
+    params: {
+      prompt: "一只橘猫坐在窗台上看夕阳，水彩画风格",
+      aspect_ratio: "16:9",
+      resolution: "1K"
+    },
+    out_task_id: "my_task_123456"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer <token>",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  })
+    .then((response) => response.json())
+    .then((data) => console.log(data));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+      payload := map[string]interface{}{
+          "model": "gpt_image_2_5_flare",
+          "params": map[string]interface{}{
+              "prompt":       "一只橘猫坐在窗台上看夕阳，水彩画风格",
+              "aspect_ratio": "16:9",
+              "resolution":   "1K",
+          },
+          "out_task_id": "my_task_123456",
+      }
+      jsonData, _ := json.Marshal(payload)
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+      resp, err := http.DefaultClient.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+      body, _ := io.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+  {
+      "statusCode": 200,
+      "message": "",
+      "data": {
+          "out_task_id": "my_task_123456",
+          "status": "pending",
+          "estimated_credits": 2,
+          "created_at": "2026-09-09T06:00:00.000Z"
+      }
+  }
+  ```
+
+  ```json 400
+  {
+      "statusCode": 400,
+      "message": "请求参数无效",
+      "ok": false
+  }
+  ```
+
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "身份验证失败，请检查您的API密钥"
+    }
+  }
+  ```
+
+  ```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "账户余额不足，请充值后再试"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "服务器内部错误，请稍后重试"
+    }
+  }
+  ```
+</ResponseExample>

@@ -1,0 +1,377 @@
+---
+title: 'GPT-Image-2.5 이미지 생성'
+description: |
+    - 비동기 처리 모드, 후속 조회를 위한 작업 ID 반환
+    - OpenAI GPT-Image 2.5 제품군: Flare(더 빠른 일상용) 및 Sunburst(더 안정적인 편집용)
+    - 텍스트 투 이미지 / 이미지 투 이미지 / 참조 이미지 편집 지원, 참조 이미지는 최대 10장
+    - 14가지 비율(auto 포함) 지원, aspect_ratio를 통해 전달
+    - resolution 옵션 1K / 2K / 4K 및 API 전용 size 사용자 지정 픽셀 지원
+    - background 지원: `auto` / `opaque` / `transparent`(투명 배경은 PNG 반환)
+    - 이 페이지에서는 quality / output_n이 지원되지 않으며, 요청당 1장의 이미지를 반환합니다
+    - 제출된 prompt는 플랫폼 민감어 / 안전 검토를 거치며, 규정 위반 콘텐츠는 즉시 거부됩니다
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  모든 API는 Bearer Token을 사용한 인증이 필요합니다
+
+  API Key 발급:
+
+  <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a>에 접속하여 API Key를 발급받으세요
+
+  사용 시 요청 헤더에 추가:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  모델 이름, 둘 중 하나 선택:
+
+  * `"gpt_image_2_5_flare"` — Flare, 더 빠른 일상 텍스트 투 이미지 / 이미지 수정
+  * `"gpt_image_2_5_sunburst"` — Sunburst, 편집 충실도(인물, 레이아웃, 제품 외형) 강조
+
+  단독 `gpt-image-2.5` ID는 없습니다. 두 모델 등급을 비교할 때는 prompt, 참조 이미지, 비율 및 해상도를 동일하게 유지하세요.
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  모델 파라미터 객체
+
+  <Expandable title="params 객체 속성">
+    <ParamField body="prompt" type="string" required>
+      이미지 생성을 위한 텍스트 설명
+
+      * 중국어 및 영어를 지원하며, 상세한 설명을 권장합니다
+      * 이미지 수정 시 변경할 내용과 반드시 유지해야 할 내용을 명확히 작성하세요
+      * 제출 전 플랫폼의 민감어 / 보안 검수를 거치며, 규정 위반 콘텐츠가 감지되면 즉시 오류가 반환됩니다
+    </ParamField>
+
+    <ParamField body="image_url" type="string[]">
+      참조 이미지 배열, 전달 시 이미지 투 이미지 / 편집 모드로 동작합니다
+
+      * 최대 10장의 참조 이미지
+      * 전달하지 않을 경우 순수 텍스트 투 이미지로 동작합니다
+      * 다음 두 가지 형식을 지원합니다:
+        1. 공개적으로 접근 가능한 URL
+        2. Base64 인코딩 형식
+           * 완전한 Data URI 형식을 사용해야 합니다: `data:image/{格式};base64,{base64数据}`
+           * 지원되는 이미지 형식: jpeg, png, webp
+           * 예시: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+           * ⚠️ 주의: 반드시 `data:image/jpeg;base64,` 접두사 부분을 포함해야 합니다
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="auto">
+      이미지 생성 비율, 기본값 `auto`
+
+      지원하는 값은 다음과 같습니다:
+
+      * `auto` - 가장 적합한 비율 자동 선택
+      * `1:1` - 정사각형
+      * `16:9` / `9:16` - 와이드스크린 가로 / 세로
+      * `4:3` / `3:4` - 표준 가로 / 세로
+      * `3:2` / `2:3` - 클래식 가로 / 세로
+      * `5:4` / `4:5` - 준정방 가로 / 세로
+      * `2:1` / `1:2` - 와이드 가로 / 롱 세로
+      * `21:9` / `9:21` - 울트라와이드 가로 / 울트라롱 세로
+
+      <Warning>
+        비율 문자열 또는 `auto`만 지원합니다. 픽셀 크기(예: `1024x1024`)를 전달하면 즉시 오류가 발생합니다. 정확한 픽셀이 필요한 경우 `size`를 사용하세요.
+      </Warning>
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="1K">
+      해상도 등급, 기본값 `1K`
+
+      * `1K` - 약 1024 기준
+      * `2K` - 약 2048 기준
+      * `4K` - 약 3840 기준
+
+      <Warning>
+        `size`를 전달할 때는 `resolution` / `aspect_ratio`를 함께 전달하지 마세요. 그렇지 않으면 400이 반환됩니다.
+      </Warning>
+    </ParamField>
+
+    <ParamField body="size" type="string">
+      사용자 정의 픽셀 크기(API 전용, `aspect_ratio` / `resolution`과 **상호 배타적**)
+
+      형식은 `宽x高`이며, 예: `2048x1536`, `3840x2160`입니다.
+
+      **사용 제한:**
+
+      * 형식은 반드시 `^\d+x\d+$`이어야 함
+      * 가로, 세로 모두 16의 배수
+      * 각 변은 3840을 초과할 수 없음
+      * 긴 변 / 짧은 변 비율 3:1 이하
+      * 총 픽셀(가로 × 세로)은 **655,360 ~ 8,294,400**
+      * `aspect_ratio`, `resolution`과 상호 배타적이며, 동시에 전달 시 400 반환
+    </ParamField>
+
+    <ParamField body="background" type="string" default="auto">
+      생성 이미지 배경, 기본값 `auto`
+
+      * `auto` - 모델이 투명 여부 결정
+      * `opaque` - 불투명 배경
+      * `transparent` - 투명 배경, 알파 채널이 포함된 PNG 반환
+
+      <Warning>
+        `transparent` 선택 시 플랫폼에서 자동으로 PNG로 출력하므로 `output_format`을 전달할 필요가 없습니다. 본 페이지에서는 `output_format`을 지원하지 않습니다.
+      </Warning>
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  요청 작업 ID
+
+  사용자 정의 작업 식별자이며, 필수 항목입니다. 결과 조회 시 동일한 값으로 `POST /api/openapi/query`를 호출합니다.
+</ParamField>
+
+## 尺寸 × 分辨率映射表
+
+`aspect_ratio × resolution` → 실제 픽셀(`auto`는 모델이 자동 선택하며 표에 포함되지 않음):
+
+| aspect\_ratio | `1K`      | `2K`      | `4K`      |
+| ------------- | --------- | --------- | --------- |
+| `1:1`         | 1024×1024 | 2048×2048 | 2880×2880 |
+| `3:2`         | 1536×1024 | 2048×1360 | 3520×2336 |
+| `2:3`         | 1024×1536 | 1360×2048 | 2336×3520 |
+| `4:3`         | 1024×768  | 2048×1536 | 3312×2480 |
+| `3:4`         | 768×1024  | 1536×2048 | 2480×3312 |
+| `5:4`         | 1280×1024 | 2560×2048 | 3216×2576 |
+| `4:5`         | 1024×1280 | 2048×2560 | 2576×3216 |
+| `16:9`        | 1536×864  | 2048×1152 | 3840×2160 |
+| `9:16`        | 864×1536  | 1152×2048 | 2160×3840 |
+| `2:1`         | 2048×1024 | 2688×1344 | 3840×1920 |
+| `1:2`         | 1024×2048 | 1344×2688 | 1920×3840 |
+| `21:9`        | 2016×864  | 2688×1152 | 3840×1648 |
+| `9:21`        | 864×2016  | 1152×2688 | 1648×3840 |
+
+> `3:2` / `2:3` @ 2K는 실제로 2048×1360(근사 비율)입니다. 표 외의 비율이 필요한 경우 `size`를 사용하세요.
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  요청자 작업 ID, 결과 조회에 사용 가능
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  초기 상태, `"pending"`으로 고정
+</ResponseField>
+
+<ResponseField name="estimated_credits" type="number">
+  예상 차감 크레딧
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  생성 시간(ISO 형식)
+</ResponseField>
+
+완료 상태를 조회하려면 동일한 `out_task_id`를 전달하여 `POST https://aireiter.com/api/openapi/query`를 사용하세요. 실패한 작업은 크레딧이 차감되지 않습니다.
+
+<RequestExample>
+  ```bash cURL(Flare + aspect_ratio)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gpt_image_2_5_flare",
+      "params": {
+        "prompt": "창가에 앉아 석양을 바라보는 치즈 고양이, 수채화 스타일",
+        "aspect_ratio": "16:9",
+        "resolution": "1K"
+      },
+      "out_task_id": "my_task_123456"
+    }'
+  ```
+
+  ```bash cURL(Sunburst + 참조 이미지)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gpt_image_2_5_sunburst",
+      "params": {
+        "prompt": "병뚜껑만 금색으로 변경하고 나머지 화면은 그대로 유지",
+        "image_url": ["https://example.com/product.png"],
+        "aspect_ratio": "1:1",
+        "resolution": "2K"
+      },
+      "out_task_id": "my_task_edit_001"
+    }'
+  ```
+
+  ```bash cURL(size 사용자 정의 크기)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gpt_image_2_5_flare",
+      "params": {
+        "prompt": "창가에 앉아 석양을 바라보는 치즈 고양이, 수채화 스타일",
+        "size": "2048x1152"
+      },
+      "out_task_id": "my_task_size_001"
+    }'
+  ```
+
+  ```bash cURL(투명 배경)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gpt_image_2_5_flare",
+      "params": {
+        "prompt": "창가에 앉아 석양을 바라보는 치즈 고양이, 수채화 스타일",
+        "aspect_ratio": "1:1",
+        "resolution": "1K",
+        "background": "transparent"
+      },
+      "out_task_id": "my_task_bg_001"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "gpt_image_2_5_flare",
+      "params": {
+          "prompt": "창가에 앉아 석양을 바라보는 치즈 고양이, 수채화 스타일",
+          "aspect_ratio": "16:9",
+          "resolution": "1K"
+      },
+      "out_task_id": "my_task_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "gpt_image_2_5_flare",
+    params: {
+      prompt: "창가에 앉아 석양을 바라보는 치즈 고양이, 수채화 스타일",
+      aspect_ratio: "16:9",
+      resolution: "1K"
+    },
+    out_task_id: "my_task_123456"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer <token>",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  })
+    .then((response) => response.json())
+    .then((data) => console.log(data));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+      payload := map[string]interface{}{
+          "model": "gpt_image_2_5_flare",
+          "params": map[string]interface{}{
+              "prompt":       "창가에 앉아 석양을 바라보는 치즈 고양이, 수채화 스타일",
+              "aspect_ratio": "16:9",
+              "resolution":   "1K",
+          },
+          "out_task_id": "my_task_123456",
+      }
+      jsonData, _ := json.Marshal(payload)
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+      resp, err := http.DefaultClient.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+      body, _ := io.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+  {
+      "statusCode": 200,
+      "message": "",
+      "data": {
+          "out_task_id": "my_task_123456",
+          "status": "pending",
+          "estimated_credits": 2,
+          "created_at": "2026-09-09T06:00:00.000Z"
+      }
+  }
+  ```
+
+  ```json 400
+  {
+      "statusCode": 400,
+      "message": "요청 매개변수가 올바르지 않습니다",
+      "ok": false
+  }
+  ```
+
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "인증에 실패했습니다. API 키를 확인해 주세요"
+    }
+  }
+  ```
+
+  ```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "계정 잔액이 부족합니다. 충전 후 다시 시도해 주세요"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해 주세요"
+    }
+  }
+  ```
+</ResponseExample>

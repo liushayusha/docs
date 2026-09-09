@@ -1,0 +1,32 @@
+[
+  {
+    "id": "__frontmatter__",
+    "hash": "7b2fea21",
+    "index": 0
+  },
+  {
+    "id": "__prologue__",
+    "hash": "5c3ee9f8",
+    "index": 1
+  },
+  {
+    "id": "section-0-authorizations",
+    "hash": "3660f703",
+    "index": 2
+  },
+  {
+    "id": "section-1-body",
+    "hash": "44185492",
+    "index": 3
+  },
+  {
+    "id": "section-2-尺寸-分辨率映射表",
+    "hash": "8b944973",
+    "index": 4
+  },
+  {
+    "id": "section-3-response",
+    "hash": "537b0a2b",
+    "index": 5
+  }
+]

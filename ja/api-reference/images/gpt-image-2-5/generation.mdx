@@ -1,0 +1,377 @@
+---
+title: 'GPT-Image-2.5 画像生成'
+description: |
+    - 非同期処理モード、後続の問い合わせ用タスクIDを返却
+    - OpenAI GPT-Image 2.5 ファミリー：Flare（より高速な日常向け）と Sunburst（より安定した編集向け）
+    - テキストから画像生成 / 画像から画像生成 / 参照画像編集に対応、参照画像は最大10枚
+    - 14種類のアスペクト比に対応（autoを含む）、aspect_ratio で指定
+    - resolution レベル 1K / 2K / 4K、およびAPI専用の size カスタムピクセルに対応
+    - background に対応：`auto` / `opaque` / `transparent`（透明背景は PNG を返却）
+    - 当ページでは quality / output_n は非対応。リクエストごとに1枚の画像を返却
+    - 送信された prompt はプラットフォームのNGワード／セキュリティ審査を受け、規約違反コンテンツは直接拒絶されます
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  すべてのAPIでBearer Tokenによる認証が必要です
+
+  API Keyの取得：
+
+  <a href={apiKeyUrl} target="_blank">API Key管理ページ</a>にアクセスしてAPI Keyを取得してください
+
+  使用時はリクエストヘッダーに以下を追加してください：
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  モデル名（いずれか1つを選択）：
+
+  * `"gpt_image_2_5_flare"` — Flare、日常的なテキストからの画像生成 / 画像編集をより高速に行います
+  * `"gpt_image_2_5_sunburst"` — Sunburst、編集の忠実度（人物、レイアウト、製品の外観）をより重視します
+
+  単体の `gpt-image-2.5` IDはありません。2つのモデルを比較する際は、prompt、参照画像、アスペクト比、解像度を同じに保ってください。
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  モデルパラメータオブジェクト
+
+  <Expandable title="params オブジェクトのプロパティ">
+    <ParamField body="prompt" type="string" required>
+      画像生成のテキストプロンプト
+
+      * 中国語および英語に対応、詳細な記述を推奨します
+      * 画像編集時は、変更する点と保持すべき点を明確に記述してください
+      * 送信前にプラットフォームのセンシティブワード/セキュリティ審査が行われ、違反内容に該当した場合はエラーが直接返されます
+    </ParamField>
+
+    <ParamField body="image_url" type="string[]">
+      参照画像配列。渡された場合はImage-to-Image / 編集モードで実行されます
+
+      * 最大10枚の参照画像
+      * 指定しない場合は純粋なText-to-Imageとして処理されます
+      * 以下の2つの形式に対応しています：
+        1. 公開アクセス可能なURL
+        2. Base64エンコード形式
+           * 完全なData URI形式を使用する必要があります：`data:image/{形式};base64,{base64データ}`
+           * 対応画像形式：jpeg、png、webp
+           * 例：`data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+           * ⚠️ 注意：`data:image/jpeg;base64,` プレフィックス部分を含める必要があります
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="auto">
+      生成する画像のアスペクト比。デフォルト値は `auto`
+
+      以下の値に対応しています：
+
+      * `auto` - 最適なアスペクト比を自動選択
+      * `1:1` - 正方形
+      * `16:9` / `9:16` - ワイド横 / 縦
+      * `4:3` / `3:4` - 標準横 / 縦
+      * `3:2` / `2:3` - クラシック横 / 縦
+      * `5:4` / `4:5` - 準スクエア横 / 縦
+      * `2:1` / `1:2` - ワイド横 / ロング縦
+      * `21:9` / `9:21` - ウルトラワイド横 / ウルトラロング縦
+
+      <Warning>
+        アスペクト比の文字列または `auto` のみ対応しています。ピクセルサイズ（例：`1024x1024`）を指定すると直接エラーになります。正確なピクセル指定が必要な場合は `size` を使用してください。
+      </Warning>
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="1K">
+      解像度レベル。デフォルト値は `1K`
+
+      * `1K` - 約1024基準
+      * `2K` - 約2048基準
+      * `4K` - 約3840基準
+
+      <Warning>
+        `size` を指定する場合は `resolution` / `aspect_ratio` を指定しないでください。指定した場合は 400 が返されます。
+      </Warning>
+    </ParamField>
+
+    <ParamField body="size" type="string">
+      カスタムピクセルサイズ（API専用、`aspect_ratio` / `resolution` と**排他**）
+
+      形式は `幅x高さ` です。例：`2048x1536`、`3840x2160`。
+
+      **使用制限：**
+
+      * 形式は `^\d+x\d+$` である必要があります
+      * 幅、高さはともに16の倍数である必要があります
+      * 各辺は3840以下である必要があります
+      * 長辺 / 短辺の比率は3:1以下である必要があります
+      * 総ピクセル数（幅 × 高さ）が **655,360 〜 8,294,400** の範囲内である必要があります
+      * `aspect_ratio`、`resolution` と排他関係にあり、同時に指定すると 400 が返されます
+    </ParamField>
+
+    <ParamField body="background" type="string" default="auto">
+      生成画像の背景。デフォルト値は `auto`
+
+      * `auto` - 透明にするかどうかをモデルが決定
+      * `opaque` - 不透明な背景
+      * `transparent` - 透明な背景（Alphaチャンネル付きPNGを返却）
+
+      <Warning>
+        `transparent` を選択した場合、プラットフォームは自動的にPNG形式で出力するため、`output_format` を渡す必要はありません。本ページでは `output_format` は提供されていません。
+      </Warning>
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  リクエスト側のタスクID
+
+  ユーザー定義のタスク識別子（必須）。結果を照会する際は、同じ値を使用して `POST /api/openapi/query` を呼び出します。
+</ParamField>
+
+## サイズ × 解像度マッピング表
+
+`aspect_ratio × resolution` → 実際のピクセル数（`auto` はモデルが自動選択するため、表には含まれません）：
+
+| aspect\_ratio | `1K`      | `2K`      | `4K`      |
+| ------------- | --------- | --------- | --------- |
+| `1:1`         | 1024×1024 | 2048×2048 | 2880×2880 |
+| `3:2`         | 1536×1024 | 2048×1360 | 3520×2336 |
+| `2:3`         | 1024×1536 | 1360×2048 | 2336×3520 |
+| `4:3`         | 1024×768  | 2048×1536 | 3312×2480 |
+| `3:4`         | 768×1024  | 1536×2048 | 2480×3312 |
+| `5:4`         | 1280×1024 | 2560×2048 | 3216×2576 |
+| `4:5`         | 1024×1280 | 2048×2560 | 2576×3216 |
+| `16:9`        | 1536×864  | 2048×1152 | 3840×2160 |
+| `9:16`        | 864×1536  | 1152×2048 | 2160×3840 |
+| `2:1`         | 2048×1024 | 2688×1344 | 3840×1920 |
+| `1:2`         | 1024×2048 | 1344×2688 | 1920×3840 |
+| `21:9`        | 2016×864  | 2688×1152 | 3840×1648 |
+| `9:21`        | 864×2016  | 1152×2688 | 1648×3840 |
+
+> `3:2` / `2:3` @ 2K は実際には 2048×1360（近似比率）です。表以外の比率が必要な場合は `size` を使用してください。
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  リクエスト側のタスクID。結果のクエリに使用できます
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  初期ステータス。固定値は `"pending"`
+</ResponseField>
+
+<ResponseField name="estimated_credits" type="number">
+  推定消費クレジット
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  作成日時（ISOフォーマット）
+</ResponseField>
+
+完了ステータスをクエリするには、同じ `out_task_id` を渡して `POST https://aireiter.com/api/openapi/query` を使用してください。失敗したタスクはクレジットを消費しません。
+
+<RequestExample>
+  ```bash cURL（Flare + aspect_ratio）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gpt_image_2_5_flare",
+      "params": {
+        "prompt": "窓辺に座って夕日を眺める茶トラ猫、水彩画風",
+        "aspect_ratio": "16:9",
+        "resolution": "1K"
+      },
+      "out_task_id": "my_task_123456"
+    }'
+  ```
+
+  ```bash cURL（Sunburst + 参照画像）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gpt_image_2_5_sunburst",
+      "params": {
+        "prompt": "ボトルのキャップのみを金色に変更し、残りの画面はそのまま維持",
+        "image_url": ["https://example.com/product.png"],
+        "aspect_ratio": "1:1",
+        "resolution": "2K"
+      },
+      "out_task_id": "my_task_edit_001"
+    }'
+  ```
+
+  ```bash cURL（size カスタムサイズ）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gpt_image_2_5_flare",
+      "params": {
+        "prompt": "窓辺に座って夕日を眺める茶トラ猫、水彩画風",
+        "size": "2048x1152"
+      },
+      "out_task_id": "my_task_size_001"
+    }'
+  ```
+
+  ```bash cURL（透明背景）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gpt_image_2_5_flare",
+      "params": {
+        "prompt": "窓辺に座って夕日を眺める茶トラ猫、水彩画風",
+        "aspect_ratio": "1:1",
+        "resolution": "1K",
+        "background": "transparent"
+      },
+      "out_task_id": "my_task_bg_001"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "gpt_image_2_5_flare",
+      "params": {
+          "prompt": "窓辺に座って夕日を眺める茶トラ猫、水彩画風",
+          "aspect_ratio": "16:9",
+          "resolution": "1K"
+      },
+      "out_task_id": "my_task_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "gpt_image_2_5_flare",
+    params: {
+      prompt: "窓辺に座って夕日を眺める茶トラ猫、水彩画風",
+      aspect_ratio: "16:9",
+      resolution: "1K"
+    },
+    out_task_id: "my_task_123456"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer <token>",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  })
+    .then((response) => response.json())
+    .then((data) => console.log(data));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+      payload := map[string]interface{}{
+          "model": "gpt_image_2_5_flare",
+          "params": map[string]interface{}{
+              "prompt":       "窓辺に座って夕日を眺める茶トラ猫、水彩画風",
+              "aspect_ratio": "16:9",
+              "resolution":   "1K",
+          },
+          "out_task_id": "my_task_123456",
+      }
+      jsonData, _ := json.Marshal(payload)
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+      resp, err := http.DefaultClient.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+      body, _ := io.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+  {
+      "statusCode": 200,
+      "message": "",
+      "data": {
+          "out_task_id": "my_task_123456",
+          "status": "pending",
+          "estimated_credits": 2,
+          "created_at": "2026-09-09T06:00:00.000Z"
+      }
+  }
+  ```
+
+  ```json 400
+  {
+      "statusCode": 400,
+      "message": "リクエストパラメータが無効です",
+      "ok": false
+  }
+  ```
+
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "認証に失敗しました。APIキーを確認してください"
+    }
+  }
+  ```
+
+  ```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "アカウント残高が不足しています。チャージしてから再試行してください"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "サーバー内部エラーが発生しました。しばらくしてから再試行してください"
+    }
+  }
+  ```
+</ResponseExample>
