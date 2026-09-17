@@ -299,7 +299,8 @@
                 "group": "MiniMax H3",
                 "icon": "video",
                 "pages": [
-                  "zh/api-reference/videos/minimax-h3/generation"
+                  "zh/api-reference/videos/minimax-h3/generation",
+                  "zh/api-reference/videos/minimax-h3/turbo"
                 ]
               },
               {
@@ -676,7 +677,8 @@
                 "group": "MiniMax H3",
                 "icon": "video",
                 "pages": [
-                  "en/api-reference/videos/minimax-h3/generation"
+                  "en/api-reference/videos/minimax-h3/generation",
+                  "en/api-reference/videos/minimax-h3/turbo"
                 ]
               },
               {
@@ -1053,7 +1055,8 @@
                 "group": "MiniMax H3",
                 "icon": "video",
                 "pages": [
-                  "ja/api-reference/videos/minimax-h3/generation"
+                  "ja/api-reference/videos/minimax-h3/generation",
+                  "ja/api-reference/videos/minimax-h3/turbo"
                 ]
               },
               {
@@ -1430,7 +1433,8 @@
                 "group": "MiniMax H3",
                 "icon": "video",
                 "pages": [
-                  "ko/api-reference/videos/minimax-h3/generation"
+                  "ko/api-reference/videos/minimax-h3/generation",
+                  "ko/api-reference/videos/minimax-h3/turbo"
                 ]
               },
               {

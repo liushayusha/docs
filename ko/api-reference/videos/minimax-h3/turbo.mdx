@@ -1,0 +1,696 @@
+---
+title: 'MiniMax H3 Turbo 비디오 생성'
+description: |
+  - MiniMax H3 Turbo, MiniMax H3 가속 버전
+  - 비동기 처리 모드, 후속 조회를 위한 작업 ID 반환
+  - 텍스트 기반 비디오 생성 및 최대 9장의 참조 이미지, 3개의 참조 오디오 지원
+  - 480P / 720P 출력 지원, 비디오 길이 5-15초, 기본적으로 네이티브 오디오 트랙 포함
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+<Note>
+MiniMax H3 Turbo의 AIReiter 내 모델명은 `minimax_h3_turbo`입니다. 해당 모델은 `minimax_h3`과 다릅니다: 해상도는 480P / 720P, 길이는 5-15초이며, 참조 비디오 및 첫/마지막 프레임을 지원하지 않습니다.
+</Note>
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  모든 API는 Bearer Token을 사용하여 인증해야 합니다.
+
+  API Key 받기:
+
+  <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a>에 접속하여 API Key를 발급받으세요.
+
+  사용 시 요청 헤더에 추가:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  모델 이름, 고정 사용:
+
+  * `minimax_h3_turbo`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  모델 파라미터 객체입니다.
+
+  <Expandable title="params 객체 속성">
+    <ParamField body="prompt" type="string" required>
+      비디오 생성을 위한 텍스트 설명입니다.
+
+      피사체, 장면, 카메라 무빙, 동작, 스타일, 조명, 템포 등의 내용을 설명할 수 있습니다.
+
+      참조 소스를 사용할 경우, 프롬프트에서 '이미지 1 / 오디오 1'과 같이 순서대로 업로드한 콘텐츠를 지정할 수 있습니다.
+    </ParamField>
+
+    <ParamField body="video_length" type="number" default="5">
+      생성할 비디오 길이(초 단위)입니다.
+
+      지원 정수: `5` ~ `15`.
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="720p">
+      출력 해상도:
+
+      * `480p`
+      * `720p` - 기본값
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="16:9">
+      비디오 화면 비율입니다.
+
+      지원되는 화면 비율:
+
+      * `21:9` - 울트라 와이드
+      * `16:9` - 가로 화면, 기본값
+      * `4:3` - 표준 가로 화면
+      * `3:2` - 사진 가로 화면
+      * `1:1` - 정사각형
+      * `3:4` - 표준 세로 화면
+      * `2:3` - 사진 세로 화면
+      * `9:16` - 세로 화면
+    </ParamField>
+
+    <ParamField body="image_url" type="string | string[]">
+      참조 이미지 URL, 선택 사항. 최대 9장.
+
+      이미지를 전달하지 않으면 텍스트 투 비디오로 동작하며, 이미지를 전달하면 피사체, 스타일 또는 구도를 유도하는 참조 이미지로 사용됩니다.
+
+      이미지 요구사항:
+
+      * JPEG, PNG, WEBP 지원
+      * 이미지당 최대 20MB
+      * URL은 공개적으로 접근 가능해야 함
+    </ParamField>
+
+    <ParamField body="audio_url" type="string | string[]">
+      참조 오디오 URL, 선택 사항. 최대 3개.
+
+      오디오 요구사항:
+
+      * MP3, WAV 지원
+      * 개별 오디오 최대 20MB
+      * 개별 오디오 길이는 15초를 초과할 수 없음
+      * URL은 공개적으로 접근 가능해야 함
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  요청 측 작업 ID입니다.
+
+  사용자 정의 작업 식별자로, 필수 항목입니다. 추후 이 ID를 사용하여 작업 상태와 결과를 조회할 수 있습니다.
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  요청자 작업 ID로, 결과 조회에 사용할 수 있습니다.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  초기 상태로, 일반적으로 `"pending"`입니다.
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  생성 시간, ISO 형식.
+</ResponseField>
+
+## Query Task
+
+MiniMax H3 Turbo는 비동기 비디오 생성 모델입니다. 작업을 제출한 후 `out_task_id`를 사용하여 작업 상태를 조회하세요.
+
+<ParamField body="out_task_id" type="string" required>
+  작업 제출 시 전달된 요청자 작업 ID입니다.
+</ParamField>
+
+```bash
+curl --request POST \
+  --url https://aireiter.com/api/openapi/query \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "out_task_id": "minimax_h3_turbo_task_123456"
+  }'
+```
+
+조회가 성공하고 완료되면 응답의 `output` 필드에 생성 결과가 포함됩니다. 비디오 URL은 `output.list[].video`에 있습니다.
+
+## Request Examples
+
+<RequestExample>
+  ```bash cURL (텍스트 투 비디오)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "minimax_h3_turbo",
+      "params": {
+        "prompt": "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
+        "video_length": 5,
+        "resolution": "720p",
+        "aspect_ratio": "16:9"
+      },
+      "out_task_id": "minimax_h3_turbo_text_123456"
+    }'
+  ```
+
+  ```bash cURL (참조 이미지 + 참조 오디오)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "minimax_h3_turbo",
+      "params": {
+        "prompt": "Create a polished ecommerce product video with consistent product appearance and cinematic motion",
+        "image_url": [
+          "https://example.com/product-front.jpg",
+          "https://example.com/product-lifestyle.jpg"
+        ],
+        "audio_url": [
+          "https://example.com/voice-reference.mp3"
+        ],
+        "video_length": 8,
+        "resolution": "720p",
+        "aspect_ratio": "16:9"
+      },
+      "out_task_id": "minimax_h3_turbo_reference_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "minimax_h3_turbo",
+      "params": {
+          "prompt": "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
+          "video_length": 5,
+          "resolution": "720p",
+          "aspect_ratio": "16:9"
+      },
+      "out_task_id": "minimax_h3_turbo_text_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "minimax_h3_turbo",
+    params: {
+      prompt: "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
+      video_length: 5,
+      resolution: "720p",
+      aspect_ratio: "16:9"
+    },
+    out_task_id: "minimax_h3_turbo_text_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "minimax_h3_turbo",
+          "params": map[string]interface{}{
+              "prompt":       "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
+              "video_length": 5,
+              "resolution":   "720p",
+              "aspect_ratio": "16:9",
+          },
+          "out_task_id": "minimax_h3_turbo_text_123456"
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/openapi/submit";
+
+          String payload = """
+              {
+                "model": "minimax_h3_turbo",
+                "params": {
+                  "prompt": "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
+                  "video_length": 5,
+                  "resolution": "720p",
+                  "aspect_ratio": "16:9"
+                },
+                "out_task_id": "minimax_h3_turbo_text_123456"
+              }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = [
+      "model" => "minimax_h3_turbo",
+      "params" => [
+          "prompt" => "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
+          "video_length" => 5,
+          "resolution" => "720p",
+          "aspect_ratio" => "16:9"
+      ],
+      "out_task_id" => "minimax_h3_turbo_text_123456"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url = URI("https://aireiter.com/api/openapi/submit")
+
+  payload = {
+    model: "minimax_h3_turbo",
+    params: {
+      prompt: "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
+      video_length: 5,
+      resolution: "720p",
+      aspect_ratio: "16:9"
+    },
+    out_task_id: "minimax_h3_turbo_text_123456"
+  }
+
+  http = Net::HTTP.new(url.host, url.port)
+
+  request = Net::HTTP::Post.new(url)
+  request["Authorization"] = "Bearer <token>"
+  request["Content-Type"] = "application/json"
+  request.body = payload.to_json
+
+  response = http.request(request)
+  puts response.body
+  ```
+
+  ```swift Swift
+  import Foundation
+
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
+
+  let payload: [String: Any] = [
+      "model": "minimax_h3_turbo",
+      "params": [
+          "prompt": "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
+          "video_length": 5,
+          "resolution": "720p",
+          "aspect_ratio": "16:9"
+      ],
+      "out_task_id": "minimax_h3_turbo_text_123456"
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      if let error = error {
+          print("Error: \(error)")
+          return
+      }
+
+      if let data = data, let responseString = String(data: data, encoding: .utf8) {
+          print(responseString)
+      }
+  }
+
+  task.resume()
+  ```
+
+  ```csharp C#
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url = "https://aireiter.com/api/openapi/submit";
+
+          var payload = @"
+                {
+                    ""model"": ""minimax_h3_turbo"",
+                    ""params"": {
+                        ""prompt"": ""A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot"",
+                        ""video_length"": 5,
+                        ""resolution"": ""720p"",
+                        ""aspect_ratio"": ""16:9""
+                    },
+                    ""out_task_id"": ""minimax_h3_turbo_text_123456""
+                }";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+
+          var content = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          var result = await response.Content.ReadAsStringAsync();
+
+          Console.WriteLine(result);
+      }
+  }
+  ```
+
+  ```c C
+  #include <stdio.h>
+  #include <curl/curl.h>
+
+  int main(void) {
+      CURL *curl;
+      CURLcode res;
+
+      curl_global_init(CURL_GLOBAL_DEFAULT);
+      curl = curl_easy_init();
+
+      if(curl) {
+          const char *url = "https://aireiter.com/api/openapi/submit";
+          const char *payload = "{\"model\":\"minimax_h3_turbo\",\"params\":{\"prompt\":\"A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot\",\"video_length\":5,\"resolution\":\"720p\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"minimax_h3_turbo_text_123456\"}";
+
+          struct curl_slist *headers = NULL;
+          headers = curl_slist_append(headers, "Authorization: Bearer <token>");
+          headers = curl_slist_append(headers, "Content-Type: application/json");
+
+          curl_easy_setopt(curl, CURLOPT_URL, url);
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
+          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+          res = curl_easy_perform(curl);
+
+          if(res != CURLE_OK) {
+              fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                      curl_easy_strerror(res));
+          }
+
+          curl_slist_free_all(headers);
+          curl_easy_cleanup(curl);
+      }
+
+      curl_global_cleanup();
+      return 0;
+  }
+  ```
+
+  ```objectivec Objective-C
+  #import <Foundation/Foundation.h>
+
+  int main(int argc, const char * argv[]) {
+      @autoreleasepool {
+          NSURL *url = [NSURL URLWithString:@"https://aireiter.com/api/openapi/submit"];
+
+          NSDictionary *payload = @{
+              @"model": @"minimax_h3_turbo",
+              @"params": @{
+                  @"prompt": @"A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
+                  @"video_length": @5,
+                  @"resolution": @"720p",
+                  @"aspect_ratio": @"16:9"
+              },
+              @"out_task_id": @"minimax_h3_turbo_text_123456"
+          };
+
+          NSError *error;
+          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
+                                                            options:0
+                                                              error:&error];
+
+          NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+          [request setHTTPMethod:@"POST"];
+          [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
+          [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+          [request setHTTPBody:jsonData];
+
+          NSURLSessionDataTask *task = [[NSURLSession sharedSession]
+              dataTaskWithRequest:request
+              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+                  if (error) {
+                      NSLog(@"Error: %@", error);
+                      return;
+                  }
+                  NSString *result = [[NSString alloc] initWithData:data
+                                                          encoding:NSUTF8StringEncoding];
+                  NSLog(@"%@", result);
+              }];
+
+          [task resume];
+          [[NSRunLoop mainRunLoop] run];
+      }
+      return 0;
+  }
+  ```
+
+  ```ocaml OCaml
+  (* Requires cohttp and yojson libraries *)
+  open Lwt
+  open Cohttp
+  open Cohttp_lwt_unix
+
+  let url = "https://aireiter.com/api/openapi/submit"
+
+  let payload = {|{
+    "model": "minimax_h3_turbo",
+    "params": {
+      "prompt": "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
+      "video_length": 5,
+      "resolution": "720p",
+      "aspect_ratio": "16:9"
+    },
+    "out_task_id": "minimax_h3_turbo_text_123456"
+  }|}
+
+  let () =
+    let headers = Header.init ()
+      |> fun h -> Header.add h "Authorization" "Bearer <token>"
+      |> fun h -> Header.add h "Content-Type" "application/json"
+    in
+    let body = Cohttp_lwt.Body.of_string payload in
+
+    let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
+      body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
+      print_endline body_str
+    in
+    Lwt_main.run response
+  ```
+
+  ```dart Dart
+  import 'dart:convert';
+  import 'package:http/http.dart' as http;
+
+  void main() async {
+    final url = Uri.parse('https://aireiter.com/api/openapi/submit');
+
+    final payload = {
+          "model": "minimax_h3_turbo",
+          "params": {
+              "prompt": "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
+              "video_length": 5,
+              "resolution": "720p",
+              "aspect_ratio": "16:9"
+          },
+          "out_task_id": "minimax_h3_turbo_text_123456"
+      };
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer <token>',
+        'Content-Type': 'application/json'
+      },
+      body: jsonEncode(payload),
+    );
+
+    print(response.body);
+  }
+  ```
+
+  ```r R
+  library(httr)
+  library(jsonlite)
+
+  url <- "https://aireiter.com/api/openapi/submit"
+
+  payload <- list(
+    model = "minimax_h3_turbo",
+    params = list(
+      prompt = "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
+      video_length = 5,
+      resolution = "720p",
+      aspect_ratio = "16:9"
+    ),
+    out_task_id = "minimax_h3_turbo_text_123456"
+  )
+
+  response <- POST(
+    url,
+    add_headers(
+      Authorization = "Bearer <token>",
+      `Content-Type` = "application/json"
+    ),
+    body = toJSON(payload, auto_unbox = TRUE),
+    encode = "raw"
+  )
+
+  cat(content(response, "text"))
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "out_task_id": "minimax_h3_turbo_text_123456",
+        "status": "pending",
+        "created_at": "2026-09-17T06:03:28.242Z"
+    }
+}
+  ```
+
+  ```json 400
+    {
+        "statusCode": 400,
+        "message": "요청 매개변수가 유효하지 않습니다",
+        "ok": false
+    }
+  ```
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "인증에 실패했습니다. API 키를 확인해 주세요"
+    }
+  }
+  ```
+```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "계정 잔액이 부족합니다. 충전 후 다시 시도해 주세요"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해 주세요"
+    }
+  }
+  ```
+</ResponseExample>
+
+## Mode Notes
+
+<Note>
+`image_url`을 전달하지 않으면 텍스트 투 비디오 모드로 동작합니다. 참조 이미지를 전달하면 이미지는 피사체, 스타일 또는 구도를 유도하는 데 사용되며 첫 프레임이나 마지막 프레임 역할을 하지 않습니다.
+</Note>
+
+<Warning>
+이 모델은 참조 비디오를 지원하지 않으며, `first_last_frame` 시작/종료 프레임 모드도 지원하지 않습니다. `video_url`, `end_image_url`, `type` 또는 `quality`를 전달하지 마세요.
+</Warning>
