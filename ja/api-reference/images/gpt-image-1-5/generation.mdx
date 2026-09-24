@@ -1,0 +1,373 @@
+---
+title: 'GPT-Image-1.5 画像生成'
+description: |
+    - 非同期処理モード。後続の照会用にタスクIDを返却
+    - OpenAI GPT Image 1.5、テキストから画像生成 / 画像から画像生成（参照画像編集、複数画像合成）に対応
+    - image_url を渡した場合は自動的に画像から画像生成を行い、渡さない場合はテキストから画像生成を行います
+    - 3 種類の画像比率（1:1 / 3:2 / 2:3）に対応、aspect_ratio フィールドで指定
+    - quality 品質レベルに対応：medium（デフォルト、より高速）/ high（より低速、よりディテール豊か）
+    - 参照画像は最大 16 枚、URL と base64 の混在に対応
+    - 1 回のリクエストで 1 枚の画像を返却。resolution / size / 透過背景には非対応
+    - 送信された prompt はプラットフォームのセンシティブワード／セキュリティ審査を受け、規約違反コンテンツは直接拒否されます
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  すべてのインターフェースでBearer Tokenによる認証が必要です
+
+  API Keyの取得：
+
+  <a href={apiKeyUrl} target="_blank">API Key管理ページ</a>にアクセスしてAPI Keyを取得してください
+
+  使用時はリクエストヘッダーに追加：
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  モデル名
+
+  固定値：`"gpt_image_1_5"`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  モデルパラメータオブジェクト
+
+  <Expandable title="params オブジェクトのプロパティ">
+    <ParamField body="prompt" type="string" required>
+      画像生成のテキスト説明
+
+      * 中国語および英語に対応、詳細な説明を推奨
+      * Image-to-Image（画像から画像）生成時は、「何を変更するか」と「何を維持するか」（人物の顔、ポーズ、背景など）を明確に記述してください
+      * 画像内に表示させたい文字は引用符で囲んでください
+      * 送信前にプラットフォームのセンシティブワード/セキュリティ審査が行われ、規約違反コンテンツが検出された場合は直接エラーが返されます
+    </ParamField>
+
+    <ParamField body="image_url" type="string[]">
+      参照画像の配列。指定した場合は Image-to-Image モードになり、指定しない場合は Text-to-Image モードになります
+
+      * 最大 16 枚の参照画像
+      * 1枚あたり 10MB 以下、jpeg、png、webp に対応
+      * 以下の2つの形式に対応：
+        1. 公開アクセス可能な URL
+        2. Base64 エンコード形式
+           * 完全な Data URI 形式を使用する必要があります：`data:image/{形式};base64,{base64データ}`
+           * 例：`data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+           * ⚠️ 注意：`data:image/jpeg;base64,` プレフィックス部分を含める必要があります
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="1:1">
+      画像生成のアスペクト比
+
+      以下の値に対応しています：
+
+      * `1:1` - 正方形（デフォルト）
+      * `3:2` - 横向き
+      * `2:3` - 縦向き
+
+      <Warning>
+        上記 3 つの値のみ対応しています。その他の比率（`16:9`、`auto` など）やピクセル解像度（`1024x1024` など）を指定すると直接エラーになります
+      </Warning>
+    </ParamField>
+
+    <ParamField body="quality" type="string" default="medium">
+      画像品質レベル
+
+      * `medium` - バランス型、生成がより高速（デフォルト）
+      * `high` - より低速、ディテールがより豊かで、最終稿に最適
+
+      まずは `medium` でプロンプトや構図を調整し、確定後に `high` で最終画像を生成することをお勧めします。レベルによって料金が異なり、送信レスポンス内の `estimated_credits` に準じます。
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  リクエスト元タスクID
+
+  ユーザー定義のタスク識別子、必須
+</ParamField>
+
+## 使用方法
+
+* **Text-to-Image / Image-to-Imageの自動切り替え**：`image_url` を渡さない場合はText-to-Imageとなり、1〜16枚の参照画像を渡すとImage-to-Imageとなります。部分修正、着せ替え、背景変更、スタイル変換、複数画像の合成に利用できます。
+* **両モード共通のパラメータ**：Text-to-ImageとImage-to-Imageは同じパラメータを使用し、`quality` のグレードに応じて課金されます。
+* **出力サイズ**：`aspect_ratio` と `quality` によって決まり、実際のピクセル数は返却された画像に準じます。1K / 2K / 4K やその他の比率が必要な場合は、[GPT-Image-2](/ja/api-reference/images/gpt-image-2/generation) をご利用ください。
+* **失敗時の課金なし**：タスクが失敗した場合、クレジットは消費されません。
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  リクエスト元タスクID、結果の照会に使用可能
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  初期ステータス、固定値 `"pending"`
+</ResponseField>
+
+<ResponseField name="estimated_credits" type="number">
+  消費予定クレジット、`quality` 設定に応じて変動
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  作成日時（ISO形式）
+</ResponseField>
+
+<RequestExample>
+  ```bash cURL（テキストから画像生成）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gpt_image_1_5",
+      "params": {
+        "prompt": "「VISIT KYOTO」と大きなタイトルが書かれたレトロな旅行ポスター、寺院と桜",
+        "aspect_ratio": "2:3",
+        "quality": "high"
+      },
+      "out_task_id": "my_task_123456"
+    }'
+  ```
+
+  ```bash cURL（画像から画像生成）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gpt_image_1_5",
+      "params": {
+        "prompt": "背景を日差しの強いビーチに変更し、人物はそのまま維持",
+        "image_url": ["https://example.com/person.jpg"],
+        "aspect_ratio": "3:2",
+        "quality": "medium"
+      },
+      "out_task_id": "my_task_edit_001"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "gpt_image_1_5",
+      "params": {
+          "prompt": "背景を日差しの強いビーチに変更し、人物はそのまま維持",
+          "image_url": ["https://example.com/person.jpg"],
+          "aspect_ratio": "3:2",
+          "quality": "medium"
+      },
+      "out_task_id": "my_task_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "gpt_image_1_5",
+    params: {
+      prompt: "背景を日差しの強いビーチに変更し、人物はそのまま維持",
+      image_url: ["https://example.com/person.jpg"],
+      aspect_ratio: "3:2",
+      quality: "medium"
+    },
+    out_task_id: "my_task_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "gpt_image_1_5",
+          "params": map[string]interface{}{
+              "prompt":       "背景を日差しの強いビーチに変更し、人物はそのまま維持",
+              "image_url":    []string{"https://example.com/person.jpg"},
+              "aspect_ratio": "3:2",
+              "quality":      "medium",
+          },
+          "out_task_id": "my_task_123456",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/openapi/submit";
+
+          String payload = """
+          {
+            "model": "gpt_image_1_5",
+            "params": {
+              "prompt": "背景を日差しの強いビーチに変更し、人物はそのまま維持",
+              "image_url": ["https://example.com/person.jpg"],
+              "aspect_ratio": "3:2",
+              "quality": "medium"
+            },
+            "out_task_id": "my_task_123456"
+          }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = [
+      "model" => "gpt_image_1_5",
+      "params" => [
+          "prompt" => "背景を日差しの強いビーチに変更し、人物はそのまま維持",
+          "image_url" => ["https://example.com/person.jpg"],
+          "aspect_ratio" => "3:2",
+          "quality" => "medium"
+      ],
+      "out_task_id" => "my_task_123456"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+  {
+      "statusCode": 200,
+      "message": "",
+      "data": {
+          "out_task_id": "my_task_123456",
+          "status": "pending",
+          "created_at": "2026-09-24T06:33:30.012Z"
+      }
+  }
+  ```
+
+  ```json 400
+  {
+      "statusCode": 400,
+      "message": "リクエストパラメータが無効です",
+      "ok": false
+  }
+  ```
+
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "認証に失敗しました。APIキーをご確認ください"
+    }
+  }
+  ```
+
+  ```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "アカウント残高が不足しています。チャージしてから再度お試しください"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "サーバー内部エラーが発生しました。しばらくしてから再試行してください"
+    }
+  }
+  ```
+</ResponseExample>

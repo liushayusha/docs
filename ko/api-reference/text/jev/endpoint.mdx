@@ -1,0 +1,246 @@
+---
+title: 'Jev 의사결정 인터페이스'
+description: |
+    - 동기식 의사결정 인터페이스이며, 채팅 인터페이스가 아니므로 스트리밍 출력을 지원하지 않습니다
+    - 자료 `state`와 여러 판단 질문 `questions`를 제출하면 한 번의 응답으로 각 질문의 확률, 선택지 또는 점수를 반환합니다
+    - 호출 시 모델명에 `jev`를 입력합니다
+api: 'POST https://aireiter.com/api/v1/systemone'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  API 키, Bearer Token 형식
+
+  API Key 발급:
+
+  <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a>에 접속하여 API Key를 확인하세요
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  모델 이름입니다. `jev`로 고정하여 입력합니다.
+
+  응답의 `result.result.model`은 업스트림에서 실제로 사용하는 버전 번호(예: `jev-1.13.0`)입니다. 이 필드는 업스트림에서 반환되므로 요청에 버전 번호를 입력하지 마세요.
+</ParamField>
+
+<ParamField body="input" type="object" required>
+  판단 내용입니다. `state`와 `questions`를 포함합니다.
+
+  <Expandable title="필드 설명">
+    <ParamField body="state" type="string | object | array" required>
+      판단할 대상 자료입니다. 한 문장일 수도 있고 객체나 배열일 수도 있습니다. 판단 완료에 필요한 데이터만 포함하고 API Key, 비밀번호 등 민감한 정보는 포함하지 마세요.
+    </ParamField>
+
+    <ParamField body="questions" type="object" required>
+      질문 목록이며 비워둘 수 없습니다. 키 이름은 직접 정의하며 각 질문은 객체입니다.
+
+      모든 질문에는 `type`과 `instructions`가 있어야 합니다.
+
+      * `noul` — 진위형(OX) 질문입니다. 0에서 1 사이의 `noul`을 반환하며 '예'일 확률을 나타냅니다. `criteria`는 선택 사항이며, 형태는 `{ "true": "어떤 경우가 참인지", "false": "어떤 경우가 거짓인지" }`와 같습니다.
+      * `choice` — 객관식 단일 선택입니다. `criteria`는 필수이며, '선택지 이름 → 설명' 형태의 객체입니다. 반환되는 `choice`는 선택된 선택지 이름입니다.
+      * `score` — 점수 매기기입니다. `criteria`는 필수이며, 낮은 항목부터 높은 항목 순으로 최소 2개 항목의 정렬된 배열입니다. 반환되는 `score`는 해당하는 구간의 숫자이며, 첫 번째 항목은 0이고 소수일 수 있습니다. 예를 들어 3개 등급일 때 `1.99`는 거의 세 번째 항목에 해당함을 나타냅니다.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+한 번의 요청에 여러 개의 `noul`, `choice`, `score`를 동시에 포함할 수 있습니다. `stream`을 전달하지 마세요. 이 엔드포인트는 한 번에 완전한 JSON만 반환합니다.
+
+## Response
+
+응답 본문은 업스트림 원본 JSON이며, 본 인터페이스는 이를 수정하지 않습니다. 판단 결과는 `result.result.answers`에 있습니다.
+
+<ResponseField name="success" type="boolean">
+  이번 요청의 성공 여부
+</ResponseField>
+
+<ResponseField name="errors" type="array">
+  오류 목록입니다. 성공 시 빈 배열입니다.
+</ResponseField>
+
+<ResponseField name="messages" type="array">
+  추가 메시지입니다. 메시지가 없을 경우 빈 배열입니다.
+</ResponseField>
+
+<ResponseField name="result" type="object">
+  업스트림 실행 결과
+
+  <Expandable title="필드 설명">
+    <ResponseField name="state" type="string">
+      실행 상태입니다. `Completed`는 완료되었음을 나타냅니다.
+    </ResponseField>
+
+    <ResponseField name="result" type="object">
+      모델 응답
+
+      <Expandable title="필드 설명">
+        <ResponseField name="model" type="string">
+          업스트림에서 실제로 사용된 버전 번호입니다 (예: `jev-1.13.0`).
+        </ResponseField>
+
+        <ResponseField name="answers" type="object">
+          각 문항의 결과입니다. 키 이름은 요청의 문항 이름과 일치합니다.
+
+          * `noul`: `{ "type": "noul", "noul": 0.49 }`. `0.8` 이상은 "예", `0.2` 이하는 "아니오"로 간주할 수 있으며, `0.5`에 가까우면 불확실함을 나타냅니다.
+          * `choice`: `choice`는 선택된 옵션 이름, `probabilities`는 각 옵션의 확률, `confidence`는 신뢰도입니다.
+          * `score`: `score`는 점수이며, `legend`는 등급 인덱스를 제출한 텍스트로 다시 매핑합니다.
+        </ResponseField>
+
+        <ResponseField name="usage" type="object">
+          토큰 사용량
+
+          <Expandable title="필드 설명">
+            <ResponseField name="input_tokens" type="integer">
+              입력 토큰 수
+            </ResponseField>
+            <ResponseField name="output_tokens" type="integer">
+              출력 토큰 수
+            </ResponseField>
+          </Expandable>
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## 使用示例
+
+<RequestExample>
+  ```bash cURL theme={null}
+  curl https://aireiter.com/api/v1/systemone \
+    -H "Authorization: Bearer $API_KEY" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "model": "jev",
+      "input": {
+        "state": "The payment API timed out.",
+        "questions": {
+          "is_urgent": {
+            "type": "noul",
+            "instructions": "Does this need a person right now?"
+          }
+        }
+      }
+    }'
+  ```
+
+  ```python Python theme={null}
+  import os
+  import requests
+
+  response = requests.post(
+      "https://aireiter.com/api/v1/systemone",
+      headers={"Authorization": f"Bearer {os.environ['API_KEY']}"},
+      json={
+          "model": "jev",
+          "input": {
+              "state": "The payment API timed out.",
+              "questions": {
+                  "is_urgent": {
+                      "type": "noul",
+                      "instructions": "Does this need a person right now?",
+                  }
+              },
+          },
+      },
+  )
+  print(response.json()["result"]["result"]["answers"])
+  ```
+
+  ```javascript JavaScript theme={null}
+  const response = await fetch("https://aireiter.com/api/v1/systemone", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "jev",
+      input: {
+        state: "The payment API timed out.",
+        questions: {
+          is_urgent: {
+            type: "noul",
+            instructions: "Does this need a person right now?",
+          },
+        },
+      },
+    }),
+  });
+
+  const data = await response.json();
+  console.log(data.result.result.answers);
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json theme={null}
+  {
+    "result": {
+      "state": "Completed",
+      "result": {
+        "model": "jev-1.13.0",
+        "answers": {
+          "is_urgent": {
+            "type": "noul",
+            "noul": 0.49
+          }
+        },
+        "usage": {
+          "input_tokens": 280,
+          "output_tokens": 23
+        }
+      }
+    },
+    "success": true,
+    "errors": [],
+    "messages": []
+  }
+  ```
+</ResponseExample>
+
+## 다중 질문 예시
+
+`choice`와 `score`는 `noul`과 함께 동일한 요청에 포함할 수 있습니다.
+
+```json theme={null}
+{
+  "model": "jev",
+  "input": {
+    "state": {
+      "ticket": "결제 인터페이스 간헐적 타임아웃 발생, 데이터베이스 커넥션 풀 거의 고갈."
+    },
+    "questions": {
+      "next_action": {
+        "type": "choice",
+        "instructions": "가장 안전한 다음 조치 선택",
+        "criteria": {
+          "rollback": "최근 변경 사항 롤백",
+          "observe": "지속적인 관찰 및 로그 샘플링"
+        }
+      },
+      "risk": {
+        "type": "score",
+        "instructions": "이번 장애의 위험도 평가",
+        "criteria": ["낮음", "중간", "높음", "매우 높음"]
+      },
+      "escalate": {
+        "type": "noul",
+        "instructions": "수동 에스컬레이션 필요 여부"
+      }
+    }
+  }
+}
+```
+
+## 注意事项
+
+* 본 인터페이스는 채팅 인터페이스가 아니므로 `messages`를 전달할 수 없으며 `stream`도 전달할 수 없습니다.
+* 컨텍스트 윈도우는 32000 tokens입니다.
+* 비즈니스 실패 시 HTTP 상태 코드가 여전히 200일 수 있으므로 `success`와 `errors`를 함께 확인해 주세요. 인증 실패 시 `401`을 반환하며, `model` 누락 또는 유효하지 않은 JSON의 경우 `400`을 반환하고, 모델이 존재하지 않는 경우 `404`를 반환합니다.

@@ -1,0 +1,246 @@
+---
+title: 'Jev Decision API'
+description: |
+    - Synchronous decision API, not a chat API, does not support streaming output
+    - Submit a piece of context `state` and several judgment questions `questions`, returning the probability, option, or score for each question in a single response
+    - Set the model name to `jev` when calling
+api: 'POST https://aireiter.com/api/v1/systemone'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  API key, Bearer Token format
+
+  Get API Key:
+
+  Visit the <a href={apiKeyUrl} target="_blank">API Key management page</a> to get your API Key
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  Model name. Fixed value is `jev`.
+
+  The `result.result.model` in the response is the actual version number used upstream, such as `jev-1.13.0`. This field is returned by upstream; do not include the version number in the request.
+</ParamField>
+
+<ParamField body="input" type="object" required>
+  Evaluation content. Contains `state` and `questions`.
+
+  <Expandable title="Field Descriptions">
+    <ParamField body="state" type="string | object | array" required>
+      Material to be evaluated. Can be a single sentence, an object, or an array. Only include data necessary to complete the evaluation; do not include sensitive information such as API keys or passwords.
+    </ParamField>
+
+    <ParamField body="questions" type="object" required>
+      Questions table, cannot be empty. Key names are user-defined, and each question is an object.
+
+      Each question must have `type` and `instructions`.
+
+      * `noul` — Yes/No question. Returns `noul`, ranging from 0 to 1, indicating the probability of "yes". `criteria` is optional, formatted as `{ "true": "what qualifies as true", "false": "what qualifies as false" }`.
+      * `choice` — Single choice. `criteria` is required, which is an object of "option name -> description". The returned `choice` is the selected option name.
+      * `score` — Scoring. `criteria` is required, which is an ordered array of at least two items from low to high. The returned `score` is a number indicating which tier it falls into, where the first item is 0, and can be a decimal. For example, with three tiers, `1.99` indicates it almost falls into the third item.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+A single request can contain multiple `noul`, `choice`, and `score` questions simultaneously. Do not pass `stream`; this endpoint only returns a complete JSON response.
+
+## Response
+
+The response body is the upstream raw JSON; this endpoint does not modify it. The evaluation results are in `result.result.answers`.
+
+<ResponseField name="success" type="boolean">
+  Whether the request was successful
+</ResponseField>
+
+<ResponseField name="errors" type="array">
+  List of errors. Empty array on success
+</ResponseField>
+
+<ResponseField name="messages" type="array">
+  Additional messages. Empty array when there are no messages
+</ResponseField>
+
+<ResponseField name="result" type="object">
+  Upstream execution results
+
+  <Expandable title="Field Descriptions">
+    <ResponseField name="state" type="string">
+      Execution status. `Completed` indicates completed
+    </ResponseField>
+
+    <ResponseField name="result" type="object">
+      Model response
+
+      <Expandable title="Field Descriptions">
+        <ResponseField name="model" type="string">
+          The actual version number used upstream, for example `jev-1.13.0`
+        </ResponseField>
+
+        <ResponseField name="answers" type="object">
+          Results for each question. Key names match the question names in the request.
+
+          * `noul`: `{ "type": "noul", "noul": 0.49 }`. `0.8` and above can be considered "yes", `0.2` and below can be considered "no", and close to `0.5` indicates uncertainty.
+          * `choice`: `choice` is the selected option name, `probabilities` are the probabilities of each option, and `confidence` is the confidence level.
+          * `score`: `score` is the score, and `legend` maps tier indices back to the text you submitted.
+        </ResponseField>
+
+        <ResponseField name="usage" type="object">
+          Token usage
+
+          <Expandable title="Field Descriptions">
+            <ResponseField name="input_tokens" type="integer">
+              Number of input tokens
+            </ResponseField>
+            <ResponseField name="output_tokens" type="integer">
+              Number of output tokens
+            </ResponseField>
+          </Expandable>
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Examples
+
+<RequestExample>
+  ```bash cURL theme={null}
+  curl https://aireiter.com/api/v1/systemone \
+    -H "Authorization: Bearer $API_KEY" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "model": "jev",
+      "input": {
+        "state": "The payment API timed out.",
+        "questions": {
+          "is_urgent": {
+            "type": "noul",
+            "instructions": "Does this need a person right now?"
+          }
+        }
+      }
+    }'
+  ```
+
+  ```python Python theme={null}
+  import os
+  import requests
+
+  response = requests.post(
+      "https://aireiter.com/api/v1/systemone",
+      headers={"Authorization": f"Bearer {os.environ['API_KEY']}"},
+      json={
+          "model": "jev",
+          "input": {
+              "state": "The payment API timed out.",
+              "questions": {
+                  "is_urgent": {
+                      "type": "noul",
+                      "instructions": "Does this need a person right now?",
+                  }
+              },
+          },
+      },
+  )
+  print(response.json()["result"]["result"]["answers"])
+  ```
+
+  ```javascript JavaScript theme={null}
+  const response = await fetch("https://aireiter.com/api/v1/systemone", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "jev",
+      input: {
+        state: "The payment API timed out.",
+        questions: {
+          is_urgent: {
+            type: "noul",
+            instructions: "Does this need a person right now?",
+          },
+        },
+      },
+    }),
+  });
+
+  const data = await response.json();
+  console.log(data.result.result.answers);
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json theme={null}
+  {
+    "result": {
+      "state": "Completed",
+      "result": {
+        "model": "jev-1.13.0",
+        "answers": {
+          "is_urgent": {
+            "type": "noul",
+            "noul": 0.49
+          }
+        },
+        "usage": {
+          "input_tokens": 280,
+          "output_tokens": 23
+        }
+      }
+    },
+    "success": true,
+    "errors": [],
+    "messages": []
+  }
+  ```
+</ResponseExample>
+
+## Multi-Question Example
+
+`choice` and `score` can be included in the same request as `noul`.
+
+```json theme={null}
+{
+  "model": "jev",
+  "input": {
+    "state": {
+      "ticket": "Payment API intermittent timeout, database connection pool nearing exhaustion."
+    },
+    "questions": {
+      "next_action": {
+        "type": "choice",
+        "instructions": "Select the safest next step",
+        "criteria": {
+          "rollback": "Roll back recent changes",
+          "observe": "Continue observing and sampling logs"
+        }
+      },
+      "risk": {
+        "type": "score",
+        "instructions": "Assess the risk of this incident",
+        "criteria": ["Low", "Medium", "High", "Critical"]
+      },
+      "escalate": {
+        "type": "noul",
+        "instructions": "Whether manual escalation is required"
+      }
+    }
+  }
+}
+```
+
+## Notes
+
+* This endpoint is not a chat endpoint and does not accept `messages` or `stream`.
+* The context window is 32,000 tokens.
+* When a business failure occurs, the HTTP status code may still be 200. Please check both `success` and `errors`. Authentication failure returns `401`, missing `model` or invalid JSON returns `400`, and a non-existent model returns `404`.

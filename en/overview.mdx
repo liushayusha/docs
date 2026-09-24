@@ -101,15 +101,15 @@ The channel only affects service stability, not output quality. All channels use
 
 When using it, just replace the model name with the corresponding channel version. For example, replace `"seedance2"` with `"seedance2_fast"`, and keep the other parameters unchanged.
 
-## 支持的模型
+## Supported Models
 
-### Text Conversation Series
+### Text Chat Series
 
 Compatible with OpenAI Chat Completions API and Responses API, supporting multi-turn conversations, tool calling, structured outputs, and streaming responses:
 
 <CardGroup cols={2}>
   <Card title="OpenAI Chat Completions API" icon="message" href="/en/api-reference/text/openai-chat-completions-api/endpoint">
-    Compatible with OpenAI SDK, supporting models such as GPT, Claude, etc.
+    Compatible with OpenAI SDK, supporting models such as GPT and Claude
   </Card>
   <Card title="OpenAI Responses API" icon="message" href="/en/api-reference/text/openai-responses-api/endpoint">
     OpenAI's latest Responses format
@@ -117,11 +117,14 @@ Compatible with OpenAI Chat Completions API and Responses API, supporting multi-
   <Card title="Claude Messages API" icon="message" href="/en/api-reference/text/claude-messages-api/endpoint">
     Anthropic native Messages API format
   </Card>
+  <Card title="Jev" icon="message" href="/en/api-reference/text/jev/endpoint">
+    Synchronous decision API. Submit materials and true/false questions to return probabilities, options, or scores
+  </Card>
 </CardGroup>
 
 ### Image Generation Series
 
-AIReiter provides multiple image generation models, supporting text-to-image and image-to-image capabilities:
+AIReiter provides multiple image generation models, supporting text-to-image and image-to-image features:
 
 <CardGroup cols={2}>
   <Card title="GPT-4o Image" icon="image" href="/en/api-reference/images/gpt-4o/generation">
@@ -131,7 +134,7 @@ AIReiter provides multiple image generation models, supporting text-to-image and
     Supports text-to-image / image-to-image, 13 aspect ratios, and up to 9 reference images
   </Card>
   <Card title="GPT-Image-2.5" icon="image" href="/en/api-reference/images/gpt-image-2-5/generation">
-    Flare / Sunburst two tiers, text-to-image and reference image editing, 1K to 4K
+    Flare / Sunburst tiers, text-to-image and reference image editing, 1K to 4K
   </Card>
   <Card title="Gemini-2.5-Flash (Nano banana)" icon="image" href="/en/api-reference/images/nano-banana/generation">
     Google's latest fast image generation model
@@ -146,10 +149,10 @@ AIReiter provides multiple image generation models, supporting text-to-image and
     Efficient image generation solution
   </Card>
   <Card title="Seedream-4.5" icon="image" href="/en/api-reference/images/seedream-4.5/generation">
-    Seedream 4.5 version
+    Seedream version 4.5
   </Card>
   <Card title="Seedream V5 lite" icon="image" href="/en/api-reference/images/seedream-v5-lite/generation">
-    Latest Seedream version, supporting web search-enhanced generation
+    Latest version of Seedream, supporting web search-enhanced generation
   </Card>
 </CardGroup>
 
@@ -162,22 +165,22 @@ Supports text-to-video and image-to-video, providing multiple resolution and dur
     Google VEO3.1 video generation model
   </Card>
   <Card title="VEO3.1 Fast" icon="video" href="/en/api-reference/videos/veo3-1-fast/generation">
-    VEO3.1 fast version
+    VEO3.1 Fast version
   </Card>
   <Card title="Seedance-1.5-pro" icon="video" href="/en/api-reference/videos/seedance-1-5-pro/generation">
-    Supports first and last frame control and audio generation (4-12 seconds)
+    Supports first-and-last frame control and audio generation (4-12 seconds)
   </Card>
   <Card title="Seedance Pro Fast" icon="video" href="/en/api-reference/videos/seedance_pro_fast/generation">
     Seedance fast version, supporting first frame control
   </Card>
   <Card title="Seedance Pro" icon="video" href="/en/api-reference/videos/seedance_pro/generation">
-    Seedance professional version, supporting first and last frame control
+    Seedance Pro version, supporting first-and-last frame control
   </Card>
   <Card title="Seedance 2.0" icon="video" href="/en/api-reference/videos/seedance2/generation">
-    Supports multiple reference images, reference videos, and first and last frame control (4-15 seconds)
+    Supports multi-reference images, reference videos, and first-and-last frame control (4-15 seconds)
   </Card>
   <Card title="Seedance 2.0 Fast" icon="video" href="/en/api-reference/videos/seedance2_fast/generation">
-    Seedance 2.0 fast version, supporting multiple reference images and first and last frame control
+    Seedance 2.0 fast version, supporting multi-reference images and first-and-last frame control
   </Card>
 </CardGroup>
 

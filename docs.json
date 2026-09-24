@@ -52,6 +52,13 @@
                 ]
               },
               {
+                "group": "GPT-Image-1.5",
+                "icon": "image",
+                "pages": [
+                  "zh/api-reference/images/gpt-image-1-5/generation"
+                ]
+              },
+              {
                 "group": "GPT-Image-2",
                 "icon": "image",
                 "pages": [
@@ -374,6 +381,13 @@
                 "pages": [
                   "zh/api-reference/text/openai-responses-api/endpoint"
                 ]
+              },
+              {
+                "group": "Jev",
+                "icon": "message",
+                "pages": [
+                  "zh/api-reference/text/jev/endpoint"
+                ]
               }
             ]
           },
@@ -426,6 +440,13 @@
                 "icon": "image",
                 "pages": [
                   "en/api-reference/images/gpt-4o/generation"
+                ]
+              },
+              {
+                "group": "GPT-Image-1.5",
+                "icon": "image",
+                "pages": [
+                  "en/api-reference/images/gpt-image-1-5/generation"
                 ]
               },
               {
@@ -752,6 +773,13 @@
                 "pages": [
                   "en/api-reference/text/openai-responses-api/endpoint"
                 ]
+              },
+              {
+                "group": "Jev",
+                "icon": "message",
+                "pages": [
+                  "en/api-reference/text/jev/endpoint"
+                ]
               }
             ]
           },
@@ -804,6 +832,13 @@
                 "icon": "image",
                 "pages": [
                   "ja/api-reference/images/gpt-4o/generation"
+                ]
+              },
+              {
+                "group": "GPT-Image-1.5",
+                "icon": "image",
+                "pages": [
+                  "ja/api-reference/images/gpt-image-1-5/generation"
                 ]
               },
               {
@@ -1130,6 +1165,13 @@
                 "pages": [
                   "ja/api-reference/text/openai-responses-api/endpoint"
                 ]
+              },
+              {
+                "group": "Jev",
+                "icon": "message",
+                "pages": [
+                  "ja/api-reference/text/jev/endpoint"
+                ]
               }
             ]
           },
@@ -1182,6 +1224,13 @@
                 "icon": "image",
                 "pages": [
                   "ko/api-reference/images/gpt-4o/generation"
+                ]
+              },
+              {
+                "group": "GPT-Image-1.5",
+                "icon": "image",
+                "pages": [
+                  "ko/api-reference/images/gpt-image-1-5/generation"
                 ]
               },
               {
@@ -1507,6 +1556,13 @@
                 "icon": "message",
                 "pages": [
                   "ko/api-reference/text/openai-responses-api/endpoint"
+                ]
+              },
+              {
+                "group": "Jev",
+                "icon": "message",
+                "pages": [
+                  "ko/api-reference/text/jev/endpoint"
                 ]
               }
             ]

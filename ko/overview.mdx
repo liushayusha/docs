@@ -101,82 +101,85 @@ curl --request POST \
 
 사용 시에는 모델 이름을 해당 채널 버전으로 바꾸기만 하면 됩니다. 예를 들어 `"seedance2"`를 `"seedance2_fast"`로 바꾸고, 다른 매개변수는 그대로 유지하면 됩니다.
 
-## 지원 모델
+## 支持的模型
 
 ### 텍스트 대화 시리즈
 
 OpenAI Chat Completions API 및 Responses API와 호환되며 멀티턴 대화, 도구 호출, 구조화된 출력, 스트리밍 응답을 지원합니다:
 
 <CardGroup cols={2}>
-  <Card title="OpenAI Chat Completions API" icon="message" href="/ko/api-reference/text/openai-chat-completions-api/endpoint">
-    OpenAI SDK와 호환, GPT, Claude 등 모델 지원
+  <Card title="OpenAI Chat Completions API" icon="message" href="/en/api-reference/text/openai-chat-completions-api/endpoint">
+    OpenAI SDK와 호환되며 GPT, Claude 등의 모델을 지원합니다
   </Card>
-  <Card title="OpenAI Responses API" icon="message" href="/ko/api-reference/text/openai-responses-api/endpoint">
+  <Card title="OpenAI Responses API" icon="message" href="/en/api-reference/text/openai-responses-api/endpoint">
     OpenAI 최신 Responses 형식
   </Card>
-  <Card title="Claude Messages API" icon="message" href="/ko/api-reference/text/claude-messages-api/endpoint">
+  <Card title="Claude Messages API" icon="message" href="/en/api-reference/text/claude-messages-api/endpoint">
     Anthropic 네이티브 Messages API 형식
+  </Card>
+  <Card title="Jev" icon="message" href="/en/api-reference/text/jev/endpoint">
+    동기식 의사결정 인터페이스입니다. 자료와 진위형 문제를 제출하면 확률, 선택지 또는 점수를 반환합니다
   </Card>
 </CardGroup>
 
 ### 이미지 생성 시리즈
 
-AIReiter는 다양한 이미지 생성 모델을 제공하며, 텍스트 기반 이미지 생성 및 이미지 기반 이미지 생성 기능을 지원합니다:
+AIReiter는 다양한 이미지 생성 모델을 제공하며, 텍스트 기반 이미지 생성 및 이미지 투 이미지 기능을 지원합니다:
 
 <CardGroup cols={2}>
-  <Card title="GPT-4o Image" icon="image" href="/ko/api-reference/images/gpt-4o/generation">
+  <Card title="GPT-4o Image" icon="image" href="/en/api-reference/images/gpt-4o/generation">
     OpenAI의 고품질 이미지 생성 모델
   </Card>
-  <Card title="GPT-Image-2" icon="image" href="/ko/api-reference/images/gpt-image-2/generation">
-    텍스트/이미지 기반 이미지 생성 지원, 13가지 비율, 참조 이미지 최대 9장
+  <Card title="GPT-Image-2" icon="image" href="/en/api-reference/images/gpt-image-2/generation">
+    텍스트 기반 이미지 생성 / 이미지 기반 이미지 생성 지원, 13가지 비율, 참조 이미지 최대 9장
   </Card>
-  <Card title="GPT-Image-2.5" icon="image" href="/ko/api-reference/images/gpt-image-2-5/generation">
-    Flare / Sunburst 2가지 옵션, 텍스트 기반 이미지 생성 및 참조 이미지 편집, 1K에서 4K
+  <Card title="GPT-Image-2.5" icon="image" href="/en/api-reference/images/gpt-image-2-5/generation">
+    Flare / Sunburst 2가지 등급, 텍스트 기반 생성 및 참조 이미지 편집, 1K에서 4K까지
   </Card>
-  <Card title="Gemini-2.5-Flash (Nano banana)" icon="image" href="/ko/api-reference/images/nano-banana/generation">
+  <Card title="Gemini-2.5-Flash (Nano banana)" icon="image" href="/en/api-reference/images/nano-banana/generation">
     Google의 최신 고속 이미지 생성 모델
   </Card>
-  <Card title="Gemini-3-Pro (Nano banana pro)" icon="image" href="/ko/api-reference/images/gemini-3-pro/generation">
+  <Card title="Gemini-3-Pro (Nano banana pro)" icon="image" href="/en/api-reference/images/gemini-3-pro/generation">
     Google의 전문가급 이미지 생성 모델
   </Card>
-  <Card title="Nano Banana V2" icon="image" href="/ko/api-reference/images/nano-banana-v2/generation">
-    텍스트-이미지 변환, 이미지 기반 이미지 생성, 이미지 편집 등 다양한 생성 모드 지원
+  <Card title="Nano Banana V2" icon="image" href="/en/api-reference/images/nano-banana-v2/generation">
+    텍스트 기반 이미지 변환, 이미지 투 이미지, 이미지 편집 등 다양한 생성 모드 지원
   </Card>
-  <Card title="Seedream-4.0" icon="image" href="/ko/api-reference/images/seedream-4/generation">
+  <Card title="Seedream-4.0" icon="image" href="/en/api-reference/images/seedream-4/generation">
     효율적인 이미지 생성 솔루션
   </Card>
-  <Card title="Seedream-4.5" icon="image" href="/ko/api-reference/images/seedream-4.5/generation">
+  <Card title="Seedream-4.5" icon="image" href="/en/api-reference/images/seedream-4.5/generation">
     Seedream 4.5 버전
   </Card>
-  <Card title="Seedream V5 lite" icon="image" href="/ko/api-reference/images/seedream-v5-lite/generation">
+  <Card title="Seedream V5 lite" icon="image" href="/en/api-reference/images/seedream-v5-lite/generation">
     Seedream 최신 버전, 웹 검색 강화 생성 지원
   </Card>
 </CardGroup>
 
 ### 비디오 생성 시리즈
 
-텍스트 기반 비디오 생성 및 이미지 기반 비디오 생성을 지원하며, 다양한 해상도와 길이 옵션을 제공합니다:
+텍스트 기반 비디오 생성과 이미지 기반 비디오 생성을 지원하며, 다양한 해상도 및 재생 시간 옵션을 제공합니다:
 
 <CardGroup cols={2}>
-  <Card title="VEO3.1" icon="video" href="/ko/api-reference/videos/veo3-1/generation">
+  <Card title="VEO3.1" icon="video" href="/en/api-reference/videos/veo3-1/generation">
     Google VEO3.1 비디오 생성 모델
   </Card>
-  <Card title="VEO3.1 Fast" icon="video" href="/ko/api-reference/videos/veo3-1-fast/generation">
+  <Card title="VEO3.1 Fast" icon="video" href="/en/api-reference/videos/veo3-1-fast/generation">
     VEO3.1 고속 버전
   </Card>
-  <Card title="Seedance-1.5-pro" icon="video" href="/ko/api-reference/videos/seedance-1-5-pro/generation">
-    첫/마지막 프레임 제어 및 오디오 생성 지원 (4-12초)
+  <Card title="Seedance-1.5-pro" icon="video" href="/en/api-reference/videos/seedance-1-5-pro/generation">
+    첫/마지막 프레임 제어 및 오디오 생성 지원(4~12초)
   </Card>
-  <Card title="Seedance Pro Fast" icon="video" href="/ko/api-reference/videos/seedance_pro_fast/generation">
+  <Card title="Seedance Pro Fast" icon="video" href="/en/api-reference/videos/seedance_pro_fast/generation">
     Seedance 고속 버전, 첫 프레임 제어 지원
   </Card>
-  <Card title="Seedance Pro" icon="video" href="/ko/api-reference/videos/seedance_pro/generation">
+  <Card title="Seedance Pro" icon="video" href="/en/api-reference/videos/seedance_pro/generation">
     Seedance 프로 버전, 첫/마지막 프레임 제어 지원
   </Card>
-  <Card title="Seedance 2.0" icon="video" href="/ko/api-reference/videos/seedance2/generation">
-    다중 참조 이미지, 참조 비디오 및 첫/마지막 프레임 제어 지원 (4-15초)
+  <Card title="Seedance 2.0" icon="video" href="/en/api-reference/videos/seedance2/generation">
+    다중 참조 이미지, 참조 비디오 및 첫/마지막 프레임 제어 지원(4~15초)
   </Card>
-  <Card title="Seedance 2.0 Fast" icon="video" href="/ko/api-reference/videos/seedance2_fast/generation">
+  <Card title="Seedance 2.0 Fast" icon="video" href="/en/api-reference/videos/seedance2_fast/generation">
     Seedance 2.0 고속 버전, 다중 참조 이미지 및 첫/마지막 프레임 제어 지원
   </Card>
 </CardGroup>

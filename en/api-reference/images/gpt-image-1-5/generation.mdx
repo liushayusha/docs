@@ -1,0 +1,373 @@
+---
+title: 'GPT-Image-1.5 Image Generation'
+description: |
+    - Asynchronous processing mode, returns a task ID for subsequent queries
+    - OpenAI GPT Image 1.5, supports text-to-image / image-to-image (reference image editing, multi-image blending)
+    - Automatically switches to image-to-image when image_url is provided; defaults to text-to-image if omitted
+    - Supports 3 aspect ratios: 1:1 / 3:2 / 2:3, passed via the aspect_ratio field
+    - Supports quality tiers: medium (default, faster) / high (slower, richer details)
+    - Up to 16 reference images, supporting a mix of URLs and base64 strings
+    - Each request returns 1 image; does not support resolution / size / transparent backgrounds
+    - Submitted prompts undergo platform sensitive word / safety moderation, and violating content will be directly rejected
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  All endpoints require authentication using a Bearer Token
+
+  Get an API Key:
+
+  Visit the <a href={apiKeyUrl} target="_blank">API Key Management Page</a> to get your API Key
+
+  Add to the request headers when using:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  Model name
+
+  Fixed value: `"gpt_image_1_5"`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  Model parameters object
+
+  <Expandable title="params Object Properties">
+    <ParamField body="prompt" type="string" required>
+      Text description for image generation
+
+      * Supports Chinese and English; detailed descriptions are recommended
+      * For image-to-image, clearly specify "what to change" and "what to keep unchanged" (e.g., character face, pose, background)
+      * Enclose any text that needs to appear in the image in quotation marks
+      * Submissions undergo platform sensitive word / safety review; violations will directly return an error
+    </ParamField>
+
+    <ParamField body="image_url" type="string[]">
+      Reference image array. Providing this enables image-to-image mode; if omitted, it defaults to text-to-image
+
+      * Up to 16 reference images
+      * Maximum 10 MB per image, supports jpeg, png, webp
+      * Supports the following two formats:
+        1. Publicly accessible URLs
+        2. Base64-encoded format
+           * Must use the complete Data URI format: `data:image/{format};base64,{base64_data}`
+           * Example: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+           * ⚠️ Note: Must include the `data:image/jpeg;base64,` prefix
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="1:1">
+      Aspect ratio for image generation
+
+      Supports the following values:
+
+      * `1:1` - Square (default)
+      * `3:2` - Landscape
+      * `2:3` - Portrait
+
+      <Warning>
+        Only the above 3 values are supported. Passing other ratios (e.g., `16:9`, `auto`) or pixel dimensions (e.g., `1024x1024`) will directly return an error
+      </Warning>
+    </ParamField>
+
+    <ParamField body="quality" type="string" default="medium">
+      Image quality tier
+
+      * `medium` - Balanced, faster generation (default)
+      * `high` - Slower, richer details, suitable for final drafts
+
+      It is recommended to use `medium` first to test the prompt and composition, and then use `high` for the final image. Different tiers have different pricing, subject to `estimated_credits` in the submission response.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  Caller task ID
+
+  User-defined task identifier, required
+</ParamField>
+
+## Instructions
+
+* **Automatic Text-to-Image / Image-to-Image Switching**: Omitting `image_url` defaults to text-to-image; passing 1–16 reference images switches to image-to-image, which can be used for partial editing, outfit changes, background replacement, style transfer, and multi-image composition.
+* **Consistent Parameters for Both Modes**: Text-to-image and image-to-image use the same set of parameters and are billed according to the `quality` tier.
+* **Output Dimensions**: Determined jointly by `aspect_ratio` and `quality`, with actual pixel dimensions subject to the returned image; if you need 1K / 2K / 4K or more aspect ratios, please use [GPT-Image-2](/en/api-reference/images/gpt-image-2/generation).
+* **No Deduction on Failure**: Credits will not be deducted if the task fails.
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  Initiator task ID, can be used to query results
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Initial status, fixed to `"pending"`
+</ResponseField>
+
+<ResponseField name="estimated_credits" type="number">
+  Estimated credit consumption, varies with `quality` tier
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  Creation time (ISO format)
+</ResponseField>
+
+<RequestExample>
+  ```bash cURL (Text-to-Image)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gpt_image_1_5",
+      "params": {
+        "prompt": "A vintage travel poster with the large headline \"VISIT KYOTO\", temples and cherry blossoms",
+        "aspect_ratio": "2:3",
+        "quality": "high"
+      },
+      "out_task_id": "my_task_123456"
+    }'
+  ```
+
+  ```bash cURL (Image-to-Image)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gpt_image_1_5",
+      "params": {
+        "prompt": "Change the background to a sunny beach, keeping the person unchanged",
+        "image_url": ["https://example.com/person.jpg"],
+        "aspect_ratio": "3:2",
+        "quality": "medium"
+      },
+      "out_task_id": "my_task_edit_001"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "gpt_image_1_5",
+      "params": {
+          "prompt": "Change the background to a sunny beach, keeping the person unchanged",
+          "image_url": ["https://example.com/person.jpg"],
+          "aspect_ratio": "3:2",
+          "quality": "medium"
+      },
+      "out_task_id": "my_task_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "gpt_image_1_5",
+    params: {
+      prompt: "Change the background to a sunny beach, keeping the person unchanged",
+      image_url: ["https://example.com/person.jpg"],
+      aspect_ratio: "3:2",
+      quality: "medium"
+    },
+    out_task_id: "my_task_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "gpt_image_1_5",
+          "params": map[string]interface{}{
+              "prompt":       "Change the background to a sunny beach, keeping the person unchanged",
+              "image_url":    []string{"https://example.com/person.jpg"},
+              "aspect_ratio": "3:2",
+              "quality":      "medium",
+          },
+          "out_task_id": "my_task_123456",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/openapi/submit";
+
+          String payload = """
+          {
+            "model": "gpt_image_1_5",
+            "params": {
+              "prompt": "Change the background to a sunny beach, keeping the person unchanged",
+              "image_url": ["https://example.com/person.jpg"],
+              "aspect_ratio": "3:2",
+              "quality": "medium"
+            },
+            "out_task_id": "my_task_123456"
+          }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = [
+      "model" => "gpt_image_1_5",
+      "params" => [
+          "prompt" => "Change the background to a sunny beach, keeping the person unchanged",
+          "image_url" => ["https://example.com/person.jpg"],
+          "aspect_ratio" => "3:2",
+          "quality" => "medium"
+      ],
+      "out_task_id" => "my_task_123456"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+  {
+      "statusCode": 200,
+      "message": "",
+      "data": {
+          "out_task_id": "my_task_123456",
+          "status": "pending",
+          "created_at": "2026-09-24T06:33:30.012Z"
+      }
+  }
+  ```
+
+  ```json 400
+  {
+      "statusCode": 400,
+      "message": "Invalid request parameters",
+      "ok": false
+  }
+  ```
+
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "Authentication failed, please check your API key"
+    }
+  }
+  ```
+
+  ```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "Insufficient account balance, please recharge and try again"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "Internal server error, please try again later"
+    }
+  }
+  ```
+</ResponseExample>

@@ -1,0 +1,247 @@
+---
+title: 'Jev 决策接口'
+description: |
+    - 同步决策接口，不是聊天接口，不支持流式输出
+    - 提交一段材料 `state` 和若干判断题 `questions`，同一次响应返回每题的概率、选项或分数
+    - 调用时模型名填 `jev`
+api: 'POST https://aireiter.com/api/v1/systemone'
+---
+
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  API 密钥，Bearer Token 格式
+
+  获取 API Key：
+
+  访问 <a href={apiKeyUrl} target="_blank">API Key 管理页面</a> 获取您的 API Key
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  模型名称。固定填 `jev`。
+
+  响应里的 `result.result.model` 是上游实际使用的版本号，例如 `jev-1.13.0`。这个字段由上游返回，请求里不要填版本号。
+</ParamField>
+
+<ParamField body="input" type="object" required>
+  判断内容。包含 `state` 和 `questions`。
+
+  <Expandable title="字段说明">
+    <ParamField body="state" type="string | object | array" required>
+      要判断的材料。可以是一句话，也可以是对象或数组。只放完成判断所需的数据，不要放 API Key、密码等敏感信息。
+    </ParamField>
+
+    <ParamField body="questions" type="object" required>
+      题目表，不能为空。键名由你自己起，每道题是一个对象。
+
+      每道题都要有 `type` 和 `instructions`。
+
+      * `noul` — 是非题。返回 `noul`，范围 0 到 1，表示「是」的概率。`criteria` 可选，形状为 `{ "true": "怎样算是", "false": "怎样算不是" }`。
+      * `choice` — 多选一。`criteria` 必填，是「选项名 → 说明」的对象。返回的 `choice` 是被选中的选项名。
+      * `score` — 打分。`criteria` 必填，是至少两项的有序数组，从低到高。返回的 `score` 是落在哪一档的数字，第一项是 0，可以是小数。例如三档时 `1.99` 表示几乎落在第三项。
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+一次请求可以同时包含多道 `noul`、`choice`、`score`。不要传 `stream`，本接口只返回一次完整 JSON。
+
+## Response
+
+响应体是上游原始 JSON，本接口不做改写。判断结果在 `result.result.answers`。
+
+<ResponseField name="success" type="boolean">
+  本次请求是否成功
+</ResponseField>
+
+<ResponseField name="errors" type="array">
+  错误列表。成功时为空数组
+</ResponseField>
+
+<ResponseField name="messages" type="array">
+  附加提示。没有提示时为空数组
+</ResponseField>
+
+<ResponseField name="result" type="object">
+  上游运行结果
+
+  <Expandable title="字段说明">
+    <ResponseField name="state" type="string">
+      运行状态。`Completed` 表示已经完成
+    </ResponseField>
+
+    <ResponseField name="result" type="object">
+      模型回答
+
+      <Expandable title="字段说明">
+        <ResponseField name="model" type="string">
+          上游实际使用的版本号，例如 `jev-1.13.0`
+        </ResponseField>
+
+        <ResponseField name="answers" type="object">
+          每道题的结果。键名与请求里的题目名一致。
+
+          * `noul`：`{ "type": "noul", "noul": 0.49 }`。`0.8` 及以上可视为「是」，`0.2` 及以下可视为「不是」，接近 `0.5` 表示拿不准。
+          * `choice`：`choice` 为选中的选项名，`probabilities` 为各选项概率，`confidence` 为置信度。
+          * `score`：`score` 为分数，`legend` 把档位下标映射回你提交的文案。
+        </ResponseField>
+
+        <ResponseField name="usage" type="object">
+          Token 用量
+
+          <Expandable title="字段说明">
+            <ResponseField name="input_tokens" type="integer">
+              输入 token 数
+            </ResponseField>
+            <ResponseField name="output_tokens" type="integer">
+              输出 token 数
+            </ResponseField>
+          </Expandable>
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+## 使用示例
+
+<RequestExample>
+  ```bash cURL theme={null}
+  curl https://aireiter.com/api/v1/systemone \
+    -H "Authorization: Bearer $API_KEY" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "model": "jev",
+      "input": {
+        "state": "The payment API timed out.",
+        "questions": {
+          "is_urgent": {
+            "type": "noul",
+            "instructions": "Does this need a person right now?"
+          }
+        }
+      }
+    }'
+  ```
+
+  ```python Python theme={null}
+  import os
+  import requests
+
+  response = requests.post(
+      "https://aireiter.com/api/v1/systemone",
+      headers={"Authorization": f"Bearer {os.environ['API_KEY']}"},
+      json={
+          "model": "jev",
+          "input": {
+              "state": "The payment API timed out.",
+              "questions": {
+                  "is_urgent": {
+                      "type": "noul",
+                      "instructions": "Does this need a person right now?",
+                  }
+              },
+          },
+      },
+  )
+  print(response.json()["result"]["result"]["answers"])
+  ```
+
+  ```javascript JavaScript theme={null}
+  const response = await fetch("https://aireiter.com/api/v1/systemone", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "jev",
+      input: {
+        state: "The payment API timed out.",
+        questions: {
+          is_urgent: {
+            type: "noul",
+            instructions: "Does this need a person right now?",
+          },
+        },
+      },
+    }),
+  });
+
+  const data = await response.json();
+  console.log(data.result.result.answers);
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json theme={null}
+  {
+    "result": {
+      "state": "Completed",
+      "result": {
+        "model": "jev-1.13.0",
+        "answers": {
+          "is_urgent": {
+            "type": "noul",
+            "noul": 0.49
+          }
+        },
+        "usage": {
+          "input_tokens": 280,
+          "output_tokens": 23
+        }
+      }
+    },
+    "success": true,
+    "errors": [],
+    "messages": []
+  }
+  ```
+</ResponseExample>
+
+## 多题示例
+
+`choice` 和 `score` 可以和 `noul` 放在同一次请求里。
+
+```json theme={null}
+{
+  "model": "jev",
+  "input": {
+    "state": {
+      "ticket": "支付接口间歇性超时，数据库连接池接近耗尽。"
+    },
+    "questions": {
+      "next_action": {
+        "type": "choice",
+        "instructions": "选择最安全的下一步",
+        "criteria": {
+          "rollback": "回滚最近变更",
+          "observe": "继续观察并采样日志"
+        }
+      },
+      "risk": {
+        "type": "score",
+        "instructions": "评估本次故障的风险",
+        "criteria": ["低", "中", "高", "极高"]
+      },
+      "escalate": {
+        "type": "noul",
+        "instructions": "是否需要人工升级"
+      }
+    }
+  }
+}
+```
+
+## 注意事项
+
+* 本接口不是聊天接口，不能传 `messages`，也不能传 `stream`。
+* 上下文窗口为 32000 tokens。
+* 业务失败时 HTTP 状态码可能仍为 200，请同时看 `success` 和 `errors`。鉴权失败返回 `401`，`model` 缺失或 JSON 不合法返回 `400`，模型不存在返回 `404`。
