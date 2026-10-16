@@ -29,10 +29,10 @@ Suno Extend의 AIReiter 내 모델 이름은 `suno_extend`입니다. 오디오 �
   ```
 </ParamField>
 
-## 본문
+## Body
 
 <ParamField body="model" type="string" required>
-  모델 이름, 고정값으로 사용:
+  모델 이름이며, 고정값으로 다음을 사용합니다:
 
   * `suno_extend`
 </ParamField>
@@ -42,44 +42,44 @@ Suno Extend의 AIReiter 내 모델 이름은 `suno_extend`입니다. 오디오 �
 
   <Expandable title="params 객체 속성">
     <ParamField body="audio_url" type="string | string[]" required>
-      이어서 작성할 오디오 URL로, 반드시 공개적으로 접근 가능해야 합니다. 배열을 전달할 경우 첫 번째 항목을 사용합니다.
+      이어 생성할 오디오 URL이며, 공개적으로 접근 가능해야 합니다. 배열로 전달할 경우 첫 번째 항목을 사용합니다.
 
-      오디오 요구사항:
+      오디오 요구 사항:
 
       * 형식: MP3, WAV
-      * 길이는 8분을 초과하지 않아야 합니다.
-      * 20MB를 초과하지 않아야 합니다.
+      * 길이: 8분 이하
+      * 크기: 20MB 이하
     </ParamField>
 
     <ParamField body="prompt" type="string">
-      선택 사항입니다. 이어쓰기 부분이 어떻게 전개되기를 원하는지 설명합니다. 예: 후렴을 더 크게, 아웃트로를 더 조용하게, 새로운 악기를 추가하기 등.
+      선택 사항. 이어지는 부분이 어떻게 전개되기를 원하는지 서술합니다(예: 코러스를 더 웅장하게, 아웃트로를 더 잔잔하게, 새로운 악기 추가 등).
     </ParamField>
 
     <ParamField body="continue_at" type="number" default="60">
-      원곡의 몇 초 지점부터 이어서 작성할지 지정합니다. 범위는 `0`부터 `240`까지이며, 원본 오디오 길이보다 짧아야 합니다. 기본값은 `60`이며, 보통 벌스나 후렴 뒤에 이어집니다.
+      원곡의 몇 초 시점부터 이어서 생성할지 지정합니다. 범위는 `0`에서 `240` 사이이며, 원본 오디오 길이보다 작아야 합니다. 기본값은 `60`이며, 일반적으로 벌스나 코러스 뒤에 이어집니다.
     </ParamField>
 
     <ParamField body="suno_model" type="string" default="V6">
       Suno 버전:
 
-      * `V6` - 기본값. 더 자연스러운 보컬과 풍부한 디테일
-      * `V6_MINI` - 가볍고 빠르며 품질과 속도의 균형
-      * `V6_WILD` - 더 과감하고 개성 있는 음악 표현
+      * `V6` - 기본값, 보컬이 더 자연스럽고 디테일이 풍부함
+      * `V6_MINI` - 가볍고 빠르며, 품질과 속도의 균형을 맞춤
+      * `V6_WILD` - 스타일이 더 과감하고 독창적임
     </ParamField>
 
     <ParamField body="instrumental" type="boolean" default="false">
-      이어쓰기 부분이 순수 음악인지 여부입니다.
+      이어 생성할 부분이 연주곡(인스트루멘탈)인지 여부입니다.
 
-      * `false` - 보컬이 포함된 상태로 계속 생성
+      * `false` - 보컬 포함 유지
       * `true` - 반주만 생성
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  발신 측 작업 ID입니다.
+  요청자 작업 ID입니다.
 
-  사용자가 정의한 작업 식별자로, 필수입니다. 문자, 숫자, 밑줄, 하이픈만 지원하며 길이는 1-64자입니다. 이후 이 ID로 작업 상태와 결과를 조회할 수 있습니다.
+  사용자 정의 작업 식별자이며 필수 항목입니다. 영문자, 숫자, 밑줄, 하이픈만 지원하며 길이는 1-64자입니다. 이후 이 ID를 사용하여 작업 상태와 결과를 조회할 수 있습니다.
 </ParamField>
 
 ## Response
@@ -149,7 +149,7 @@ curl --request POST \
       "model": "suno_extend",
       "params": {
         "audio_url": "https://example.com/song.mp3",
-        "prompt": "더 밝은 후렴으로 이어지게 하고, 기타는 그대로 유지",
+        "prompt": "더 밝은 후렴구로 이어지고, 기타는 그대로 유지",
         "continue_at": 60,
         "suno_model": "V6",
         "instrumental": false
@@ -167,7 +167,7 @@ curl --request POST \
       "model": "suno_extend",
       "params": {
           "audio_url": "https://example.com/song.mp3",
-          "prompt": "더 밝은 후렴으로 이어지게 하고, 기타는 그대로 유지",
+          "prompt": "더 밝은 후렴구로 이어지고, 기타는 그대로 유지",
           "continue_at": 60,
           "suno_model": "V6",
           "instrumental": False
@@ -192,7 +192,7 @@ curl --request POST \
     model: "suno_extend",
     params: {
       audio_url: "https://example.com/song.mp3",
-      prompt: "더 밝은 후렴으로 이어지게 하고, 기타는 그대로 유지",
+      prompt: "더 밝은 후렴구로 이어지고, 기타는 그대로 유지",
       continue_at: 60,
       suno_model: "V6",
       instrumental: false
@@ -233,7 +233,7 @@ curl --request POST \
           "model": "suno_extend",
           "params": map[string]interface{}{
               "audio_url": "https://example.com/song.mp3",
-              "prompt": "더 밝은 후렴으로 이어지게 하고, 기타는 그대로 유지",
+              "prompt": "더 밝은 후렴구로 이어지고, 기타는 그대로 유지",
               "continue_at": 60,
               "suno_model": "V6",
               "instrumental": false,
@@ -274,7 +274,7 @@ curl --request POST \
                 "model": "suno_extend",
                 "params": {
                   "audio_url": "https://example.com/song.mp3",
-                  "prompt": "더 밝은 후렴으로 이어지게 하고, 기타는 그대로 유지",
+                  "prompt": "더 밝은 후렴구로 이어지고, 기타는 그대로 유지",
                   "continue_at": 60,
                   "suno_model": "V6",
                   "instrumental": false
@@ -308,7 +308,7 @@ curl --request POST \
       "model" => "suno_extend",
       "params" => [
           "audio_url" => "https://example.com/song.mp3",
-          "prompt" => "더 밝은 후렴으로 이어지게 하고, 기타는 그대로 유지",
+          "prompt" => "더 밝은 후렴구로 이어지고, 기타는 그대로 유지",
           "continue_at" => 60,
           "suno_model" => "V6",
           "instrumental" => false
@@ -343,7 +343,7 @@ curl --request POST \
     model: "suno_extend",
     params: {
       audio_url: "https://example.com/song.mp3",
-      prompt: "더 밝은 후렴으로 이어지게 하고, 기타는 그대로 유지",
+      prompt: "더 밝은 후렴구로 이어지고, 기타는 그대로 유지",
       continue_at: 60,
       suno_model: "V6",
       instrumental: false
@@ -371,7 +371,7 @@ curl --request POST \
       "model": "suno_extend",
       "params": [
           "audio_url": "https://example.com/song.mp3",
-          "prompt": "더 밝은 후렴으로 이어지게 하고, 기타는 그대로 유지",
+          "prompt": "더 밝은 후렴구로 이어지고, 기타는 그대로 유지",
           "continue_at": 60,
           "suno_model": "V6",
           "instrumental": false
@@ -416,7 +416,7 @@ curl --request POST \
                       "model": "suno_extend",
                       "params": {
                         "audio_url": "https://example.com/song.mp3",
-                        "prompt": "더 밝은 후렴으로 이어지게 하고, 기타는 그대로 유지",
+                        "prompt": "더 밝은 후렴구로 이어지고, 기타는 그대로 유지",
                         "continue_at": 60,
                         "suno_model": "V6",
                         "instrumental": false
@@ -449,7 +449,7 @@ curl --request POST \
 
       if(curl) {
           const char *url = "https://aireiter.com/api/openapi/submit";
-          const char *payload = "{\"model\":\"suno_extend\",\"params\":{\"audio_url\":\"https://example.com/song.mp3\",\"prompt\":\"더 밝은 후렴으로 이어지게 하고, 기타는 그대로 유지\",\"continue_at\":60,\"suno_model\":\"V6\",\"instrumental\":false},\"out_task_id\":\"suno_extend_123456\"}";
+          const char *payload = "{\"model\":\"suno_extend\",\"params\":{\"audio_url\":\"https://example.com/song.mp3\",\"prompt\":\"더 밝은 후렴구로 이어지고, 기타는 그대로 유지\",\"continue_at\":60,\"suno_model\":\"V6\",\"instrumental\":false},\"out_task_id\":\"suno_extend_123456\"}";
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
@@ -486,7 +486,7 @@ curl --request POST \
               @"model": @"suno_extend",
               @"params": @{
                   @"audio_url": @"https://example.com/song.mp3",
-                  @"prompt": @"더 밝은 후렴으로 이어지게 하고, 기타는 그대로 유지",
+                  @"prompt": @"더 밝은 후렴구로 이어지고, 기타는 그대로 유지",
                   @"continue_at": @60,
                   @"suno_model": @"V6",
                   @"instrumental": @NO
@@ -536,7 +536,7 @@ curl --request POST \
   "model": "suno_extend",
   "params": {
     "audio_url": "https://example.com/song.mp3",
-    "prompt": "더 밝은 후렴으로 이어지게 하고, 기타는 그대로 유지",
+    "prompt": "더 밝은 후렴구로 이어지고, 기타는 그대로 유지",
     "continue_at": 60,
     "suno_model": "V6",
     "instrumental": false
@@ -569,7 +569,7 @@ curl --request POST \
       model: "suno_extend",
       params: {
         audio_url: "https://example.com/song.mp3",
-        prompt: "더 밝은 후렴으로 이어지게 하고, 기타는 그대로 유지",
+        prompt: "더 밝은 후렴구로 이어지고, 기타는 그대로 유지",
         continue_at: 60,
         suno_model: "V6",
         instrumental: false
@@ -600,7 +600,7 @@ curl --request POST \
     model = "suno_extend",
     params = list(
       audio_url = "https://example.com/song.mp3",
-      prompt = "더 밝은 후렴으로 이어지게 하고, 기타는 그대로 유지",
+      prompt = "더 밝은 후렴구로 이어지고, 기타는 그대로 유지",
       continue_at = 60,
       suno_model = "V6",
       instrumental = FALSE
@@ -638,7 +638,7 @@ curl --request POST \
   ```json 400
     {
         "statusCode": 400,
-        "message": "요청 매개변수가 잘못되었습니다",
+        "message": "요청 매개변수가 유효하지 않습니다",
         "ok": false
     }
   ```
@@ -646,7 +646,7 @@ curl --request POST \
   {
     "error": {
       "code": 401,
-      "message": "인증에 실패했습니다. API 키를 확인하세요."
+      "message": "인증에 실패했습니다. API 키를 확인해 주세요"
     }
   }
   ```
@@ -654,7 +654,7 @@ curl --request POST \
   {
     "error": {
       "code": 433,
-      "message": "계정 잔액이 부족합니다. 충전 후 다시 시도하세요."
+      "message": "계정 잔액이 부족합니다. 충전 후 다시 시도해 주세요"
     }
   }
   ```
@@ -663,7 +663,7 @@ curl --request POST \
   {
     "error": {
       "code": 500,
-      "message": "서버 내부 오류입니다. 잠시 후 다시 시도하세요."
+      "message": "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해 주세요"
     }
   }
   ```

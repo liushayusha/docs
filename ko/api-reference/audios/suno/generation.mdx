@@ -1,9 +1,9 @@
 ---
 title: 'Suno 음악 생성'
 description: |
-  - Suno 텍스트-투-뮤직, 한 번에 2곡의 오리지널 곡을 반환
-  - 비동기 처리 모드, 후속 조회를 위한 작업 ID를 반환
-  - 간단한 모드와 사용자 정의 모드를 지원하며, 보컬 또는 순수 음악을 생성 가능
+  - Suno 텍스트 기반 음악 생성, 한 번에 오리지널 곡 2곡 반환
+  - 비동기 처리 모드, 후속 조회를 위한 작업 ID 반환
+  - 심플 모드 및 커스텀 모드 지원, 보컬 또는 연주곡 생성 가능
   - V6 / V6 Mini / V6 Wild 지원
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
@@ -32,7 +32,7 @@ Suno의 AIReiter 내 모델 이름은 `suno`입니다. 가사, 이어쓰기, 커
 ## Body
 
 <ParamField body="model" type="string" required>
-  모델 이름, 고정값으로 사용:
+  모델 이름, 고정 사용:
 
   * `suno`
 </ParamField>
@@ -42,56 +42,56 @@ Suno의 AIReiter 내 모델 이름은 `suno`입니다. 가사, 이어쓰기, 커
 
   <Expandable title="params 객체 속성">
     <ParamField body="prompt" type="string" required>
-      곡 설명. 주제, 감정, 악기와 리듬을 작성할 수 있습니다.
+      곡 설명. 주제, 분위기, 악기, 템포 등을 작성할 수 있습니다.
 
-      커스텀 모드를 끄면 모델이 이를 바탕으로 제목, 스타일, 가사를 자동으로 작성합니다. 커스텀 모드를 켜고 순수 음악이 아닌 경우, 프롬프트는 가사로 처리됩니다.
+      사용자 지정 모드를 비활성화하면 모델이 이를 기반으로 제목, 스타일, 가사를 자동으로 생성합니다. 사용자 지정 모드를 활성화하고 연주곡이 아닌 경우, 프롬프트가 가사로 사용됩니다.
 
-      V6 시리즈는 최대 5000자까지 지원합니다.
+      V6 시리즈는 최대 5000자.
     </ParamField>
 
     <ParamField body="suno_model" type="string" default="V6">
       Suno 버전:
 
-      * `V6` - 기본값. 더 자연스러운 보컬과 풍부한 디테일
-      * `V6_MINI` - 가볍고 빠르며 품질과 속도의 균형
-      * `V6_WILD` - 더 과감하고 개성 있는 음악 표현
+      * `V6` - 기본값, 보컬이 더욱 자연스럽고 디테일이 풍부함
+      * `V6_MINI` - 가볍고 빠르며 품질과 속도를 겸비
+      * `V6_WILD` - 스타일이 더욱 과감하고 개성이 뚜렷함
     </ParamField>
 
     <ParamField body="custom_mode" type="boolean" default="false">
-      커스텀 모드를 켤지 여부입니다.
+      사용자 지정 모드 활성화 여부.
 
-      * `false` - 간단한 모드로, 프롬프트만 입력하면 제목, 스타일, 가사는 모델이 생성합니다
-      * `true` - 커스텀 모드로, `title`과 `style`을 지정해야 합니다. 보컬이 있는 경우 `prompt`는 가사로 사용됩니다
+      * `false` - 단순 모드, 프롬프트만 입력하며 제목, 스타일, 가사는 모델이 생성함
+      * `true` - 사용자 지정 모드, `title`과 `style`을 지정해야 함. 보컬이 있는 경우 `prompt`가 가사로 사용됨
     </ParamField>
 
     <ParamField body="instrumental" type="boolean" default="false">
-      순수 음악을 생성할지 여부입니다.
+      연주곡(순수 음악) 생성 여부.
 
-      * `false` - 보컬이 있는 곡을 생성합니다
-      * `true` - 반주만 생성하며, 보컬과 가사는 없습니다
+      * `false` - 보컬이 포함된 곡 생성
+      * `true` - 반주만 생성하며 보컬 및 가사 없음
     </ParamField>
 
     <ParamField body="vocal_gender" type="string" default="m">
-      보컬 성별 선호입니다. 순수 음악일 때는 무시됩니다.
+      보컬 성별 선호도. 사용자 지정 모드에서만 유효하며 연주곡일 경우 무시됩니다.
 
       * `m` - 남성 보컬, 기본값
       * `f` - 여성 보컬
     </ParamField>
 
     <ParamField body="title" type="string">
-      곡 제목입니다. 커스텀 모드에서만 유효하며, 최대 80자까지 가능합니다. `custom_mode`를 켜면 필수입니다.
+      곡 제목. 사용자 지정 모드에서만 유효하며 최대 80자. `custom_mode` 활성화 시 필수.
     </ParamField>
 
     <ParamField body="style" type="string">
-      곡 스타일과 제작 방향입니다. 예: indie folk, lo-fi hip hop, 80s synthwave. 커스텀 모드에서만 유효하며, 최대 1000자까지 가능합니다. `custom_mode`를 켜면 필수입니다.
+      음악 장르 및 제작 방향(예: indie folk, lo-fi hip hop, 80s synthwave). 사용자 지정 모드에서만 유효하며 최대 1000자. `custom_mode` 활성화 시 필수.
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  요청 측 작업 ID.
+  요청자 작업 ID.
 
-  사용자가 직접 정의한 작업 식별자이며, 필수입니다. 문자, 숫자, 밑줄, 하이픈만 지원하며 길이는 1-64자입니다. 이후 이 ID로 작업 상태와 결과를 조회할 수 있습니다.
+  사용자 정의 작업 식별자, 필수. 영문자, 숫자, 밑줄(_), 하이픈(-)만 지원하며 길이는 1-64자. 이후 이 ID를 사용하여 작업 상태와 결과를 조회할 수 있습니다.
 </ParamField>
 
 ## Response
@@ -158,7 +158,7 @@ curl --request POST \
 ## Request Examples
 
 <RequestExample>
-  ```bash cURL(간단 모드)
+  ```bash cURL (기본 모드)
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
@@ -166,7 +166,7 @@ curl --request POST \
     --data '{
       "model": "suno",
       "params": {
-        "prompt": "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
+        "prompt": "이른 아침 커피에 관한 따뜻한 어쿠스틱 포크 송, 부드러운 여성 보컬, 기타와 가벼운 드럼",
         "suno_model": "V6",
         "custom_mode": false,
         "instrumental": false
@@ -175,7 +175,7 @@ curl --request POST \
     }'
   ```
 
-  ```bash cURL(사용자 정의 모드)
+  ```bash cURL (사용자 지정 모드)
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
@@ -183,7 +183,7 @@ curl --request POST \
     --data '{
       "model": "suno",
       "params": {
-        "prompt": "[Verse]\\n아침 창턱에 뜨거운 커피 한 잔이 있어요\\n[Chorus]\\n이 노래가 천천히 깨어나게 해줘",
+        "prompt": "[Verse]\\n이른 아침 창가에는 따뜻한 커피 한 잔\\n[Chorus]\\n이 노래가 천천히 깨어나도록",
         "suno_model": "V6",
         "custom_mode": true,
         "instrumental": false,
@@ -203,7 +203,7 @@ curl --request POST \
   payload = {
       "model": "suno",
       "params": {
-          "prompt": "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
+          "prompt": "이른 아침 커피에 관한 따뜻한 어쿠스틱 포크 송, 부드러운 여성 보컬, 기타와 가벼운 드럼",
           "suno_model": "V6",
           "custom_mode": False,
           "instrumental": False
@@ -227,7 +227,7 @@ curl --request POST \
   const payload = {
     model: "suno",
     params: {
-      prompt: "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
+      prompt: "이른 아침 커피에 관한 따뜻한 어쿠스틱 포크 송, 부드러운 여성 보컬, 기타와 가벼운 드럼",
       suno_model: "V6",
       custom_mode: false,
       instrumental: false
@@ -267,10 +267,10 @@ curl --request POST \
       payload := map[string]interface{}{
           "model": "suno",
           "params": map[string]interface{}{
-              "prompt": "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
+              "prompt": "이른 아침 커피에 관한 따뜻한 어쿠스틱 포크 송, 부드러운 여성 보컬, 기타와 가벼운 드럼",
               "suno_model": "V6",
               "custom_mode": false,
-              "instrumental": false,
+              "instrumental": false
           },
           "out_task_id": "suno_gen_123456",
       }
@@ -307,7 +307,7 @@ curl --request POST \
 {
                 "model": "suno",
                 "params": {
-                  "prompt": "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
+                  "prompt": "이른 아침 커피에 관한 따뜻한 어쿠스틱 포크 송, 부드러운 여성 보컬, 기타와 가벼운 드럼",
                   "suno_model": "V6",
                   "custom_mode": false,
                   "instrumental": false
@@ -340,7 +340,7 @@ curl --request POST \
   $payload = [
       "model" => "suno",
       "params" => [
-          "prompt" => "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
+          "prompt" => "이른 아침 커피에 관한 따뜻한 어쿠스틱 포크 송, 부드러운 여성 보컬, 기타와 가벼운 드럼",
           "suno_model" => "V6",
           "custom_mode" => false,
           "instrumental" => false
@@ -374,7 +374,7 @@ curl --request POST \
   payload = {
     model: "suno",
     params: {
-      prompt: "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
+      prompt: "이른 아침 커피에 관한 따뜻한 어쿠스틱 포크 송, 부드러운 여성 보컬, 기타와 가벼운 드럼",
       suno_model: "V6",
       custom_mode: false,
       instrumental: false
@@ -401,7 +401,7 @@ curl --request POST \
   let payload: [String: Any] = [
       "model": "suno",
       "params": [
-          "prompt": "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
+          "prompt": "이른 아침 커피에 관한 따뜻한 어쿠스틱 포크 송, 부드러운 여성 보컬, 기타와 가벼운 드럼",
           "suno_model": "V6",
           "custom_mode": false,
           "instrumental": false
@@ -445,7 +445,7 @@ curl --request POST \
 {
                       "model": "suno",
                       "params": {
-                        "prompt": "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
+                        "prompt": "이른 아침 커피에 관한 따뜻한 어쿠스틱 포크 송, 부드러운 여성 보컬, 기타와 가벼운 드럼",
                         "suno_model": "V6",
                         "custom_mode": false,
                         "instrumental": false
@@ -478,7 +478,7 @@ curl --request POST \
 
       if(curl) {
           const char *url = "https://aireiter.com/api/openapi/submit";
-          const char *payload = "{\"model\":\"suno\",\"params\":{\"prompt\":\"아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼\",\"suno_model\":\"V6\",\"custom_mode\":false,\"instrumental\":false},\"out_task_id\":\"suno_gen_123456\"}";
+          const char *payload = "{\"model\":\"suno\",\"params\":{\"prompt\":\"이른 아침 커피에 관한 따뜻한 어쿠스틱 포크 송, 부드러운 여성 보컬, 기타와 가벼운 드럼\",\"suno_model\":\"V6\",\"custom_mode\":false,\"instrumental\":false},\"out_task_id\":\"suno_gen_123456\"}";
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
@@ -514,7 +514,7 @@ curl --request POST \
           NSDictionary *payload = @{
               @"model": @"suno",
               @"params": @{
-                  @"prompt": @"아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
+                  @"prompt": @"이른 아침 커피에 관한 따뜻한 어쿠스틱 포크 송, 부드러운 여성 보컬, 기타와 가벼운 드럼",
                   @"suno_model": @"V6",
                   @"custom_mode": @NO,
                   @"instrumental": @NO
@@ -563,7 +563,7 @@ curl --request POST \
   let payload = {|{
   "model": "suno",
   "params": {
-    "prompt": "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
+    "prompt": "이른 아침 커피에 관한 따뜻한 어쿠스틱 포크 송, 부드러운 여성 보컬, 기타와 가벼운 드럼",
     "suno_model": "V6",
     "custom_mode": false,
     "instrumental": false
@@ -595,7 +595,7 @@ curl --request POST \
     final payload = {
       model: "suno",
       params: {
-        prompt: "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
+        prompt: "이른 아침 커피에 관한 따뜻한 어쿠스틱 포크 송, 부드러운 여성 보컬, 기타와 가벼운 드럼",
         suno_model: "V6",
         custom_mode: false,
         instrumental: false
@@ -625,7 +625,7 @@ curl --request POST \
   payload <- list(
     model = "suno",
     params = list(
-      prompt = "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
+      prompt = "이른 아침 커피에 관한 따뜻한 어쿠스틱 포크 송, 부드러운 여성 보컬, 기타와 가벼운 드럼",
       suno_model = "V6",
       custom_mode = FALSE,
       instrumental = FALSE
@@ -663,7 +663,7 @@ curl --request POST \
   ```json 400
     {
         "statusCode": 400,
-        "message": "요청 매개변수가 유효하지 않습니다",
+        "message": "요청 매개변수가 올바르지 않습니다",
         "ok": false
     }
   ```
@@ -671,7 +671,7 @@ curl --request POST \
   {
     "error": {
       "code": 401,
-      "message": "인증에 실패했습니다. API 키를 확인하세요."
+      "message": "인증에 실패했습니다. API 키를 확인해 주세요"
     }
   }
   ```
@@ -679,7 +679,7 @@ curl --request POST \
   {
     "error": {
       "code": 433,
-      "message": "계정 잔액이 부족합니다. 충전 후 다시 시도하세요."
+      "message": "계정 잔액이 부족합니다. 충전 후 다시 시도해 주세요"
     }
   }
   ```
@@ -688,7 +688,7 @@ curl --request POST \
   {
     "error": {
       "code": 500,
-      "message": "서버 내부 오류입니다. 잠시 후 다시 시도하세요."
+      "message": "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해 주세요"
     }
   }
   ```

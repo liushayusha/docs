@@ -1,0 +1,742 @@
+---
+title: 'Vidu Q4 動画生成'
+description: |
+  - 生数科技 Vidu Q4 動画生成モデル
+  - 非同期処理モード、後続のクエリに使用するタスク ID を返却
+  - ファーストフレーム画像からの動画生成、参照画像（参照音声の追加可能）からの動画生成の2つのモードに対応
+  - 540p / 720p / 1080p / 2K / 4K 出力に対応、動画の長さは3〜16秒、デフォルトで同期したセリフと効果音を生成
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+<Note>
+Vidu Q4 の AIReiter におけるモデル名は `vidu_q4` です。このモデルは少なくとも1枚の画像を入力する必要があり、テキストのみからの動画生成および先頭・末尾フレームには対応していません。
+</Note>
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  すべてのAPIで Bearer Token による認証が必要です。
+
+  API Key の取得：
+
+  <a href={apiKeyUrl} target="_blank">API Key 管理ページ</a>にアクセスして API Key を取得します。
+
+  使用時はリクエストヘッダーに以下を追加します：
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  モデル名、固定値：
+
+  * `vidu_q4`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  モデルパラメータオブジェクト。
+
+  <Expandable title="params オブジェクトのプロパティ">
+    <ParamField body="prompt" type="string">
+      動画内容の説明、最大20000文字。
+
+      * `frame` モードでは任意、画面のアクションやカメラワークの記述に使用
+      * `reference` モードでは必須
+
+      参考モードではアップロード順に素材を指定可能。例：「参考画像2の男性」「参考音声1の声を使用」。
+    </ParamField>
+
+    <ParamField body="type" type="string" default="frame">
+      生成モード：
+
+      * `frame` - 最初のフレーム、デフォルト値。1枚の画像を動画の最初のフレームとして渡し、動画は画像のアスペクト比を継承
+      * `reference` - 参照、1〜15枚の参考画像を渡し、0〜3本の参考音声を追加可能
+
+      <Warning>
+        最初のフレームモードでは1枚の画像のみ渡すことができ、`audio_url` は指定できません。
+      </Warning>
+    </ParamField>
+
+    <ParamField body="image_url" type="string | string[]" required>
+      画像URL。パブリックネットワークから直接アクセス可能である必要があります。
+
+      * `frame` - 最初のフレームとして、必ず1枚のみ
+      * `reference` - 1〜15枚の参考画像
+
+      画像要件：
+
+      * フォーマット：JPG、JPEG、PNG、WEBP
+      * 1枚あたり50MB以下
+    </ParamField>
+
+    <ParamField body="audio_url" type="string | string[]">
+      参考音声URL。生成動画内の音色やトーンの指定に使用。
+
+      `reference` モードでのみ有効、最大3本。
+
+      音声要件：
+
+      * フォーマット：MP3
+      * 1本あたり3〜12秒
+      * 1本あたり50MB以下
+
+      <Warning>`frame` モードではこのパラメータを指定しないでください。</Warning>
+    </ParamField>
+
+    <ParamField body="video_length" type="integer" default="5">
+      生成する動画の長さ（秒単位）。
+
+      対応する整数：`3` から `16`。
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="720p">
+      出力解像度：
+
+      * `540p`
+      * `720p` - デフォルト値
+      * `1080p`
+      * `2K`
+      * `4K`
+
+      解像度レベルは画面の総ピクセル数に基づいて計算されます。16:9以外の画面（正方形や縦画面など）では、幅と高さがレベル名と異なる場合があります（例：540pの1:1動画は720×720）。
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="16:9">
+      動画のアスペクト比。`reference` モードでのみ有効。`frame` モードでは最初のフレーム画像のアスペクト比が継承され、指定しても無視されます。
+
+      対応するアスペクト比：
+
+      * `16:9` - 横画面、デフォルト値
+      * `9:16` - 縦画面
+      * `1:1` - 正方形
+      * `4:3` - 標準横画面
+      * `3:4` - 標準縦画面
+    </ParamField>
+
+    <ParamField body="generate_audio" type="boolean" default="true">
+      同期音声（対話や効果音）を生成するかどうか。
+
+      * `true` - 音声トラック付き動画を生成、デフォルト値
+      * `false` - 音声なし動画を出力
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  リクエスト側のタスクID。
+
+  ユーザー定義のタスク識別子、必須。英数字、アンダースコア、ハイフンのみ対応、長さは1〜64文字。後からこのIDを使用してタスクのステータスや結果を照会できます。
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  リクエスト元のタスクID。結果の照会に使用できます。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  初期ステータス。通常は `"pending"` です。
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  作成日時、ISO形式。
+</ResponseField>
+
+## Query Task
+
+Vidu Q4は非同期動画生成モデルです。タスクを送信後、`out_task_id`を使用してタスクステータスを照会してください。10〜15秒ごとに照会することをお勧めします。
+
+<ParamField body="out_task_id" type="string" required>
+  タスク送信時に渡された送信元タスクID。
+</ParamField>
+
+```bash
+curl --request POST \
+  --url https://aireiter.com/api/openapi/query \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "out_task_id": "vidu_q4_frame_123456"
+  }'
+```
+
+照会が成功して完了すると、レスポンス内の `output` 配列に生成された動画が含まれ、要素には `video` フィールドが含まれます。
+
+<RequestExample>
+  ```bash cURL（最初のフレーム）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "vidu_q4",
+      "params": {
+        "prompt": "カメラに向かって微笑みながらこんにちはと言う少女、そよ風に揺れる髪、映画のような質感、テキストなし",
+        "type": "frame",
+        "image_url": ["https://example.com/first-frame.jpg"],
+        "resolution": "720p",
+        "video_length": 5,
+        "generate_audio": true
+      },
+      "out_task_id": "vidu_q4_frame_123456"
+    }'
+  ```
+
+  ```bash cURL（参照画像 + 参照音声）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "vidu_q4",
+      "params": {
+        "prompt": "参照画像1の少女が参照画像2の通りを歩き、参照音声1の声で「今日は本当にいい天気ですね」と言う",
+        "type": "reference",
+        "image_url": ["https://example.com/girl.jpg", "https://example.com/street.jpg"],
+        "audio_url": ["https://example.com/voice.mp3"],
+        "resolution": "1080p",
+        "aspect_ratio": "9:16",
+        "video_length": 8,
+        "generate_audio": true
+      },
+      "out_task_id": "vidu_q4_ref_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "vidu_q4",
+      "params": {
+          "prompt": "カメラに向かって微笑みながらこんにちはと言う少女、そよ風に揺れる髪、映画のような質感、テキストなし",
+          "type": "frame",
+          "image_url": ["https://example.com/first-frame.jpg"],
+          "resolution": "720p",
+          "video_length": 5,
+          "generate_audio": True
+      },
+      "out_task_id": "vidu_q4_frame_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "vidu_q4",
+    params: {
+      prompt: "カメラに向かって微笑みながらこんにちはと言う少女、そよ風に揺れる髪、映画のような質感、テキストなし",
+      type: "frame",
+      image_url: ["https://example.com/first-frame.jpg"],
+      resolution: "720p",
+      video_length: 5,
+      generate_audio: true
+    },
+    out_task_id: "vidu_q4_frame_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "vidu_q4",
+          "params": map[string]interface{}{
+              "prompt": "カメラに向かって微笑みながらこんにちはと言う少女、そよ風に揺れる髪、映画のような質感、テキストなし",
+              "type": "frame",
+              "image_url": []string{"https://example.com/first-frame.jpg"},
+              "resolution": "720p",
+              "video_length": 5,
+              "generate_audio": true,
+          },
+          "out_task_id": "vidu_q4_frame_123456",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/openapi/submit";
+
+          String payload = """
+              {
+                "model": "vidu_q4",
+                "params": {
+                  "prompt": "カメラに向かって微笑みながらこんにちはと言う少女、そよ風に揺れる髪、映画のような質感、テキストなし",
+                  "type": "frame",
+                  "image_url": ["https://example.com/first-frame.jpg"],
+                  "resolution": "720p",
+                  "video_length": 5,
+                  "generate_audio": true
+                },
+                "out_task_id": "vidu_q4_frame_123456"
+              }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = [
+      "model" => "vidu_q4",
+      "params" => [
+          "prompt" => "カメラに向かって微笑みながらこんにちはと言う少女、そよ風に揺れる髪、映画のような質感、テキストなし",
+          "type" => "frame",
+          "image_url" => ["https://example.com/first-frame.jpg"],
+          "resolution" => "720p",
+          "video_length" => 5,
+          "generate_audio" => true
+      ],
+      "out_task_id" => "vidu_q4_frame_123456"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url = URI("https://aireiter.com/api/openapi/submit")
+
+  payload = {
+    model: "vidu_q4",
+    params: {
+      prompt: "カメラに向かって微笑みながらこんにちはと言う少女、そよ風に揺れる髪、映画のような質感、テキストなし",
+      type: "frame",
+      image_url: ["https://example.com/first-frame.jpg"],
+      resolution: "720p",
+      video_length: 5,
+      generate_audio: true
+    },
+    out_task_id: "vidu_q4_frame_123456"
+  }
+
+  http = Net::HTTP.new(url.host, url.port)
+  http.use_ssl = true
+
+  request = Net::HTTP::Post.new(url)
+  request["Authorization"] = "Bearer <token>"
+  request["Content-Type"] = "application/json"
+  request.body = payload.to_json
+
+  response = http.request(request)
+  puts response.body
+  ```
+
+  ```swift Swift
+  import Foundation
+
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
+
+  let payload: [String: Any] = [
+      "model": "vidu_q4",
+      "params": [
+          "prompt": "カメラに向かって微笑みながらこんにちはと言う少女、そよ風に揺れる髪、映画のような質感、テキストなし",
+          "type": "frame",
+          "image_url": ["https://example.com/first-frame.jpg"],
+          "resolution": "720p",
+          "video_length": 5,
+          "generate_audio": true
+      ],
+      "out_task_id": "vidu_q4_frame_123456"
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      if let error = error {
+          print("Error: \(error)")
+          return
+      }
+
+      if let data = data, let responseString = String(data: data, encoding: .utf8) {
+          print(responseString)
+      }
+  }
+
+  task.resume()
+  ```
+
+  ```csharp C#
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url = "https://aireiter.com/api/openapi/submit";
+
+          var payload = @"
+                {
+                    ""model"": ""vidu_q4"",
+                    ""params"": {
+                        ""prompt"": ""カメラに向かって微笑みながらこんにちはと言う少女、そよ風に揺れる髪、映画のような質感、テキストなし"",
+                        ""type"": ""frame"",
+                        ""image_url"": [""https://example.com/first-frame.jpg""],
+                        ""resolution"": ""720p"",
+                        ""video_length"": 5,
+                        ""generate_audio"": true
+                    },
+                    ""out_task_id"": ""vidu_q4_frame_123456""
+                }";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+
+          var content = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          var result = await response.Content.ReadAsStringAsync();
+
+          Console.WriteLine(result);
+      }
+  }
+  ```
+
+  ```c C
+  #include <stdio.h>
+  #include <curl/curl.h>
+
+  int main(void) {
+      CURL *curl;
+      CURLcode res;
+
+      curl_global_init(CURL_GLOBAL_DEFAULT);
+      curl = curl_easy_init();
+
+      if(curl) {
+          const char *url = "https://aireiter.com/api/openapi/submit";
+          const char *payload = "{\"model\":\"vidu_q4\",\"params\":{\"prompt\":\"カメラに向かって微笑みながらこんにちはと言う少女、そよ風に揺れる髪、映画のような質感、テキストなし\",\"type\":\"frame\",\"image_url\":[\"https://example.com/first-frame.jpg\"],\"resolution\":\"720p\",\"video_length\":5,\"generate_audio\":true},\"out_task_id\":\"vidu_q4_frame_123456\"}";
+
+          struct curl_slist *headers = NULL;
+          headers = curl_slist_append(headers, "Authorization: Bearer <token>");
+          headers = curl_slist_append(headers, "Content-Type: application/json");
+
+          curl_easy_setopt(curl, CURLOPT_URL, url);
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
+          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+          res = curl_easy_perform(curl);
+
+          if(res != CURLE_OK) {
+              fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                      curl_easy_strerror(res));
+          }
+
+          curl_slist_free_all(headers);
+          curl_easy_cleanup(curl);
+      }
+
+      curl_global_cleanup();
+      return 0;
+  }
+  ```
+
+  ```objectivec Objective-C
+  #import <Foundation/Foundation.h>
+
+  int main(int argc, const char * argv[]) {
+      @autoreleasepool {
+          NSURL *url = [NSURL URLWithString:@"https://aireiter.com/api/openapi/submit"];
+
+          NSDictionary *payload = @{
+              @"model": @"vidu_q4",
+              @"params": @{
+                  @"prompt": @"カメラに向かって微笑みながらこんにちはと言う少女、そよ風に揺れる髪、映画のような質感、テキストなし",
+                  @"type": @"frame",
+                  @"image_url": @[@"https://example.com/first-frame.jpg"],
+                  @"resolution": @"720p",
+                  @"video_length": @5,
+                  @"generate_audio": @YES
+              },
+              @"out_task_id": @"vidu_q4_frame_123456"
+          };
+
+          NSError *error;
+          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
+                                                            options:0
+                                                              error:&error];
+
+          NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+          [request setHTTPMethod:@"POST"];
+          [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
+          [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+          [request setHTTPBody:jsonData];
+
+          NSURLSessionDataTask *task = [[NSURLSession sharedSession]
+              dataTaskWithRequest:request
+              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+                  if (error) {
+                      NSLog(@"Error: %@", error);
+                      return;
+                  }
+                  NSString *result = [[NSString alloc] initWithData:data
+                                                          encoding:NSUTF8StringEncoding];
+                  NSLog(@"%@", result);
+              }];
+
+          [task resume];
+          [[NSRunLoop mainRunLoop] run];
+      }
+      return 0;
+  }
+  ```
+
+  ```ocaml OCaml
+  (* Requires cohttp and yojson libraries *)
+  open Lwt
+  open Cohttp
+  open Cohttp_lwt_unix
+
+  let url = "https://aireiter.com/api/openapi/submit"
+
+  let payload = {|{
+    "model": "vidu_q4",
+    "params": {
+      "prompt": "カメラに向かって微笑みながらこんにちはと言う少女、そよ風に揺れる髪、映画のような質感、テキストなし",
+      "type": "frame",
+      "image_url": ["https://example.com/first-frame.jpg"],
+      "resolution": "720p",
+      "video_length": 5,
+      "generate_audio": true
+    },
+    "out_task_id": "vidu_q4_frame_123456"
+  }|}
+
+  let () =
+    let headers = Header.init ()
+      |> fun h -> Header.add h "Authorization" "Bearer <token>"
+      |> fun h -> Header.add h "Content-Type" "application/json"
+    in
+    let body = Cohttp_lwt.Body.of_string payload in
+
+    let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
+      body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
+      print_endline body_str
+    in
+    Lwt_main.run response
+  ```
+
+  ```dart Dart
+  import 'dart:convert';
+  import 'package:http/http.dart' as http;
+
+  void main() async {
+    final url = Uri.parse('https://aireiter.com/api/openapi/submit');
+
+    final payload = {
+      "model": "vidu_q4",
+      "params": {
+        "prompt": "カメラに向かって微笑みながらこんにちはと言う少女、そよ風に揺れる髪、映画のような質感、テキストなし",
+        "type": "frame",
+        "image_url": ["https://example.com/first-frame.jpg"],
+        "resolution": "720p",
+        "video_length": 5,
+        "generate_audio": true
+      },
+      "out_task_id": "vidu_q4_frame_123456"
+    };
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer <token>',
+        'Content-Type': 'application/json'
+      },
+      body: jsonEncode(payload),
+    );
+
+    print(response.body);
+  }
+  ```
+
+  ```r R
+  library(httr)
+  library(jsonlite)
+
+  url <- "https://aireiter.com/api/openapi/submit"
+
+  payload <- list(
+    model = "vidu_q4",
+    params = list(
+      prompt = "カメラに向かって微笑みながらこんにちはと言う少女、そよ風に揺れる髪、映画のような質感、テキストなし",
+      type = "frame",
+      image_url = I("https://example.com/first-frame.jpg"),
+      resolution = "720p",
+      video_length = 5,
+      generate_audio = TRUE
+    ),
+    out_task_id = "vidu_q4_frame_123456"
+  )
+
+  response <- POST(
+    url,
+    add_headers(
+      Authorization = "Bearer <token>",
+      `Content-Type` = "application/json"
+    ),
+    body = toJSON(payload, auto_unbox = TRUE),
+    encode = "raw"
+  )
+
+  cat(content(response, "text"))
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "out_task_id": "vidu_q4_frame_123456",
+        "status": "pending",
+        "created_at": "2026-10-16T07:56:45.511Z"
+    }
+}
+  ```
+
+  ```json 400
+    {
+        "statusCode": 400,
+        "message": "Missing required field: image_url",
+        "ok": false
+    }
+  ```
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "認証に失敗しました。APIキーを確認してください"
+    }
+  }
+  ```
+```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "残高が不足しています。チャージしてから再試行してください"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "サーバー内部エラーが発生しました。しばらくしてから再試行してください"
+    }
+  }
+  ```
+</ResponseExample>
+
+## Mode Notes
+
+<Note>
+`frame` は1枚の画像を最初のフレームとして動画を生成します。プロンプトは任意で、アスペクト比は画像に従います。`reference` は1〜15枚の参照画像と最大3つの参照音声を組み合わせて新しい映像を生成します。プロンプトは必須で、アスペクト比を指定できます。
+</Note>
+
+<Warning>
+`type` が `frame` の場合、`image_url` は必ず1枚である必要があり、`audio_url` は渡さないでください。`type` が `reference` の場合、`prompt` を空にすることはできず、参照画像は最大15枚、参照音声は最大3つまでとなります。
+</Warning>

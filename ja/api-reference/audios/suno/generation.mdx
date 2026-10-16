@@ -1,10 +1,10 @@
 ---
 title: 'Suno 音楽生成'
 description: |
-  - Suno のテキストから音楽を生成し、一度に2曲のオリジナル楽曲を返します
-  - 非同期処理モードで、後続の問い合わせに使用するタスクIDを返します
-  - シンプルモードとカスタムモードをサポートし、ボーカル付き音楽またはインストゥルメンタルを生成できます
-  - V6 / V6 Mini / V6 Wild をサポートします
+  - Suno テキスト音楽生成、一度に2曲のオリジナル楽曲を返却
+  - 非同期処理モード、後続のクエリ用にタスクIDを返却
+  - シンプルモードとカスタムモードに対応し、ボーカル曲またはインストゥルメンタルを生成可能
+  - V6 / V6 Mini / V6 Wild に対応
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -32,66 +32,66 @@ AIReiter における Suno のモデル名は `suno` です。歌詞、継続作
 ## Body
 
 <ParamField body="model" type="string" required>
-  モデル名。固定で次を使用します:
+  モデル名。固定で使用：
 
   * `suno`
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  モデルパラメータのオブジェクト。
+  モデルパラメータオブジェクト。
 
-  <Expandable title="params オブジェクトの属性">
+  <Expandable title="params オブジェクトのプロパティ">
     <ParamField body="prompt" type="string" required>
-      楽曲の説明。テーマ、ムード、楽器、リズムを記述できます。
+      楽曲の説明。テーマ、感情、楽器、リズムなどを記述できます。
 
-      カスタムモードをオフにすると、モデルはこれに基づいてタイトル、スタイル、歌詞を自動生成します。カスタムモードをオンにしていて、かつインストゥルメンタルではない場合、プロンプトは歌詞として扱われます。
+      カスタムモードが無効の場合、モデルはこれに基づいてタイトル、スタイル、歌詞を自動生成します。カスタムモードが有効でインストゥルメンタルではない場合、プロンプトは歌詞として扱われます。
 
-      V6 系列は最大 5000 文字です。
+      V6シリーズは最大5000文字。
     </ParamField>
 
     <ParamField body="suno_model" type="string" default="V6">
-      Suno バージョン:
+      Sunoバージョン：
 
-      * `V6` - デフォルト値. より自然なボーカルと豊かなディテール
-      * `V6_MINI` - 軽量・高速で、品質と速度のバランスが取れています
-      * `V6_WILD` - より大胆で個性的な音楽表現
+      * `V6` - デフォルト値。ボーカルがより自然で、ディテールがより豊か
+      * `V6_MINI` - 軽量かつ高速。品質と速度を両立
+      * `V6_WILD` - より大胆で特徴的なスタイル
     </ParamField>
 
     <ParamField body="custom_mode" type="boolean" default="false">
       カスタムモードを有効にするかどうか。
 
-      * `false` - シンプルモード。プロンプトのみを入力し、タイトル、スタイル、歌詞はモデルが生成します
-      * `true` - カスタムモード。`title` と `style` の指定が必要です。ボーカルがある場合、`prompt` は歌詞として扱われます
+      * `false` - シンプルモード。プロンプトのみ入力し、タイトル、スタイル、歌詞はモデルによって生成
+      * `true` - カスタムモード。`title` と `style` の指定が必要。ボーカルがある場合、`prompt` は歌詞として使用
     </ParamField>
 
     <ParamField body="instrumental" type="boolean" default="false">
       インストゥルメンタルを生成するかどうか。
 
-      * `false` - ボーカル付きの楽曲を生成します
-      * `true` - 伴奏のみを出力し、ボーカルと歌詞は含みません
+      * `false` - ボーカル入りの楽曲を生成
+      * `true` - 伴奏のみ生成（ボーカルおよび歌詞なし）
     </ParamField>
 
     <ParamField body="vocal_gender" type="string" default="m">
-      ボーカルの性別の優先設定。インストゥルメンタルの場合は無視されます。
+      ボーカルの性別の好み。カスタムモードでのみ有効で、インストゥルメンタルの場合は無視されます。
 
-      * `m` - 男声、既定値
-      * `f` - 女声
+      * `m` - 男性ボーカル、デフォルト値
+      * `f` - 女性ボーカル
     </ParamField>
 
     <ParamField body="title" type="string">
-      楽曲タイトル。カスタムモードでのみ有効で、最大 80 文字です。`custom_mode` をオンにした場合は必須です。
+      楽曲のタイトル。カスタムモードでのみ有効で、最大80文字。`custom_mode` を有効にした場合は必須です。
     </ParamField>
 
     <ParamField body="style" type="string">
-      ジャンルと制作方向。たとえば indie folk、lo-fi hip hop、80s synthwave。カスタムモードでのみ有効で、最大 1000 文字です。`custom_mode` をオンにした場合は必須です。
+      音楽スタイルおよび制作の方向性（例：indie folk、lo-fi hip hop、80s synthwave）。カスタムモードでのみ有効で、最大1000文字。`custom_mode` を有効にした場合は必須です。
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  呼び出し元のタスク ID。
+  リクエスト元のタスクID。
 
-  ユーザーが定義するタスク識別子です。必須です。英字、数字、アンダースコア、ハイフンのみ使用でき、長さは 1〜64 文字です。後続でこの ID を使用してタスクの状態と結果を確認できます。
+  ユーザー定義のタスク識別子（必須）。英数字、アンダースコア、ハイフンのみ対応し、長さは1〜64文字です。後からこのIDを使用してタスクのステータスや結果を取得できます。
 </ParamField>
 
 ## Response
@@ -166,7 +166,7 @@ curl --request POST \
     --data '{
       "model": "suno",
       "params": {
-        "prompt": "朝のコーヒーをテーマにした、温かみのあるアコースティック・フォークソング。やさしい女性ボーカル、ギターと軽いドラム。",
+        "prompt": "朝のコーヒーについての心温まるアコースティックフォーク、優しい女性ボーカル、ギターと軽やかなドラム",
         "suno_model": "V6",
         "custom_mode": false,
         "instrumental": false
@@ -183,7 +183,7 @@ curl --request POST \
     --data '{
       "model": "suno",
       "params": {
-        "prompt": "[Verse]\\n朝の窓辺に一杯のホットコーヒー\\n[Chorus]\\nこの歌をゆっくり目覚めさせて",
+        "prompt": "[Verse]\\n朝の窓辺に温かいコーヒーが一杯\\n[Chorus]\\nこの歌でゆっくり目覚めよう",
         "suno_model": "V6",
         "custom_mode": true,
         "instrumental": false,
@@ -203,7 +203,7 @@ curl --request POST \
   payload = {
       "model": "suno",
       "params": {
-          "prompt": "朝のコーヒーをテーマにした、温かみのあるアコースティック・フォークソング。やさしい女性ボーカル、ギターと軽いドラム。",
+          "prompt": "朝のコーヒーについての心温まるアコースティックフォーク、優しい女性ボーカル、ギターと軽やかなドラム",
           "suno_model": "V6",
           "custom_mode": False,
           "instrumental": False
@@ -227,7 +227,7 @@ curl --request POST \
   const payload = {
     model: "suno",
     params: {
-      prompt: "朝のコーヒーをテーマにした、温かみのあるアコースティック・フォークソング。やさしい女性ボーカル、ギターと軽いドラム。",
+      prompt: "朝のコーヒーについての心温まるアコースティックフォーク、優しい女性ボーカル、ギターと軽やかなドラム",
       suno_model: "V6",
       custom_mode: false,
       instrumental: false
@@ -267,7 +267,7 @@ curl --request POST \
       payload := map[string]interface{}{
           "model": "suno",
           "params": map[string]interface{}{
-              "prompt": "朝のコーヒーをテーマにした、温かみのあるアコースティック・フォークソング。やさしい女性ボーカル、ギターと軽いドラム。",
+              "prompt": "朝のコーヒーについての心温まるアコースティックフォーク、優しい女性ボーカル、ギターと軽やかなドラム",
               "suno_model": "V6",
               "custom_mode": false,
               "instrumental": false,
@@ -307,7 +307,7 @@ curl --request POST \
 {
                 "model": "suno",
                 "params": {
-                  "prompt": "朝のコーヒーをテーマにした、温かみのあるアコースティック・フォークソング。やさしい女性ボーカル、ギターと軽いドラム。",
+                  "prompt": "朝のコーヒーについての心温まるアコースティックフォーク、優しい女性ボーカル、ギターと軽やかなドラム",
                   "suno_model": "V6",
                   "custom_mode": false,
                   "instrumental": false
@@ -340,7 +340,7 @@ curl --request POST \
   $payload = [
       "model" => "suno",
       "params" => [
-          "prompt" => "朝のコーヒーをテーマにした、温かみのあるアコースティック・フォークソング。やさしい女性ボーカル、ギターと軽いドラム。",
+          "prompt" => "朝のコーヒーについての心温まるアコースティックフォーク、優しい女性ボーカル、ギターと軽やかなドラム",
           "suno_model" => "V6",
           "custom_mode" => false,
           "instrumental" => false
@@ -374,7 +374,7 @@ curl --request POST \
   payload = {
     model: "suno",
     params: {
-      prompt: "朝のコーヒーをテーマにした、温かみのあるアコースティック・フォークソング。やさしい女性ボーカル、ギターと軽いドラム。",
+      prompt: "朝のコーヒーについての心温まるアコースティックフォーク、優しい女性ボーカル、ギターと軽やかなドラム",
       suno_model: "V6",
       custom_mode: false,
       instrumental: false
@@ -401,7 +401,7 @@ curl --request POST \
   let payload: [String: Any] = [
       "model": "suno",
       "params": [
-          "prompt": "朝のコーヒーをテーマにした、温かみのあるアコースティック・フォークソング。やさしい女性ボーカル、ギターと軽いドラム。",
+          "prompt": "朝のコーヒーについての心温まるアコースティックフォーク、優しい女性ボーカル、ギターと軽やかなドラム",
           "suno_model": "V6",
           "custom_mode": false,
           "instrumental": false
@@ -445,7 +445,7 @@ curl --request POST \
 {
                       "model": "suno",
                       "params": {
-                        "prompt": "朝のコーヒーをテーマにした、温かみのあるアコースティック・フォークソング。やさしい女性ボーカル、ギターと軽いドラム。",
+                        "prompt": "朝のコーヒーについての心温まるアコースティックフォーク、優しい女性ボーカル、ギターと軽やかなドラム",
                         "suno_model": "V6",
                         "custom_mode": false,
                         "instrumental": false
@@ -478,7 +478,7 @@ curl --request POST \
 
       if(curl) {
           const char *url = "https://aireiter.com/api/openapi/submit";
-          const char *payload = "{\"model\":\"suno\",\"params\":{\"prompt\":\"朝のコーヒーをテーマにした、温かみのあるアコースティック・フォークソング。やさしい女性ボーカル、ギターと軽いドラム。\",\"suno_model\":\"V6\",\"custom_mode\":false,\"instrumental\":false},\"out_task_id\":\"suno_gen_123456\"}";
+          const char *payload = "{\"model\":\"suno\",\"params\":{\"prompt\":\"朝のコーヒーについての心温まるアコースティックフォーク、優しい女性ボーカル、ギターと軽やかなドラム\",\"suno_model\":\"V6\",\"custom_mode\":false,\"instrumental\":false},\"out_task_id\":\"suno_gen_123456\"}";
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
@@ -514,7 +514,7 @@ curl --request POST \
           NSDictionary *payload = @{
               @"model": @"suno",
               @"params": @{
-                  @"prompt": @"朝のコーヒーをテーマにした、温かみのあるアコースティック・フォークソング。やさしい女性ボーカル、ギターと軽いドラム。",
+                  @"prompt": @"朝のコーヒーについての心温まるアコースティックフォーク、優しい女性ボーカル、ギターと軽やかなドラム",
                   @"suno_model": @"V6",
                   @"custom_mode": @NO,
                   @"instrumental": @NO
@@ -563,7 +563,7 @@ curl --request POST \
   let payload = {|{
   "model": "suno",
   "params": {
-    "prompt": "朝のコーヒーをテーマにした、温かみのあるアコースティック・フォークソング。やさしい女性ボーカル、ギターと軽いドラム。",
+    "prompt": "朝のコーヒーについての心温まるアコースティックフォーク、優しい女性ボーカル、ギターと軽やかなドラム",
     "suno_model": "V6",
     "custom_mode": false,
     "instrumental": false
@@ -595,7 +595,7 @@ curl --request POST \
     final payload = {
       model: "suno",
       params: {
-        prompt: "朝のコーヒーをテーマにした、温かみのあるアコースティック・フォークソング。やさしい女性ボーカル、ギターと軽いドラム。",
+        prompt: "朝のコーヒーについての心温まるアコースティックフォーク、優しい女性ボーカル、ギターと軽やかなドラム",
         suno_model: "V6",
         custom_mode: false,
         instrumental: false
@@ -625,7 +625,7 @@ curl --request POST \
   payload <- list(
     model = "suno",
     params = list(
-      prompt = "朝のコーヒーをテーマにした、温かみのあるアコースティック・フォークソング。やさしい女性ボーカル、ギターと軽いドラム。",
+      prompt = "朝のコーヒーについての心温まるアコースティックフォーク、優しい女性ボーカル、ギターと軽やかなドラム",
       suno_model = "V6",
       custom_mode = FALSE,
       instrumental = FALSE
@@ -679,7 +679,7 @@ curl --request POST \
   {
     "error": {
       "code": 433,
-      "message": "残高不足です。チャージしてから再度お試しください"
+      "message": "アカウント残高が不足しています。チャージしてからもう一度お試しください"
     }
   }
   ```
@@ -688,7 +688,7 @@ curl --request POST \
   {
     "error": {
       "code": 500,
-      "message": "サーバー内部エラーです。しばらくしてから再試行してください"
+      "message": "サーバー内部エラーが発生しました。しばらくしてからもう一度お試しください"
     }
   }
   ```

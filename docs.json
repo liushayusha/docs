@@ -330,6 +330,13 @@
                 "pages": [
                   "zh/api-reference/videos/wan-3-0/generation"
                 ]
+              },
+              {
+                "group": "Vidu Q4",
+                "icon": "video",
+                "pages": [
+                  "zh/api-reference/videos/vidu-q4/generation"
+                ]
               }
             ]
           },
@@ -735,6 +742,13 @@
                 "icon": "video",
                 "pages": [
                   "en/api-reference/videos/wan-3-0/generation"
+                ]
+              },
+              {
+                "group": "Vidu Q4",
+                "icon": "video",
+                "pages": [
+                  "en/api-reference/videos/vidu-q4/generation"
                 ]
               }
             ]
@@ -1142,6 +1156,13 @@
                 "pages": [
                   "ja/api-reference/videos/wan-3-0/generation"
                 ]
+              },
+              {
+                "group": "Vidu Q4",
+                "icon": "video",
+                "pages": [
+                  "ja/api-reference/videos/vidu-q4/generation"
+                ]
               }
             ]
           },
@@ -1547,6 +1568,13 @@
                 "icon": "video",
                 "pages": [
                   "ko/api-reference/videos/wan-3-0/generation"
+                ]
+              },
+              {
+                "group": "Vidu Q4",
+                "icon": "video",
+                "pages": [
+                  "ko/api-reference/videos/vidu-q4/generation"
                 ]
               }
             ]

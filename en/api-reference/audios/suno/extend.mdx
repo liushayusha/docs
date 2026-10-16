@@ -32,43 +32,43 @@ The model name for Suno Extend in AIReiter is `suno_extend`. Upload an audio tra
 ## Body
 
 <ParamField body="model" type="string" required>
-  Model name, fixed as:
+  Model name, fixed to:
 
   * `suno_extend`
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  Model parameters object.
+  Model parameter object.
 
   <Expandable title="params Object Properties">
     <ParamField body="audio_url" type="string | string[]" required>
-      The audio URL to continue, and it must be publicly accessible. If an array is passed, use the first item.
+      The URL of the audio to extend, which must be publicly accessible. When passing an array, the first item is used.
 
       Audio requirements:
 
       * Format: MP3, WAV
-      * Duration: no more than 8 minutes
-      * Size: no more than 20MB
+      * Duration not exceeding 8 minutes
+      * Size not exceeding 20 MB
     </ParamField>
 
     <ParamField body="prompt" type="string">
-      Optional. Describe how you want the continuation to develop, for example, a louder chorus, a quieter outro, or the addition of a new instrument.
+      Optional. Describes how the extended part should develop, such as a louder chorus, a quieter outro, or adding a new instrument.
     </ParamField>
 
     <ParamField body="continue_at" type="number" default="60">
-      The second in the original track from which to continue. Range `0` to `240`, and it must be shorter than the original audio duration. Default `60`, usually placed after the verse or chorus.
+      The point in seconds from the original song to continue from. Range is `0` to `240`, and must be less than the original audio duration. Default is `60`, typically placed after a verse or chorus.
     </ParamField>
 
     <ParamField body="suno_model" type="string" default="V6">
       Suno version:
 
-      * `V6` - Default value. more natural vocals and richer detail
-      * `V6_MINI` - lightweight and fast, balancing quality and speed
-      * `V6_WILD` - bolder, more distinctive musical expression
+      * `V6` - Default value, more natural vocals and richer details
+      * `V6_MINI` - Lightweight and fast, balancing quality and speed
+      * `V6_WILD` - Bolder style, more distinctive
     </ParamField>
 
     <ParamField body="instrumental" type="boolean" default="false">
-      Whether the continuation is instrumental only.
+      Whether the extended part is instrumental.
 
       * `false` - Continue with vocals
       * `true` - Instrumental only
@@ -79,7 +79,7 @@ The model name for Suno Extend in AIReiter is `suno_extend`. Upload an audio tra
 <ParamField body="out_task_id" type="string" required>
   Initiator task ID.
 
-  User-defined task identifier, required. Only letters, numbers, underscores, and hyphens are supported, with a length of 1-64 characters. You can later use this ID to query the task status and results.
+  User-defined task identifier, required. Supports only letters, numbers, underscores, and hyphens, with a length of 1-64 characters. This ID can be used later to query task status and results.
 </ParamField>
 
 ## Response
@@ -149,7 +149,7 @@ After a successful query and completion, the `output` example is:
       "model": "suno_extend",
       "params": {
         "audio_url": "https://example.com/song.mp3",
-        "prompt": "Switch to a brighter chorus, keep the guitar unchanged",
+        "prompt": "Transition to a brighter chorus, keeping the guitar unchanged",
         "continue_at": 60,
         "suno_model": "V6",
         "instrumental": false
@@ -167,7 +167,7 @@ After a successful query and completion, the `output` example is:
       "model": "suno_extend",
       "params": {
           "audio_url": "https://example.com/song.mp3",
-          "prompt": "Switch to a brighter chorus, keep the guitar unchanged",
+          "prompt": "Transition to a brighter chorus, keeping the guitar unchanged",
           "continue_at": 60,
           "suno_model": "V6",
           "instrumental": False
@@ -192,7 +192,7 @@ After a successful query and completion, the `output` example is:
     model: "suno_extend",
     params: {
       audio_url: "https://example.com/song.mp3",
-      prompt: "Switch to a brighter chorus, keep the guitar unchanged",
+      prompt: "Transition to a brighter chorus, keeping the guitar unchanged",
       continue_at: 60,
       suno_model: "V6",
       instrumental: false
@@ -233,7 +233,7 @@ After a successful query and completion, the `output` example is:
           "model": "suno_extend",
           "params": map[string]interface{}{
               "audio_url": "https://example.com/song.mp3",
-              "prompt": "Switch to a brighter chorus, keep the guitar unchanged",
+              "prompt": "Transition to a brighter chorus, keeping the guitar unchanged",
               "continue_at": 60,
               "suno_model": "V6",
               "instrumental": false,
@@ -274,7 +274,7 @@ After a successful query and completion, the `output` example is:
                 "model": "suno_extend",
                 "params": {
                   "audio_url": "https://example.com/song.mp3",
-                  "prompt": "Switch to a brighter chorus, keep the guitar unchanged",
+                  "prompt": "Transition to a brighter chorus, keeping the guitar unchanged",
                   "continue_at": 60,
                   "suno_model": "V6",
                   "instrumental": false
@@ -308,7 +308,7 @@ After a successful query and completion, the `output` example is:
       "model" => "suno_extend",
       "params" => [
           "audio_url" => "https://example.com/song.mp3",
-          "prompt" => "Switch to a brighter chorus, keep the guitar unchanged",
+          "prompt" => "Transition to a brighter chorus, keeping the guitar unchanged",
           "continue_at" => 60,
           "suno_model" => "V6",
           "instrumental" => false
@@ -343,7 +343,7 @@ After a successful query and completion, the `output` example is:
     model: "suno_extend",
     params: {
       audio_url: "https://example.com/song.mp3",
-      prompt: "Switch to a brighter chorus, keep the guitar unchanged",
+      prompt: "Transition to a brighter chorus, keeping the guitar unchanged",
       continue_at: 60,
       suno_model: "V6",
       instrumental: false
@@ -371,7 +371,7 @@ After a successful query and completion, the `output` example is:
       "model": "suno_extend",
       "params": [
           "audio_url": "https://example.com/song.mp3",
-          "prompt": "Switch to a brighter chorus, keep the guitar unchanged",
+          "prompt": "Transition to a brighter chorus, keeping the guitar unchanged",
           "continue_at": 60,
           "suno_model": "V6",
           "instrumental": false
@@ -416,7 +416,7 @@ After a successful query and completion, the `output` example is:
                       "model": "suno_extend",
                       "params": {
                         "audio_url": "https://example.com/song.mp3",
-                        "prompt": "Switch to a brighter chorus, keep the guitar unchanged",
+                        "prompt": "Transition to a brighter chorus, keeping the guitar unchanged",
                         "continue_at": 60,
                         "suno_model": "V6",
                         "instrumental": false
@@ -449,7 +449,7 @@ After a successful query and completion, the `output` example is:
 
       if(curl) {
           const char *url = "https://aireiter.com/api/openapi/submit";
-          const char *payload = "{\"model\":\"suno_extend\",\"params\":{\"audio_url\":\"https://example.com/song.mp3\",\"prompt\":\"Switch to a brighter chorus, keep the guitar unchanged\",\"continue_at\":60,\"suno_model\":\"V6\",\"instrumental\":false},\"out_task_id\":\"suno_extend_123456\"}";
+          const char *payload = "{\"model\":\"suno_extend\",\"params\":{\"audio_url\":\"https://example.com/song.mp3\",\"prompt\":\"Transition to a brighter chorus, keeping the guitar unchanged\",\"continue_at\":60,\"suno_model\":\"V6\",\"instrumental\":false},\"out_task_id\":\"suno_extend_123456\"}";
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
@@ -486,7 +486,7 @@ After a successful query and completion, the `output` example is:
               @"model": @"suno_extend",
               @"params": @{
                   @"audio_url": @"https://example.com/song.mp3",
-                  @"prompt": @"Switch to a brighter chorus, keep the guitar unchanged",
+                  @"prompt": @"Transition to a brighter chorus, keeping the guitar unchanged",
                   @"continue_at": @60,
                   @"suno_model": @"V6",
                   @"instrumental": @NO
@@ -536,7 +536,7 @@ After a successful query and completion, the `output` example is:
   "model": "suno_extend",
   "params": {
     "audio_url": "https://example.com/song.mp3",
-    "prompt": "Switch to a brighter chorus, keep the guitar unchanged",
+    "prompt": "Transition to a brighter chorus, keeping the guitar unchanged",
     "continue_at": 60,
     "suno_model": "V6",
     "instrumental": false
@@ -569,7 +569,7 @@ After a successful query and completion, the `output` example is:
       model: "suno_extend",
       params: {
         audio_url: "https://example.com/song.mp3",
-        prompt: "Switch to a brighter chorus, keep the guitar unchanged",
+        prompt: "Transition to a brighter chorus, keeping the guitar unchanged",
         continue_at: 60,
         suno_model: "V6",
         instrumental: false
@@ -600,7 +600,7 @@ After a successful query and completion, the `output` example is:
     model = "suno_extend",
     params = list(
       audio_url = "https://example.com/song.mp3",
-      prompt = "Switch to a brighter chorus, keep the guitar unchanged",
+      prompt = "Transition to a brighter chorus, keeping the guitar unchanged",
       continue_at = 60,
       suno_model = "V6",
       instrumental = FALSE
@@ -654,7 +654,7 @@ After a successful query and completion, the `output` example is:
   {
     "error": {
       "code": 433,
-      "message": "Insufficient account balance, please top up and try again"
+      "message": "Insufficient account balance, please recharge and try again"
     }
   }
   ```
