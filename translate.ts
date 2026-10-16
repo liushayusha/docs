@@ -591,7 +591,7 @@ async function translateSingleChunk(sourceLang: string, targetLang: string, text
   try {
     const userPrompt = createTranslateUserPrompt(sourceLang, targetLang, textObj);
     const response = await openai.chat.completions.create({
-      model: process.env.TRANSLATE_MODEL || "gemini-3.7-flash-high",
+      model: process.env.TRANSLATE_MODEL || "gemini-3.8-flash-high",
       messages: [
         { role: "system", content: translateSystemPrompt },
         { role: "user", content: userPrompt },

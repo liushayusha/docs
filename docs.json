@@ -156,6 +156,13 @@
                 ]
               },
               {
+                "group": "Midjourney V8.2",
+                "icon": "image",
+                "pages": [
+                  "zh/api-reference/images/midjourney-v8-2/generation"
+                ]
+              },
+              {
                 "group": "Krea 2 Turbo",
                 "icon": "image",
                 "pages": [
@@ -552,6 +559,13 @@
                   "en/api-reference/images/midjourney-v8-1/generation",
                   "en/api-reference/images/midjourney-v8-1/retexture",
                   "en/api-reference/images/midjourney-v8-1/remove-bg"
+                ]
+              },
+              {
+                "group": "Midjourney V8.2",
+                "icon": "image",
+                "pages": [
+                  "en/api-reference/images/midjourney-v8-2/generation"
                 ]
               },
               {
@@ -954,6 +968,13 @@
                 ]
               },
               {
+                "group": "Midjourney V8.2",
+                "icon": "image",
+                "pages": [
+                  "ja/api-reference/images/midjourney-v8-2/generation"
+                ]
+              },
+              {
                 "group": "Krea 2 Turbo",
                 "icon": "image",
                 "pages": [
@@ -1350,6 +1371,13 @@
                   "ko/api-reference/images/midjourney-v8-1/generation",
                   "ko/api-reference/images/midjourney-v8-1/retexture",
                   "ko/api-reference/images/midjourney-v8-1/remove-bg"
+                ]
+              },
+              {
+                "group": "Midjourney V8.2",
+                "icon": "image",
+                "pages": [
+                  "ko/api-reference/images/midjourney-v8-2/generation"
                 ]
               },
               {

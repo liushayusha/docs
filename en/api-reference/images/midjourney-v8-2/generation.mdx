@@ -1,0 +1,733 @@
+---
+title: 'Midjourney V8.2 Image Generation'
+description: |
+    - Asynchronous processing mode, returns a task ID for subsequent queries
+    - Generates 4 independent images per request, billed per request, not per image
+    - Supports text-to-image, reference images (up to 4 images), style reference, and image editing
+    - Aspect ratio, quality, and speed are selected via parameters, without needing to manually write Midjourney parameters in the prompt
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  All endpoints require Bearer Token authentication
+
+  Get an API Key:
+
+  Visit the <a href={apiKeyUrl} target="_blank">API Key Management page</a> to get your API Key
+
+  Add to the request header when using:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  Model name, fixed to `"mj_v8_2"`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  Model parameter object
+
+  <Expandable title="params Object Properties">
+    <ParamField body="prompt" type="string" required>
+      Text description of the image, written in natural language to describe the desired scene
+
+      * Midjourney parameters such as version, aspect ratio, quality, and speed are automatically added by the fields below and do not need to be written manually
+      * Manually written `--` parameters (such as `--ar`, `--v`, `--fast`) in the prompt will be ignored; content starting from the first `--` will not take effect
+      * When using image editing (`use_edit`), you can directly write modification instructions, for example: "Render this logo as a hand drawn pencil sketch"
+    </ParamField>
+
+    <ParamField body="image_url" type="string[]">
+      URL list of reference images (Image Prompt), affecting the content, composition, and color scheme of the final result
+
+      * Up to 4 images, used in the order passed
+      * If omitted, text-to-image generation is performed
+      * Supports the following two formats:
+        1. Publicly accessible URL (cannot require login, cookies, or temporary authorization)
+        2. Base64 encoded format
+           * Must use the complete Data URI format: `data:image/{format};base64,{base64_data}`
+           * Supported image formats: jpeg, png, webp
+           * Example: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+           * ⚠️ Note: Must include the `data:image/jpeg;base64,` prefix; Base64 image size cannot exceed 10 MB
+    </ParamField>
+
+    <ParamField body="image_weight" type="number" default="1">
+      Reference image weight (corresponding to `--iw`), indicating how closely the output adheres to the reference image
+
+      * Value range: 0-3, default is 1; higher values make it resemble the reference image more
+      * Takes effect only when `image_url` is provided
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="1:1">
+      Image aspect ratio (corresponding to `--ar`)
+
+      Supported aspect ratios:
+
+      * `1:1` - Square (default)
+      * `16:9` - Landscape widescreen
+      * `9:16` - Portrait vertical
+      * `4:3` - Landscape 4:3
+      * `3:4` - Portrait 3:4
+      * `3:2` - Landscape 3:2
+      * `2:3` - Portrait 2:3
+    </ParamField>
+
+    <ParamField body="quality" type="string" default="sd">
+      Image quality level
+
+      Supported values:
+
+      * `sd` - Standard definition (default), 1024×1024 per image at 1:1
+      * `hd` - Native high definition, 2048×2048 per image at 1:1
+
+      Other aspect ratios are converted proportionally; the actual size depends on the returned image.
+    </ParamField>
+
+    <ParamField body="speed" type="string" default="fast">
+      Generation speed (corresponding to `--fast` / `--relax`)
+
+      Supported values:
+
+      * `fast` - Fast mode (default)
+      * `relax` - Relaxed mode, longer queuing time
+
+      Relaxed mode is processed by a dedicated queue, which in practice is more than twice as slow as fast mode.
+    </ParamField>
+
+    <ParamField body="use_style_ref" type="boolean" default="false">
+      Whether to enable style reference (corresponding to `--sref`)
+
+      Borrows the art style, color scheme, and texture from another image without copying its people or objects. When set to `true`, `style_image_url` must be provided.
+    </ParamField>
+
+    <ParamField body="style_image_url" type="string">
+      Style reference image, 1 image
+
+      * Takes effect only when `use_style_ref` is `true`, and is required in this case
+      * Format requirements are the same as `image_url`
+    </ParamField>
+
+    <ParamField body="style_weight" type="number" default="100">
+      Style strength (corresponding to `--sw`)
+
+      * Value range: 0-1000, default is 100
+      * Takes effect only when `use_style_ref` is `true`
+    </ParamField>
+
+    <ParamField body="use_edit" type="boolean" default="false">
+      Whether to enable image editing (corresponding to `--edit`)
+
+      Edits an existing image using `prompt` as the modification instruction. When set to `true`, `edit_image_url` must be provided. Can be used simultaneously with `image_url` and style reference.
+    </ParamField>
+
+    <ParamField body="edit_image_url" type="string">
+      Image to be edited, 1 image
+
+      * Takes effect only when `use_edit` is `true`, and is required in this case
+      * Format requirements are the same as `image_url`
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  Caller Task ID
+
+  User-defined task identifier, required. Supports only letters, numbers, `_`, and `-`, with a length of 1-64 characters
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  Caller task ID, can be used to query results
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Initial status, fixed as `"pending"`
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  Creation time (ISO format)
+</ResponseField>
+
+After the task is completed, retrieve the result via the query endpoint: `data.output` contains 4 images, arranged in the order of the original 2x2 grid: top-left, top-right, bottom-left, and bottom-right. Generation usually takes a few minutes; please do not submit repeatedly while waiting.
+
+<RequestExample>
+  ```bash cURL
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "mj_v8_2",
+      "params": {
+        "prompt": "A blue robot watering tulips in a sunny garden, storybook illustration",
+        "image_url": [
+          "https://example.com/product.png",
+          "https://example.com/style.png"
+        ],
+        "aspect_ratio": "16:9",
+        "quality": "hd",
+        "speed": "fast"
+      },
+      "out_task_id": "my_task_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "mj_v8_2",
+      "params": {
+          "prompt": "A blue robot watering tulips in a sunny garden, storybook illustration",
+          "image_url": [
+              "https://example.com/product.png",
+              "https://example.com/style.png"
+          ],
+          "aspect_ratio": "16:9",
+          "quality": "hd",
+          "speed": "fast"
+      },
+      "out_task_id": "my_task_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "mj_v8_2",
+    params: {
+      prompt: "A blue robot watering tulips in a sunny garden, storybook illustration",
+      image_url: [
+        "https://example.com/product.png",
+        "https://example.com/style.png"
+      ],
+      aspect_ratio: "16:9",
+      quality: "hd",
+      speed: "fast"
+    },
+    out_task_id: "my_task_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "mj_v8_2",
+          "params": map[string]interface{}{
+              "prompt":       "A blue robot watering tulips in a sunny garden, storybook illustration",
+              "image_url":    []string{"https://example.com/product.png", "https://example.com/style.png"},
+              "aspect_ratio": "16:9",
+              "quality":   "hd",
+              "speed":   "fast",
+          },
+          "out_task_id": "my_task_123456",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := io.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/openapi/submit";
+
+          String payload = """
+          {
+            "model": "mj_v8_2",
+            "params": {
+              "prompt": "A blue robot watering tulips in a sunny garden, storybook illustration",
+              "image_url": [
+                "https://example.com/product.png",
+                "https://example.com/style.png"
+              ],
+              "aspect_ratio": "16:9",
+              "quality": "hd",
+              "speed": "fast"
+            },
+            "out_task_id": "my_task_123456"
+          }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = [
+      "model" => "mj_v8_2",
+      "params" => [
+          "prompt" => "A blue robot watering tulips in a sunny garden, storybook illustration",
+          "image_url" => [
+              "https://example.com/product.png",
+              "https://example.com/style.png"
+          ],
+          "aspect_ratio" => "16:9",
+          "quality" => "hd",
+          "speed" => "fast"
+      ],
+      "out_task_id" => "my_task_123456"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url = URI("https://aireiter.com/api/openapi/submit")
+
+  payload = {
+    model: "mj_v8_2",
+    params: {
+      prompt: "A blue robot watering tulips in a sunny garden, storybook illustration",
+      image_url: [
+        "https://example.com/product.png",
+        "https://example.com/style.png"
+      ],
+      aspect_ratio: "16:9",
+      quality: "hd",
+      speed: "fast"
+    },
+    out_task_id: "my_task_123456"
+  }
+
+  http = Net::HTTP.new(url.host, url.port)
+  http.use_ssl = true
+
+  request = Net::HTTP::Post.new(url)
+  request["Authorization"] = "Bearer <token>"
+  request["Content-Type"] = "application/json"
+  request.body = payload.to_json
+
+  response = http.request(request)
+  puts response.body
+  ```
+
+  ```swift Swift
+  import Foundation
+
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
+
+  let payload: [String: Any] = [
+      "model": "mj_v8_2",
+      "params": [
+          "prompt": "A blue robot watering tulips in a sunny garden, storybook illustration",
+          "image_url": [
+              "https://example.com/product.png",
+              "https://example.com/style.png"
+          ],
+          "aspect_ratio": "16:9",
+          "quality": "hd",
+          "speed": "fast"
+      ],
+      "out_task_id": "my_task_123456"
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      if let error = error {
+          print("Error: \(error)")
+          return
+      }
+
+      if let data = data, let responseString = String(data: data, encoding: .utf8) {
+          print(responseString)
+      }
+  }
+
+  task.resume()
+  ```
+
+  ```csharp C#
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url = "https://aireiter.com/api/openapi/submit";
+
+          var payload = @"{
+              ""model"": ""mj_v8_2"",
+              ""params"": {
+                  ""prompt"": ""A blue robot watering tulips in a sunny garden, storybook illustration"",
+                  ""image_url"": [
+                      ""https://example.com/product.png"",
+                      ""https://example.com/style.png""
+                  ],
+                  ""aspect_ratio"": ""16:9"",
+                  ""quality"": ""hd"",
+                  ""speed"": ""fast""
+              },
+              ""out_task_id"": ""my_task_123456""
+          }";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+
+          var content = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          var result = await response.Content.ReadAsStringAsync();
+
+          Console.WriteLine(result);
+      }
+  }
+  ```
+
+  ```c C
+  #include <stdio.h>
+  #include <curl/curl.h>
+
+  int main(void) {
+      CURL *curl;
+      CURLcode res;
+
+      curl_global_init(CURL_GLOBAL_DEFAULT);
+      curl = curl_easy_init();
+
+      if(curl) {
+          const char *url = "https://aireiter.com/api/openapi/submit";
+          const char *payload = "{"
+              "\"model\":\"mj_v8_2\","
+              "\"params\":{"
+                  "\"prompt\":\"A blue robot watering tulips in a sunny garden, storybook illustration\","
+                  "\"image_url\":[\"https://example.com/product.png\",\"https://example.com/style.png\"],"
+                  "\"aspect_ratio\":\"16:9\","
+                  "\"quality\":\"hd\"",
+                  "\"speed\":\"fast\""
+              "},"
+              "\"out_task_id\":\"my_task_123456\""
+          "}";
+
+          struct curl_slist *headers = NULL;
+          headers = curl_slist_append(headers, "Authorization: Bearer <token>");
+          headers = curl_slist_append(headers, "Content-Type: application/json");
+
+          curl_easy_setopt(curl, CURLOPT_URL, url);
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
+          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+          res = curl_easy_perform(curl);
+
+          if(res != CURLE_OK) {
+              fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                      curl_easy_strerror(res));
+          }
+
+          curl_slist_free_all(headers);
+          curl_easy_cleanup(curl);
+      }
+
+      curl_global_cleanup();
+      return 0;
+  }
+  ```
+
+  ```objectivec Objective-C
+  #import <Foundation/Foundation.h>
+
+  int main(int argc, const char * argv[]) {
+      @autoreleasepool {
+          NSURL *url = [NSURL URLWithString:@"https://aireiter.com/api/openapi/submit"];
+
+          NSDictionary *payload = @{
+              @"model": @"mj_v8_2",
+              @"params": @{
+                  @"prompt": @"A blue robot watering tulips in a sunny garden, storybook illustration",
+                  @"image_url": @[@"https://example.com/product.png", @"https://example.com/style.png"],
+                  @"aspect_ratio": @"16:9",
+                  @"quality": @"hd",
+                  @"speed": @"fast"
+              },
+              @"out_task_id": @"my_task_123456"
+          };
+
+          NSError *error;
+          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
+                                                            options:0
+                                                              error:&error];
+
+          NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+          [request setHTTPMethod:@"POST"];
+          [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
+          [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+          [request setHTTPBody:jsonData];
+
+          NSURLSessionDataTask *task = [[NSURLSession sharedSession]
+              dataTaskWithRequest:request
+              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+                  if (error) {
+                      NSLog(@"Error: %@", error);
+                      return;
+                  }
+                  NSString *result = [[NSString alloc] initWithData:data
+                                                          encoding:NSUTF8StringEncoding];
+                  NSLog(@"%@", result);
+              }];
+
+          [task resume];
+          [[NSRunLoop mainRunLoop] run];
+      }
+      return 0;
+  }
+  ```
+
+  ```ocaml OCaml
+  (* Requires cohttp and yojson libraries *)
+  open Lwt
+  open Cohttp
+  open Cohttp_lwt_unix
+
+  let url = "https://aireiter.com/api/openapi/submit"
+
+  let payload = {|{
+    "model": "mj_v8_2",
+    "params": {
+      "prompt": "A blue robot watering tulips in a sunny garden, storybook illustration",
+      "image_url": [
+        "https://example.com/product.png",
+        "https://example.com/style.png"
+      ],
+      "aspect_ratio": "16:9",
+      "quality": "hd",
+      "speed": "fast"
+    },
+    "out_task_id": "my_task_123456"
+  }|}
+
+  let () =
+    let headers = Header.init ()
+      |> fun h -> Header.add h "Authorization" "Bearer <token>"
+      |> fun h -> Header.add h "Content-Type" "application/json"
+    in
+    let body = Cohttp_lwt.Body.of_string payload in
+
+    let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
+      body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
+      print_endline body_str
+    in
+    Lwt_main.run response
+  ```
+
+  ```dart Dart
+  import 'dart:convert';
+  import 'package:http/http.dart' as http;
+
+  void main() async {
+    final url = Uri.parse('https://aireiter.com/api/openapi/submit');
+
+    final payload = {
+      'model': 'mj_v8_2',
+      'params': {
+        'prompt': 'A blue robot watering tulips in a sunny garden, storybook illustration',
+        'image_url': [
+          'https://example.com/product.png',
+          'https://example.com/style.png'
+        ],
+        'aspect_ratio': '16:9',
+        'quality': 'hd',
+        'speed': 'fast'
+      },
+      'out_task_id': 'my_task_123456'
+    };
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer <token>',
+        'Content-Type': 'application/json'
+      },
+      body: jsonEncode(payload),
+    );
+
+    print(response.body);
+  }
+  ```
+
+  ```r R
+  library(httr)
+  library(jsonlite)
+
+  url <- "https://aireiter.com/api/openapi/submit"
+
+  payload <- list(
+    model = "mj_v8_2",
+    params = list(
+      prompt = "A blue robot watering tulips in a sunny garden, storybook illustration",
+      image_url = c(
+        "https://example.com/product.png",
+        "https://example.com/style.png"
+      ),
+      aspect_ratio = "16:9",
+      quality = "hd",
+      speed = "fast"
+    ),
+    out_task_id = "my_task_123456"
+  )
+
+  response <- POST(
+    url,
+    add_headers(
+      Authorization = "Bearer <token>",
+      `Content-Type` = "application/json"
+    ),
+    body = toJSON(payload, auto_unbox = TRUE),
+    encode = "raw"
+  )
+
+  cat(content(response, "text"))
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+  {
+    "statusCode": 200,
+    "message": "",
+    "data": {
+      "out_task_id": "my_task_123456",
+      "status": "pending",
+      "created_at": "2026-10-08T06:03:28.242Z"
+    }
+  }
+  ```
+
+  ```json 400
+  {
+    "statusCode": 400,
+    "message": "Invalid request parameters",
+    "ok": false
+  }
+  ```
+
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "Authentication failed, please check your API key"
+    }
+  }
+  ```
+
+  ```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "Insufficient account balance, please recharge and try again"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "Internal server error, please try again later"
+    }
+  }
+  ```
+</ResponseExample>
