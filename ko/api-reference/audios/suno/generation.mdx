@@ -4,7 +4,7 @@ description: |
   - Suno 텍스트-투-뮤직, 한 번에 2곡의 오리지널 곡을 반환
   - 비동기 처리 모드, 후속 조회를 위한 작업 ID를 반환
   - 간단한 모드와 사용자 정의 모드를 지원하며, 보컬 또는 순수 음악을 생성 가능
-  - V4 / V4.5 / V4.5+ / V4.5 All / V5 / V5.5 지원
+  - V6 / V6 Mini / V6 Wild 지원
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -46,18 +46,15 @@ Suno의 AIReiter 내 모델 이름은 `suno`입니다. 가사, 이어쓰기, 커
 
       커스텀 모드를 끄면 모델이 이를 바탕으로 제목, 스타일, 가사를 자동으로 작성합니다. 커스텀 모드를 켜고 순수 음악이 아닌 경우, 프롬프트는 가사로 처리됩니다.
 
-      V5 / V5.5 / V4.5 시리즈는 최대 5000자까지 지원합니다.
+      V6 시리즈는 최대 5000자까지 지원합니다.
     </ParamField>
 
-    <ParamField body="suno_model" type="string" default="V5">
+    <ParamField body="suno_model" type="string" default="V6">
       Suno 버전:
 
-      * `V4`
-      * `V4_5`
-      * `V4_5PLUS`
-      * `V4_5ALL`
-      * `V5` - 기본값
-      * `V5_5`
+      * `V6` - 기본값. 더 자연스러운 보컬과 풍부한 디테일
+      * `V6_MINI` - 가볍고 빠르며 품질과 속도의 균형
+      * `V6_WILD` - 더 과감하고 개성 있는 음악 표현
     </ParamField>
 
     <ParamField body="custom_mode" type="boolean" default="false">
@@ -82,7 +79,7 @@ Suno의 AIReiter 내 모델 이름은 `suno`입니다. 가사, 이어쓰기, 커
     </ParamField>
 
     <ParamField body="title" type="string">
-      곡 제목입니다. 커스텀 모드에서만 유효하며, 최대 100자까지 가능합니다. `custom_mode`를 켜면 필수입니다.
+      곡 제목입니다. 커스텀 모드에서만 유효하며, 최대 80자까지 가능합니다. `custom_mode`를 켜면 필수입니다.
     </ParamField>
 
     <ParamField body="style" type="string">
@@ -170,7 +167,7 @@ curl --request POST \
       "model": "suno",
       "params": {
         "prompt": "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
-        "suno_model": "V5",
+        "suno_model": "V6",
         "custom_mode": false,
         "instrumental": false
       },
@@ -187,7 +184,7 @@ curl --request POST \
       "model": "suno",
       "params": {
         "prompt": "[Verse]\\n아침 창턱에 뜨거운 커피 한 잔이 있어요\\n[Chorus]\\n이 노래가 천천히 깨어나게 해줘",
-        "suno_model": "V5",
+        "suno_model": "V6",
         "custom_mode": true,
         "instrumental": false,
         "title": "아침 커피",
@@ -207,7 +204,7 @@ curl --request POST \
       "model": "suno",
       "params": {
           "prompt": "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
-          "suno_model": "V5",
+          "suno_model": "V6",
           "custom_mode": False,
           "instrumental": False
       },
@@ -231,7 +228,7 @@ curl --request POST \
     model: "suno",
     params: {
       prompt: "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
-      suno_model: "V5",
+      suno_model: "V6",
       custom_mode: false,
       instrumental: false
     },
@@ -271,7 +268,7 @@ curl --request POST \
           "model": "suno",
           "params": map[string]interface{}{
               "prompt": "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
-              "suno_model": "V5",
+              "suno_model": "V6",
               "custom_mode": false,
               "instrumental": false,
           },
@@ -311,7 +308,7 @@ curl --request POST \
                 "model": "suno",
                 "params": {
                   "prompt": "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
-                  "suno_model": "V5",
+                  "suno_model": "V6",
                   "custom_mode": false,
                   "instrumental": false
                 },
@@ -344,7 +341,7 @@ curl --request POST \
       "model" => "suno",
       "params" => [
           "prompt" => "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
-          "suno_model" => "V5",
+          "suno_model" => "V6",
           "custom_mode" => false,
           "instrumental" => false
       ],
@@ -378,7 +375,7 @@ curl --request POST \
     model: "suno",
     params: {
       prompt: "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
-      suno_model: "V5",
+      suno_model: "V6",
       custom_mode: false,
       instrumental: false
     },
@@ -405,7 +402,7 @@ curl --request POST \
       "model": "suno",
       "params": [
           "prompt": "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
-          "suno_model": "V5",
+          "suno_model": "V6",
           "custom_mode": false,
           "instrumental": false
       ],
@@ -449,7 +446,7 @@ curl --request POST \
                       "model": "suno",
                       "params": {
                         "prompt": "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
-                        "suno_model": "V5",
+                        "suno_model": "V6",
                         "custom_mode": false,
                         "instrumental": false
                       },
@@ -481,7 +478,7 @@ curl --request POST \
 
       if(curl) {
           const char *url = "https://aireiter.com/api/openapi/submit";
-          const char *payload = "{\"model\":\"suno\",\"params\":{\"prompt\":\"아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼\",\"suno_model\":\"V5\",\"custom_mode\":false,\"instrumental\":false},\"out_task_id\":\"suno_gen_123456\"}";
+          const char *payload = "{\"model\":\"suno\",\"params\":{\"prompt\":\"아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼\",\"suno_model\":\"V6\",\"custom_mode\":false,\"instrumental\":false},\"out_task_id\":\"suno_gen_123456\"}";
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
@@ -518,7 +515,7 @@ curl --request POST \
               @"model": @"suno",
               @"params": @{
                   @"prompt": @"아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
-                  @"suno_model": @"V5",
+                  @"suno_model": @"V6",
                   @"custom_mode": @NO,
                   @"instrumental": @NO
               },
@@ -567,7 +564,7 @@ curl --request POST \
   "model": "suno",
   "params": {
     "prompt": "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
-    "suno_model": "V5",
+    "suno_model": "V6",
     "custom_mode": false,
     "instrumental": false
   },
@@ -599,7 +596,7 @@ curl --request POST \
       model: "suno",
       params: {
         prompt: "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
-        suno_model: "V5",
+        suno_model: "V6",
         custom_mode: false,
         instrumental: false
       },
@@ -629,7 +626,7 @@ curl --request POST \
     model = "suno",
     params = list(
       prompt = "아침 커피에 관한 따뜻한 어쿠스틱 포크 발라드, 여성 보컬은 부드럽고, 기타와 가벼운 드럼",
-      suno_model = "V5",
+      suno_model = "V6",
       custom_mode = FALSE,
       instrumental = FALSE
     ),

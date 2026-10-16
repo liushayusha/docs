@@ -60,15 +60,12 @@ Suno Extend 在 AIReiter 中的模型名称为 `suno_extend`。上传音轨或�
       从原曲第几秒开始往下接。范围 `0` 到 `240`，必须小于原音频时长。默认 `60`，一般接在主歌或副歌之后。
     </ParamField>
 
-    <ParamField body="suno_model" type="string" default="V5">
+    <ParamField body="suno_model" type="string" default="V6">
       Suno 版本：
 
-      * `V4`
-      * `V4_5`
-      * `V4_5PLUS`
-      * `V4_5ALL`
-      * `V5` - 默认值
-      * `V5_5`
+      * `V6` - 默认值，人声更自然、细节更丰富
+      * `V6_MINI` - 轻量快速，兼顾质量与速度
+      * `V6_WILD` - 风格更大胆、更有辨识度
     </ParamField>
 
     <ParamField body="instrumental" type="boolean" default="false">
@@ -155,7 +152,7 @@ curl --request POST \
         "audio_url": "https://example.com/song.mp3",
         "prompt": "接到更明亮的副歌，吉他保持不变",
         "continue_at": 60,
-        "suno_model": "V5",
+        "suno_model": "V6",
         "instrumental": false
       },
       "out_task_id": "suno_extend_123456"
@@ -173,7 +170,7 @@ curl --request POST \
           "audio_url": "https://example.com/song.mp3",
           "prompt": "接到更明亮的副歌，吉他保持不变",
           "continue_at": 60,
-          "suno_model": "V5",
+          "suno_model": "V6",
           "instrumental": False
       },
       "out_task_id": "suno_extend_123456"
@@ -198,7 +195,7 @@ curl --request POST \
       audio_url: "https://example.com/song.mp3",
       prompt: "接到更明亮的副歌，吉他保持不变",
       continue_at: 60,
-      suno_model: "V5",
+      suno_model: "V6",
       instrumental: false
     },
     out_task_id: "suno_extend_123456"
@@ -239,7 +236,7 @@ curl --request POST \
               "audio_url": "https://example.com/song.mp3",
               "prompt": "接到更明亮的副歌，吉他保持不变",
               "continue_at": 60,
-              "suno_model": "V5",
+              "suno_model": "V6",
               "instrumental": false,
           },
           "out_task_id": "suno_extend_123456",
@@ -280,7 +277,7 @@ curl --request POST \
                   "audio_url": "https://example.com/song.mp3",
                   "prompt": "接到更明亮的副歌，吉他保持不变",
                   "continue_at": 60,
-                  "suno_model": "V5",
+                  "suno_model": "V6",
                   "instrumental": false
                 },
                 "out_task_id": "suno_extend_123456"
@@ -314,7 +311,7 @@ curl --request POST \
           "audio_url" => "https://example.com/song.mp3",
           "prompt" => "接到更明亮的副歌，吉他保持不变",
           "continue_at" => 60,
-          "suno_model" => "V5",
+          "suno_model" => "V6",
           "instrumental" => false
       ],
       "out_task_id" => "suno_extend_123456"
@@ -349,7 +346,7 @@ curl --request POST \
       audio_url: "https://example.com/song.mp3",
       prompt: "接到更明亮的副歌，吉他保持不变",
       continue_at: 60,
-      suno_model: "V5",
+      suno_model: "V6",
       instrumental: false
     },
     out_task_id: "suno_extend_123456"
@@ -377,7 +374,7 @@ curl --request POST \
           "audio_url": "https://example.com/song.mp3",
           "prompt": "接到更明亮的副歌，吉他保持不变",
           "continue_at": 60,
-          "suno_model": "V5",
+          "suno_model": "V6",
           "instrumental": false
       ],
       "out_task_id": "suno_extend_123456"
@@ -422,7 +419,7 @@ curl --request POST \
                         "audio_url": "https://example.com/song.mp3",
                         "prompt": "接到更明亮的副歌，吉他保持不变",
                         "continue_at": 60,
-                        "suno_model": "V5",
+                        "suno_model": "V6",
                         "instrumental": false
                       },
                       "out_task_id": "suno_extend_123456"
@@ -453,7 +450,7 @@ curl --request POST \
 
       if(curl) {
           const char *url = "https://aireiter.com/api/openapi/submit";
-          const char *payload = "{\"model\":\"suno_extend\",\"params\":{\"audio_url\":\"https://example.com/song.mp3\",\"prompt\":\"接到更明亮的副歌，吉他保持不变\",\"continue_at\":60,\"suno_model\":\"V5\",\"instrumental\":false},\"out_task_id\":\"suno_extend_123456\"}";
+          const char *payload = "{\"model\":\"suno_extend\",\"params\":{\"audio_url\":\"https://example.com/song.mp3\",\"prompt\":\"接到更明亮的副歌，吉他保持不变\",\"continue_at\":60,\"suno_model\":\"V6\",\"instrumental\":false},\"out_task_id\":\"suno_extend_123456\"}";
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
@@ -492,7 +489,7 @@ curl --request POST \
                   @"audio_url": @"https://example.com/song.mp3",
                   @"prompt": @"接到更明亮的副歌，吉他保持不变",
                   @"continue_at": @60,
-                  @"suno_model": @"V5",
+                  @"suno_model": @"V6",
                   @"instrumental": @NO
               },
               @"out_task_id": @"suno_extend_123456"
@@ -542,7 +539,7 @@ curl --request POST \
     "audio_url": "https://example.com/song.mp3",
     "prompt": "接到更明亮的副歌，吉他保持不变",
     "continue_at": 60,
-    "suno_model": "V5",
+    "suno_model": "V6",
     "instrumental": false
   },
   "out_task_id": "suno_extend_123456"
@@ -575,7 +572,7 @@ curl --request POST \
         audio_url: "https://example.com/song.mp3",
         prompt: "接到更明亮的副歌，吉他保持不变",
         continue_at: 60,
-        suno_model: "V5",
+        suno_model: "V6",
         instrumental: false
       },
       out_task_id: "suno_extend_123456"
@@ -606,7 +603,7 @@ curl --request POST \
       audio_url = "https://example.com/song.mp3",
       prompt = "接到更明亮的副歌，吉他保持不变",
       continue_at = 60,
-      suno_model = "V5",
+      suno_model = "V6",
       instrumental = FALSE
     ),
     out_task_id = "suno_extend_123456"

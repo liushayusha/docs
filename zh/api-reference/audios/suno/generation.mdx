@@ -4,7 +4,7 @@ description: |
   - Suno 文生音乐，一次返回两首原创歌曲
   - 异步处理模式，返回任务 ID 用于后续查询
   - 支持简单模式和自定义模式，可生成人声或纯音乐
-  - 支持 V4 / V4.5 / V4.5+ / V4.5 All / V5 / V5.5
+  - 支持 V6 / V6 Mini / V6 Wild
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 
@@ -47,18 +47,15 @@ Suno 在 AIReiter 中的模型名称为 `suno`。歌词、续写、翻唱请分�
 
       关闭自定义模式时，模型会据此自动写标题、风格和歌词。打开自定义模式且不是纯音乐时，提示词会当作歌词。
 
-      V5 / V5.5 / V4.5 系列最多 5000 个字符。
+      V6 系列最多 5000 个字符。
     </ParamField>
 
-    <ParamField body="suno_model" type="string" default="V5">
+    <ParamField body="suno_model" type="string" default="V6">
       Suno 版本：
 
-      * `V4`
-      * `V4_5`
-      * `V4_5PLUS`
-      * `V4_5ALL`
-      * `V5` - 默认值
-      * `V5_5`
+      * `V6` - 默认值，人声更自然、细节更丰富
+      * `V6_MINI` - 轻量快速，兼顾质量与速度
+      * `V6_WILD` - 风格更大胆、更有辨识度
     </ParamField>
 
     <ParamField body="custom_mode" type="boolean" default="false">
@@ -76,14 +73,14 @@ Suno 在 AIReiter 中的模型名称为 `suno`。歌词、续写、翻唱请分�
     </ParamField>
 
     <ParamField body="vocal_gender" type="string" default="m">
-      人声性别偏好。纯音乐时会被忽略。
+      人声性别偏好。仅自定义模式有效，纯音乐时会被忽略。
 
       * `m` - 男声，默认值
       * `f` - 女声
     </ParamField>
 
     <ParamField body="title" type="string">
-      歌曲标题。仅自定义模式有效，最多 100 个字符。打开 `custom_mode` 时必填。
+      歌曲标题。仅自定义模式有效，最多 80 个字符。打开 `custom_mode` 时必填。
     </ParamField>
 
     <ParamField body="style" type="string">
@@ -171,7 +168,7 @@ curl --request POST \
       "model": "suno",
       "params": {
         "prompt": "一首关于清晨咖啡的温暖原声民谣，女声轻柔，吉他和轻鼓",
-        "suno_model": "V5",
+        "suno_model": "V6",
         "custom_mode": false,
         "instrumental": false
       },
@@ -188,7 +185,7 @@ curl --request POST \
       "model": "suno",
       "params": {
         "prompt": "[Verse]\\n清晨的窗台有一杯热咖啡\\n[Chorus]\\n让这首歌慢慢醒来",
-        "suno_model": "V5",
+        "suno_model": "V6",
         "custom_mode": true,
         "instrumental": false,
         "title": "清晨咖啡",
@@ -208,7 +205,7 @@ curl --request POST \
       "model": "suno",
       "params": {
           "prompt": "一首关于清晨咖啡的温暖原声民谣，女声轻柔，吉他和轻鼓",
-          "suno_model": "V5",
+          "suno_model": "V6",
           "custom_mode": False,
           "instrumental": False
       },
@@ -232,7 +229,7 @@ curl --request POST \
     model: "suno",
     params: {
       prompt: "一首关于清晨咖啡的温暖原声民谣，女声轻柔，吉他和轻鼓",
-      suno_model: "V5",
+      suno_model: "V6",
       custom_mode: false,
       instrumental: false
     },
@@ -272,7 +269,7 @@ curl --request POST \
           "model": "suno",
           "params": map[string]interface{}{
               "prompt": "一首关于清晨咖啡的温暖原声民谣，女声轻柔，吉他和轻鼓",
-              "suno_model": "V5",
+              "suno_model": "V6",
               "custom_mode": false,
               "instrumental": false,
           },
@@ -312,7 +309,7 @@ curl --request POST \
                 "model": "suno",
                 "params": {
                   "prompt": "一首关于清晨咖啡的温暖原声民谣，女声轻柔，吉他和轻鼓",
-                  "suno_model": "V5",
+                  "suno_model": "V6",
                   "custom_mode": false,
                   "instrumental": false
                 },
@@ -345,7 +342,7 @@ curl --request POST \
       "model" => "suno",
       "params" => [
           "prompt" => "一首关于清晨咖啡的温暖原声民谣，女声轻柔，吉他和轻鼓",
-          "suno_model" => "V5",
+          "suno_model" => "V6",
           "custom_mode" => false,
           "instrumental" => false
       ],
@@ -379,7 +376,7 @@ curl --request POST \
     model: "suno",
     params: {
       prompt: "一首关于清晨咖啡的温暖原声民谣，女声轻柔，吉他和轻鼓",
-      suno_model: "V5",
+      suno_model: "V6",
       custom_mode: false,
       instrumental: false
     },
@@ -406,7 +403,7 @@ curl --request POST \
       "model": "suno",
       "params": [
           "prompt": "一首关于清晨咖啡的温暖原声民谣，女声轻柔，吉他和轻鼓",
-          "suno_model": "V5",
+          "suno_model": "V6",
           "custom_mode": false,
           "instrumental": false
       ],
@@ -450,7 +447,7 @@ curl --request POST \
                       "model": "suno",
                       "params": {
                         "prompt": "一首关于清晨咖啡的温暖原声民谣，女声轻柔，吉他和轻鼓",
-                        "suno_model": "V5",
+                        "suno_model": "V6",
                         "custom_mode": false,
                         "instrumental": false
                       },
@@ -482,7 +479,7 @@ curl --request POST \
 
       if(curl) {
           const char *url = "https://aireiter.com/api/openapi/submit";
-          const char *payload = "{\"model\":\"suno\",\"params\":{\"prompt\":\"一首关于清晨咖啡的温暖原声民谣，女声轻柔，吉他和轻鼓\",\"suno_model\":\"V5\",\"custom_mode\":false,\"instrumental\":false},\"out_task_id\":\"suno_gen_123456\"}";
+          const char *payload = "{\"model\":\"suno\",\"params\":{\"prompt\":\"一首关于清晨咖啡的温暖原声民谣，女声轻柔，吉他和轻鼓\",\"suno_model\":\"V6\",\"custom_mode\":false,\"instrumental\":false},\"out_task_id\":\"suno_gen_123456\"}";
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
@@ -519,7 +516,7 @@ curl --request POST \
               @"model": @"suno",
               @"params": @{
                   @"prompt": @"一首关于清晨咖啡的温暖原声民谣，女声轻柔，吉他和轻鼓",
-                  @"suno_model": @"V5",
+                  @"suno_model": @"V6",
                   @"custom_mode": @NO,
                   @"instrumental": @NO
               },
@@ -568,7 +565,7 @@ curl --request POST \
   "model": "suno",
   "params": {
     "prompt": "一首关于清晨咖啡的温暖原声民谣，女声轻柔，吉他和轻鼓",
-    "suno_model": "V5",
+    "suno_model": "V6",
     "custom_mode": false,
     "instrumental": false
   },
@@ -600,7 +597,7 @@ curl --request POST \
       model: "suno",
       params: {
         prompt: "一首关于清晨咖啡的温暖原声民谣，女声轻柔，吉他和轻鼓",
-        suno_model: "V5",
+        suno_model: "V6",
         custom_mode: false,
         instrumental: false
       },
@@ -630,7 +627,7 @@ curl --request POST \
     model = "suno",
     params = list(
       prompt = "一首关于清晨咖啡的温暖原声民谣，女声轻柔，吉他和轻鼓",
-      suno_model = "V5",
+      suno_model = "V6",
       custom_mode = FALSE,
       instrumental = FALSE
     ),

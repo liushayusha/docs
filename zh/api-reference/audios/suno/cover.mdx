@@ -45,7 +45,7 @@ Suno Cover 在 AIReiter 中的模型名称为 `suno_cover`。旋律会贴近原�
     <ParamField body="prompt" type="string" required>
       翻唱后希望是什么味道。旋律会贴近原曲，这里改的是曲风、人声和制作。
 
-      打开自定义模式且不是纯音乐时，提示词会当作歌词。V5 / V5.5 / V4.5 系列最多 5000 个字符。
+      打开自定义模式且不是纯音乐时，提示词会当作歌词。V6 系列最多 5000 个字符。
     </ParamField>
 
     <ParamField body="audio_url" type="string | string[]" required>
@@ -58,15 +58,12 @@ Suno Cover 在 AIReiter 中的模型名称为 `suno_cover`。旋律会贴近原�
       * 不超过 20MB
     </ParamField>
 
-    <ParamField body="suno_model" type="string" default="V5">
+    <ParamField body="suno_model" type="string" default="V6">
       Suno 版本：
 
-      * `V4`
-      * `V4_5`
-      * `V4_5PLUS`
-      * `V4_5ALL`
-      * `V5` - 默认值
-      * `V5_5`
+      * `V6` - 默认值，人声更自然、细节更丰富
+      * `V6_MINI` - 轻量快速，兼顾质量与速度
+      * `V6_WILD` - 风格更大胆、更有辨识度
     </ParamField>
 
     <ParamField body="custom_mode" type="boolean" default="false">
@@ -91,7 +88,7 @@ Suno Cover 在 AIReiter 中的模型名称为 `suno_cover`。旋律会贴近原�
     </ParamField>
 
     <ParamField body="title" type="string">
-      歌曲标题。仅自定义模式有效，最多 100 个字符。打开 `custom_mode` 时必填。
+      歌曲标题。仅自定义模式有效，最多 80 个字符。打开 `custom_mode` 时必填。
     </ParamField>
 
     <ParamField body="style" type="string">
@@ -174,7 +171,7 @@ curl --request POST \
       "params": {
         "audio_url": "https://example.com/song.mp3",
         "prompt": "翻成雨夜爵士，近距离人声，lo-fi",
-        "suno_model": "V5",
+        "suno_model": "V6",
         "custom_mode": false,
         "instrumental": false
       },
@@ -192,7 +189,7 @@ curl --request POST \
       "params": {
         "audio_url": "https://example.com/song.mp3",
         "prompt": "[Verse]\\n街灯把雨丝拉得很长\\n[Chorus]\\n这首旧歌换了新衣",
-        "suno_model": "V5",
+        "suno_model": "V6",
         "custom_mode": true,
         "instrumental": false,
         "title": "雨夜翻唱",
@@ -213,7 +210,7 @@ curl --request POST \
       "params": {
           "audio_url": "https://example.com/song.mp3",
           "prompt": "翻成雨夜爵士，近距离人声，lo-fi",
-          "suno_model": "V5",
+          "suno_model": "V6",
           "custom_mode": False,
           "instrumental": False
       },
@@ -238,7 +235,7 @@ curl --request POST \
     params: {
       audio_url: "https://example.com/song.mp3",
       prompt: "翻成雨夜爵士，近距离人声，lo-fi",
-      suno_model: "V5",
+      suno_model: "V6",
       custom_mode: false,
       instrumental: false
     },
@@ -279,7 +276,7 @@ curl --request POST \
           "params": map[string]interface{}{
               "audio_url": "https://example.com/song.mp3",
               "prompt": "翻成雨夜爵士，近距离人声，lo-fi",
-              "suno_model": "V5",
+              "suno_model": "V6",
               "custom_mode": false,
               "instrumental": false,
           },
@@ -320,7 +317,7 @@ curl --request POST \
                 "params": {
                   "audio_url": "https://example.com/song.mp3",
                   "prompt": "翻成雨夜爵士，近距离人声，lo-fi",
-                  "suno_model": "V5",
+                  "suno_model": "V6",
                   "custom_mode": false,
                   "instrumental": false
                 },
@@ -354,7 +351,7 @@ curl --request POST \
       "params" => [
           "audio_url" => "https://example.com/song.mp3",
           "prompt" => "翻成雨夜爵士，近距离人声，lo-fi",
-          "suno_model" => "V5",
+          "suno_model" => "V6",
           "custom_mode" => false,
           "instrumental" => false
       ],
@@ -389,7 +386,7 @@ curl --request POST \
     params: {
       audio_url: "https://example.com/song.mp3",
       prompt: "翻成雨夜爵士，近距离人声，lo-fi",
-      suno_model: "V5",
+      suno_model: "V6",
       custom_mode: false,
       instrumental: false
     },
@@ -417,7 +414,7 @@ curl --request POST \
       "params": [
           "audio_url": "https://example.com/song.mp3",
           "prompt": "翻成雨夜爵士，近距离人声，lo-fi",
-          "suno_model": "V5",
+          "suno_model": "V6",
           "custom_mode": false,
           "instrumental": false
       ],
@@ -462,7 +459,7 @@ curl --request POST \
                       "params": {
                         "audio_url": "https://example.com/song.mp3",
                         "prompt": "翻成雨夜爵士，近距离人声，lo-fi",
-                        "suno_model": "V5",
+                        "suno_model": "V6",
                         "custom_mode": false,
                         "instrumental": false
                       },
@@ -494,7 +491,7 @@ curl --request POST \
 
       if(curl) {
           const char *url = "https://aireiter.com/api/openapi/submit";
-          const char *payload = "{\"model\":\"suno_cover\",\"params\":{\"audio_url\":\"https://example.com/song.mp3\",\"prompt\":\"翻成雨夜爵士，近距离人声，lo-fi\",\"suno_model\":\"V5\",\"custom_mode\":false,\"instrumental\":false},\"out_task_id\":\"suno_cover_123456\"}";
+          const char *payload = "{\"model\":\"suno_cover\",\"params\":{\"audio_url\":\"https://example.com/song.mp3\",\"prompt\":\"翻成雨夜爵士，近距离人声，lo-fi\",\"suno_model\":\"V6\",\"custom_mode\":false,\"instrumental\":false},\"out_task_id\":\"suno_cover_123456\"}";
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
@@ -532,7 +529,7 @@ curl --request POST \
               @"params": @{
                   @"audio_url": @"https://example.com/song.mp3",
                   @"prompt": @"翻成雨夜爵士，近距离人声，lo-fi",
-                  @"suno_model": @"V5",
+                  @"suno_model": @"V6",
                   @"custom_mode": @NO,
                   @"instrumental": @NO
               },
@@ -582,7 +579,7 @@ curl --request POST \
   "params": {
     "audio_url": "https://example.com/song.mp3",
     "prompt": "翻成雨夜爵士，近距离人声，lo-fi",
-    "suno_model": "V5",
+    "suno_model": "V6",
     "custom_mode": false,
     "instrumental": false
   },
@@ -615,7 +612,7 @@ curl --request POST \
       params: {
         audio_url: "https://example.com/song.mp3",
         prompt: "翻成雨夜爵士，近距离人声，lo-fi",
-        suno_model: "V5",
+        suno_model: "V6",
         custom_mode: false,
         instrumental: false
       },
@@ -646,7 +643,7 @@ curl --request POST \
     params = list(
       audio_url = "https://example.com/song.mp3",
       prompt = "翻成雨夜爵士，近距离人声，lo-fi",
-      suno_model = "V5",
+      suno_model = "V6",
       custom_mode = FALSE,
       instrumental = FALSE
     ),

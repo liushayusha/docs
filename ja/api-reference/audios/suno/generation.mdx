@@ -4,7 +4,7 @@ description: |
   - Suno のテキストから音楽を生成し、一度に2曲のオリジナル楽曲を返します
   - 非同期処理モードで、後続の問い合わせに使用するタスクIDを返します
   - シンプルモードとカスタムモードをサポートし、ボーカル付き音楽またはインストゥルメンタルを生成できます
-  - V4 / V4.5 / V4.5+ / V4.5 All / V5 / V5.5 をサポートします
+  - V6 / V6 Mini / V6 Wild をサポートします
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -46,18 +46,15 @@ AIReiter における Suno のモデル名は `suno` です。歌詞、継続作
 
       カスタムモードをオフにすると、モデルはこれに基づいてタイトル、スタイル、歌詞を自動生成します。カスタムモードをオンにしていて、かつインストゥルメンタルではない場合、プロンプトは歌詞として扱われます。
 
-      V5 / V5.5 / V4.5 系列は最大 5000 文字です。
+      V6 系列は最大 5000 文字です。
     </ParamField>
 
-    <ParamField body="suno_model" type="string" default="V5">
+    <ParamField body="suno_model" type="string" default="V6">
       Suno バージョン:
 
-      * `V4`
-      * `V4_5`
-      * `V4_5PLUS`
-      * `V4_5ALL`
-      * `V5` - 既定値
-      * `V5_5`
+      * `V6` - デフォルト値. より自然なボーカルと豊かなディテール
+      * `V6_MINI` - 軽量・高速で、品質と速度のバランスが取れています
+      * `V6_WILD` - より大胆で個性的な音楽表現
     </ParamField>
 
     <ParamField body="custom_mode" type="boolean" default="false">
@@ -82,7 +79,7 @@ AIReiter における Suno のモデル名は `suno` です。歌詞、継続作
     </ParamField>
 
     <ParamField body="title" type="string">
-      楽曲タイトル。カスタムモードでのみ有効で、最大 100 文字です。`custom_mode` をオンにした場合は必須です。
+      楽曲タイトル。カスタムモードでのみ有効で、最大 80 文字です。`custom_mode` をオンにした場合は必須です。
     </ParamField>
 
     <ParamField body="style" type="string">
@@ -170,7 +167,7 @@ curl --request POST \
       "model": "suno",
       "params": {
         "prompt": "朝のコーヒーをテーマにした、温かみのあるアコースティック・フォークソング。やさしい女性ボーカル、ギターと軽いドラム。",
-        "suno_model": "V5",
+        "suno_model": "V6",
         "custom_mode": false,
         "instrumental": false
       },
@@ -187,7 +184,7 @@ curl --request POST \
       "model": "suno",
       "params": {
         "prompt": "[Verse]\\n朝の窓辺に一杯のホットコーヒー\\n[Chorus]\\nこの歌をゆっくり目覚めさせて",
-        "suno_model": "V5",
+        "suno_model": "V6",
         "custom_mode": true,
         "instrumental": false,
         "title": "朝のコーヒー",
@@ -207,7 +204,7 @@ curl --request POST \
       "model": "suno",
       "params": {
           "prompt": "朝のコーヒーをテーマにした、温かみのあるアコースティック・フォークソング。やさしい女性ボーカル、ギターと軽いドラム。",
-          "suno_model": "V5",
+          "suno_model": "V6",
           "custom_mode": False,
           "instrumental": False
       },
@@ -231,7 +228,7 @@ curl --request POST \
     model: "suno",
     params: {
       prompt: "朝のコーヒーをテーマにした、温かみのあるアコースティック・フォークソング。やさしい女性ボーカル、ギターと軽いドラム。",
-      suno_model: "V5",
+      suno_model: "V6",
       custom_mode: false,
       instrumental: false
     },
@@ -271,7 +268,7 @@ curl --request POST \
           "model": "suno",
           "params": map[string]interface{}{
               "prompt": "朝のコーヒーをテーマにした、温かみのあるアコースティック・フォークソング。やさしい女性ボーカル、ギターと軽いドラム。",
-              "suno_model": "V5",
+              "suno_model": "V6",
               "custom_mode": false,
               "instrumental": false,
           },
@@ -311,7 +308,7 @@ curl --request POST \
                 "model": "suno",
                 "params": {
                   "prompt": "朝のコーヒーをテーマにした、温かみのあるアコースティック・フォークソング。やさしい女性ボーカル、ギターと軽いドラム。",
-                  "suno_model": "V5",
+                  "suno_model": "V6",
                   "custom_mode": false,
                   "instrumental": false
                 },
@@ -344,7 +341,7 @@ curl --request POST \
       "model" => "suno",
       "params" => [
           "prompt" => "朝のコーヒーをテーマにした、温かみのあるアコースティック・フォークソング。やさしい女性ボーカル、ギターと軽いドラム。",
-          "suno_model" => "V5",
+          "suno_model" => "V6",
           "custom_mode" => false,
           "instrumental" => false
       ],
@@ -378,7 +375,7 @@ curl --request POST \
     model: "suno",
     params: {
       prompt: "朝のコーヒーをテーマにした、温かみのあるアコースティック・フォークソング。やさしい女性ボーカル、ギターと軽いドラム。",
-      suno_model: "V5",
+      suno_model: "V6",
       custom_mode: false,
       instrumental: false
     },
@@ -405,7 +402,7 @@ curl --request POST \
       "model": "suno",
       "params": [
           "prompt": "朝のコーヒーをテーマにした、温かみのあるアコースティック・フォークソング。やさしい女性ボーカル、ギターと軽いドラム。",
-          "suno_model": "V5",
+          "suno_model": "V6",
           "custom_mode": false,
           "instrumental": false
       ],
@@ -449,7 +446,7 @@ curl --request POST \
                       "model": "suno",
                       "params": {
                         "prompt": "朝のコーヒーをテーマにした、温かみのあるアコースティック・フォークソング。やさしい女性ボーカル、ギターと軽いドラム。",
-                        "suno_model": "V5",
+                        "suno_model": "V6",
                         "custom_mode": false,
                         "instrumental": false
                       },
@@ -481,7 +478,7 @@ curl --request POST \
 
       if(curl) {
           const char *url = "https://aireiter.com/api/openapi/submit";
-          const char *payload = "{\"model\":\"suno\",\"params\":{\"prompt\":\"朝のコーヒーをテーマにした、温かみのあるアコースティック・フォークソング。やさしい女性ボーカル、ギターと軽いドラム。\",\"suno_model\":\"V5\",\"custom_mode\":false,\"instrumental\":false},\"out_task_id\":\"suno_gen_123456\"}";
+          const char *payload = "{\"model\":\"suno\",\"params\":{\"prompt\":\"朝のコーヒーをテーマにした、温かみのあるアコースティック・フォークソング。やさしい女性ボーカル、ギターと軽いドラム。\",\"suno_model\":\"V6\",\"custom_mode\":false,\"instrumental\":false},\"out_task_id\":\"suno_gen_123456\"}";
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
@@ -518,7 +515,7 @@ curl --request POST \
               @"model": @"suno",
               @"params": @{
                   @"prompt": @"朝のコーヒーをテーマにした、温かみのあるアコースティック・フォークソング。やさしい女性ボーカル、ギターと軽いドラム。",
-                  @"suno_model": @"V5",
+                  @"suno_model": @"V6",
                   @"custom_mode": @NO,
                   @"instrumental": @NO
               },
@@ -567,7 +564,7 @@ curl --request POST \
   "model": "suno",
   "params": {
     "prompt": "朝のコーヒーをテーマにした、温かみのあるアコースティック・フォークソング。やさしい女性ボーカル、ギターと軽いドラム。",
-    "suno_model": "V5",
+    "suno_model": "V6",
     "custom_mode": false,
     "instrumental": false
   },
@@ -599,7 +596,7 @@ curl --request POST \
       model: "suno",
       params: {
         prompt: "朝のコーヒーをテーマにした、温かみのあるアコースティック・フォークソング。やさしい女性ボーカル、ギターと軽いドラム。",
-        suno_model: "V5",
+        suno_model: "V6",
         custom_mode: false,
         instrumental: false
       },
@@ -629,7 +626,7 @@ curl --request POST \
     model = "suno",
     params = list(
       prompt = "朝のコーヒーをテーマにした、温かみのあるアコースティック・フォークソング。やさしい女性ボーカル、ギターと軽いドラム。",
-      suno_model = "V5",
+      suno_model = "V6",
       custom_mode = FALSE,
       instrumental = FALSE
     ),

@@ -44,7 +44,7 @@ AIReiter에서 Suno Cover의 모델 이름은 `suno_cover`입니다. 멜로디�
     <ParamField body="prompt" type="string" required>
       리메이크 후 어떤 분위기를 원하나요. 멜로디는 원곡에 가깝게 유지되며, 여기서는 장르, 보컬, 프로덕션을 바꿉니다.
 
-      사용자 정의 모드를 켜고 순수 음악이 아닐 경우, 프롬프트는 가사로 처리됩니다. V5 / V5.5 / V4.5 시리즈는 최대 5000자입니다.
+      사용자 정의 모드를 켜고 순수 음악이 아닐 경우, 프롬프트는 가사로 처리됩니다. V6 시리즈는 최대 5000자입니다.
     </ParamField>
 
     <ParamField body="audio_url" type="string | string[]" required>
@@ -57,15 +57,12 @@ AIReiter에서 Suno Cover의 모델 이름은 `suno_cover`입니다. 멜로디�
       * 20MB를 초과할 수 없습니다.
     </ParamField>
 
-    <ParamField body="suno_model" type="string" default="V5">
+    <ParamField body="suno_model" type="string" default="V6">
       Suno 버전:
 
-      * `V4`
-      * `V4_5`
-      * `V4_5PLUS`
-      * `V4_5ALL`
-      * `V5` - 기본값
-      * `V5_5`
+      * `V6` - 기본값. 더 자연스러운 보컬과 풍부한 디테일
+      * `V6_MINI` - 가볍고 빠르며 품질과 속도의 균형
+      * `V6_WILD` - 더 과감하고 개성 있는 음악 표현
     </ParamField>
 
     <ParamField body="custom_mode" type="boolean" default="false">
@@ -90,7 +87,7 @@ AIReiter에서 Suno Cover의 모델 이름은 `suno_cover`입니다. 멜로디�
     </ParamField>
 
     <ParamField body="title" type="string">
-      곡 제목. 사용자 정의 모드에서만 유효하며, 최대 100자입니다. `custom_mode`를 켰을 때 필수입니다.
+      곡 제목. 사용자 정의 모드에서만 유효하며, 최대 80자입니다. `custom_mode`를 켰을 때 필수입니다.
     </ParamField>
 
     <ParamField body="style" type="string">
@@ -173,7 +170,7 @@ curl --request POST \
       "params": {
         "audio_url": "https://example.com/song.mp3",
         "prompt": "비 오는 밤 재즈, 근접 보컬, lo-fi",
-        "suno_model": "V5",
+        "suno_model": "V6",
         "custom_mode": false,
         "instrumental": false
       },
@@ -191,7 +188,7 @@ curl --request POST \
       "params": {
         "audio_url": "https://example.com/song.mp3",
         "prompt": "[Verse]\\n가로등이 빗줄기를 길게 늘이고\\n[Chorus]\\n이 오래된 노래가 새 옷을 입었어",
-        "suno_model": "V5",
+        "suno_model": "V6",
         "custom_mode": true,
         "instrumental": false,
         "title": "비 오는 밤 커버",
@@ -212,7 +209,7 @@ curl --request POST \
       "params": {
           "audio_url": "https://example.com/song.mp3",
           "prompt": "비 오는 밤 재즈, 근접 보컬, lo-fi",
-          "suno_model": "V5",
+          "suno_model": "V6",
           "custom_mode": False,
           "instrumental": False
       },
@@ -237,7 +234,7 @@ curl --request POST \
     params: {
       audio_url: "https://example.com/song.mp3",
       prompt: "비 오는 밤 재즈, 근접 보컬, lo-fi",
-      suno_model: "V5",
+      suno_model: "V6",
       custom_mode: false,
       instrumental: false
     },
@@ -278,7 +275,7 @@ curl --request POST \
           "params": map[string]interface{}{
               "audio_url": "https://example.com/song.mp3",
               "prompt": "비 오는 밤 재즈, 근접 보컬, lo-fi",
-              "suno_model": "V5",
+              "suno_model": "V6",
               "custom_mode": false,
               "instrumental": false,
           },
@@ -319,7 +316,7 @@ curl --request POST \
                 "params": {
                   "audio_url": "https://example.com/song.mp3",
                   "prompt": "비 오는 밤 재즈, 근접 보컬, lo-fi",
-                  "suno_model": "V5",
+                  "suno_model": "V6",
                   "custom_mode": false,
                   "instrumental": false
                 },
@@ -353,7 +350,7 @@ curl --request POST \
       "params" => [
           "audio_url" => "https://example.com/song.mp3",
           "prompt" => "비 오는 밤 재즈, 근접 보컬, lo-fi",
-          "suno_model" => "V5",
+          "suno_model" => "V6",
           "custom_mode" => false,
           "instrumental" => false
       ],
@@ -388,7 +385,7 @@ curl --request POST \
     params: {
       audio_url: "https://example.com/song.mp3",
       prompt: "비 오는 밤 재즈, 근접 보컬, lo-fi",
-      suno_model: "V5",
+      suno_model: "V6",
       custom_mode: false,
       instrumental: false
     },
@@ -416,7 +413,7 @@ curl --request POST \
       "params": [
           "audio_url": "https://example.com/song.mp3",
           "prompt": "비 오는 밤 재즈, 근접 보컬, lo-fi",
-          "suno_model": "V5",
+          "suno_model": "V6",
           "custom_mode": false,
           "instrumental": false
       ],
@@ -461,7 +458,7 @@ curl --request POST \
                       "params": {
                         "audio_url": "https://example.com/song.mp3",
                         "prompt": "비 오는 밤 재즈, 근접 보컬, lo-fi",
-                        "suno_model": "V5",
+                        "suno_model": "V6",
                         "custom_mode": false,
                         "instrumental": false
                       },
@@ -493,7 +490,7 @@ curl --request POST \
 
       if(curl) {
           const char *url = "https://aireiter.com/api/openapi/submit";
-          const char *payload = "{\"model\":\"suno_cover\",\"params\":{\"audio_url\":\"https://example.com/song.mp3\",\"prompt\":\"비 오는 밤 재즈, 근접 보컬, lo-fi\",\"suno_model\":\"V5\",\"custom_mode\":false,\"instrumental\":false},\"out_task_id\":\"suno_cover_123456\"}";
+          const char *payload = "{\"model\":\"suno_cover\",\"params\":{\"audio_url\":\"https://example.com/song.mp3\",\"prompt\":\"비 오는 밤 재즈, 근접 보컬, lo-fi\",\"suno_model\":\"V6\",\"custom_mode\":false,\"instrumental\":false},\"out_task_id\":\"suno_cover_123456\"}";
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
@@ -531,7 +528,7 @@ curl --request POST \
               @"params": @{
                   @"audio_url": @"https://example.com/song.mp3",
                   @"prompt": @"비 오는 밤 재즈, 근접 보컬, lo-fi",
-                  @"suno_model": @"V5",
+                  @"suno_model": @"V6",
                   @"custom_mode": @NO,
                   @"instrumental": @NO
               },
@@ -581,7 +578,7 @@ curl --request POST \
   "params": {
     "audio_url": "https://example.com/song.mp3",
     "prompt": "비 오는 밤 재즈, 근접 보컬, lo-fi",
-    "suno_model": "V5",
+    "suno_model": "V6",
     "custom_mode": false,
     "instrumental": false
   },
@@ -614,7 +611,7 @@ curl --request POST \
       params: {
         audio_url: "https://example.com/song.mp3",
         prompt: "비 오는 밤 재즈, 근접 보컬, lo-fi",
-        suno_model: "V5",
+        suno_model: "V6",
         custom_mode: false,
         instrumental: false
       },
@@ -645,7 +642,7 @@ curl --request POST \
     params = list(
       audio_url = "https://example.com/song.mp3",
       prompt = "비 오는 밤 재즈, 근접 보컬, lo-fi",
-      suno_model = "V5",
+      suno_model = "V6",
       custom_mode = FALSE,
       instrumental = FALSE
     ),

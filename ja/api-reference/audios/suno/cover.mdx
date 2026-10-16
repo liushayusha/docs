@@ -44,7 +44,7 @@ AIReiter における Suno Cover のモデル名は `suno_cover` です。メロ
     <ParamField body="prompt" type="string" required>
       カバー後にどんな雰囲気にしたいか。メロディは原曲に近く、この項目で変更するのは曲調、ボーカル、制作です。
 
-      カスタムモードを有効にしていて、かつインストゥルメンタルでない場合、プロンプトは歌詞として扱われます。V5 / V5.5 / V4.5 系列は最大5000文字です。
+      カスタムモードを有効にしていて、かつインストゥルメンタルでない場合、プロンプトは歌詞として扱われます。V6 系列は最大5000文字です。
     </ParamField>
 
     <ParamField body="audio_url" type="string | string[]" required>
@@ -57,15 +57,12 @@ AIReiter における Suno Cover のモデル名は `suno_cover` です。メロ
       * 20MB以下
     </ParamField>
 
-    <ParamField body="suno_model" type="string" default="V5">
+    <ParamField body="suno_model" type="string" default="V6">
       Suno バージョン:
 
-      * `V4`
-      * `V4_5`
-      * `V4_5PLUS`
-      * `V4_5ALL`
-      * `V5` - デフォルト値
-      * `V5_5`
+      * `V6` - デフォルト値. より自然なボーカルと豊かなディテール
+      * `V6_MINI` - 軽量・高速で、品質と速度のバランスが取れています
+      * `V6_WILD` - より大胆で個性的な音楽表現
     </ParamField>
 
     <ParamField body="custom_mode" type="boolean" default="false">
@@ -173,7 +170,7 @@ curl --request POST \
       "params": {
         "audio_url": "https://example.com/song.mp3",
         "prompt": "雨の夜のジャズ、近接ボーカル、lo-fi に変換",
-        "suno_model": "V5",
+        "suno_model": "V6",
         "custom_mode": false,
         "instrumental": false
       },
@@ -191,7 +188,7 @@ curl --request POST \
       "params": {
         "audio_url": "https://example.com/song.mp3",
         "prompt": "[Verse]\\n街灯が雨の糸を長く引き伸ばす\\n[Chorus]\\nこの古い歌は新しい衣をまとう",
-        "suno_model": "V5",
+        "suno_model": "V6",
         "custom_mode": true,
         "instrumental": false,
         "title": "雨夜のカバー",
@@ -212,7 +209,7 @@ curl --request POST \
       "params": {
           "audio_url": "https://example.com/song.mp3",
           "prompt": "雨の夜のジャズ、近接ボーカル、lo-fi に変換",
-          "suno_model": "V5",
+          "suno_model": "V6",
           "custom_mode": False,
           "instrumental": False
       },
@@ -237,7 +234,7 @@ curl --request POST \
     params: {
       audio_url: "https://example.com/song.mp3",
       prompt: "雨の夜のジャズ、近接ボーカル、lo-fi に変換",
-      suno_model: "V5",
+      suno_model: "V6",
       custom_mode: false,
       instrumental: false
     },
@@ -278,7 +275,7 @@ curl --request POST \
           "params": map[string]interface{}{
               "audio_url": "https://example.com/song.mp3",
               "prompt": "雨の夜のジャズ、近接ボーカル、lo-fi に変換",
-              "suno_model": "V5",
+              "suno_model": "V6",
               "custom_mode": false,
               "instrumental": false,
           },
@@ -319,7 +316,7 @@ curl --request POST \
                 "params": {
                   "audio_url": "https://example.com/song.mp3",
                   "prompt": "雨の夜のジャズ、近接ボーカル、lo-fi に変換",
-                  "suno_model": "V5",
+                  "suno_model": "V6",
                   "custom_mode": false,
                   "instrumental": false
                 },
@@ -353,7 +350,7 @@ curl --request POST \
       "params" => [
           "audio_url" => "https://example.com/song.mp3",
           "prompt" => "雨の夜のジャズ、近接ボーカル、lo-fi に変換",
-          "suno_model" => "V5",
+          "suno_model" => "V6",
           "custom_mode" => false,
           "instrumental" => false
       ],
@@ -388,7 +385,7 @@ curl --request POST \
     params: {
       audio_url: "https://example.com/song.mp3",
       prompt: "雨の夜のジャズ、近接ボーカル、lo-fi に変換",
-      suno_model: "V5",
+      suno_model: "V6",
       custom_mode: false,
       instrumental: false
     },
@@ -416,7 +413,7 @@ curl --request POST \
       "params": [
           "audio_url": "https://example.com/song.mp3",
           "prompt": "雨の夜のジャズ、近接ボーカル、lo-fi に変換",
-          "suno_model": "V5",
+          "suno_model": "V6",
           "custom_mode": false,
           "instrumental": false
       ],
@@ -461,7 +458,7 @@ curl --request POST \
                       "params": {
                         "audio_url": "https://example.com/song.mp3",
                         "prompt": "雨の夜のジャズ、近接ボーカル、lo-fi に変換",
-                        "suno_model": "V5",
+                        "suno_model": "V6",
                         "custom_mode": false,
                         "instrumental": false
                       },
@@ -493,7 +490,7 @@ curl --request POST \
 
       if(curl) {
           const char *url = "https://aireiter.com/api/openapi/submit";
-          const char *payload = "{\"model\":\"suno_cover\",\"params\":{\"audio_url\":\"https://example.com/song.mp3\",\"prompt\":\"雨の夜のジャズ、近接ボーカル、lo-fi に変換\",\"suno_model\":\"V5\",\"custom_mode\":false,\"instrumental\":false},\"out_task_id\":\"suno_cover_123456\"}";
+          const char *payload = "{\"model\":\"suno_cover\",\"params\":{\"audio_url\":\"https://example.com/song.mp3\",\"prompt\":\"雨の夜のジャズ、近接ボーカル、lo-fi に変換\",\"suno_model\":\"V6\",\"custom_mode\":false,\"instrumental\":false},\"out_task_id\":\"suno_cover_123456\"}";
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
@@ -531,7 +528,7 @@ curl --request POST \
               @"params": @{
                   @"audio_url": @"https://example.com/song.mp3",
                   @"prompt": @"雨の夜のジャズ、近接ボーカル、lo-fi に変換",
-                  @"suno_model": @"V5",
+                  @"suno_model": @"V6",
                   @"custom_mode": @NO,
                   @"instrumental": @NO
               },
@@ -581,7 +578,7 @@ curl --request POST \
   "params": {
     "audio_url": "https://example.com/song.mp3",
     "prompt": "雨の夜のジャズ、近接ボーカル、lo-fi に変換",
-    "suno_model": "V5",
+    "suno_model": "V6",
     "custom_mode": false,
     "instrumental": false
   },
@@ -614,7 +611,7 @@ curl --request POST \
       params: {
         audio_url: "https://example.com/song.mp3",
         prompt: "雨の夜のジャズ、近接ボーカル、lo-fi に変換",
-        suno_model: "V5",
+        suno_model: "V6",
         custom_mode: false,
         instrumental: false
       },
@@ -645,7 +642,7 @@ curl --request POST \
     params = list(
       audio_url = "https://example.com/song.mp3",
       prompt = "雨の夜のジャズ、近接ボーカル、lo-fi に変換",
-      suno_model = "V5",
+      suno_model = "V6",
       custom_mode = FALSE,
       instrumental = FALSE
     ),

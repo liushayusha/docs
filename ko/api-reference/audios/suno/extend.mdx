@@ -59,15 +59,12 @@ Suno Extend의 AIReiter 내 모델 이름은 `suno_extend`입니다. 오디오 �
       원곡의 몇 초 지점부터 이어서 작성할지 지정합니다. 범위는 `0`부터 `240`까지이며, 원본 오디오 길이보다 짧아야 합니다. 기본값은 `60`이며, 보통 벌스나 후렴 뒤에 이어집니다.
     </ParamField>
 
-    <ParamField body="suno_model" type="string" default="V5">
+    <ParamField body="suno_model" type="string" default="V6">
       Suno 버전:
 
-      * `V4`
-      * `V4_5`
-      * `V4_5PLUS`
-      * `V4_5ALL`
-      * `V5` - 기본값
-      * `V5_5`
+      * `V6` - 기본값. 더 자연스러운 보컬과 풍부한 디테일
+      * `V6_MINI` - 가볍고 빠르며 품질과 속도의 균형
+      * `V6_WILD` - 더 과감하고 개성 있는 음악 표현
     </ParamField>
 
     <ParamField body="instrumental" type="boolean" default="false">
@@ -154,7 +151,7 @@ curl --request POST \
         "audio_url": "https://example.com/song.mp3",
         "prompt": "더 밝은 후렴으로 이어지게 하고, 기타는 그대로 유지",
         "continue_at": 60,
-        "suno_model": "V5",
+        "suno_model": "V6",
         "instrumental": false
       },
       "out_task_id": "suno_extend_123456"
@@ -172,7 +169,7 @@ curl --request POST \
           "audio_url": "https://example.com/song.mp3",
           "prompt": "더 밝은 후렴으로 이어지게 하고, 기타는 그대로 유지",
           "continue_at": 60,
-          "suno_model": "V5",
+          "suno_model": "V6",
           "instrumental": False
       },
       "out_task_id": "suno_extend_123456"
@@ -197,7 +194,7 @@ curl --request POST \
       audio_url: "https://example.com/song.mp3",
       prompt: "더 밝은 후렴으로 이어지게 하고, 기타는 그대로 유지",
       continue_at: 60,
-      suno_model: "V5",
+      suno_model: "V6",
       instrumental: false
     },
     out_task_id: "suno_extend_123456"
@@ -238,7 +235,7 @@ curl --request POST \
               "audio_url": "https://example.com/song.mp3",
               "prompt": "더 밝은 후렴으로 이어지게 하고, 기타는 그대로 유지",
               "continue_at": 60,
-              "suno_model": "V5",
+              "suno_model": "V6",
               "instrumental": false,
           },
           "out_task_id": "suno_extend_123456",
@@ -279,7 +276,7 @@ curl --request POST \
                   "audio_url": "https://example.com/song.mp3",
                   "prompt": "더 밝은 후렴으로 이어지게 하고, 기타는 그대로 유지",
                   "continue_at": 60,
-                  "suno_model": "V5",
+                  "suno_model": "V6",
                   "instrumental": false
                 },
                 "out_task_id": "suno_extend_123456"
@@ -313,7 +310,7 @@ curl --request POST \
           "audio_url" => "https://example.com/song.mp3",
           "prompt" => "더 밝은 후렴으로 이어지게 하고, 기타는 그대로 유지",
           "continue_at" => 60,
-          "suno_model" => "V5",
+          "suno_model" => "V6",
           "instrumental" => false
       ],
       "out_task_id" => "suno_extend_123456"
@@ -348,7 +345,7 @@ curl --request POST \
       audio_url: "https://example.com/song.mp3",
       prompt: "더 밝은 후렴으로 이어지게 하고, 기타는 그대로 유지",
       continue_at: 60,
-      suno_model: "V5",
+      suno_model: "V6",
       instrumental: false
     },
     out_task_id: "suno_extend_123456"
@@ -376,7 +373,7 @@ curl --request POST \
           "audio_url": "https://example.com/song.mp3",
           "prompt": "더 밝은 후렴으로 이어지게 하고, 기타는 그대로 유지",
           "continue_at": 60,
-          "suno_model": "V5",
+          "suno_model": "V6",
           "instrumental": false
       ],
       "out_task_id": "suno_extend_123456"
@@ -421,7 +418,7 @@ curl --request POST \
                         "audio_url": "https://example.com/song.mp3",
                         "prompt": "더 밝은 후렴으로 이어지게 하고, 기타는 그대로 유지",
                         "continue_at": 60,
-                        "suno_model": "V5",
+                        "suno_model": "V6",
                         "instrumental": false
                       },
                       "out_task_id": "suno_extend_123456"
@@ -452,7 +449,7 @@ curl --request POST \
 
       if(curl) {
           const char *url = "https://aireiter.com/api/openapi/submit";
-          const char *payload = "{\"model\":\"suno_extend\",\"params\":{\"audio_url\":\"https://example.com/song.mp3\",\"prompt\":\"더 밝은 후렴으로 이어지게 하고, 기타는 그대로 유지\",\"continue_at\":60,\"suno_model\":\"V5\",\"instrumental\":false},\"out_task_id\":\"suno_extend_123456\"}";
+          const char *payload = "{\"model\":\"suno_extend\",\"params\":{\"audio_url\":\"https://example.com/song.mp3\",\"prompt\":\"더 밝은 후렴으로 이어지게 하고, 기타는 그대로 유지\",\"continue_at\":60,\"suno_model\":\"V6\",\"instrumental\":false},\"out_task_id\":\"suno_extend_123456\"}";
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
@@ -491,7 +488,7 @@ curl --request POST \
                   @"audio_url": @"https://example.com/song.mp3",
                   @"prompt": @"더 밝은 후렴으로 이어지게 하고, 기타는 그대로 유지",
                   @"continue_at": @60,
-                  @"suno_model": @"V5",
+                  @"suno_model": @"V6",
                   @"instrumental": @NO
               },
               @"out_task_id": @"suno_extend_123456"
@@ -541,7 +538,7 @@ curl --request POST \
     "audio_url": "https://example.com/song.mp3",
     "prompt": "더 밝은 후렴으로 이어지게 하고, 기타는 그대로 유지",
     "continue_at": 60,
-    "suno_model": "V5",
+    "suno_model": "V6",
     "instrumental": false
   },
   "out_task_id": "suno_extend_123456"
@@ -574,7 +571,7 @@ curl --request POST \
         audio_url: "https://example.com/song.mp3",
         prompt: "더 밝은 후렴으로 이어지게 하고, 기타는 그대로 유지",
         continue_at: 60,
-        suno_model: "V5",
+        suno_model: "V6",
         instrumental: false
       },
       out_task_id: "suno_extend_123456"
@@ -605,7 +602,7 @@ curl --request POST \
       audio_url = "https://example.com/song.mp3",
       prompt = "더 밝은 후렴으로 이어지게 하고, 기타는 그대로 유지",
       continue_at = 60,
-      suno_model = "V5",
+      suno_model = "V6",
       instrumental = FALSE
     ),
     out_task_id = "suno_extend_123456"

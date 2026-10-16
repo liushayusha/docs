@@ -59,15 +59,12 @@ The model name for Suno Extend in AIReiter is `suno_extend`. Upload an audio tra
       The second in the original track from which to continue. Range `0` to `240`, and it must be shorter than the original audio duration. Default `60`, usually placed after the verse or chorus.
     </ParamField>
 
-    <ParamField body="suno_model" type="string" default="V5">
+    <ParamField body="suno_model" type="string" default="V6">
       Suno version:
 
-      * `V4`
-      * `V4_5`
-      * `V4_5PLUS`
-      * `V4_5ALL`
-      * `V5` - Default value
-      * `V5_5`
+      * `V6` - Default value. more natural vocals and richer detail
+      * `V6_MINI` - lightweight and fast, balancing quality and speed
+      * `V6_WILD` - bolder, more distinctive musical expression
     </ParamField>
 
     <ParamField body="instrumental" type="boolean" default="false">
@@ -154,7 +151,7 @@ After a successful query and completion, the `output` example is:
         "audio_url": "https://example.com/song.mp3",
         "prompt": "Switch to a brighter chorus, keep the guitar unchanged",
         "continue_at": 60,
-        "suno_model": "V5",
+        "suno_model": "V6",
         "instrumental": false
       },
       "out_task_id": "suno_extend_123456"
@@ -172,7 +169,7 @@ After a successful query and completion, the `output` example is:
           "audio_url": "https://example.com/song.mp3",
           "prompt": "Switch to a brighter chorus, keep the guitar unchanged",
           "continue_at": 60,
-          "suno_model": "V5",
+          "suno_model": "V6",
           "instrumental": False
       },
       "out_task_id": "suno_extend_123456"
@@ -197,7 +194,7 @@ After a successful query and completion, the `output` example is:
       audio_url: "https://example.com/song.mp3",
       prompt: "Switch to a brighter chorus, keep the guitar unchanged",
       continue_at: 60,
-      suno_model: "V5",
+      suno_model: "V6",
       instrumental: false
     },
     out_task_id: "suno_extend_123456"
@@ -238,7 +235,7 @@ After a successful query and completion, the `output` example is:
               "audio_url": "https://example.com/song.mp3",
               "prompt": "Switch to a brighter chorus, keep the guitar unchanged",
               "continue_at": 60,
-              "suno_model": "V5",
+              "suno_model": "V6",
               "instrumental": false,
           },
           "out_task_id": "suno_extend_123456",
@@ -279,7 +276,7 @@ After a successful query and completion, the `output` example is:
                   "audio_url": "https://example.com/song.mp3",
                   "prompt": "Switch to a brighter chorus, keep the guitar unchanged",
                   "continue_at": 60,
-                  "suno_model": "V5",
+                  "suno_model": "V6",
                   "instrumental": false
                 },
                 "out_task_id": "suno_extend_123456"
@@ -313,7 +310,7 @@ After a successful query and completion, the `output` example is:
           "audio_url" => "https://example.com/song.mp3",
           "prompt" => "Switch to a brighter chorus, keep the guitar unchanged",
           "continue_at" => 60,
-          "suno_model" => "V5",
+          "suno_model" => "V6",
           "instrumental" => false
       ],
       "out_task_id" => "suno_extend_123456"
@@ -348,7 +345,7 @@ After a successful query and completion, the `output` example is:
       audio_url: "https://example.com/song.mp3",
       prompt: "Switch to a brighter chorus, keep the guitar unchanged",
       continue_at: 60,
-      suno_model: "V5",
+      suno_model: "V6",
       instrumental: false
     },
     out_task_id: "suno_extend_123456"
@@ -376,7 +373,7 @@ After a successful query and completion, the `output` example is:
           "audio_url": "https://example.com/song.mp3",
           "prompt": "Switch to a brighter chorus, keep the guitar unchanged",
           "continue_at": 60,
-          "suno_model": "V5",
+          "suno_model": "V6",
           "instrumental": false
       ],
       "out_task_id": "suno_extend_123456"
@@ -421,7 +418,7 @@ After a successful query and completion, the `output` example is:
                         "audio_url": "https://example.com/song.mp3",
                         "prompt": "Switch to a brighter chorus, keep the guitar unchanged",
                         "continue_at": 60,
-                        "suno_model": "V5",
+                        "suno_model": "V6",
                         "instrumental": false
                       },
                       "out_task_id": "suno_extend_123456"
@@ -452,7 +449,7 @@ After a successful query and completion, the `output` example is:
 
       if(curl) {
           const char *url = "https://aireiter.com/api/openapi/submit";
-          const char *payload = "{\"model\":\"suno_extend\",\"params\":{\"audio_url\":\"https://example.com/song.mp3\",\"prompt\":\"Switch to a brighter chorus, keep the guitar unchanged\",\"continue_at\":60,\"suno_model\":\"V5\",\"instrumental\":false},\"out_task_id\":\"suno_extend_123456\"}";
+          const char *payload = "{\"model\":\"suno_extend\",\"params\":{\"audio_url\":\"https://example.com/song.mp3\",\"prompt\":\"Switch to a brighter chorus, keep the guitar unchanged\",\"continue_at\":60,\"suno_model\":\"V6\",\"instrumental\":false},\"out_task_id\":\"suno_extend_123456\"}";
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
@@ -491,7 +488,7 @@ After a successful query and completion, the `output` example is:
                   @"audio_url": @"https://example.com/song.mp3",
                   @"prompt": @"Switch to a brighter chorus, keep the guitar unchanged",
                   @"continue_at": @60,
-                  @"suno_model": @"V5",
+                  @"suno_model": @"V6",
                   @"instrumental": @NO
               },
               @"out_task_id": @"suno_extend_123456"
@@ -541,7 +538,7 @@ After a successful query and completion, the `output` example is:
     "audio_url": "https://example.com/song.mp3",
     "prompt": "Switch to a brighter chorus, keep the guitar unchanged",
     "continue_at": 60,
-    "suno_model": "V5",
+    "suno_model": "V6",
     "instrumental": false
   },
   "out_task_id": "suno_extend_123456"
@@ -574,7 +571,7 @@ After a successful query and completion, the `output` example is:
         audio_url: "https://example.com/song.mp3",
         prompt: "Switch to a brighter chorus, keep the guitar unchanged",
         continue_at: 60,
-        suno_model: "V5",
+        suno_model: "V6",
         instrumental: false
       },
       out_task_id: "suno_extend_123456"
@@ -605,7 +602,7 @@ After a successful query and completion, the `output` example is:
       audio_url = "https://example.com/song.mp3",
       prompt = "Switch to a brighter chorus, keep the guitar unchanged",
       continue_at = 60,
-      suno_model = "V5",
+      suno_model = "V6",
       instrumental = FALSE
     ),
     out_task_id = "suno_extend_123456"

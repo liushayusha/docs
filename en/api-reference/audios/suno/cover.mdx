@@ -44,7 +44,7 @@ Suno Cover's model name in AIReiter is `suno_cover`. The melody stays close to t
     <ParamField body="prompt" type="string" required>
       What the cover should sound like after conversion. The melody will stay close to the original song; this is where you change the style, vocals, and production.
 
-      When custom mode is enabled and the track is not instrumental, the prompt is treated as lyrics. The V5 / V5.5 / V4.5 series supports up to 5000 characters.
+      When custom mode is enabled and the track is not instrumental, the prompt is treated as lyrics. The V6 series supports up to 5000 characters.
     </ParamField>
 
     <ParamField body="audio_url" type="string | string[]" required>
@@ -57,15 +57,12 @@ Suno Cover's model name in AIReiter is `suno_cover`. The melody stays close to t
       * No more than 20MB
     </ParamField>
 
-    <ParamField body="suno_model" type="string" default="V5">
+    <ParamField body="suno_model" type="string" default="V6">
       Suno versions:
 
-      * `V4`
-      * `V4_5`
-      * `V4_5PLUS`
-      * `V4_5ALL`
-      * `V5` - default value
-      * `V5_5`
+      * `V6` - Default value. more natural vocals and richer detail
+      * `V6_MINI` - lightweight and fast, balancing quality and speed
+      * `V6_WILD` - bolder, more distinctive musical expression
     </ParamField>
 
     <ParamField body="custom_mode" type="boolean" default="false">
@@ -90,7 +87,7 @@ Suno Cover's model name in AIReiter is `suno_cover`. The melody stays close to t
     </ParamField>
 
     <ParamField body="title" type="string">
-      Song title. Only valid in custom mode, up to 100 characters. Required when `custom_mode` is enabled.
+      Song title. Only valid in custom mode, up to 80 characters. Required when `custom_mode` is enabled.
     </ParamField>
 
     <ParamField body="style" type="string">
@@ -173,7 +170,7 @@ Example of a successful query after completion, `output`:
       "params": {
         "audio_url": "https://example.com/song.mp3",
         "prompt": "Turn it into rainy-night jazz, close-up vocals, lo-fi",
-        "suno_model": "V5",
+        "suno_model": "V6",
         "custom_mode": false,
         "instrumental": false
       },
@@ -191,7 +188,7 @@ Example of a successful query after completion, `output`:
       "params": {
         "audio_url": "https://example.com/song.mp3",
         "prompt": "[Verse]\\nThe streetlights draw the rain into long threads\\n[Chorus]\\nThis old song has put on new clothes",
-        "suno_model": "V5",
+        "suno_model": "V6",
         "custom_mode": true,
         "instrumental": false,
         "title": "Rainy Night Cover",
@@ -212,7 +209,7 @@ Example of a successful query after completion, `output`:
       "params": {
           "audio_url": "https://example.com/song.mp3",
           "prompt": "Turn it into rainy-night jazz, close-up vocals, lo-fi",
-          "suno_model": "V5",
+          "suno_model": "V6",
           "custom_mode": False,
           "instrumental": False
       },
@@ -237,7 +234,7 @@ Example of a successful query after completion, `output`:
     params: {
       audio_url: "https://example.com/song.mp3",
       prompt: "Turn it into rainy-night jazz, close-up vocals, lo-fi",
-      suno_model: "V5",
+      suno_model: "V6",
       custom_mode: false,
       instrumental: false
     },
@@ -278,7 +275,7 @@ Example of a successful query after completion, `output`:
           "params": map[string]interface{}{
               "audio_url": "https://example.com/song.mp3",
               "prompt": "Turn it into rainy-night jazz, close-up vocals, lo-fi",
-              "suno_model": "V5",
+              "suno_model": "V6",
               "custom_mode": false,
               "instrumental": false,
           },
@@ -319,7 +316,7 @@ Example of a successful query after completion, `output`:
                 "params": {
                   "audio_url": "https://example.com/song.mp3",
                   "prompt": "Turn it into rainy-night jazz, close-up vocals, lo-fi",
-                  "suno_model": "V5",
+                  "suno_model": "V6",
                   "custom_mode": false,
                   "instrumental": false
                 },
@@ -353,7 +350,7 @@ Example of a successful query after completion, `output`:
       "params" => [
           "audio_url" => "https://example.com/song.mp3",
           "prompt" => "Turn it into rainy-night jazz, close-up vocals, lo-fi",
-          "suno_model" => "V5",
+          "suno_model" => "V6",
           "custom_mode" => false,
           "instrumental" => false
       ],
@@ -388,7 +385,7 @@ Example of a successful query after completion, `output`:
     params: {
       audio_url: "https://example.com/song.mp3",
       prompt: "Turn it into rainy-night jazz, close-up vocals, lo-fi",
-      suno_model: "V5",
+      suno_model: "V6",
       custom_mode: false,
       instrumental: false
     },
@@ -416,7 +413,7 @@ Example of a successful query after completion, `output`:
       "params": [
           "audio_url": "https://example.com/song.mp3",
           "prompt": "Turn it into rainy-night jazz, close-up vocals, lo-fi",
-          "suno_model": "V5",
+          "suno_model": "V6",
           "custom_mode": false,
           "instrumental": false
       ],
@@ -461,7 +458,7 @@ Example of a successful query after completion, `output`:
                       \"params\": {
                         \"audio_url\": \"https://example.com/song.mp3\",
                         \"prompt\": \"Turn it into rainy-night jazz, close-up vocals, lo-fi\",
-                        \"suno_model\": \"V5\",
+                        \"suno_model\": \"V6\",
                         \"custom_mode\": false,
                         \"instrumental\": false
                       },
@@ -493,7 +490,7 @@ Example of a successful query after completion, `output`:
 
       if(curl) {
           const char *url = "https://aireiter.com/api/openapi/submit";
-          const char *payload = "{\"model\":\"suno_cover\",\"params\":{\"audio_url\":\"https://example.com/song.mp3\",\"prompt\":\"Turn it into rainy-night jazz, close-up vocals, lo-fi\",\"suno_model\":\"V5\",\"custom_mode\":false,\"instrumental\":false},\"out_task_id\":\"suno_cover_123456\"}";
+          const char *payload = "{\"model\":\"suno_cover\",\"params\":{\"audio_url\":\"https://example.com/song.mp3\",\"prompt\":\"Turn it into rainy-night jazz, close-up vocals, lo-fi\",\"suno_model\":\"V6\",\"custom_mode\":false,\"instrumental\":false},\"out_task_id\":\"suno_cover_123456\"}";
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
@@ -531,7 +528,7 @@ Example of a successful query after completion, `output`:
               @"params": @{
                   @"audio_url": @"https://example.com/song.mp3",
                   @"prompt": @"Turn it into rainy-night jazz, close-up vocals, lo-fi",
-                  @"suno_model": @"V5",
+                  @"suno_model": @"V6",
                   @"custom_mode": @NO,
                   @"instrumental": @NO
               },
@@ -581,7 +578,7 @@ Example of a successful query after completion, `output`:
   "params": {
     "audio_url": "https://example.com/song.mp3",
     "prompt": "Turn it into rainy-night jazz, close-up vocals, lo-fi",
-    "suno_model": "V5",
+    "suno_model": "V6",
     "custom_mode": false,
     "instrumental": false
   },
@@ -614,7 +611,7 @@ Example of a successful query after completion, `output`:
       params: {
         audio_url: "https://example.com/song.mp3",
         prompt: "Turn it into rainy-night jazz, close-up vocals, lo-fi",
-        suno_model: "V5",
+        suno_model: "V6",
         custom_mode: false,
         instrumental: false
       },
@@ -645,7 +642,7 @@ Example of a successful query after completion, `output`:
     params = list(
       audio_url = "https://example.com/song.mp3",
       prompt = "Turn it into rainy-night jazz, close-up vocals, lo-fi",
-      suno_model = "V5",
+      suno_model = "V6",
       custom_mode = FALSE,
       instrumental = FALSE
     ),
