@@ -1,0 +1,759 @@
+---
+title: 'FLUX 3 Max 视频生成'
+description: |
+  - Black Forest Labs FLUX 3 Max 视频生成模型，基于 FLUX 3 Video 后训练，提示词遵循与画质更强、生成延迟更低
+  - 异步处理模式，返回任务 ID 用于后续查询
+  - 支持文生视频、首尾帧、关键帧（最多 10 张）三种模式
+  - 支持 720p / 1080p 输出，视频时长 5-20 秒，默认生成原生音频
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+<Note>
+FLUX 3 Max 在 AIReiter 中的模型名称为 `flux_3_max`。通过 `type` 选择文生（`text`）、首尾帧（`frame`）或关键帧（`keyframes`）模式。
+</Note>
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  所有接口均需要使用 Bearer Token 进行认证。
+
+  获取 API Key：
+
+  访问 <a href={apiKeyUrl} target="_blank">API Key 管理页面</a> 获取您的 API Key。
+
+  使用时在请求头中添加：
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  模型名称，固定使用：
+
+  * `flux_3_max`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  模型参数对象。
+
+  <Expandable title="params 对象属性">
+    <ParamField body="prompt" type="string" required>
+      视频内容描述，所有模式必填。
+
+      建议同时描述画面、动作、运镜和声音。模型会在生成前自动理解并扩写提示词（扩写强度见 `reasoning_level`）。
+    </ParamField>
+
+    <ParamField body="type" type="string" default="text">
+      生成模式：
+
+      * `text` - 文生视频，默认值。只用提示词，传入的图片会被忽略
+      * `frame` - 首尾帧。`image_url[0]` 作为首帧（必传），`image_url[1]` 作为尾帧（可选）
+      * `keyframes` - 关键帧。按顺序传入最多 10 张图片，均匀分布在视频时间轴上，视频依次经过每一张
+
+      <Warning>
+        `frame` 和 `keyframes` 模式至少需要 1 张图片；不传图片时按 `text` 模式生成。
+      </Warning>
+    </ParamField>
+
+    <ParamField body="image_url" type="string | string[]">
+      图片 URL，必须可由公网直接访问。`text` 模式无需传入。
+
+      * `frame` - 1-2 张：第 1 张为首帧，第 2 张（可选）为尾帧
+      * `keyframes` - 1-10 张，按上传顺序从第一帧到最后一帧均匀放置
+
+      图片要求：
+
+      * 格式 PNG、JPEG、WEBP
+      * 单张不超过 20MB
+    </ParamField>
+
+    <ParamField body="end_image_url" type="string">
+      尾帧图片 URL，仅 `frame` 模式有效。也可以直接作为 `image_url` 的第 2 张传入，两者同时传时以 `end_image_url` 为准。
+    </ParamField>
+
+    <ParamField body="video_length" type="integer" default="5">
+      生成视频时长，单位为秒。
+
+      支持整数：`5` 到 `20`。
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="720p">
+      输出分辨率（24 fps）：
+
+      * `720p` - 默认值
+      * `1080p`
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="auto">
+      视频宽高比：
+
+      * `auto` - 默认值。`text` 模式为 16:9，有图片时跟随第 1 张图片
+      * `16:9` - 横屏
+      * `9:16` - 竖屏
+      * `1:1` - 方形
+      * `4:3` - 标准横屏
+      * `3:4` - 竖版标准
+      * `21:9` - 超宽屏
+    </ParamField>
+
+    <ParamField body="reasoning_level" type="string" default="high">
+      提示词推理强度，模型在生成前理解和扩写提示词的力度：
+
+      * `high` - 默认值。扩写更充分、效果更好，生成更慢
+      * `low` - 更快
+
+      两档价格相同。
+    </ParamField>
+
+    <ParamField body="generate_audio" type="boolean" default="true">
+      是否随视频生成原生音频。
+
+      * `true` - 生成带音轨的视频，默认值
+      * `false` - 输出无声视频
+
+      开关音频价格相同。
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  发起方任务 ID。
+
+  用户自定义的任务标识，必填。仅支持字母、数字、下划线和横线，长度为 1-64 个字符。后续可使用该 ID 查询任务状态和结果。
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  发起方任务 ID，可用于查询结果。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  初始状态，通常为 `"pending"`。
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  创建时间，ISO 格式。
+</ResponseField>
+
+## Query Task
+
+FLUX 3 Max 是异步视频生成模型。提交任务后，请使用 `out_task_id` 查询任务状态，建议每 10-15 秒查询一次。
+
+<ParamField body="out_task_id" type="string" required>
+  提交任务时传入的发起方任务 ID。
+</ParamField>
+
+```bash
+curl --request POST \
+  --url https://aireiter.com/api/openapi/query \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "out_task_id": "flux_3_max_frame_123456"
+  }'
+```
+
+查询成功并完成后，响应中的 `output` 数组会包含生成的视频，元素含 `video` 字段。
+
+<RequestExample>
+  ```bash cURL（首尾帧）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "flux_3_max",
+      "params": {
+        "prompt": "牛仔骑马穿过日落时的峡谷，马蹄扬起尘土，马蹄声和风声",
+        "type": "frame",
+        "image_url": ["https://example.com/first-frame.jpg", "https://example.com/last-frame.jpg"],
+        "resolution": "720p",
+        "video_length": 5,
+        "generate_audio": true
+      },
+      "out_task_id": "flux_3_max_frame_123456"
+    }'
+  ```
+
+  ```bash cURL（文生视频）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "flux_3_max",
+      "params": {
+        "prompt": "一只小熊猫沿着长满青苔的原木行走，停下嗅了嗅空气，晨光透过树冠洒下，鸟鸣和树叶沙沙声",
+        "type": "text",
+        "resolution": "1080p",
+        "aspect_ratio": "16:9",
+        "video_length": 8,
+        "reasoning_level": "high",
+        "generate_audio": true
+      },
+      "out_task_id": "flux_3_max_text_123456"
+    }'
+  ```
+
+  ```bash cURL（关键帧）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "flux_3_max",
+      "params": {
+        "prompt": "镜头跟随角色从街口走进咖啡馆，最后在窗边坐下，城市环境音",
+        "type": "keyframes",
+        "image_url": [
+          "https://example.com/key-1.jpg",
+          "https://example.com/key-2.jpg",
+          "https://example.com/key-3.jpg"
+        ],
+        "resolution": "720p",
+        "video_length": 10,
+        "generate_audio": true
+      },
+      "out_task_id": "flux_3_max_keyframes_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "flux_3_max",
+      "params": {
+          "prompt": "牛仔骑马穿过日落时的峡谷，马蹄扬起尘土，马蹄声和风声",
+          "type": "frame",
+          "image_url": ["https://example.com/first-frame.jpg"],
+          "resolution": "720p",
+          "video_length": 5,
+          "generate_audio": True
+      },
+      "out_task_id": "flux_3_max_frame_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "flux_3_max",
+    params: {
+      prompt: "牛仔骑马穿过日落时的峡谷，马蹄扬起尘土，马蹄声和风声",
+      type: "frame",
+      image_url: ["https://example.com/first-frame.jpg"],
+      resolution: "720p",
+      video_length: 5,
+      generate_audio: true
+    },
+    out_task_id: "flux_3_max_frame_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "flux_3_max",
+          "params": map[string]interface{}{
+              "prompt": "牛仔骑马穿过日落时的峡谷，马蹄扬起尘土，马蹄声和风声",
+              "type": "frame",
+              "image_url": []string{"https://example.com/first-frame.jpg"},
+              "resolution": "720p",
+              "video_length": 5,
+              "generate_audio": true,
+          },
+          "out_task_id": "flux_3_max_frame_123456",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/openapi/submit";
+
+          String payload = """
+              {
+                "model": "flux_3_max",
+                "params": {
+                  "prompt": "牛仔骑马穿过日落时的峡谷，马蹄扬起尘土，马蹄声和风声",
+                  "type": "frame",
+                  "image_url": ["https://example.com/first-frame.jpg"],
+                  "resolution": "720p",
+                  "video_length": 5,
+                  "generate_audio": true
+                },
+                "out_task_id": "flux_3_max_frame_123456"
+              }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = [
+      "model" => "flux_3_max",
+      "params" => [
+          "prompt" => "牛仔骑马穿过日落时的峡谷，马蹄扬起尘土，马蹄声和风声",
+          "type" => "frame",
+          "image_url" => ["https://example.com/first-frame.jpg"],
+          "resolution" => "720p",
+          "video_length" => 5,
+          "generate_audio" => true
+      ],
+      "out_task_id" => "flux_3_max_frame_123456"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url = URI("https://aireiter.com/api/openapi/submit")
+
+  payload = {
+    model: "flux_3_max",
+    params: {
+      prompt: "牛仔骑马穿过日落时的峡谷，马蹄扬起尘土，马蹄声和风声",
+      type: "frame",
+      image_url: ["https://example.com/first-frame.jpg"],
+      resolution: "720p",
+      video_length: 5,
+      generate_audio: true
+    },
+    out_task_id: "flux_3_max_frame_123456"
+  }
+
+  http = Net::HTTP.new(url.host, url.port)
+  http.use_ssl = true
+
+  request = Net::HTTP::Post.new(url)
+  request["Authorization"] = "Bearer <token>"
+  request["Content-Type"] = "application/json"
+  request.body = payload.to_json
+
+  response = http.request(request)
+  puts response.body
+  ```
+
+  ```swift Swift
+  import Foundation
+
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
+
+  let payload: [String: Any] = [
+      "model": "flux_3_max",
+      "params": [
+          "prompt": "牛仔骑马穿过日落时的峡谷，马蹄扬起尘土，马蹄声和风声",
+          "type": "frame",
+          "image_url": ["https://example.com/first-frame.jpg"],
+          "resolution": "720p",
+          "video_length": 5,
+          "generate_audio": true
+      ],
+      "out_task_id": "flux_3_max_frame_123456"
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      if let error = error {
+          print("Error: \(error)")
+          return
+      }
+
+      if let data = data, let responseString = String(data: data, encoding: .utf8) {
+          print(responseString)
+      }
+  }
+
+  task.resume()
+  ```
+
+  ```csharp C#
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url = "https://aireiter.com/api/openapi/submit";
+
+          var payload = @"
+                {
+                    ""model"": ""flux_3_max"",
+                    ""params"": {
+                        ""prompt"": ""牛仔骑马穿过日落时的峡谷，马蹄扬起尘土，马蹄声和风声"",
+                        ""type"": ""frame"",
+                        ""image_url"": [""https://example.com/first-frame.jpg""],
+                        ""resolution"": ""720p"",
+                        ""video_length"": 5,
+                        ""generate_audio"": true
+                    },
+                    ""out_task_id"": ""flux_3_max_frame_123456""
+                }";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+
+          var content = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          var result = await response.Content.ReadAsStringAsync();
+
+          Console.WriteLine(result);
+      }
+  }
+  ```
+
+  ```c C
+  #include <stdio.h>
+  #include <curl/curl.h>
+
+  int main(void) {
+      CURL *curl;
+      CURLcode res;
+
+      curl_global_init(CURL_GLOBAL_DEFAULT);
+      curl = curl_easy_init();
+
+      if(curl) {
+          const char *url = "https://aireiter.com/api/openapi/submit";
+          const char *payload = "{\"model\":\"flux_3_max\",\"params\":{\"prompt\":\"牛仔骑马穿过日落时的峡谷，马蹄扬起尘土，马蹄声和风声\",\"type\":\"frame\",\"image_url\":[\"https://example.com/first-frame.jpg\"],\"resolution\":\"720p\",\"video_length\":5,\"generate_audio\":true},\"out_task_id\":\"flux_3_max_frame_123456\"}";
+
+          struct curl_slist *headers = NULL;
+          headers = curl_slist_append(headers, "Authorization: Bearer <token>");
+          headers = curl_slist_append(headers, "Content-Type: application/json");
+
+          curl_easy_setopt(curl, CURLOPT_URL, url);
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
+          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+          res = curl_easy_perform(curl);
+
+          if(res != CURLE_OK) {
+              fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                      curl_easy_strerror(res));
+          }
+
+          curl_slist_free_all(headers);
+          curl_easy_cleanup(curl);
+      }
+
+      curl_global_cleanup();
+      return 0;
+  }
+  ```
+
+  ```objectivec Objective-C
+  #import <Foundation/Foundation.h>
+
+  int main(int argc, const char * argv[]) {
+      @autoreleasepool {
+          NSURL *url = [NSURL URLWithString:@"https://aireiter.com/api/openapi/submit"];
+
+          NSDictionary *payload = @{
+              @"model": @"flux_3_max",
+              @"params": @{
+                  @"prompt": @"牛仔骑马穿过日落时的峡谷，马蹄扬起尘土，马蹄声和风声",
+                  @"type": @"frame",
+                  @"image_url": @[@"https://example.com/first-frame.jpg"],
+                  @"resolution": @"720p",
+                  @"video_length": @5,
+                  @"generate_audio": @YES
+              },
+              @"out_task_id": @"flux_3_max_frame_123456"
+          };
+
+          NSError *error;
+          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
+                                                            options:0
+                                                              error:&error];
+
+          NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+          [request setHTTPMethod:@"POST"];
+          [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
+          [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+          [request setHTTPBody:jsonData];
+
+          NSURLSessionDataTask *task = [[NSURLSession sharedSession]
+              dataTaskWithRequest:request
+              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+                  if (error) {
+                      NSLog(@"Error: %@", error);
+                      return;
+                  }
+                  NSString *result = [[NSString alloc] initWithData:data
+                                                          encoding:NSUTF8StringEncoding];
+                  NSLog(@"%@", result);
+              }];
+
+          [task resume];
+          [[NSRunLoop mainRunLoop] run];
+      }
+      return 0;
+  }
+  ```
+
+  ```ocaml OCaml
+  (* Requires cohttp and yojson libraries *)
+  open Lwt
+  open Cohttp
+  open Cohttp_lwt_unix
+
+  let url = "https://aireiter.com/api/openapi/submit"
+
+  let payload = {|{
+    "model": "flux_3_max",
+    "params": {
+      "prompt": "牛仔骑马穿过日落时的峡谷，马蹄扬起尘土，马蹄声和风声",
+      "type": "frame",
+      "image_url": ["https://example.com/first-frame.jpg"],
+      "resolution": "720p",
+      "video_length": 5,
+      "generate_audio": true
+    },
+    "out_task_id": "flux_3_max_frame_123456"
+  }|}
+
+  let () =
+    let headers = Header.init ()
+      |> fun h -> Header.add h "Authorization" "Bearer <token>"
+      |> fun h -> Header.add h "Content-Type" "application/json"
+    in
+    let body = Cohttp_lwt.Body.of_string payload in
+
+    let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
+      body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
+      print_endline body_str
+    in
+    Lwt_main.run response
+  ```
+
+  ```dart Dart
+  import 'dart:convert';
+  import 'package:http/http.dart' as http;
+
+  void main() async {
+    final url = Uri.parse('https://aireiter.com/api/openapi/submit');
+
+    final payload = {
+      "model": "flux_3_max",
+      "params": {
+        "prompt": "牛仔骑马穿过日落时的峡谷，马蹄扬起尘土，马蹄声和风声",
+        "type": "frame",
+        "image_url": ["https://example.com/first-frame.jpg"],
+        "resolution": "720p",
+        "video_length": 5,
+        "generate_audio": true
+      },
+      "out_task_id": "flux_3_max_frame_123456"
+    };
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer <token>',
+        'Content-Type': 'application/json'
+      },
+      body: jsonEncode(payload),
+    );
+
+    print(response.body);
+  }
+  ```
+
+  ```r R
+  library(httr)
+  library(jsonlite)
+
+  url <- "https://aireiter.com/api/openapi/submit"
+
+  payload <- list(
+    model = "flux_3_max",
+    params = list(
+      prompt = "牛仔骑马穿过日落时的峡谷，马蹄扬起尘土，马蹄声和风声",
+      type = "frame",
+      image_url = I("https://example.com/first-frame.jpg"),
+      resolution = "720p",
+      video_length = 5,
+      generate_audio = TRUE
+    ),
+    out_task_id = "flux_3_max_frame_123456"
+  )
+
+  response <- POST(
+    url,
+    add_headers(
+      Authorization = "Bearer <token>",
+      `Content-Type` = "application/json"
+    ),
+    body = toJSON(payload, auto_unbox = TRUE),
+    encode = "raw"
+  )
+
+  cat(content(response, "text"))
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "out_task_id": "flux_3_max_frame_123456",
+        "status": "pending",
+        "created_at": "2026-10-20T06:00:03.438Z"
+    }
+}
+  ```
+
+  ```json 400
+    {
+        "statusCode": 400,
+        "message": "Missing required field: prompt",
+        "ok": false
+    }
+  ```
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "身份验证失败，请检查您的API密钥"
+    }
+  }
+  ```
+```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "账户余额不足，请充值后再试"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "服务器内部错误，请稍后重试"
+    }
+  }
+  ```
+</ResponseExample>
+
+## Mode Notes
+
+<Note>
+`text` 只用提示词生成；`frame` 固定视频的开头（可再固定结尾）；`keyframes` 用多张图片约束整段视频的走向，图片按顺序均匀分布在时间轴上（例如 10 秒视频传 3 张，分别落在第 0、5、10 秒）。三种模式价格相同，按输出秒数和分辨率计费。
+</Note>
+
+<Warning>
+`frame` 模式最多使用 2 张图片（首帧 + 尾帧），多余的会被忽略；`keyframes` 模式最多 10 张。`text` 模式会忽略传入的图片。
+</Warning>

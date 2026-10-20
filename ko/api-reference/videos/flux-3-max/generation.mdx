@@ -1,0 +1,758 @@
+---
+title: 'FLUX 3 Max 비디오 생성'
+description: |
+  - Black Forest Labs FLUX 3 Max 비디오 생성 모델, FLUX 3 Video 기반 사후 학습을 통해 프롬프트 준수 능력 및 화질 향상, 더 낮은 생성 지연 시간
+  - 비동기 처리 모드, 후속 조회를 위한 작업 ID 반환
+  - 텍스트 투 비디오, 시작/종료 프레임, 키프레임(최대 10장) 3가지 모드 지원
+  - 720p / 1080p 출력 지원, 비디오 길이 5-20초, 기본으로 네이티브 오디오 생성
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+<Note>
+FLUX 3 Max의 AIReiter 내 모델 이름은 `flux_3_max`입니다. `type`을 통해 텍스트 생성(`text`), 시작 및 종료 프레임(`frame`) 또는 키프레임(`keyframes`) 모드를 선택합니다.
+</Note>
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  모든 API는 Bearer Token을 사용하여 인증해야 합니다.
+
+  API Key 받기:
+
+  <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a>를 방문하여 API Key를 받으세요.
+
+  사용 시 요청 헤더에 추가:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  모델 이름, 고정 사용:
+
+  * `flux_3_max`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  모델 파라미터 객체입니다.
+
+  <Expandable title="params 객체 속성">
+    <ParamField body="prompt" type="string" required>
+      동영상 콘텐츠 설명이며, 모든 모드에서 필수입니다.
+
+      화면, 동작, 카메라 워크, 사운드를 함께 설명하는 것을 권장합니다. 모델은 생성 전에 프롬프트를 자동으로 이해하고 확장합니다(확장 강도는 `reasoning_level` 참조).
+    </ParamField>
+
+    <ParamField body="type" type="string" default="text">
+      생성 모드:
+
+      * `text` - 텍스트 투 비디오, 기본값. 프롬프트만 사용하며 전달된 이미지는 무시됩니다
+      * `frame` - 시작/마지막 프레임. `image_url[0]`을 시작 프레임(필수), `image_url[1]`을 마지막 프레임(선택 사항)으로 사용합니다
+      * `keyframes` - 키프레임. 최대 10장의 이미지를 순서대로 전달하여 동영상 타임라인에 균등하게 배치하며, 동영상이 각 이미지를 순서대로 거쳐갑니다
+
+      <Warning>
+        `frame` 및 `keyframes` 모드는 최소 1장의 이미지가 필요합니다. 이미지를 전달하지 않으면 `text` 모드로 생성됩니다.
+      </Warning>
+    </ParamField>
+
+    <ParamField body="image_url" type="string | string[]">
+      이미지 URL이며, 공용 네트워크에서 직접 접근할 수 있어야 합니다. `text` 모드에서는 전달할 필요가 없습니다.
+
+      * `frame` - 1~2장: 첫 번째 이미지는 시작 프레임, 두 번째 이미지(선택 사항)는 마지막 프레임
+      * `keyframes` - 1~10장, 업로드 순서에 따라 첫 번째 프레임부터 마지막 프레임까지 균등하게 배치
+
+      이미지 요구 사항:
+
+      * 형식: PNG, JPEG, WEBP
+      * 장당 20MB 이하
+    </ParamField>
+
+    <ParamField body="end_image_url" type="string">
+      마지막 프레임 이미지 URL이며, `frame` 모드에서만 유효합니다. `image_url`의 두 번째 이미지로 직접 전달할 수도 있으며, 둘 다 전달할 경우 `end_image_url`이 우선 적용됩니다.
+    </ParamField>
+
+    <ParamField body="video_length" type="integer" default="5">
+      생성할 동영상 길이(초 단위).
+
+      지원 정수: `5`~`20`.
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="720p">
+      출력 해상도(24 fps):
+
+      * `720p` - 기본값
+      * `1080p`
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="auto">
+      동영상 가로세로 비율:
+
+      * `auto` - 기본값. `text` 모드에서는 16:9, 이미지가 있는 경우 첫 번째 이미지를 따름
+      * `16:9` - 가로 화면
+      * `9:16` - 세로 화면
+      * `1:1` - 정사각형
+      * `4:3` - 표준 가로 화면
+      * `3:4` - 표준 세로 화면
+      * `21:9` - 울트라와이드 화면
+    </ParamField>
+
+    <ParamField body="reasoning_level" type="string" default="high">
+      프롬프트 추론 강도로, 모델이 생성 전에 프롬프트를 이해하고 확장하는 수준입니다:
+
+      * `high` - 기본값. 확장이 더 풍부하고 효과가 좋으나 생성이 더 느림
+      * `low` - 더 빠름
+
+      두 단계 모두 가격은 동일합니다.
+    </ParamField>
+
+    <ParamField body="generate_audio" type="boolean" default="true">
+      동영상과 함께 네이티브 오디오를 생성할지 여부입니다.
+
+      * `true` - 오디오 트랙이 포함된 동영상 생성, 기본값
+      * `false` - 무음 동영상 출력
+
+      오디오 활성화 여부와 관계없이 가격은 동일합니다.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  요청자 작업 ID.
+
+  사용자 정의 작업 식별자로 필수 항목입니다. 영문자, 숫자, 밑줄(_), 하이픈(-)만 지원하며 길이는 1~64자입니다. 추후 이 ID를 사용하여 작업 상태와 결과를 조회할 수 있습니다.
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  요청자 작업 ID이며, 결과 조회에 사용할 수 있습니다.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  초기 상태이며, 일반적으로 `"pending"`입니다.
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  생성 시간, ISO 형식.
+</ResponseField>
+
+## Query Task
+
+FLUX 3 Max는 비동기 비디오 생성 모델입니다. 작업을 제출한 후 `out_task_id`를 사용하여 작업 상태를 조회하십시오. 10-15초마다 한 번씩 조회하는 것을 권장합니다.
+
+<ParamField body="out_task_id" type="string" required>
+  작업 제출 시 전달한 요청자 작업 ID입니다.
+</ParamField>
+
+```bash
+curl --request POST \
+  --url https://aireiter.com/api/openapi/query \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "out_task_id": "flux_3_max_frame_123456"
+  }'
+```
+
+조회가 성공하고 완료되면 응답의 `output` 배열에 생성된 비디오가 포함되며, 요소에는 `video` 필드가 포함됩니다.
+
+<RequestExample>
+  ```bash cURL (시작 및 종료 프레임)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "flux_3_max",
+      "params": {
+        "prompt": "일몰 무렵 협곡을 말을 타고 지나가는 카우보이, 말발굽에 일어나는 흙먼지, 말발굽 소리와 바람 소리",
+        "type": "frame",
+        "image_url": ["https://example.com/first-frame.jpg", "https://example.com/last-frame.jpg"],
+        "resolution": "720p",
+        "video_length": 5,
+        "generate_audio": true
+      },
+      "out_task_id": "flux_3_max_frame_123456"
+    }'
+  ```
+
+  ```bash cURL (텍스트 투 비디오)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "flux_3_max",
+      "params": {
+        "prompt": "이끼로 뒤덮인 통나무를 따라 걷다가 멈춰 서서 공기 냄새를 맡는 레서판다, 캐노피 사이로 비치는 아침 햇살, 새들의 지저귐과 나뭇잎 바스락거리는 소리",
+        "type": "text",
+        "resolution": "1080p",
+        "aspect_ratio": "16:9",
+        "video_length": 8,
+        "reasoning_level": "high",
+        "generate_audio": true
+      },
+      "out_task_id": "flux_3_max_text_123456"
+    }'
+  ```
+
+  ```bash cURL (키프레임)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "flux_3_max",
+      "params": {
+        "prompt": "카메라가 캐릭터를 따라 길모퉁이에서 카페 안으로 들어가 창가에 앉는 모습, 도시 환경음",
+        "type": "keyframes",
+        "image_url": [
+          "https://example.com/key-1.jpg",
+          "https://example.com/key-2.jpg",
+          "https://example.com/key-3.jpg"
+        ],
+        "resolution": "720p",
+        "video_length": 10,
+        "generate_audio": true
+      },
+      "out_task_id": "flux_3_max_keyframes_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "flux_3_max",
+      "params": {
+          "prompt": "일몰 무렵 협곡을 말을 타고 지나가는 카우보이, 말발굽에 일어나는 흙먼지, 말발굽 소리와 바람 소리",
+          "type": "frame",
+          "image_url": ["https://example.com/first-frame.jpg"],
+          "resolution": "720p",
+          "video_length": 5,
+          "generate_audio": True
+      },
+      "out_task_id": "flux_3_max_frame_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "flux_3_max",
+    params: {
+      prompt: "일몰 무렵 협곡을 말을 타고 지나가는 카우보이, 말발굽에 일어나는 흙먼지, 말발굽 소리와 바람 소리",
+      type: "frame",
+      image_url: ["https://example.com/first-frame.jpg"],
+      resolution: "720p",
+      video_length: 5,
+      generate_audio: true
+    },
+    out_task_id: "flux_3_max_frame_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "flux_3_max",
+          "params": map[string]interface{}{
+              "prompt": "일몰 무렵 협곡을 말을 타고 지나가는 카우보이, 말발굽에 일어나는 흙먼지, 말발굽 소리와 바람 소리",
+              "type": "frame",
+              "image_url": []string{"https://example.com/first-frame.jpg"},
+              "resolution": "720p",
+              "video_length": 5,
+              "generate_audio": true,
+          },
+          "out_task_id": "flux_3_max_frame_123456",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/openapi/submit";
+
+          String payload = """
+              {
+                "model": "flux_3_max",
+                "params": {
+                  "prompt": "일몰 무렵 협곡을 말을 타고 지나가는 카우보이, 말발굽에 일어나는 흙먼지, 말발굽 소리와 바람 소리",
+                  "type": "frame",
+                  "image_url": ["https://example.com/first-frame.jpg"],
+                  "resolution": "720p",
+                  "video_length": 5,
+                  "generate_audio": true
+                },
+                "out_task_id": "flux_3_max_frame_123456"
+              }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = [
+      "model" => "flux_3_max",
+      "params" => [
+          "prompt" => "일몰 무렵 협곡을 말을 타고 지나가는 카우보이, 말발굽에 일어나는 흙먼지, 말발굽 소리와 바람 소리",
+          "type" => "frame",
+          "image_url" => ["https://example.com/first-frame.jpg"],
+          "resolution" => "720p",
+          "video_length" => 5,
+          "generate_audio" => true
+      ],
+      "out_task_id" => "flux_3_max_frame_123456"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url = URI("https://aireiter.com/api/openapi/submit")
+
+  payload = {
+    model: "flux_3_max",
+    params: {
+      prompt: "일몰 무렵 협곡을 말을 타고 지나가는 카우보이, 말발굽에 일어나는 흙먼지, 말발굽 소리와 바람 소리",
+      type: "frame",
+      image_url: ["https://example.com/first-frame.jpg"],
+      resolution: "720p",
+      video_length: 5,
+      generate_audio: true
+    },
+    out_task_id: "flux_3_max_frame_123456"
+  }
+
+  http = Net::HTTP.new(url.host, url.port)
+  http.use_ssl = true
+
+  request = Net::HTTP::Post.new(url)
+  request["Authorization"] = "Bearer <token>"
+  request["Content-Type"] = "application/json"
+  request.body = payload.to_json
+
+  response = http.request(request)
+  puts response.body
+  ```
+
+  ```swift Swift
+  import Foundation
+
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
+
+  let payload: [String: Any] = [
+      "model": "flux_3_max",
+      "params": [
+          "prompt": "일몰 무렵 협곡을 말을 타고 지나가는 카우보이, 말발굽에 일어나는 흙먼지, 말발굽 소리와 바람 소리",
+          "type": "frame",
+          "image_url": ["https://example.com/first-frame.jpg"],
+          "resolution": "720p",
+          "video_length": 5,
+          "generate_audio": true
+      ],
+      "out_task_id": "flux_3_max_frame_123456"
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      if let error = error {
+          print("Error: \(error)")
+          return
+      }
+
+      if let data = data, let responseString = String(data: data, encoding: .utf8) {
+          print(responseString)
+      }
+  }
+
+  task.resume()
+  ```
+
+  ```csharp C#
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url = "https://aireiter.com/api/openapi/submit";
+
+          var payload = @"
+                {
+                    ""model"": ""flux_3_max"",
+                    ""params"": {
+                        ""prompt"": ""일몰 무렵 협곡을 말을 타고 지나가는 카우보이, 말발굽에 일어나는 흙먼지, 말발굽 소리와 바람 소리"",
+                        ""type"": ""frame"",
+                        ""image_url"": [""https://example.com/first-frame.jpg""],
+                        ""resolution"": ""720p"",
+                        ""video_length"": 5,
+                        ""generate_audio"": true
+                    },
+                    ""out_task_id"": ""flux_3_max_frame_123456""
+                }";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+
+          var content = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          var result = await response.Content.ReadAsStringAsync();
+
+          Console.WriteLine(result);
+      }
+  }
+  ```
+
+  ```c C
+  #include <stdio.h>
+  #include <curl/curl.h>
+
+  int main(void) {
+      CURL *curl;
+      CURLcode res;
+
+      curl_global_init(CURL_GLOBAL_DEFAULT);
+      curl = curl_easy_init();
+
+      if(curl) {
+          const char *url = "https://aireiter.com/api/openapi/submit";
+          const char *payload = "{\"model\":\"flux_3_max\",\"params\":{\"prompt\":\"일몰 무렵 협곡을 말을 타고 지나가는 카우보이, 말발굽에 일어나는 흙먼지, 말발굽 소리와 바람 소리\",\"type\":\"frame\",\"image_url\":[\"https://example.com/first-frame.jpg\"],\"resolution\":\"720p\",\"video_length\":5,\"generate_audio\":true},\"out_task_id\":\"flux_3_max_frame_123456\"}";
+
+          struct curl_slist *headers = NULL;
+          headers = curl_slist_append(headers, "Authorization: Bearer <token>");
+          headers = curl_slist_append(headers, "Content-Type: application/json");
+
+          curl_easy_setopt(curl, CURLOPT_URL, url);
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
+          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+          res = curl_easy_perform(curl);
+
+          if(res != CURLE_OK) {
+              fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                      curl_easy_strerror(res));
+          }
+
+          curl_slist_free_all(headers);
+          curl_easy_cleanup(curl);
+      }
+
+      curl_global_cleanup();
+      return 0;
+  }
+  ```
+
+  ```objectivec Objective-C
+  #import <Foundation/Foundation.h>
+
+  int main(int argc, const char * argv[]) {
+      @autoreleasepool {
+          NSURL *url = [NSURL URLWithString:@"https://aireiter.com/api/openapi/submit"];
+
+          NSDictionary *payload = @{
+              @"model": @"flux_3_max",
+              @"params": @{
+                  @"prompt": @"일몰 무렵 협곡을 말을 타고 지나가는 카우보이, 말발굽에 일어나는 흙먼지, 말발굽 소리와 바람 소리",
+                  @"type": @"frame",
+                  @"image_url": @[@"https://example.com/first-frame.jpg"],
+                  @"resolution": @"720p",
+                  @"video_length": @5,
+                  @"generate_audio": @YES
+              },
+              @"out_task_id": @"flux_3_max_frame_123456"
+          };
+
+          NSError *error;
+          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
+                                                            options:0
+                                                              error:&error];
+
+          NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+          [request setHTTPMethod:@"POST"];
+          [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
+          [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+          [request setHTTPBody:jsonData];
+
+          NSURLSessionDataTask *task = [[NSURLSession sharedSession]
+              dataTaskWithRequest:request
+              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+                  if (error) {
+                      NSLog(@"Error: %@", error);
+                      return;
+                  }
+                  NSString *result = [[NSString alloc] initWithData:data
+                                                          encoding:NSUTF8StringEncoding];
+                  NSLog(@"%@", result);
+              }];
+
+          [task resume];
+          [[NSRunLoop mainRunLoop] run];
+      }
+      return 0;
+  }
+  ```
+
+  ```ocaml OCaml
+  (* Requires cohttp and yojson libraries *)
+  open Lwt
+  open Cohttp
+  open Cohttp_lwt_unix
+
+  let url = "https://aireiter.com/api/openapi/submit"
+
+  let payload = {|{
+    "model": "flux_3_max",
+    "params": {
+      "prompt": "일몰 무렵 협곡을 말을 타고 지나가는 카우보이, 말발굽에 일어나는 흙먼지, 말발굽 소리와 바람 소리",
+      "type": "frame",
+      "image_url": ["https://example.com/first-frame.jpg"],
+      "resolution": "720p",
+      "video_length": 5,
+      "generate_audio": true
+    },
+    "out_task_id": "flux_3_max_frame_123456"
+  }|}
+
+  let () =
+    let headers = Header.init ()
+      |> fun h -> Header.add h "Authorization" "Bearer <token>"
+      |> fun h -> Header.add h "Content-Type" "application/json"
+    in
+    let body = Cohttp_lwt.Body.of_string payload in
+
+    let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
+      body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
+      print_endline body_str
+    in
+    Lwt_main.run response
+  ```
+
+  ```dart Dart
+  import 'dart:convert';
+  import 'package:http/http.dart' as http;
+
+  void main() async {
+    final url = Uri.parse('https://aireiter.com/api/openapi/submit');
+
+    final payload = {
+      "model": "flux_3_max",
+      "params": {
+        "prompt": "일몰 무렵 협곡을 말을 타고 지나가는 카우보이, 말발굽에 일어나는 흙먼지, 말발굽 소리와 바람 소리",
+        "type": "frame",
+        "image_url": ["https://example.com/first-frame.jpg"],
+        "resolution": "720p",
+        "video_length": 5,
+        "generate_audio": true
+      },
+      "out_task_id": "flux_3_max_frame_123456"
+    };
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer <token>',
+        'Content-Type': 'application/json'
+      },
+      body: jsonEncode(payload),
+    );
+
+    print(response.body);
+  }
+  ```
+
+  ```r R
+  library(httr)
+  library(jsonlite)
+
+  url <- "https://aireiter.com/api/openapi/submit"
+
+  payload <- list(
+    model = "flux_3_max",
+    params = list(
+      prompt = "일몰 무렵 협곡을 말을 타고 지나가는 카우보이, 말발굽에 일어나는 흙먼지, 말발굽 소리와 바람 소리",
+      type = "frame",
+      image_url = I("https://example.com/first-frame.jpg"),
+      resolution = "720p",
+      video_length = 5,
+      generate_audio = TRUE
+    ),
+    out_task_id = "flux_3_max_frame_123456"
+  )
+
+  response <- POST(
+    url,
+    add_headers(
+      Authorization = "Bearer <token>",
+      `Content-Type` = "application/json"
+    ),
+    body = toJSON(payload, auto_unbox = TRUE),
+    encode = "raw"
+  )
+
+  cat(content(response, "text"))
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "out_task_id": "flux_3_max_frame_123456",
+        "status": "pending",
+        "created_at": "2026-10-20T06:00:03.438Z"
+    }
+}
+  ```
+
+  ```json 400
+    {
+        "statusCode": 400,
+        "message": "Missing required field: prompt",
+        "ok": false
+    }
+  ```
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "인증에 실패했습니다. API 키를 확인해 주세요"
+    }
+  }
+  ```
+```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "계정 잔액이 부족합니다. 충전 후 다시 시도해 주세요"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해 주세요"
+    }
+  }
+  ```
+</ResponseExample>
+
+## Mode Notes
+
+<Note>
+`text`는 프롬프트만 사용하여 생성하며, `frame`은 영상의 시작 부분을 고정합니다(끝 부분도 추가 고정 가능). `keyframes`는 여러 장의 이미지를 사용하여 전체 영상의 흐름을 제어하며, 이미지는 타임라인에 순서대로 균등하게 배치됩니다(예: 10초 영상에 3장을 전달하면 각각 0초, 5초, 10초에 배치). 세 가지 모드의 가격은 동일하며, 출력 시간(초)과 해상도에 따라 요금이 부과됩니다.
+</Note>
+
+<Warning>
+`frame` 모드는 최대 2장의 이미지(첫 프레임 + 마지막 프레임)를 사용하며 초과된 이미지는 무시됩니다. `keyframes` 모드는 최대 10장까지 지원합니다. `text` 모드는 전달된 이미지를 무시합니다.
+</Warning>

@@ -1,0 +1,758 @@
+---
+title: 'FLUX 3 Max 動画生成'
+description: |
+  - Black Forest Labs FLUX 3 Max 動画生成モデル。FLUX 3 Video の事後学習に基づき、プロンプト追従性と画質が向上、生成遅延がより低減
+  - 非同期処理モード。後続の照会に使用するタスク ID を返却
+  - テキストから動画生成、先頭・末尾フレーム、キーフレーム（最大10枚）の3つのモードに対応
+  - 720p / 1080p 出力に対応、動画の長さは5〜20秒、デフォルトでネイティブ音声を生成
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+<Note>
+FLUX 3 Max の AIReiter におけるモデル名は `flux_3_max` です。`type` を使用してテキスト生成（`text`）、開始・終了フレーム（`frame`）、またはキーフレーム（`keyframes`）モードを選択します。
+</Note>
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  すべてのインターフェースで Bearer Token による認証が必要です。
+
+  API Key の取得：
+
+  <a href={apiKeyUrl} target="_blank">API Key 管理ページ</a>にアクセスして API Key を取得してください。
+
+  使用時はリクエストヘッダーに以下を追加します：
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  モデル名。以下を固定で使用：
+
+  * `flux_3_max`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  モデルパラメータオブジェクト。
+
+  <Expandable title="params オブジェクトのプロパティ">
+    <ParamField body="prompt" type="string" required>
+      動画コンテンツの説明。すべてのモードで必須。
+
+      画面、アクション、カメラワーク、および音声を同時に描写することをお勧めします。モデルは生成前にプロンプトを自動的に理解し、拡張します（拡張強度は `reasoning_level` を参照）。
+    </ParamField>
+
+    <ParamField body="type" type="string" default="text">
+      生成モード：
+
+      * `text` - テキストから動画生成（デフォルト値）。プロンプトのみを使用し、渡された画像は無視されます
+      * `frame` - 開始・終了フレーム。`image_url[0]` を開始フレームとして使用（必須）、`image_url[1]` を終了フレームとして使用（任意）
+      * `keyframes` - キーフレーム。順序どおりに最大10枚の画像を渡し、動画のタイムライン上に均等に配置され、動画が各画像を順番に通過します
+
+      <Warning>
+        `frame` および `keyframes` モードでは少なくとも1枚の画像が必要です。画像が渡されない場合は `text` モードとして生成されます。
+      </Warning>
+    </ParamField>
+
+    <ParamField body="image_url" type="string | string[]">
+      画像URL。パブリックインターネットから直接アクセス可能である必要があります。`text` モードでは渡す必要はありません。
+
+      * `frame` - 1〜2枚：1枚目が開始フレーム、2枚目（任意）が終了フレーム
+      * `keyframes` - 1〜10枚、アップロード順に最初から最後のフレームまで均等に配置
+
+      画像の要件：
+
+      * フォーマット：PNG、JPEG、WEBP
+      * 1枚あたり20MB以下
+    </ParamField>
+
+    <ParamField body="end_image_url" type="string">
+      終了フレーム画像のURL。`frame` モードでのみ有効です。`image_url` の2枚目として直接渡すことも可能ですが、両方を同時に渡した場合は `end_image_url` が優先されます。
+    </ParamField>
+
+    <ParamField body="video_length" type="integer" default="5">
+      生成する動画の長さ（秒単位）。
+
+      サポートされる整数：`5` 〜 `20`。
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="720p">
+      出力解像度（24 fps）：
+
+      * `720p` - デフォルト値
+      * `1080p`
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="auto">
+      動画のアスペクト比：
+
+      * `auto` - デフォルト値。`text` モードでは 16:9、画像がある場合は1枚目の画像に従う
+      * `16:9` - 横向き
+      * `9:16` - 縦向き
+      * `1:1` - 正方形
+      * `4:3` - 標準横向き
+      * `3:4` - 標準縦向き
+      * `21:9` - ウルトラワイド
+    </ParamField>
+
+    <ParamField body="reasoning_level" type="string" default="high">
+      プロンプト推論強度。生成前にモデルがプロンプトを理解し拡張する強度：
+
+      * `high` - デフォルト値。より十分に拡張され、効果が高くなりますが、生成速度は遅くなります
+      * `low` - より高速
+
+      どちらの設定も料金は同じです。
+    </ParamField>
+
+    <ParamField body="generate_audio" type="boolean" default="true">
+      動画とともにネイティブ音声を生成するかどうか。
+
+      * `true` - 音声トラック付きの動画を生成（デフォルト値）
+      * `false` - 音声なしの動画を出力
+
+      音声の有無に関わらず料金は同じです。
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  リクエスト元のタスクID。
+
+  ユーザー定義のタスク識別子（必須）。英数字、アンダースコア、ハイフンのみ対応し、長さは1〜64文字です。後からこのIDを使用してタスクのステータスや結果を照会できます。
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  リクエスト元のタスクID。結果の照会に使用できます。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  初期ステータス。通常は `"pending"` です。
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  作成日時（ISO形式）。
+</ResponseField>
+
+## Query Task
+
+FLUX 3 Max は非同期動画生成モデルです。タスク送信後、`out_task_id` を使用してタスクステータスをクエリしてください。10〜15秒ごとにクエリすることをお勧めします。
+
+<ParamField body="out_task_id" type="string" required>
+  タスク送信時に渡されたリクエスト元のタスク ID。
+</ParamField>
+
+```bash
+curl --request POST \
+  --url https://aireiter.com/api/openapi/query \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "out_task_id": "flux_3_max_frame_123456"
+  }'
+```
+
+クエリが成功して完了すると、レスポンス内の `output` 配列に生成された動画が含まれ、要素には `video` フィールドが含まれます。
+
+<RequestExample>
+  ```bash cURL（最初と最後のフレーム）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "flux_3_max",
+      "params": {
+        "prompt": "夕暮れの峡谷を馬に乗って進むカウボーイ、蹄が土煙を上げ、蹄の音と風の音が響く",
+        "type": "frame",
+        "image_url": ["https://example.com/first-frame.jpg", "https://example.com/last-frame.jpg"],
+        "resolution": "720p",
+        "video_length": 5,
+        "generate_audio": true
+      },
+      "out_task_id": "flux_3_max_frame_123456"
+    }'
+  ```
+
+  ```bash cURL（テキストから動画）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "flux_3_max",
+      "params": {
+        "prompt": "苔むした倒木の上を歩くレッサーパンダ、立ち止まって空気を嗅ぎ、樹冠から朝の光が差し込み、鳥のさえずりと葉のざわめき",
+        "type": "text",
+        "resolution": "1080p",
+        "aspect_ratio": "16:9",
+        "video_length": 8,
+        "reasoning_level": "high",
+        "generate_audio": true
+      },
+      "out_task_id": "flux_3_max_text_123456"
+    }'
+  ```
+
+  ```bash cURL（キーフレーム）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "flux_3_max",
+      "params": {
+        "prompt": "カメラがキャラクターを追って通りの入り口からカフェに入り、最終的に窓際の席に座る、街の環境音",
+        "type": "keyframes",
+        "image_url": [
+          "https://example.com/key-1.jpg",
+          "https://example.com/key-2.jpg",
+          "https://example.com/key-3.jpg"
+        ],
+        "resolution": "720p",
+        "video_length": 10,
+        "generate_audio": true
+      },
+      "out_task_id": "flux_3_max_keyframes_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "flux_3_max",
+      "params": {
+          "prompt": "夕暮れの峡谷を馬に乗って進むカウボーイ、蹄が土煙を上げ、蹄の音と風の音が響く",
+          "type": "frame",
+          "image_url": ["https://example.com/first-frame.jpg"],
+          "resolution": "720p",
+          "video_length": 5,
+          "generate_audio": True
+      },
+      "out_task_id": "flux_3_max_frame_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "flux_3_max",
+    params: {
+      prompt: "夕暮れの峡谷を馬に乗って進むカウボーイ、蹄が土煙を上げ、蹄の音と風の音が響く",
+      type: "frame",
+      image_url: ["https://example.com/first-frame.jpg"],
+      resolution: "720p",
+      video_length: 5,
+      generate_audio: true
+    },
+    out_task_id: "flux_3_max_frame_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "flux_3_max",
+          "params": map[string]interface{}{
+              "prompt": "夕暮れの峡谷を馬に乗って進むカウボーイ、蹄が土煙を上げ、蹄の音と風の音が響く",
+              "type": "frame",
+              "image_url": []string{"https://example.com/first-frame.jpg"},
+              "resolution": "720p",
+              "video_length": 5,
+              "generate_audio": true,
+          },
+          "out_task_id": "flux_3_max_frame_123456",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/openapi/submit";
+
+          String payload = """
+              {
+                "model": "flux_3_max",
+                "params": {
+                  "prompt": "夕暮れの峡谷を馬に乗って進むカウボーイ、蹄が土煙を上げ、蹄の音と風の音が響く",
+                  "type": "frame",
+                  "image_url": ["https://example.com/first-frame.jpg"],
+                  "resolution": "720p",
+                  "video_length": 5,
+                  "generate_audio": true
+                },
+                "out_task_id": "flux_3_max_frame_123456"
+              }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = [
+      "model" => "flux_3_max",
+      "params" => [
+          "prompt" => "夕暮れの峡谷を馬に乗って進むカウボーイ、蹄が土煙を上げ、蹄の音と風の音が響く",
+          "type" => "frame",
+          "image_url" => ["https://example.com/first-frame.jpg"],
+          "resolution" => "720p",
+          "video_length" => 5,
+          "generate_audio" => true
+      ],
+      "out_task_id" => "flux_3_max_frame_123456"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url = URI("https://aireiter.com/api/openapi/submit")
+
+  payload = {
+    model: "flux_3_max",
+    params: {
+      prompt: "夕暮れの峡谷を馬に乗って進むカウボーイ、蹄が土煙を上げ、蹄の音と風の音が響く",
+      type: "frame",
+      image_url: ["https://example.com/first-frame.jpg"],
+      resolution: "720p",
+      video_length: 5,
+      generate_audio: true
+    },
+    out_task_id: "flux_3_max_frame_123456"
+  }
+
+  http = Net::HTTP.new(url.host, url.port)
+  http.use_ssl = true
+
+  request = Net::HTTP::Post.new(url)
+  request["Authorization"] = "Bearer <token>"
+  request["Content-Type"] = "application/json"
+  request.body = payload.to_json
+
+  response = http.request(request)
+  puts response.body
+  ```
+
+  ```swift Swift
+  import Foundation
+
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
+
+  let payload: [String: Any] = [
+      "model": "flux_3_max",
+      "params": [
+          "prompt": "夕暮れの峡谷を馬に乗って進むカウボーイ、蹄が土煙を上げ、蹄の音と風の音が響く",
+          "type": "frame",
+          "image_url": ["https://example.com/first-frame.jpg"],
+          "resolution": "720p",
+          "video_length": 5,
+          "generate_audio": true
+      ],
+      "out_task_id": "flux_3_max_frame_123456"
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      if let error = error {
+          print("Error: \(error)")
+          return
+      }
+
+      if let data = data, let responseString = String(data: data, encoding: .utf8) {
+          print(responseString)
+      }
+  }
+
+  task.resume()
+  ```
+
+  ```csharp C#
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url = "https://aireiter.com/api/openapi/submit";
+
+          var payload = @"
+                {
+                    ""model"": ""flux_3_max"",
+                    ""params"": {
+                        ""prompt"": ""夕暮れの峡谷を馬に乗って進むカウボーイ、蹄が土煙を上げ、蹄の音と風の音が響く"",
+                        ""type"": ""frame"",
+                        ""image_url"": [""https://example.com/first-frame.jpg""],
+                        ""resolution"": ""720p"",
+                        ""video_length"": 5,
+                        ""generate_audio"": true
+                    },
+                    ""out_task_id"": ""flux_3_max_frame_123456""
+                }";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+
+          var content = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          var result = await response.Content.ReadAsStringAsync();
+
+          Console.WriteLine(result);
+      }
+  }
+  ```
+
+  ```c C
+  #include <stdio.h>
+  #include <curl/curl.h>
+
+  int main(void) {
+      CURL *curl;
+      CURLcode res;
+
+      curl_global_init(CURL_GLOBAL_DEFAULT);
+      curl = curl_easy_init();
+
+      if(curl) {
+          const char *url = "https://aireiter.com/api/openapi/submit";
+          const char *payload = "{\"model\":\"flux_3_max\",\"params\":{\"prompt\":\"夕暮れの峡谷を馬に乗って進むカウボーイ、蹄が土煙を上げ、蹄の音と風の音が響く\",\"type\":\"frame\",\"image_url\":[\"https://example.com/first-frame.jpg\"],\"resolution\":\"720p\",\"video_length\":5,\"generate_audio\":true},\"out_task_id\":\"flux_3_max_frame_123456\"}";
+
+          struct curl_slist *headers = NULL;
+          headers = curl_slist_append(headers, "Authorization: Bearer <token>");
+          headers = curl_slist_append(headers, "Content-Type: application/json");
+
+          curl_easy_setopt(curl, CURLOPT_URL, url);
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
+          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+          res = curl_easy_perform(curl);
+
+          if(res != CURLE_OK) {
+              fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                      curl_easy_strerror(res));
+          }
+
+          curl_slist_free_all(headers);
+          curl_easy_cleanup(curl);
+      }
+
+      curl_global_cleanup();
+      return 0;
+  }
+  ```
+
+  ```objectivec Objective-C
+  #import <Foundation/Foundation.h>
+
+  int main(int argc, const char * argv[]) {
+      @autoreleasepool {
+          NSURL *url = [NSURL URLWithString:@"https://aireiter.com/api/openapi/submit"];
+
+          NSDictionary *payload = @{
+              @"model": @"flux_3_max",
+              @"params": @{
+                  @"prompt": @"夕暮れの峡谷を馬に乗って進むカウボーイ、蹄が土煙を上げ、蹄の音と風の音が響く",
+                  @"type": @"frame",
+                  @"image_url": @[@"https://example.com/first-frame.jpg"],
+                  @"resolution": @"720p",
+                  @"video_length": @5,
+                  @"generate_audio": @YES
+              },
+              @"out_task_id": @"flux_3_max_frame_123456"
+          };
+
+          NSError *error;
+          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
+                                                            options:0
+                                                              error:&error];
+
+          NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+          [request setHTTPMethod:@"POST"];
+          [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
+          [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+          [request setHTTPBody:jsonData];
+
+          NSURLSessionDataTask *task = [[NSURLSession sharedSession]
+              dataTaskWithRequest:request
+              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+                  if (error) {
+                      NSLog(@"Error: %@", error);
+                      return;
+                  }
+                  NSString *result = [[NSString alloc] initWithData:data
+                                                          encoding:NSUTF8StringEncoding];
+                  NSLog(@"%@", result);
+              }];
+
+          [task resume];
+          [[NSRunLoop mainRunLoop] run];
+      }
+      return 0;
+  }
+  ```
+
+  ```ocaml OCaml
+  (* Requires cohttp and yojson libraries *)
+  open Lwt
+  open Cohttp
+  open Cohttp_lwt_unix
+
+  let url = "https://aireiter.com/api/openapi/submit"
+
+  let payload = {|{
+    "model": "flux_3_max",
+    "params": {
+      "prompt": "夕暮れの峡谷を馬に乗って進むカウボーイ、蹄が土煙を上げ、蹄の音と風の音が響く",
+      "type": "frame",
+      "image_url": ["https://example.com/first-frame.jpg"],
+      "resolution": "720p",
+      "video_length": 5,
+      "generate_audio": true
+    },
+    "out_task_id": "flux_3_max_frame_123456"
+  }|}
+
+  let () =
+    let headers = Header.init ()
+      |> fun h -> Header.add h "Authorization" "Bearer <token>"
+      |> fun h -> Header.add h "Content-Type" "application/json"
+    in
+    let body = Cohttp_lwt.Body.of_string payload in
+
+    let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
+      body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
+      print_endline body_str
+    in
+    Lwt_main.run response
+  ```
+
+  ```dart Dart
+  import 'dart:convert';
+  import 'package:http/http.dart' as http;
+
+  void main() async {
+    final url = Uri.parse('https://aireiter.com/api/openapi/submit');
+
+    final payload = {
+      "model": "flux_3_max",
+      "params": {
+        "prompt": "夕暮れの峡谷を馬に乗って進むカウボーイ、蹄が土煙を上げ、蹄の音と風の音が響く",
+        "type": "frame",
+        "image_url": ["https://example.com/first-frame.jpg"],
+        "resolution": "720p",
+        "video_length": 5,
+        "generate_audio": true
+      },
+      "out_task_id": "flux_3_max_frame_123456"
+    };
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer <token>',
+        'Content-Type': 'application/json'
+      },
+      body: jsonEncode(payload),
+    );
+
+    print(response.body);
+  }
+  ```
+
+  ```r R
+  library(httr)
+  library(jsonlite)
+
+  url <- "https://aireiter.com/api/openapi/submit"
+
+  payload = list(
+    model = "flux_3_max",
+    params = list(
+      prompt = "夕暮れの峡谷を馬に乗って進むカウボーイ、蹄が土煙を上げ、蹄の音と風の音が響く",
+      type = "frame",
+      image_url = I("https://example.com/first-frame.jpg"),
+      resolution = "720p",
+      video_length = 5,
+      generate_audio = TRUE
+    ),
+    out_task_id = "flux_3_max_frame_123456"
+  )
+
+  response <- POST(
+    url,
+    add_headers(
+      Authorization = "Bearer <token>",
+      `Content-Type` = "application/json"
+    ),
+    body = toJSON(payload, auto_unbox = TRUE),
+    encode = "raw"
+  )
+
+  cat(content(response, "text"))
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "out_task_id": "flux_3_max_frame_123456",
+        "status": "pending",
+        "created_at": "2026-10-20T06:00:03.438Z"
+    }
+}
+  ```
+
+  ```json 400
+    {
+        "statusCode": 400,
+        "message": "Missing required field: prompt",
+        "ok": false
+    }
+  ```
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "認証に失敗しました。APIキーを確認してください"
+    }
+  }
+  ```
+```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "アカウントの残高が不足しています。チャージしてから再試行してください"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "サーバー内部エラーが発生しました。後でもう一度お試しください"
+    }
+  }
+  ```
+</ResponseExample>
+
+## Mode Notes
+
+<Note>
+`text` はプロンプトのみを使用して生成します。`frame` は動画の開始フレームを固定します（終了フレームの固定も可能）。`keyframes` は複数の画像で動画全体の流れを制御し、画像は順番通りタイムライン上に均等に配置されます（例：10秒の動画に3枚指定した場合、それぞれ0秒、5秒、10秒の位置に配置）。3つのモードの料金は同一で、出力秒数と解像度に基づいて課金されます。
+</Note>
+
+<Warning>
+`frame` モードで使用できる画像は最大2枚（最初のフレーム＋最後のフレーム）で、余分な画像は無視されます。`keyframes` モードは最大10枚です。`text` モードは渡された画像を無視します。
+</Warning>
