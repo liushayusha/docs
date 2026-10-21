@@ -1,8 +1,9 @@
 ---
-title: 'Jev 意思決定インターフェース'
+title: 'Jev 意思決定 API'
 description: |
-    - 同期型の意思決定インターフェースであり、チャットインターフェースではありません。ストリーミング出力には対応していません
-    - コンテキスト `state` と複数の判定問題 `questions` を送信すると、1回のレスポンスで各問題の確率、選択肢、またはスコアが返されます
+    - 同期型の意思決定 API であり、チャット API ではありません。ストリーミング出力には対応していません
+    - 判定材料となる `state` と複数の判定問題 `questions` を送信すると、1 回のレスポンスで各問題の確率、選択肢、スコア、または画像内の位置を返します
+    - 画像入力および Box 位置特定問題に対応（Beta）
     - 呼び出し時のモデル名には `jev` を指定してください
 api: 'POST https://aireiter.com/api/v1/systemone'
 ---
@@ -25,39 +26,62 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  モデル名。`jev` と固定で指定します。
+  モデル名。`jev` を固定で指定します。
 
-  レスポンス内の `result.result.model` はアップストリームで実際に使用されたバージョン番号（例：`jev-1.13.0`）です。このフィールドはアップストリームから返されるため、リクエストにはバージョン番号を含めないでください。
+  レスポンス内の `result.result.model` はアップストリームで実際に使用されたバージョン番号（例：`jev-1.14.0`）です。このフィールドはアップストリームから返されるため、リクエストにはバージョン番号を含めないでください。
 </ParamField>
 
 <ParamField body="input" type="object" required>
-  判定内容。`state` と `questions` を含みます。
+  判定内容。`state`、`questions` を含み、画像を含める場合は `assets` も追加します。
 
-  <Expandable title="フィールドの説明">
+  <Expandable title="フィールド説明">
     <ParamField body="state" type="string | object | array" required>
-      判定対象のデータ。1つの文字列でも、オブジェクトや配列でも構いません。判定の完了に必要なデータのみを含め、APIキーやパスワードなどの機密情報は含めないでください。
+      判定対象のデータ。単一のテキスト文のほか、オブジェクトや配列も指定可能です。判定に必要なデータのみを含め、APIキーやパスワードなどの機密情報は含めないでください。
+
+      画像を含める場合は、`state` 内に画像の参照名を記述します（例：`{ "photo": "img-7f3a91" }`）。参照名は `assets` 内のキーに対応します。
+    </ParamField>
+
+    <ParamField body="assets" type="object">
+      画像マップ（Beta）。キーは参照名、値は画像オブジェクトです。画像がない場合は渡さないでください。
+
+      参照名はプレーンテキストとしてマッチングされ、`state`、質問の `instructions`、または `criteria` 内の任意の文字列に記述できます。モデルはその位置に該当の画像を認識します。参照名には本文と重複しない文字列を選択してください。画像ごとに UUID を使用することをお勧めします。各参照名はリクエスト内に少なくとも1回出現する必要があります。
+
+      <Expandable title="画像オブジェクト">
+        <ParamField body="type" type="string">
+          `image` 固定。省略可能です。
+        </ParamField>
+
+        <ParamField body="format" type="string" required>
+          画像フォーマット：`png`、`jpg`、または `jpeg`（小文字）。
+        </ParamField>
+
+        <ParamField body="data_base64" type="string" required>
+          画像ファイルの Base64 エンコード。標準の Base64 アルファベットを使用し、`=` によるパディングを含め、改行や `data:` プレフィックスは含めないでください。
+        </ParamField>
+      </Expandable>
     </ParamField>
 
     <ParamField body="questions" type="object" required>
-      設問リスト（空にすることはできません）。キー名は自由に設定でき、各設問は1つのオブジェクトになります。
+      質問マップ。空にすることはできません。キー名は自由に設定可能で、各質問はオブジェクト形式です。
 
-      各設問には `type` と `instructions` が必須です。
+      各質問には `type` と `instructions` が必須です。
 
-      * `noul` — 二者択一問題。返される `noul` は 0 〜 1 の範囲で、「はい」の確率を表します。`criteria` は任意で、形式は `{ "true": "どのような場合が「はい」か", "false": "どのような場合が「いいえ」か" }` です。
-      * `choice` — 単一選択。`criteria` は必須で、「選択肢名 → 説明」のオブジェクトです。返される `choice` は選択された選択肢名です。
-      * `score` — スコア評価。`criteria` は必須で、低い順から並んだ2つ以上の要素を持つ配列です。返される `score` は該当する段階の数値で、最初の項目は 0 となり、小数も可能です。例えば3段階の場合、`1.99` はほぼ3番目の項目に該当することを示します。
+      * `noul` — 正誤判定問題（Yes/No）。「Yes」の確率を示す 0 から 1 の範囲の `noul` を返します。`criteria` は任意で、`{ "true": "どのような場合をYesとするか", "false": "どのような場合をNoとするか" }` のような形式です。
+      * `choice` — 単一選択問題。`criteria` は必須で、「選択肢名 → 説明」のオブジェクトです。返される `choice` は選択された選択肢名です。
+      * `score` — スコア評価。`criteria` は必須で、低い順に並んだ少なくとも2つの要素を持つ順序付き配列です。返される `score` は該当する段階を示す数値で、最初の項目が 0 となり、小数も取り得ます。例えば3段階の場合、`1.99` はほぼ3番目の項目に該当することを示します。
+      * `box` — 画像内の位置検出（Beta）。画像が必須であり、`criteria` は受け付けません。`instructions` には何を探すか、どの画像内にあるかを記述します（例：``"the car in `photo`"``）。対象を囲むバウンディングボックス（矩形）を返します。
     </ParamField>
   </Expandable>
 </ParamField>
 
-1回のリクエストに複数の `noul`、`choice`、`score` を同時に含めることができます。`stream` は渡さないでください。本エンドポイントは1回の完全なJSONのみを返します。
+1回のリクエストに複数の `noul`、`choice`、`score`、`box` を同時に含めることができます。`stream` は渡さないでください。本エンドポイントは完全な JSON を一度だけ返します。
 
 ## Response
 
-レスポンスボディは上流のオリジナルの JSON であり、本インターフェースでは変更を加えません。判定結果は `result.result.answers` に格納されます。
+レスポンスボディはアップストリームの生 JSON であり、本インターフェースによる改変は行われません。判定結果は `result.result.answers` に格納されます。
 
 <ResponseField name="success" type="boolean">
-  リクエストが成功したかどうか
+  今回のリクエストが成功したかどうか
 </ResponseField>
 
 <ResponseField name="errors" type="array">
@@ -69,11 +93,11 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ResponseField>
 
 <ResponseField name="result" type="object">
-  上流の実行結果
+  アップストリームの実行結果
 
   <Expandable title="フィールド説明">
     <ResponseField name="state" type="string">
-      実行ステータス。`Completed` は完了を表します
+      実行ステータス。`Completed` は完了したことを示します
     </ResponseField>
 
     <ResponseField name="result" type="object">
@@ -81,19 +105,20 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
       <Expandable title="フィールド説明">
         <ResponseField name="model" type="string">
-          上流で実際に使用されたバージョン番号（例：`jev-1.13.0`）
+          アップストリームで実際に使用されたバージョン番号。例：`jev-1.14.0`
         </ResponseField>
 
         <ResponseField name="answers" type="object">
           各設問の結果。キー名はリクエスト内の設問名と一致します。
 
-          * `noul`：`{ "type": "noul", "noul": 0.49 }`。`0.8` 以上は「はい」、`0.2` 以下は「いいえ」と見なすことができ、`0.5` に近い値は判断がつかないことを表します。
+          * `noul`：`{ "type": "noul", "noul": 0.49 }`。`0.8` 以上は「はい」、`0.2` 以下は「いいえ」と見なすことができ、`0.5` に近い場合は判断がつかないことを示します。
           * `choice`：`choice` は選択された選択肢名、`probabilities` は各選択肢の確率、`confidence` は信頼度です。
-          * `score`：`score` はスコア、`legend` はランクのインデックスを送信したテキストにマッピングします。
+          * `score`：`score` はスコア、`legend` は段階のインデックスを送信されたテキストにマッピングします。
+          * `box`：`box` は `{ "top", "bottom", "left", "right" }` の4辺で、値は 0 から 1 の範囲となり、画像の高さおよび幅に対する相対比率です（原点は左上）。`confidence` は信頼度です。枠を描画する際は、各辺に画像のピクセル幅・高さを掛けます。
         </ResponseField>
 
         <ResponseField name="usage" type="object">
-          トークン使用量
+          Token 使用量
 
           <Expandable title="フィールド説明">
             <ResponseField name="input_tokens" type="integer">
@@ -185,7 +210,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     "result": {
       "state": "Completed",
       "result": {
-        "model": "jev-1.13.0",
+        "model": "jev-1.14.0",
         "answers": {
           "is_urgent": {
             "type": "noul",
@@ -239,8 +264,67 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 }
 ```
 
+## 图片与 Box 示例（Beta）
+
+画像は `assets` に配置し、`state` で参照名を使って指定します。設問内では `` `photo` `` でこの画像を参照します。以下の例では、「画像内に車があるか」と「車はどこにあるか」を同時に質問しています。
+
+```json theme={null}
+{
+  "model": "jev",
+  "input": {
+    "state": { "photo": "img-7f3a91" },
+    "assets": {
+      "img-7f3a91": {
+        "type": "image",
+        "format": "jpg",
+        "data_base64": "/9j/4AAQSkZJRg..."
+      }
+    },
+    "questions": {
+      "has_car": {
+        "type": "noul",
+        "instructions": "Is there a car in `photo`?"
+      },
+      "car": {
+        "type": "box",
+        "instructions": "the car in `photo`"
+      }
+    }
+  }
+}
+```
+
+レスポンス内の `answers`：
+
+```json theme={null}
+{
+  "has_car": { "type": "noul", "noul": 0.97 },
+  "car": {
+    "type": "box",
+    "box": { "top": 0.24, "bottom": 0.81, "left": 0.15, "right": 0.74 },
+    "confidence": 0.74
+  }
+}
+```
+
+Box の設問は常にボックスを返し、「見つからない」という結果はありません。画像内に対象が存在しない場合でもボックスが返されますが、信頼度が低くなります。対象が存在するか不確実な場合は、上記の例のように同じリクエスト内に `noul` の設問を1つ追加し、`noul` が非常に低い場合はそのボックスを無視してください。
+
+### 画像要件
+
+| 項目 | 制限 |
+| - | - |
+| フォーマット | PNG または JPEG の静止画像、アニメーションは非対応。WebP、GIF、HEIC などは事前に PNG または JPEG への変換が必要 |
+| 1枚のサイズ | デコード後 16 MiB 以内 |
+| 幅、高さ | 各辺 280〜1568ピクセル。範囲外の場合は自動縮小されず直接エラー |
+| リクエストボディ | JSON と base64 を含めて 32 MiB 以内 |
+
+* 送信前に長辺を 1568ピクセル以内に縮小してください。アップストリーム側で EXIF は削除され、EXIF の向きに応じた回転は行われません。スマートフォンの写真は事前にピクセル自体の向きを正しく回転させてください。
+* 画像は入力トークンに換算され、`usage.input_tokens` に計上されるとともにコンテキストウィンドウも消費します。約 800ピクセルの画像1枚で約 1500トークンを消費します。
+* リクエスト内のいずれかの画像が要件を満たしていない場合、リクエスト全体が失敗となり、部分的な結果が返されることはありません。
+
 ## 注意事项
 
-* 本エンドポイントはチャットエンドポイントではないため、`messages` を渡すことはできず、`stream` を渡すこともできません。
-* コンテキストウィンドウは 32000 トークンです。
-* 処理失敗時でも HTTP ステータスコードが 200 のままの場合がありますので、`success` と `errors` の両方を確認してください。認証失敗時は `401`、`model` の欠落または不正な JSON の場合は `400`、モデルが存在しない場合は `404` が返されます。
+* 本インターフェースはチャットインターフェースではないため、`messages` や `stream` を渡すことはできません。
+* 画像入力および Box の問題は現在 Beta であり、リクエスト形式、結果、制限はバージョンによって変更される可能性があるため、本番環境の意思決定に直接使用することはお勧めしません。
+* コンテキストウィンドウは 32000 tokens です。
+* 業務エラー時でも HTTP ステータスコードが 200 のままになる場合があるため、`success` と `errors` の両方を確認してください。認証失敗時は `401`、`model` の欠落または不正な JSON の場合は `400`、モデルが存在しない場合は `404` が返されます。

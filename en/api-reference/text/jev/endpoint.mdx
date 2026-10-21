@@ -2,7 +2,8 @@
 title: 'Jev Decision API'
 description: |
     - Synchronous decision API, not a chat API, does not support streaming output
-    - Submit a piece of context `state` and several judgment questions `questions`, returning the probability, option, or score for each question in a single response
+    - Submit context material `state` and multiple questions `questions`, returning the probability, option, score, or image location for each question in a single response
+    - Supports image input and Box localization questions (Beta)
     - Set the model name to `jev` when calling
 api: 'POST https://aireiter.com/api/v1/systemone'
 ---
@@ -25,43 +26,66 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  Model name. Fixed value is `jev`.
+  Model name. Fixed value `jev`.
 
-  The `result.result.model` in the response is the actual version number used upstream, such as `jev-1.13.0`. This field is returned by upstream; do not include the version number in the request.
+  The `result.result.model` in the response is the actual version number used upstream, such as `jev-1.14.0`. This field is returned by the upstream service; do not provide a version number in the request.
 </ParamField>
 
 <ParamField body="input" type="object" required>
-  Evaluation content. Contains `state` and `questions`.
+  Judgment content. Contains `state` and `questions`, plus `assets` when images are included.
 
   <Expandable title="Field Descriptions">
     <ParamField body="state" type="string | object | array" required>
-      Material to be evaluated. Can be a single sentence, an object, or an array. Only include data necessary to complete the evaluation; do not include sensitive information such as API keys or passwords.
+      The material to be judged. It can be a single sentence, an object, or an array. Only include data necessary to complete the judgment; do not include sensitive information such as API keys or passwords.
+
+      When including images, specify the image reference name in `state`, such as `{ "photo": "img-7f3a91" }`, where the reference name corresponds to a key in `assets`.
+    </ParamField>
+
+    <ParamField body="assets" type="object">
+      Image table (Beta). The key is the reference name, and the value is the image object. Omit if not including images.
+
+      Reference names are matched as plain text and can be written in any string within `state`, question `instructions`, or `criteria`. The model will see the image at that position. Choose reference names that will not collide with body text; using a UUID for each image is recommended. Each reference name must appear at least once in the request.
+
+      <Expandable title="Image Object">
+        <ParamField body="type" type="string">
+          Fixed as `image`, can be omitted.
+        </ParamField>
+
+        <ParamField body="format" type="string" required>
+          Image format: `png`, `jpg`, or `jpeg`, lowercase.
+        </ParamField>
+
+        <ParamField body="data_base64" type="string" required>
+          Base64 encoding of the image file. Use the standard base64 alphabet, with `=` padding, no line breaks, and without the `data:` prefix.
+        </ParamField>
+      </Expandable>
     </ParamField>
 
     <ParamField body="questions" type="object" required>
-      Questions table, cannot be empty. Key names are user-defined, and each question is an object.
+      Question table, cannot be empty. Key names are self-defined, and each question is an object.
 
       Each question must have `type` and `instructions`.
 
-      * `noul` — Yes/No question. Returns `noul`, ranging from 0 to 1, indicating the probability of "yes". `criteria` is optional, formatted as `{ "true": "what qualifies as true", "false": "what qualifies as false" }`.
-      * `choice` — Single choice. `criteria` is required, which is an object of "option name -> description". The returned `choice` is the selected option name.
-      * `score` — Scoring. `criteria` is required, which is an ordered array of at least two items from low to high. The returned `score` is a number indicating which tier it falls into, where the first item is 0, and can be a decimal. For example, with three tiers, `1.99` indicates it almost falls into the third item.
+      * `noul` — True/false question. Returns `noul`, ranging from 0 to 1, indicating the probability of "true". `criteria` is optional, structured as `{ "true": "what counts as true", "false": "what counts as false" }`.
+      * `choice` — Single-choice question. `criteria` is required and is an object of "option name → description". The returned `choice` is the selected option name.
+      * `score` — Scoring. `criteria` is required and is an ordered array of at least two items, from low to high. The returned `score` is a numeric value indicating which tier it falls into, with the first item being 0, and can be a decimal. For example, with three tiers, `1.99` indicates it almost falls into the third item.
+      * `box` — Image localization (Beta). Must include images; does not accept `criteria`. Write what to look for and in which image in `instructions`, for example ``"the car in `photo`"``. Returns a rectangle bounding the target.
     </ParamField>
   </Expandable>
 </ParamField>
 
-A single request can contain multiple `noul`, `choice`, and `score` questions simultaneously. Do not pass `stream`; this endpoint only returns a complete JSON response.
+A single request can contain multiple `noul`, `choice`, `score`, and `box` questions simultaneously. Do not pass `stream`; this endpoint only returns a single complete JSON response.
 
 ## Response
 
-The response body is the upstream raw JSON; this endpoint does not modify it. The evaluation results are in `result.result.answers`.
+The response body is the raw JSON from upstream, which this endpoint returns without modification. The evaluation results are in `result.result.answers`.
 
 <ResponseField name="success" type="boolean">
   Whether the request was successful
 </ResponseField>
 
 <ResponseField name="errors" type="array">
-  List of errors. Empty array on success
+  Error list. Empty array on success
 </ResponseField>
 
 <ResponseField name="messages" type="array">
@@ -69,11 +93,11 @@ The response body is the upstream raw JSON; this endpoint does not modify it. Th
 </ResponseField>
 
 <ResponseField name="result" type="object">
-  Upstream execution results
+  Upstream execution result
 
   <Expandable title="Field Descriptions">
     <ResponseField name="state" type="string">
-      Execution status. `Completed` indicates completed
+      Execution status. `Completed` indicates completion
     </ResponseField>
 
     <ResponseField name="result" type="object">
@@ -81,15 +105,16 @@ The response body is the upstream raw JSON; this endpoint does not modify it. Th
 
       <Expandable title="Field Descriptions">
         <ResponseField name="model" type="string">
-          The actual version number used upstream, for example `jev-1.13.0`
+          The actual upstream version used, such as `jev-1.14.0`
         </ResponseField>
 
         <ResponseField name="answers" type="object">
-          Results for each question. Key names match the question names in the request.
+          Results for each question. Keys match the question names in the request.
 
-          * `noul`: `{ "type": "noul", "noul": 0.49 }`. `0.8` and above can be considered "yes", `0.2` and below can be considered "no", and close to `0.5` indicates uncertainty.
-          * `choice`: `choice` is the selected option name, `probabilities` are the probabilities of each option, and `confidence` is the confidence level.
+          * `noul`: `{ "type": "noul", "noul": 0.49 }`. Values of `0.8` and above can be considered "yes", `0.2` and below can be considered "no", and values close to `0.5` indicate uncertainty.
+          * `choice`: `choice` is the selected option name, `probabilities` are the probabilities for each option, and `confidence` is the confidence score.
           * `score`: `score` is the score, and `legend` maps tier indices back to the text you submitted.
+          * `box`: `box` consists of four edges `{ "top", "bottom", "left", "right" }`, ranging from 0 to 1 as proportions relative to the image height and width, with the origin at the top-left corner; `confidence` is the confidence score. When drawing bounding boxes, multiply each edge by the image's pixel width and height.
         </ResponseField>
 
         <ResponseField name="usage" type="object">
@@ -109,7 +134,7 @@ The response body is the upstream raw JSON; this endpoint does not modify it. Th
   </Expandable>
 </ResponseField>
 
-## Examples
+## Usage Examples
 
 <RequestExample>
   ```bash cURL theme={null}
@@ -185,7 +210,7 @@ The response body is the upstream raw JSON; this endpoint does not modify it. Th
     "result": {
       "state": "Completed",
       "result": {
-        "model": "jev-1.13.0",
+        "model": "jev-1.14.0",
         "answers": {
           "is_urgent": {
             "type": "noul",
@@ -239,8 +264,67 @@ The response body is the upstream raw JSON; this endpoint does not modify it. Th
 }
 ```
 
-## Notes
+## 图片与 Box 示例（Beta）
+
+Images are placed in `assets`, and `state` points to them using a reference name; `` `photo` `` is used in questions to refer to this image. The following example asks both "whether there is a car in the image" and "where the car is".
+
+```json theme={null}
+{
+  "model": "jev",
+  "input": {
+    "state": { "photo": "img-7f3a91" },
+    "assets": {
+      "img-7f3a91": {
+        "type": "image",
+        "format": "jpg",
+        "data_base64": "/9j/4AAQSkZJRg..."
+      }
+    },
+    "questions": {
+      "has_car": {
+        "type": "noul",
+        "instructions": "Is there a car in `photo`?"
+      },
+      "car": {
+        "type": "box",
+        "instructions": "the car in `photo`"
+      }
+    }
+  }
+}
+```
+
+The `answers` in the response:
+
+```json theme={null}
+{
+  "has_car": { "type": "noul", "noul": 0.97 },
+  "car": {
+    "type": "box",
+    "box": { "top": 0.24, "bottom": 0.81, "left": 0.15, "right": 0.74 },
+    "confidence": 0.74
+  }
+}
+```
+
+Box questions always return a box, and there is no result such as "not found"; a box will still be provided even when there is no target in the image, only with lower confidence. When unsure whether the target exists, add a `noul` question in the same request as shown in the example above; ignore the box if `noul` is very low.
+
+### Image Requirements
+
+| Item | Limitations |
+| - | - |
+| Format | Static PNG or JPEG images; animated images are not supported. WebP, GIF, HEIC, etc., must be converted to PNG or JPEG first |
+| Single Image Size | No more than 16 MiB after decoding |
+| Width, Height | 280 to 1568 pixels per side; an error will be returned directly if out of range, no automatic scaling |
+| Request Body | No more than 32 MiB, including JSON and base64 |
+
+* Scale the long edge down to within 1568 pixels before sending. Upstream will strip EXIF data and will not rotate according to EXIF orientation; please orient the pixels of phone photos properly beforehand.
+* Images will be converted into input tokens, counted towards `usage.input_tokens`, and also occupy the context window. An image of about 800 pixels is approximately 1500 tokens.
+* If any image in the request fails to meet the requirements, the entire request fails, and partial results will not be returned.
+
+## 注意事项
 
 * This endpoint is not a chat endpoint and does not accept `messages` or `stream`.
-* The context window is 32,000 tokens.
-* When a business failure occurs, the HTTP status code may still be 200. Please check both `success` and `errors`. Authentication failure returns `401`, missing `model` or invalid JSON returns `400`, and a non-existent model returns `404`.
+* Image input and Box questions are currently in Beta. Request formats, results, and limitations may change across versions, and they are not recommended for direct use in production decisions.
+* The context window is 32000 tokens.
+* When a business failure occurs, the HTTP status code may still be 200. Please check both `success` and `errors`. Authentication failure returns `401`, a missing `model` or invalid JSON returns `400`, and a non-existent model returns `404`.

@@ -2,7 +2,8 @@
 title: 'Jev 决策接口'
 description: |
     - 同步决策接口，不是聊天接口，不支持流式输出
-    - 提交一段材料 `state` 和若干判断题 `questions`，同一次响应返回每题的概率、选项或分数
+    - 提交一段材料 `state` 和若干判断题 `questions`，同一次响应返回每题的概率、选项、分数或图中位置
+    - 支持图片输入和 Box 定位题（Beta）
     - 调用时模型名填 `jev`
 api: 'POST https://aireiter.com/api/v1/systemone'
 ---
@@ -28,15 +29,37 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="model" type="string" required>
   模型名称。固定填 `jev`。
 
-  响应里的 `result.result.model` 是上游实际使用的版本号，例如 `jev-1.13.0`。这个字段由上游返回，请求里不要填版本号。
+  响应里的 `result.result.model` 是上游实际使用的版本号，例如 `jev-1.14.0`。这个字段由上游返回，请求里不要填版本号。
 </ParamField>
 
 <ParamField body="input" type="object" required>
-  判断内容。包含 `state` 和 `questions`。
+  判断内容。包含 `state`、`questions`，带图片时再加 `assets`。
 
   <Expandable title="字段说明">
     <ParamField body="state" type="string | object | array" required>
       要判断的材料。可以是一句话，也可以是对象或数组。只放完成判断所需的数据，不要放 API Key、密码等敏感信息。
+
+      带图片时，在 `state` 里写图片的引用名，例如 `{ "photo": "img-7f3a91" }`，引用名对应 `assets` 里的键。
+    </ParamField>
+
+    <ParamField body="assets" type="object">
+      图片表（Beta）。键是引用名，值是图片对象。不带图片时不传。
+
+      引用名按纯文本匹配，可以写在 `state`、题目的 `instructions` 或 `criteria` 里的任意字符串中，模型会在该位置看到这张图。引用名要选不会和正文撞上的字符串，建议每张图用一个 UUID。每个引用名都必须在请求里出现至少一次。
+
+      <Expandable title="图片对象">
+        <ParamField body="type" type="string">
+          固定为 `image`，可省略。
+        </ParamField>
+
+        <ParamField body="format" type="string" required>
+          图片格式：`png`、`jpg` 或 `jpeg`，小写。
+        </ParamField>
+
+        <ParamField body="data_base64" type="string" required>
+          图片文件的 base64 编码。使用标准 base64 字母表，带 `=` 补位，不能有换行，不能带 `data:` 前缀。
+        </ParamField>
+      </Expandable>
     </ParamField>
 
     <ParamField body="questions" type="object" required>
@@ -47,11 +70,12 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       * `noul` — 是非题。返回 `noul`，范围 0 到 1，表示「是」的概率。`criteria` 可选，形状为 `{ "true": "怎样算是", "false": "怎样算不是" }`。
       * `choice` — 多选一。`criteria` 必填，是「选项名 → 说明」的对象。返回的 `choice` 是被选中的选项名。
       * `score` — 打分。`criteria` 必填，是至少两项的有序数组，从低到高。返回的 `score` 是落在哪一档的数字，第一项是 0，可以是小数。例如三档时 `1.99` 表示几乎落在第三项。
+      * `box` — 图中定位（Beta）。必须带图片，不接受 `criteria`。`instructions` 写要找什么、在哪张图里，例如 ``"the car in `photo`"``。返回一个框住目标的矩形。
     </ParamField>
   </Expandable>
 </ParamField>
 
-一次请求可以同时包含多道 `noul`、`choice`、`score`。不要传 `stream`，本接口只返回一次完整 JSON。
+一次请求可以同时包含多道 `noul`、`choice`、`score`、`box`。不要传 `stream`，本接口只返回一次完整 JSON。
 
 ## Response
 
@@ -82,7 +106,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
       <Expandable title="字段说明">
         <ResponseField name="model" type="string">
-          上游实际使用的版本号，例如 `jev-1.13.0`
+          上游实际使用的版本号，例如 `jev-1.14.0`
         </ResponseField>
 
         <ResponseField name="answers" type="object">
@@ -91,6 +115,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           * `noul`：`{ "type": "noul", "noul": 0.49 }`。`0.8` 及以上可视为「是」，`0.2` 及以下可视为「不是」，接近 `0.5` 表示拿不准。
           * `choice`：`choice` 为选中的选项名，`probabilities` 为各选项概率，`confidence` 为置信度。
           * `score`：`score` 为分数，`legend` 把档位下标映射回你提交的文案。
+          * `box`：`box` 为 `{ "top", "bottom", "left", "right" }` 四条边，取值 0 到 1，是相对图片高、宽的比例，原点在左上角；`confidence` 为置信度。画框时用各边乘以图片的像素宽高。
         </ResponseField>
 
         <ResponseField name="usage" type="object">
@@ -186,7 +211,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     "result": {
       "state": "Completed",
       "result": {
-        "model": "jev-1.13.0",
+        "model": "jev-1.14.0",
         "answers": {
           "is_urgent": {
             "type": "noul",
@@ -240,8 +265,67 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 }
 ```
 
+## 图片与 Box 示例（Beta）
+
+图片放在 `assets` 里，`state` 用引用名指向它；题目里用 `` `photo` `` 指代这张图。下例同时问「图里有没有车」和「车在哪」。
+
+```json theme={null}
+{
+  "model": "jev",
+  "input": {
+    "state": { "photo": "img-7f3a91" },
+    "assets": {
+      "img-7f3a91": {
+        "type": "image",
+        "format": "jpg",
+        "data_base64": "/9j/4AAQSkZJRg..."
+      }
+    },
+    "questions": {
+      "has_car": {
+        "type": "noul",
+        "instructions": "Is there a car in `photo`?"
+      },
+      "car": {
+        "type": "box",
+        "instructions": "the car in `photo`"
+      }
+    }
+  }
+}
+```
+
+响应中的 `answers`：
+
+```json theme={null}
+{
+  "has_car": { "type": "noul", "noul": 0.97 },
+  "car": {
+    "type": "box",
+    "box": { "top": 0.24, "bottom": 0.81, "left": 0.15, "right": 0.74 },
+    "confidence": 0.74
+  }
+}
+```
+
+Box 题总会返回一个框，没有「找不到」这种结果；图里没有目标时也会给框，只是置信度偏低。不确定目标是否存在时，像上例一样在同一次请求里加一道 `noul`，`noul` 很低就忽略这个框。
+
+### 图片要求
+
+| 项目 | 限制 |
+| - | - |
+| 格式 | PNG 或 JPEG 静态图，不支持动图；WebP、GIF、HEIC 等需先转成 PNG 或 JPEG |
+| 单张大小 | 解码后不超过 16 MiB |
+| 宽、高 | 每边 280 到 1568 像素，超出范围直接报错，不会自动缩放 |
+| 请求体 | 含 JSON 和 base64 在内不超过 32 MiB |
+
+* 发送前把长边缩到 1568 像素以内。上游会去掉 EXIF，不会按 EXIF 方向旋转，手机照片请先把像素本身转正。
+* 图片会折算成输入 token，计入 `usage.input_tokens`，也占用上下文窗口。一张约 800 像素的图大约 1500 tokens。
+* 请求里任何一张图片不合格，整个请求失败，不会返回部分结果。
+
 ## 注意事项
 
 * 本接口不是聊天接口，不能传 `messages`，也不能传 `stream`。
+* 图片输入和 Box 题目前是 Beta，请求格式、结果和限制可能随版本变化，不建议直接用于生产决策。
 * 上下文窗口为 32000 tokens。
 * 业务失败时 HTTP 状态码可能仍为 200，请同时看 `success` 和 `errors`。鉴权失败返回 `401`，`model` 缺失或 JSON 不合法返回 `400`，模型不存在返回 `404`。
