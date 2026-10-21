@@ -197,6 +197,13 @@
                   "zh/api-reference/images/grok-imagine-image-2-0/generation",
                   "zh/api-reference/images/grok-imagine-2-0-ext/generation"
                 ]
+              },
+              {
+                "group": "P-Image-Upscale",
+                "icon": "image",
+                "pages": [
+                  "zh/api-reference/images/prunaai-p-image-upscale/generation"
+                ]
               }
             ]
           },
