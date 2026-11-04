@@ -2,7 +2,7 @@
  * @Author: yusha
  * @Date: 2025-12-17 14:16:31
  * @LastEditors: yusha
- * @LastEditTime: 2026-08-27 17:18:23
+ * @LastEditTime: 2026-11-04 15:21:44
  * @Description: 
  */
 /**
@@ -78,8 +78,8 @@ const languageMap: Record<string, string> = {
 languageMap.tw = "Traditional Chinese";
 
 const openai = new OpenAI({
-  baseURL: "http://95.216.117.43:8317/v1",
-  apiKey: "sk-k8UV6AHCIQQ1iVHyBvJZbWPOj60MXCMe7H6PWanb2C07hEC7Vg7Zr05cEMHL89D2",
+  baseURL: "http://95.216.117.43:8356/v1",
+  apiKey: "sk-005a3af9e3d421100b561a97470d92a4fe6afa8b8a399d4787a8be5be31debaf",
 });
 
 
@@ -948,3 +948,4 @@ async function main() {
 }
 
 main();
+

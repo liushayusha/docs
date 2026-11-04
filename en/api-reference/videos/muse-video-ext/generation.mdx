@@ -1,0 +1,400 @@
+---
+title: 'Muse Video Ext Video Generation'
+description: |
+  - Asynchronous processing mode, returning a task ID for subsequent queries
+  - Supports text-to-video, or image-to-video with up to 9 reference images
+  - Generates 1 10-second, 720p video with audio track each time
+  - Specify timestamps in the prompt to switch shots between scenes
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+<Note>
+The duration is fixed at 10 seconds, the resolution is fixed at 720p, and the final video includes a generated audio track. `video_length` and `resolution` can be omitted.
+
+Reference videos, reference audio, first and last frames, `seed`, and `negative_prompt` are not supported, and the audio track cannot be disabled.
+</Note>
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  All endpoints require Bearer Token authentication.
+
+  Get the API Key:
+
+  Visit the <a href={apiKeyUrl} target="_blank">API Key Management page</a> to get your API Key.
+
+  Add to the request header when using:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  Model name, fixed to `muse_video_ext`.
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  Model parameter object.
+
+  <Expandable title="params Object Properties">
+    <ParamField body="prompt" type="string" required>
+      Text description for video generation, supporting both Chinese and English. Required, and cannot be empty after trimming leading and trailing whitespace.
+
+      When reference images are provided, you can use `Picture 1` and `Picture 2` in the prompt to refer to the 1st and 2nd images.
+
+      For multiple shots, write a separate paragraph for each shot and mark the transition position with a timestamp, for example:
+
+      ```
+      [Shot 1] Wide shot of the living room, a girl holding up a T-shirt on a hanger...
+      [Shot 2] At 00:04.000, camera cuts to in front of a white wall, a boy puts on this T-shirt...
+      ```
+
+      <Warning>
+        If real brand, team, or logo names appear in the prompt, it may fail content moderation, and the task will end in failure. Please retry with a description without specific names.
+      </Warning>
+    </ParamField>
+
+    <ParamField body="image_url" type="string | string[]">
+      Reference image URL, which must be publicly accessible via the Internet. A single string can also be passed. If omitted, it generates video from text.
+
+      * Up to 9 images
+      * The total original size of all images must not exceed 11 MiB
+      * PNG, JPEG, and WebP are recommended
+
+      Local paths and `blob:` addresses are not supported.
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="auto">
+      Video aspect ratio:
+
+      * `auto` - Default value. Follows the composition of the reference image when provided, and defaults to `16:9` for text-only
+      * `1:1`
+      * `16:9`
+      * `9:16`
+      * `4:3`
+      * `3:4`
+      * `3:2`
+      * `2:3`
+    </ParamField>
+
+    <ParamField body="video_length" type="string" default="10">
+      Video duration, fixed to `"10"`. Optional.
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="720p">
+      Output resolution, fixed to `720p`. Optional.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  Initiator task ID.
+
+  User-defined task identifier, required. Only letters, numbers, underscores, and hyphens are supported, with a length of 1-64 characters. This ID can be used later to query task status and results.
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  Initiator task ID, can be used to query results.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Initial status, typically `"pending"`.
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  Creation time, ISO format.
+</ResponseField>
+
+## Query Task
+
+This model uses asynchronous video generation. After submitting a task, please use `out_task_id` to query the task status. See also [Get Task Status](/en/api-reference/tasks/status).
+
+<ParamField body="out_task_id" type="string" required>
+  The initiator task ID passed when submitting the task.
+</ParamField>
+
+```bash
+curl --request POST \
+  --url https://aireiter.com/api/openapi/query \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "out_task_id": "muse_ext_t2v_123456"
+  }'
+```
+
+After the query succeeds and is completed, the `output` array in the response will contain the generated video, with elements containing the `video` field.
+
+Generation time varies depending on the input: text-only usually takes about 1 to 2 minutes, while multiple reference images may take several minutes. Please continue polling and do not resubmit.
+
+## 使用说明
+
+| Input | `image_url` | `aspect_ratio` |
+|---|---|---|
+| Text-to-Video | Do not pass, or empty array | Defaults to `16:9` if not passed; can also be specified |
+| Reference Image-to-Video | 1–9 images, totaling no more than 11 MiB | Recommended to use `auto` to follow the reference image, or specify |
+
+Effects of multi-shot prompts:
+
+* Reliable cut timing: For timestamps specified in the prompt, the actual cut error is within 1 second.
+* Text, prints, and logos on products remain consistent across shots.
+* Characters may differ from the reference image after a cut. When the same person needs to remain recognizable, it is recommended to use at most 2 cut points and repeat their appearance description in each shot.
+
+## Request Examples
+
+<RequestExample>
+  ```bash cURL (Text-to-Video)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "muse_video_ext",
+      "params": {
+        "prompt": "Cinematic widescreen footage: Under the golden sunset, a snow leopard walks along a snow mountain ridge toward the camera, fine snow drifting with the wind, fur backlit, low-angle camera slowly pushing in. The audio is the sound of wind and footsteps on the snow. No subtitles, no logo.",
+        "aspect_ratio": "16:9"
+      },
+      "out_task_id": "muse_ext_t2v_123456"
+    }'
+  ```
+
+  ```bash cURL (3 Reference Images)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "muse_video_ext",
+      "params": {
+        "prompt": "The young man in Picture 1 stands in front of the arched mirror in the bedroom, flattening the printed T-shirt from Picture 2, the camera zooms in on the chest print, pans to the sleeve badge in Picture 3, and finally pulls back to a medium shot. Handheld phone shooting texture, soft natural light.",
+        "image_url": [
+          "https://example.com/person.jpg",
+          "https://example.com/print.jpg",
+          "https://example.com/sleeve.jpg"
+        ],
+        "aspect_ratio": "9:16"
+      },
+      "out_task_id": "muse_ext_ref_123456"
+    }'
+  ```
+
+  ```bash cURL (Multi-Shot)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "muse_video_ext",
+      "params": {
+        "prompt": "[Shot 1] Panoramic view of a mountain lake at sunrise, mist rising from the water surface, a wooden boat floating quietly, soft bird songs in the background.\n[Shot 2] At 00:04.000, camera cuts to a close-up of water ripples spreading around the oars, warm light shimmering on the water surface.\n[Shot 3] At 00:07.000, camera cuts to a high-altitude drone shot pulling back, revealing the entire lake surrounded by pine-covered mountains.\nNo subtitles, no logo.",
+        "aspect_ratio": "16:9"
+      },
+      "out_task_id": "muse_ext_shots_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "muse_video_ext",
+      "params": {
+          "prompt": "Cinematic widescreen footage: Under the golden sunset, a snow leopard walks along a snow mountain ridge toward the camera, fine snow drifting with the wind, fur backlit, low-angle camera slowly pushing in. The audio is the sound of wind and footsteps on the snow. No subtitles, no logo.",
+          "aspect_ratio": "16:9"
+      },
+      "out_task_id": "muse_ext_t2v_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "muse_video_ext",
+    params: {
+      prompt: "Cinematic widescreen footage: Under the golden sunset, a snow leopard walks along a snow mountain ridge toward the camera, fine snow drifting with the wind, fur backlit, low-angle camera slowly pushing in. The audio is the sound of wind and footsteps on the snow. No subtitles, no logo.",
+      aspect_ratio: "16:9"
+    },
+    out_task_id: "muse_ext_t2v_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "muse_video_ext",
+          "params": map[string]interface{}{
+              "prompt":       "Cinematic widescreen footage: Under the golden sunset, a snow leopard walks along a snow mountain ridge toward the camera, fine snow drifting with the wind, fur backlit, low-angle camera slowly pushing in. The audio is the sound of wind and footsteps on the snow. No subtitles, no logo.",
+              "aspect_ratio": "16:9",
+          },
+          "out_task_id": "muse_ext_t2v_123456",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/openapi/submit";
+
+          String payload = """
+              {
+                "model": "muse_video_ext",
+                "params": {
+                  "prompt": "Cinematic widescreen footage: Under the golden sunset, a snow leopard walks along a snow mountain ridge toward the camera, fine snow drifting with the wind, fur backlit, low-angle camera slowly pushing in. The audio is the sound of wind and footsteps on the snow. No subtitles, no logo.",
+                  "aspect_ratio": "16:9"
+                },
+                "out_task_id": "muse_ext_t2v_123456"
+              }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = [
+      "model" => "muse_video_ext",
+      "params" => [
+          "prompt" => "Cinematic widescreen footage: Under the golden sunset, a snow leopard walks along a snow mountain ridge toward the camera, fine snow drifting with the wind, fur backlit, low-angle camera slowly pushing in. The audio is the sound of wind and footsteps on the snow. No subtitles, no logo.",
+          "aspect_ratio" => "16:9"
+      ],
+      "out_task_id" => "muse_ext_t2v_123456"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "out_task_id": "muse_ext_t2v_123456",
+        "status": "pending",
+        "created_at": "2026-11-04T06:03:28.242Z"
+    }
+}
+  ```
+
+  ```json 400
+  {
+    "statusCode": 400,
+    "message": "Invalid request parameters",
+    "ok": false
+  }
+  ```
+
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "Authentication failed, please check your API key"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "Internal server error, please try again later"
+    }
+  }
+  ```
+</ResponseExample>

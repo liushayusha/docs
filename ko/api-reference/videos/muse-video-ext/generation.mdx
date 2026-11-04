@@ -1,0 +1,400 @@
+---
+title: 'Muse Video Ext 비디오 생성'
+description: |
+  - 비동기 처리 모드, 후속 조회를 위한 작업 ID 반환
+  - 텍스트 기반 비디오 생성 또는 최대 9장의 참조 이미지 기반 비디오 생성 지원
+  - 1회 생성 시 10초 길이의 720p, 자체 오디오 트랙이 포함된 비디오 1개 생성
+  - 프롬프트에 타임스탬프를 입력하여 장면 간 샷 전환 가능
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+<Note>
+재생 시간은 10초로 고정되며, 해상도는 720p로 고정되고, 완성된 영상에는 생성된 오디오 트랙이 기본으로 포함됩니다. `video_length` 및 `resolution`은 전달하지 않아도 됩니다.
+
+참조 비디오, 참조 오디오, 첫 프레임 및 마지막 프레임, `seed`, `negative_prompt`는 지원하지 않으며, 오디오 트랙을 끌 수도 없습니다.
+</Note>
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  모든 API는 Bearer Token을 사용하여 인증해야 합니다.
+
+  API Key 발급:
+
+  <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a>에 접속하여 API Key를 확인하세요.
+
+  사용 시 요청 헤더에 추가:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  모델 이름이며, `muse_video_ext`로 고정됩니다.
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  모델 파라미터 객체입니다.
+
+  <Expandable title="params 객체 속성">
+    <ParamField body="prompt" type="string" required>
+      비디오 생성을 위한 텍스트 설명으로, 중국어와 영어를 지원합니다. 필수 입력값이며, 앞뒤 공백을 제거한 후 비어 있을 수 없습니다.
+
+      참조 이미지가 있는 경우, 프롬프트에서 `Picture 1`, `Picture 2`를 사용하여 1번째, 2번째 이미지를 지정할 수 있습니다.
+
+      여러 샷이 있는 경우 각 샷을 개별 단락으로 작성하고 전환 위치를 타임스탬프로 표시합니다. 예:
+
+      ```
+      [Shot 1] 거실 전경, 여성이 옷걸이에 걸린 티셔츠를 들고 있다...
+      [Shot 2] At 00:04.000, 카메라가 흰 벽 앞으로 전환되고, 남성이 이 티셔츠를 입는다...
+      ```
+
+      <Warning>
+        프롬프트에 실제 브랜드, 스포츠팀 또는 로고 이름이 포함된 경우 콘텐츠 검토를 통과하지 못해 작업이 실패할 수 있습니다. 이름이 없는 설명으로 변경한 후 다시 시도해 주세요.
+      </Warning>
+    </ParamField>
+
+    <ParamField body="image_url" type="string | string[]">
+      참조 이미지 URL로, 공용 네트워크에서 직접 접근할 수 있어야 합니다. 단일 문자열로 전달할 수도 있습니다. 전달하지 않으면 텍스트 기반 비디오 생성이 진행됩니다.
+
+      * 최대 9장
+      * 모든 이미지의 원본 크기 합계 11 MiB 이하
+      * PNG, JPEG, WebP 권장
+
+      로컬 경로 및 `blob:` 주소는 지원되지 않습니다.
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="auto">
+      비디오 화면비:
+
+      * `auto` - 기본값. 참조 이미지가 있는 경우 참조 이미지의 구도를 따르며, 순수 텍스트인 경우 `16:9`
+      * `1:1`
+      * `16:9`
+      * `9:16`
+      * `4:3`
+      * `3:4`
+      * `3:2`
+      * `2:3`
+    </ParamField>
+
+    <ParamField body="video_length" type="string" default="10">
+      비디오 길이이며, `"10"`으로 고정됩니다. 전달하지 않아도 됩니다.
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="720p">
+      출력 해상도이며, `720p`로 고정됩니다. 전달하지 않아도 됩니다.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  요청자 작업 ID입니다.
+
+  사용자 정의 작업 식별자이며 필수 항목입니다. 영문자, 숫자, 밑줄(_), 하이픈(-)만 지원하며 길이는 1~64자입니다. 이후 이 ID를 사용하여 작업 상태와 결과를 조회할 수 있습니다.
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  요청자 작업 ID로, 결과 조회에 사용할 수 있습니다.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  초기 상태로, 보통 `"pending"`입니다.
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  생성 시간, ISO 형식.
+</ResponseField>
+
+## Query Task
+
+본 모델은 비동기 비디오 생성 모델입니다. 작업을 제출한 후 `out_task_id`를 사용하여 작업 상태를 조회하세요. [작업 상태 조회](/en/api-reference/tasks/status)도 참조할 수 있습니다.
+
+<ParamField body="out_task_id" type="string" required>
+  작업 제출 시 전달한 요청자 작업 ID입니다.
+</ParamField>
+
+```bash
+curl --request POST \
+  --url https://aireiter.com/api/openapi/query \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "out_task_id": "muse_ext_t2v_123456"
+  }'
+```
+
+조회가 성공하고 완료되면 응답의 `output` 배열에 생성된 비디오가 포함되며, 요소에는 `video` 필드가 포함됩니다.
+
+생성 소요 시간은 입력에 따라 다릅니다. 텍스트만 있는 경우 일반적으로 약 1~2분 정도 소요되며, 참조 이미지가 많을 경우 몇 분 정도 걸릴 수 있으므로 중복 제출하지 마시고 계속 폴링해 주세요.
+
+## 使用说明
+
+| 입력 | `image_url` | `aspect_ratio` |
+|---|---|---|
+| 텍스트 투 비디오 | 전달하지 않거나 빈 배열 | 전달하지 않으면 기본값 `16:9`, 지정도 가능 |
+| 이미지 투 비디오 | 1~9장, 합계 11 MiB 이하 | `auto`로 참조 이미지를 따르도록 권장하거나 지정 |
+
+멀티샷 프롬프트의 효과:
+
+* 전환 시점의 정확성: 프롬프트에 작성한 시점과 실제 전환 오차가 1초 이내입니다.
+* 상품의 텍스트, 프린트 및 로고가 각 샷 간에 일관되게 유지됩니다.
+* 샷 전환 후 인물이 참조 이미지와 달라질 수 있습니다. 동일 인물의 식별성을 유지해야 하는 경우, 전환 시점을 최대 2개로 제한하고 각 샷마다 외모 묘사를 반복하여 작성하는 것을 권장합니다.
+
+## Request Examples
+
+<RequestExample>
+  ```bash cURL(텍스트 생성)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "muse_video_ext",
+      "params": {
+        "prompt": "영화 같은 와이드스크린 화면: 황금빛 석양 아래 눈표범 한 마리가 설산 능선을 따라 카메라를 향해 걸어오고, 고운 눈이 바람에 흩날리며 털에 역광이 비치고 로우 앵글로 천천히 다가온다. 소리는 바람 소리와 눈 위의 발자국 소리. 자막 없음, 로고 없음.",
+        "aspect_ratio": "16:9"
+      },
+      "out_task_id": "muse_ext_t2v_123456"
+    }'
+  ```
+
+  ```bash cURL(참조 이미지 3장)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "muse_video_ext",
+      "params": {
+        "prompt": "Picture 1의 남자가 침실의 아치형 거울 앞에 서서 Picture 2의 프린트 티셔츠를 팽팽하게 펴고, 카메라는 가슴 쪽 프린트로 줌인된 후 Picture 3의 소매 패치로 이동했다가 마지막으로 미디엄 샷으로 빠진다. 스마트폰 핸드헬드 촬영 질감, 부드러운 자연광.",
+        "image_url": [
+          "https://example.com/person.jpg",
+          "https://example.com/print.jpg",
+          "https://example.com/sleeve.jpg"
+        ],
+        "aspect_ratio": "9:16"
+      },
+      "out_task_id": "muse_ext_ref_123456"
+    }'
+  ```
+
+  ```bash cURL(멀티 샷)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "muse_video_ext",
+      "params": {
+        "prompt": "[Shot 1] 일출 무렵 산속 호수의 전경, 수면에 옅은 안개가 피어오르고, 나무배 한 척이 고요히 떠 있으며 부드러운 새소리가 들려온다.\n[Shot 2] At 00:04.000, 노 주변으로 물결이 퍼지는 클로즈업으로 전환되고 따뜻한 빛이 수면에 일렁인다.\n[Shot 3] At 00:07.000, 드론이 상공에서 뒤로 빠지며 소나무 숲과 산으로 둘러싸인 호수 전체가 드러난다.\n자막 없음, 로고 없음.",
+        "aspect_ratio": "16:9"
+      },
+      "out_task_id": "muse_ext_shots_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "muse_video_ext",
+      "params": {
+          "prompt": "영화 같은 와이드스크린 화면: 황금빛 석양 아래 눈표범 한 마리가 설산 능선을 따라 카메라를 향해 걸어오고, 고운 눈이 바람에 흩날리며 털에 역광이 비치고 로우 앵글로 천천히 다가온다. 소리는 바람 소리와 눈 위의 발자국 소리. 자막 없음, 로고 없음.",
+          "aspect_ratio": "16:9"
+      },
+      "out_task_id": "muse_ext_t2v_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "muse_video_ext",
+    params: {
+      prompt: "영화 같은 와이드스크린 화면: 황금빛 석양 아래 눈표범 한 마리가 설산 능선을 따라 카메라를 향해 걸어오고, 고운 눈이 바람에 흩날리며 털에 역광이 비치고 로우 앵글로 천천히 다가온다. 소리는 바람 소리와 눈 위의 발자국 소리. 자막 없음, 로고 없음.",
+      aspect_ratio: "16:9"
+    },
+    out_task_id: "muse_ext_t2v_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "muse_video_ext",
+          "params": map[string]interface{}{
+              "prompt":       "영화 같은 와이드스크린 화면: 황금빛 석양 아래 눈표범 한 마리가 설산 능선을 따라 카메라를 향해 걸어오고, 고운 눈이 바람에 흩날리며 털에 역광이 비치고 로우 앵글로 천천히 다가온다. 소리는 바람 소리와 눈 위의 발자국 소리. 자막 없음, 로고 없음.",
+              "aspect_ratio": "16:9",
+          },
+          "out_task_id": "muse_ext_t2v_123456",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/openapi/submit";
+
+          String payload = """
+              {
+                "model": "muse_video_ext",
+                "params": {
+                  "prompt": "영화 같은 와이드스크린 화면: 황금빛 석양 아래 눈표범 한 마리가 설산 능선을 따라 카메라를 향해 걸어오고, 고운 눈이 바람에 흩날리며 털에 역광이 비치고 로우 앵글로 천천히 다가온다. 소리는 바람 소리와 눈 위의 발자국 소리. 자막 없음, 로고 없음.",
+                  "aspect_ratio": "16:9"
+                },
+                "out_task_id": "muse_ext_t2v_123456"
+              }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = [
+      "model" => "muse_video_ext",
+      "params" => [
+          "prompt" => "영화 같은 와이드스크린 화면: 황금빛 석양 아래 눈표범 한 마리가 설산 능선을 따라 카메라를 향해 걸어오고, 고운 눈이 바람에 흩날리며 털에 역광이 비치고 로우 앵글로 천천히 다가온다. 소리는 바람 소리와 눈 위의 발자국 소리. 자막 없음, 로고 없음.",
+          "aspect_ratio" => "16:9"
+      ],
+      "out_task_id" => "muse_ext_t2v_123456"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type": "application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "out_task_id": "muse_ext_t2v_123456",
+        "status": "pending",
+        "created_at": "2026-11-04T06:03:28.242Z"
+    }
+}
+  ```
+
+  ```json 400
+  {
+    "statusCode": 400,
+    "message": "유효하지 않은 요청 파라미터입니다",
+    "ok": false
+  }
+  ```
+
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "인증에 실패했습니다. API 키를 확인해 주세요"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해 주세요"
+    }
+  }
+  ```
+</ResponseExample>

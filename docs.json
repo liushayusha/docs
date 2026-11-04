@@ -360,6 +360,13 @@
                 ]
               },
               {
+                "group": "Muse Video Ext",
+                "icon": "video",
+                "pages": [
+                  "zh/api-reference/videos/muse-video-ext/generation"
+                ]
+              },
+              {
                 "group": "Vidu Q4",
                 "icon": "video",
                 "pages": [
@@ -791,6 +798,13 @@
                 "icon": "video",
                 "pages": [
                   "en/api-reference/videos/wan-3-0/generation"
+                ]
+              },
+              {
+                "group": "Muse Video Ext",
+                "icon": "video",
+                "pages": [
+                  "en/api-reference/videos/muse-video-ext/generation"
                 ]
               },
               {
@@ -1228,6 +1242,13 @@
                 ]
               },
               {
+                "group": "Muse Video Ext",
+                "icon": "video",
+                "pages": [
+                  "ja/api-reference/videos/muse-video-ext/generation"
+                ]
+              },
+              {
                 "group": "Vidu Q4",
                 "icon": "video",
                 "pages": [
@@ -1659,6 +1680,13 @@
                 "icon": "video",
                 "pages": [
                   "ko/api-reference/videos/wan-3-0/generation"
+                ]
+              },
+              {
+                "group": "Muse Video Ext",
+                "icon": "video",
+                "pages": [
+                  "ko/api-reference/videos/muse-video-ext/generation"
                 ]
               },
               {
