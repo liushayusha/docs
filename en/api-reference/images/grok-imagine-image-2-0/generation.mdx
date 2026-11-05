@@ -1,11 +1,11 @@
 ---
 title: 'Grok Imagine Image 2.0 Image Generation and Editing'
 description: |
-    - Asynchronous image generation; retrieve results through the task query API after submission
+    - Asynchronous image generation; retrieve results via the task query endpoint after submission
     - Supports text-to-image, image-to-image, and image editing
-    - Supports 1K / 2K, Low / Medium quality, and up to 10 output images
+    - Supports 1K / 2K, Low / Medium quality, and up to 10 outputs
     - Supports up to 3 reference images and 14 aspect ratio options
-    - Submitted prompts are subject to platform sensitive word / safety review, and violating content will be directly rejected
+    - Submitted prompts undergo platform sensitive word / safety review, and non-compliant content will be directly rejected
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -15,7 +15,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField header="Authorization" type="string" required>
   All endpoints require Bearer Token authentication.
 
-  Visit the <a href={apiKeyUrl} target="_blank">API Key management page</a> to get your API Key, and add the following to the request header:
+  Visit the <a href={apiKeyUrl} target="_blank">API Key management page</a> to get an API key and add it to the request header:
 
   ```text
   Authorization: Bearer YOUR_API_KEY
@@ -29,30 +29,30 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  Model parameters object.
+  Model parameter object.
 
   <Expandable title="params Object Properties">
     <ParamField body="prompt" type="string" required>
-      Image generation or editing instructions. Chinese and English are supported.
+      Image generation or editing prompt. Supports Chinese and English.
 
       When using multiple reference images, you can use `<IMAGE_0>`, `<IMAGE_1>`, and `<IMAGE_2>` in the prompt to refer to the corresponding images.
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      Array of reference images. If omitted, text-to-image is used; after passing it in, image-to-image or image editing mode is used automatically.
+      Array of reference images. When omitted, text-to-image mode is used; when provided, it automatically switches to image-to-image or image editing mode.
 
       * Up to 3 images
       * Maximum 10MB per image
-      * JPG, PNG, and WebP are supported
-      * Public URLs, full Base64 Data URIs, or raw Base64 are supported
+      * Supports JPG, PNG, and WebP
+      * Supports public URLs, complete Base64 Data URIs, or raw Base64
 
       <Warning>
-        When using a URL, the image must be directly accessible from the public internet and cannot rely on login status, cookies, or temporary page authorization.
+        When using a URL, the image must be directly accessible from the public network and cannot rely on login status, cookies, or temporary page authorization.
       </Warning>
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="auto">
-      Output image aspect ratio. Supported values:
+      Aspect ratio of the output image. Supports:
 
       * `auto` (default)
       * `1:1`
@@ -67,14 +67,14 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     </ParamField>
 
     <ParamField body="resolution" type="string" default="1K">
-      Output resolution tier: `1K` (default) or `2K`. `4K` is not supported.
+      Output resolution level: `1K` (default) or `2K`. `4K` is not supported.
     </ParamField>
 
     <ParamField body="quality" type="string" default="medium">
       Generation quality tier:
 
-      * `low` - faster and lower cost
-      * `medium` - better detail (default)
+      * `low` - Faster speed and lower cost
+      * `medium` - Better details (default)
     </ParamField>
 
     <ParamField body="output_n" type="integer" default="1">
@@ -84,19 +84,37 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  Caller-defined task ID, used for idempotent submission and result retrieval.
+  Caller-defined custom task ID, used for idempotent submission and querying results.
 
-  * Length: 1-64 characters
+  * Length of 1-64 characters
   * Only letters, numbers, underscores, and hyphens are supported
-  * Cannot be reused under the same API Key
+  * Cannot be reused under the same API key
 </ParamField>
 
-## Query Results
+## Response
 
-After submission succeeds, call [Get Task Status](/en/api-reference/tasks/status) using the same `out_task_id` to query. Once the task is completed, the image results are located in `data.output`.
+<ResponseField name="out_task_id" type="string">
+  Caller task ID, which can be used to query task status and results.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Initial status, usually `"pending"`.
+</ResponseField>
+
+<ResponseField name="estimated_credits" type="number">
+  Estimated credit consumption for this task.
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  Task creation time, in ISO 8601 format.
+</ResponseField>
+
+## 查询结果
+
+After successful submission, call [Get Task Status](/en/api-reference/tasks/status) and use the same `out_task_id` to query. After the task is completed, the image result is located in `data.output`.
 
 <RequestExample>
-  ```bash cURL（Text-to-Image）
+  ```bash cURL (Text-to-Image)
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
@@ -104,7 +122,7 @@ After submission succeeds, call [Get Task Status](/en/api-reference/tasks/status
     --data '{
       "model": "grok_imagine_image_2_0",
       "params": {
-        "prompt": "Tokyo streets on a rainy night, neon lights reflecting on the wet pavement, cinematic photography",
+        "prompt": "Rainy night in Tokyo streets, neon lights reflecting on wet pavement, cinematic photography",
         "aspect_ratio": "16:9",
         "resolution": "2K",
         "quality": "medium",
@@ -114,7 +132,7 @@ After submission succeeds, call [Get Task Status](/en/api-reference/tasks/status
     }'
   ```
 
-  ```bash cURL（Image Editing）
+  ```bash cURL (Image Editing)
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
@@ -122,76 +140,7 @@ After submission succeeds, call [Get Task Status](/en/api-reference/tasks/status
     --data '{
       "model": "grok_imagine_image_2_0",
       "params": {
-        "prompt": "Place the person in <IMAGE_0> into the scene of <IMAGE_1> while keeping the lighting consistent",
-        "image_url": [
-          "https://example.com/person.png",
-          "https://example.com/scene.png"
-        ],
-        "aspect_ratio": "16:9",
-        "resolution": "1K",
-        "quality": "medium",
-        "output_n": 1
-      },
-      "out_task_id": "grok_image_2_edit_001"
-    }'
-  ```
-
-  ```javascript JavaScript
-  const response = await fetch("https://aireiter.com/api/openapi/submit", {
-    method: "POST",
-    headers: {
-      Authorization: "Bearer <token>",
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model: "grok_imagine_image_2_0",
-      params: {
-        prompt: "A blue ceramic cup in a minimalist white studio, soft product lighting",
-        aspect_ratio: "1:1",
-        resolution: "1K",
-        quality: "low",
-        output_n: 1
-      },
-      out_task_id: "grok_image_2_js_001"
-    })
-  });
-
-  console.log(await response.json());
-  ```
-</RequestExample>
-
-## Query Results
-
-After a successful submission, call [Get Task Status](/en/api-reference/tasks/status) with the same `out_task_id` to query it. Once the task is completed, the image results are located in `data.output`.
-
-<RequestExample>
-  ```bash cURL (text-to-image)
-  curl --request POST \
-    --url https://aireiter.com/api/openapi/submit \
-    --header 'Authorization: Bearer <token>' \
-    --header 'Content-Type: application/json' \
-    --data '{
-      "model": "grok_imagine_image_2_0",
-      "params": {
-        "prompt": "Tokyo street at night in the rain, neon lights reflecting on wet pavement, cinematic photography",
-        "aspect_ratio": "16:9",
-        "resolution": "2K",
-        "quality": "medium",
-        "output_n": 1
-      },
-      "out_task_id": "grok_image_2_text_001"
-    }'
-  ```
-
-  ```bash cURL (image editing)
-  curl --request POST \
-    --url https://aireiter.com/api/openapi/submit \
-    --header 'Authorization: Bearer <token>' \
-    --header 'Content-Type: application/json' \
-    --data '{
-      "model": "grok_imagine_image_2_0",
-      "params": {
-        "prompt": "Place the person from <IMAGE_0> into the scene of <IMAGE_1>, and keep the lighting consistent",
+        "prompt": "Place the person from <IMAGE_0> into the scene of <IMAGE_1>, maintaining consistent lighting",
         "image_url": [
           "https://example.com/person.png",
           "https://example.com/scene.png"
@@ -213,7 +162,7 @@ After a successful submission, call [Get Task Status](/en/api-reference/tasks/st
   payload = {
       "model": "grok_imagine_image_2_0",
       "params": {
-          "prompt": "Tokyo street at night in the rain, neon lights reflecting on wet pavement, cinematic photography",
+          "prompt": "Rainy night in Tokyo streets, neon lights reflecting on wet pavement, cinematic photography",
           "aspect_ratio": "16:9",
           "resolution": "2K",
           "quality": "medium",
@@ -238,7 +187,7 @@ After a successful submission, call [Get Task Status](/en/api-reference/tasks/st
   const payload = {
     model: "grok_imagine_image_2_0",
     params: {
-      prompt: "Tokyo street at night in the rain, neon lights reflecting on wet pavement, cinematic photography",
+      prompt: "Rainy night in Tokyo streets, neon lights reflecting on wet pavement, cinematic photography",
       aspect_ratio: "16:9",
       resolution: "2K",
       quality: "medium",
@@ -279,7 +228,7 @@ After a successful submission, call [Get Task Status](/en/api-reference/tasks/st
       payload := map[string]interface{}{
           "model": "grok_imagine_image_2_0",
           "params": map[string]interface{}{
-              "prompt": "Tokyo street at night in the rain, neon lights reflecting on wet pavement, cinematic photography",
+              "prompt": "Rainy night in Tokyo streets, neon lights reflecting on wet pavement, cinematic photography",
               "aspect_ratio": "16:9",
               "resolution": "2K",
               "quality": "medium",
@@ -320,7 +269,7 @@ After a successful submission, call [Get Task Status](/en/api-reference/tasks/st
               {
                 "model": "grok_imagine_image_2_0",
                 "params": {
-                  "prompt": "Tokyo street at night in the rain, neon lights reflecting on wet pavement, cinematic photography",
+                  "prompt": "Rainy night in Tokyo streets, neon lights reflecting on wet pavement, cinematic photography",
                   "aspect_ratio": "16:9",
                   "resolution": "2K",
                   "quality": "medium",
@@ -354,7 +303,7 @@ After a successful submission, call [Get Task Status](/en/api-reference/tasks/st
   $payload = [
       "model" => "grok_imagine_image_2_0",
       "params" => [
-          "prompt" => "Tokyo street at night in the rain, neon lights reflecting on wet pavement, cinematic photography",
+          "prompt" => "Rainy night in Tokyo streets, neon lights reflecting on wet pavement, cinematic photography",
           "aspect_ratio" => "16:9",
           "resolution" => "2K",
           "quality" => "medium",
@@ -389,7 +338,7 @@ After a successful submission, call [Get Task Status](/en/api-reference/tasks/st
   payload = {
     model: "grok_imagine_image_2_0",
     params: {
-      prompt: "Tokyo street at night in the rain, neon lights reflecting on wet pavement, cinematic photography",
+      prompt: "Tokyo streets on a rainy night, neon lights reflecting on wet pavement, cinematic photography",
       aspect_ratio: "16:9",
       resolution: "2K",
       quality: "medium",
@@ -417,7 +366,7 @@ After a successful submission, call [Get Task Status](/en/api-reference/tasks/st
   let payload: [String: Any] = [
       "model": "grok_imagine_image_2_0",
       "params": [
-          "prompt": "Tokyo street at night in the rain, neon lights reflecting on wet pavement, cinematic photography",
+          "prompt": "Tokyo streets on a rainy night, neon lights reflecting on wet pavement, cinematic photography",
           "aspect_ratio": "16:9",
           "resolution": "2K",
           "quality": "medium",
@@ -462,7 +411,7 @@ After a successful submission, call [Get Task Status](/en/api-reference/tasks/st
                 {
                     ""model"": ""grok_imagine_image_2_0"",
                     ""params"": {
-                        ""prompt"": ""Tokyo street at night in the rain, neon lights reflecting on wet pavement, cinematic photography"",
+                        ""prompt"": ""Tokyo streets on a rainy night, neon lights reflecting on wet pavement, cinematic photography"",
                         ""aspect_ratio"": ""16:9"",
                         ""resolution"": ""2K"",
                         ""quality"": ""medium"",
@@ -483,7 +432,7 @@ After a successful submission, call [Get Task Status](/en/api-reference/tasks/st
   }
   ```
 
-  ```c c
+  ```c C
   #include <stdio.h>
   #include <curl/curl.h>
 
@@ -496,7 +445,7 @@ After a successful submission, call [Get Task Status](/en/api-reference/tasks/st
 
       if(curl) {
           const char *url = "https://aireiter.com/api/openapi/submit";
-          const char *payload = "{\"model\":\"grok_imagine_image_2_0\",\"params\":{\"prompt\":\"Tokyo street at night in the rain, neon lights reflecting on wet pavement, cinematic photography\",\"aspect_ratio\":\"16:9\",\"resolution\":\"2K\",\"quality\":\"medium\",\"output_n\":1},\"out_task_id\":\"grok_image_2_text_001\"}";
+          const char *payload = "{\"model\":\"grok_imagine_image_2_0\",\"params\":{\"prompt\":\"Tokyo streets on a rainy night, neon lights reflecting on wet pavement, cinematic photography\",\"aspect_ratio\":\"16:9\",\"resolution\":\"2K\",\"quality\":\"medium\",\"output_n\":1},\"out_task_id\":\"grok_image_2_text_001\"}";
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
@@ -532,7 +481,7 @@ After a successful submission, call [Get Task Status](/en/api-reference/tasks/st
           NSDictionary *payload = @{
               @"model": @"grok_imagine_image_2_0",
               @"params": @{
-                  @"prompt": @"Tokyo street at night in the rain, neon lights reflecting on wet pavement, cinematic photography",
+                  @"prompt": @"Tokyo streets on a rainy night, neon lights reflecting on wet pavement, cinematic photography",
                   @"aspect_ratio": @"16:9",
                   @"resolution": @"2K",
                   @"quality": @"medium",
@@ -582,7 +531,7 @@ After a successful submission, call [Get Task Status](/en/api-reference/tasks/st
   let payload = {|{
     "model": "grok_imagine_image_2_0",
     "params": {
-      "prompt": "Tokyo street at night in the rain, neon lights reflecting on wet pavement, cinematic photography",
+      "prompt": "Rainy night Tokyo street, neon lights reflected on wet pavement, cinematic photography",
       "aspect_ratio": "16:9",
       "resolution": "2K",
       "quality": "medium",
@@ -615,7 +564,7 @@ After a successful submission, call [Get Task Status](/en/api-reference/tasks/st
     final payload = {
           "model": "grok_imagine_image_2_0",
           "params": {
-              "prompt": "Tokyo street at night in the rain, neon lights reflecting on wet pavement, cinematic photography",
+              "prompt": "Rainy night Tokyo street, neon lights reflected on wet pavement, cinematic photography",
               "aspect_ratio": "16:9",
               "resolution": "2K",
               "quality": "medium",
@@ -646,7 +595,7 @@ After a successful submission, call [Get Task Status](/en/api-reference/tasks/st
   payload <- list(
     model = "grok_imagine_image_2_0",
     params = list(
-      prompt = "Tokyo street at night in the rain, neon lights reflecting on wet pavement, cinematic photography",
+      prompt = "Rainy night Tokyo street, neon lights reflected on wet pavement, cinematic photography",
       aspect_ratio = "16:9",
       resolution = "2K",
       quality = "medium",
@@ -702,7 +651,7 @@ After a successful submission, call [Get Task Status](/en/api-reference/tasks/st
   {
     "error": {
       "code": 433,
-      "message": "Insufficient account balance, please top up and try again"
+      "message": "Insufficient account balance, please recharge and try again"
     }
   }
   ```

@@ -1,10 +1,10 @@
 ---
 title: 'Grok Imagine Image 2.0 이미지 생성 및 편집'
 description: |
-    - 비동기 이미지 생성, 제출 후 작업 조회 인터페이스를 통해 결과를 가져옵니다
-    - 텍스트-이미지, 이미지-이미지 및 이미지 편집을 지원합니다
-    - 1K / 2K, Low / Medium 품질 및 최대 10장 출력을 지원합니다
-    - 최대 3장의 참조 이미지와 14가지 가로세로 비율 옵션을 지원합니다
+    - 비동기 이미지 생성, 제출 후 작업 조회 인터페이스를 통해 결과 확인
+    - 텍스트 기반 이미지 생성, 이미지 기반 이미지 생성 및 이미지 편집 지원
+    - 1K / 2K, Low / Medium 품질 및 최대 10장 출력 지원
+    - 최대 3장의 참조 이미지 및 14가지 화면비 옵션 지원
     - 제출된 prompt는 플랫폼 민감어 / 안전 검토를 거치며, 위반 콘텐츠는 직접 거부됩니다
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
@@ -13,9 +13,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  모든 엔드포인트는 Bearer Token 인증이 필요합니다.
+  모든 API는 Bearer Token 인증을 사용해야 합니다.
 
-  <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a>에 접속하여 API Key를 얻고, 요청 헤더에 다음을 추가하세요:
+  <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a>에 접속하여 API Key를 발급받고, 요청 헤더에 추가하세요:
 
   ```text
   Authorization: Bearer YOUR_API_KEY
@@ -25,36 +25,36 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  Model name, fixed value: `"grok_imagine_image_2_0"`.
+  모델 이름, 고정값: `"grok_imagine_image_2_0"`.
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  Model parameter object.
+  모델 매개변수 객체입니다.
 
-  <Expandable title="params Object Properties">
+  <Expandable title="params 객체 Properties">
     <ParamField body="prompt" type="string" required>
-      Image generation or editing instructions. Supports Chinese and English.
+      이미지 생성 또는 편집 지시문입니다. 중국어와 영어를 지원합니다.
 
-      When using multiple reference images, you can use `<IMAGE_0>`, `<IMAGE_1>`, and `<IMAGE_2>` in the prompt to refer to the corresponding images.
+      여러 장의 참조 이미지를 사용할 때 프롬프트에 `<IMAGE_0>`, `<IMAGE_1>`, `<IMAGE_2>`를 사용하여 해당 이미지를 지정할 수 있습니다.
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      Reference image array. Omitted for text-to-image; after being passed in, it automatically uses image-to-image or image editing mode.
+      참조 이미지 배열입니다. 생략 시 텍스트 기반 이미지 생성(Text-to-Image) 모드로 동작하며, 전달 시 이미지 기반 이미지 생성(Image-to-Image) 또는 이미지 편집 모드를 자동으로 사용합니다.
 
-      * Up to 3 images
-      * Maximum 10MB per image
-      * Supports JPG, PNG, and WebP
-      * Supports public URLs, complete Base64 Data URIs, or plain Base64
+      * 최대 3장
+      * 장당 최대 10MB
+      * JPG, PNG, WebP 지원
+      * 공개 URL, 전체 Base64 Data URI 또는 순수 Base64 지원
 
       <Warning>
-        When using a URL, the image must be directly accessible from the public internet and cannot depend on login status, cookies, or temporary page authorization.
+        URL을 사용할 경우 이미지는 공용 네트워크에서 직접 액세스할 수 있어야 하며, 로그인 상태, Cookie 또는 임시 페이지 인증에 의존해서는 안 됩니다.
       </Warning>
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="auto">
-      Output image aspect ratio. Supports:
+      출력 이미지 가로세로 비율입니다. 지원:
 
-      * `auto` (default)
+      * `auto`(기본값)
       * `1:1`
       * `4:3` / `3:4`
       * `3:2` / `2:3`
@@ -63,40 +63,58 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       * `19.5:9` / `9:19.5`
       * `20:9` / `9:20`
 
-      Custom `WIDTHxHEIGHT` pixel dimensions are not supported.
+      사용자 지정 `WIDTHxHEIGHT` 픽셀 크기는 지원되지 않습니다.
     </ParamField>
 
     <ParamField body="resolution" type="string" default="1K">
-      Output resolution level: `1K` (default) or `2K`. `4K` is not supported.
+      출력 해상도 등급: `1K`(기본값) 또는 `2K`. `4K`는 지원되지 않습니다.
     </ParamField>
 
     <ParamField body="quality" type="string" default="medium">
-      Generation quality level:
+      생성 품질 등급:
 
-      * `low` - faster and lower cost
-      * `medium` - better details (default)
+      * `low` - 더 빠른 속도, 더 저렴한 비용
+      * `medium` - 더 정교한 디테일(기본값)
     </ParamField>
 
     <ParamField body="output_n" type="integer" default="1">
-      Number of output images, ranging from `1` to `10`. Each image is billed separately.
+      출력 이미지 수량으로, 설정 가능한 범위는 `1`부터 `10`까지입니다. 이미지마다 개별 요금이 청구됩니다.
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  Caller-defined task ID, used for idempotent submission and result querying.
+  호출자 지정 작업 ID로, 멱등성 제출 및 결과 조회에 사용됩니다.
 
-  * Length: 1-64 characters
-  * Only letters, numbers, underscores, and hyphens are supported
-  * Cannot be reused under the same API Key
+  * 길이 1~64자
+  * 영문자, 숫자, 밑줄 및 하이픈만 지원
+  * 동일한 API Key 내에서 중복 사용 불가
 </ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  호출자 작업 ID로, 작업 상태 및 결과를 조회하는 데 사용할 수 있습니다.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  초기 상태이며, 일반적으로 `"pending"`입니다.
+</ResponseField>
+
+<ResponseField name="estimated_credits" type="number">
+  해당 작업의 예상 소모 크레딧입니다.
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  작업 생성 시간이며, ISO 8601 형식입니다.
+</ResponseField>
 
 ## 查询结果
 
-제출 성공 후, [작업 상태 가져오기](/en/api-reference/tasks/status)를 호출하고, 동일한 `out_task_id`를 사용하여 조회합니다. 작업이 완료되면 이미지 결과는 `data.output`에 있습니다.
+제출 성공 후, [작업 상태 가져오기](/en/api-reference/tasks/status)를 호출하여 동일한 `out_task_id`로 조회합니다. 작업이 완료되면 이미지 결과는 `data.output`에 위치합니다.
 
 <RequestExample>
-  ```bash cURL（文生图）
+  ```bash cURL(텍스트-이미지 생성)
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
@@ -104,7 +122,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     --data '{
       "model": "grok_imagine_image_2_0",
       "params": {
-        "prompt": "비 오는 밤 도쿄 거리, 젖은 도로에 반사되는 네온사인, 영화 같은 사진",
+        "prompt": "비 내리는 밤 도쿄 거리, 젖은 노면에 비친 네온사인, 영화 같은 사진",
         "aspect_ratio": "16:9",
         "resolution": "2K",
         "quality": "medium",
@@ -114,7 +132,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     }'
   ```
 
-  ```bash cURL（图片编辑）
+  ```bash cURL(이미지 편집)
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
@@ -122,76 +140,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     --data '{
       "model": "grok_imagine_image_2_0",
       "params": {
-        "prompt": "<IMAGE_0>의 인물을 <IMAGE_1>의 장면에 넣고, 조명은 동일하게 유지합니다",
-        "image_url": [
-          "https://example.com/person.png",
-          "https://example.com/scene.png"
-        ],
-        "aspect_ratio": "16:9",
-        "resolution": "1K",
-        "quality": "medium",
-        "output_n": 1
-      },
-      "out_task_id": "grok_image_2_edit_001"
-    }'
-  ```
-
-  ```javascript JavaScript
-  const response = await fetch("https://aireiter.com/api/openapi/submit", {
-    method: "POST",
-    headers: {
-      Authorization: "Bearer <token>",
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model: "grok_imagine_image_2_0",
-      params: {
-        prompt: "미니멀한 흰색 사진 스튜디오의 파란색 세라믹 컵, 부드러운 제품 조명",
-        aspect_ratio: "1:1",
-        resolution: "1K",
-        quality: "low",
-        output_n: 1
-      },
-      out_task_id: "grok_image_2_js_001"
-    })
-  });
-
-  console.log(await response.json());
-  ```
-</RequestExample>
-
-## 쿼리 결과
-
-제출에 성공한 후 [작업 상태 가져오기](/en/api-reference/tasks/status)를 호출하고, 동일한 `out_task_id`를 사용해 쿼리합니다. 작업이 완료되면 이미지 결과는 `data.output`에 있습니다.
-
-<RequestExample>
-  ```bash cURL（text-to-image）
-  curl --request POST \
-    --url https://aireiter.com/api/openapi/submit \
-    --header 'Authorization: Bearer <token>' \
-    --header 'Content-Type: application/json' \
-    --data '{
-      "model": "grok_imagine_image_2_0",
-      "params": {
-        "prompt": "비 오는 밤의 도쿄 거리, 젖은 노면에 반사되는 네온사인, 시네마틱 촬영",
-        "aspect_ratio": "16:9",
-        "resolution": "2K",
-        "quality": "medium",
-        "output_n": 1
-      },
-      "out_task_id": "grok_image_2_text_001"
-    }'
-  ```
-
-  ```bash cURL（image editing）
-  curl --request POST \
-    --url https://aireiter.com/api/openapi/submit \
-    --header 'Authorization: Bearer <token>' \
-    --header 'Content-Type: application/json' \
-    --data '{
-      "model": "grok_imagine_image_2_0",
-      "params": {
-        "prompt": "<IMAGE_0>의 인물을 <IMAGE_1>의 장면에 넣고, 조명은 일관되게 유지",
+        "prompt": "<IMAGE_0>의 인물을 <IMAGE_1>의 장면에 넣고 조명을 일관되게 유지",
         "image_url": [
           "https://example.com/person.png",
           "https://example.com/scene.png"
@@ -213,7 +162,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
       "model": "grok_imagine_image_2_0",
       "params": {
-          "prompt": "비 오는 밤의 도쿄 거리, 젖은 노면에 반사되는 네온사인, 시네마틱 촬영",
+          "prompt": "비 내리는 밤 도쿄 거리, 젖은 노면에 비친 네온사인, 영화 같은 사진",
           "aspect_ratio": "16:9",
           "resolution": "2K",
           "quality": "medium",
@@ -238,7 +187,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   const payload = {
     model: "grok_imagine_image_2_0",
     params: {
-      prompt: "비 오는 밤의 도쿄 거리, 젖은 노면에 반사되는 네온사인, 시네마틱 촬영",
+      prompt: "비 내리는 밤 도쿄 거리, 젖은 노면에 비친 네온사인, 영화 같은 사진",
       aspect_ratio: "16:9",
       resolution: "2K",
       quality: "medium",
@@ -279,7 +228,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       payload := map[string]interface{}{
           "model": "grok_imagine_image_2_0",
           "params": map[string]interface{}{
-              "prompt": "비 오는 밤의 도쿄 거리, 젖은 노면에 반사되는 네온사인, 시네마틱 촬영",
+              "prompt": "비 내리는 밤 도쿄 거리, 젖은 노면에 비친 네온사인, 영화 같은 사진",
               "aspect_ratio": "16:9",
               "resolution": "2K",
               "quality": "medium",
@@ -320,7 +269,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
               {
                 "model": "grok_imagine_image_2_0",
                 "params": {
-                  "prompt": "비 오는 밤의 도쿄 거리, 젖은 노면에 반사되는 네온사인, 시네마틱 촬영",
+                  "prompt": "비 내리는 밤 도쿄 거리, 젖은 노면에 비친 네온사인, 영화 같은 사진",
                   "aspect_ratio": "16:9",
                   "resolution": "2K",
                   "quality": "medium",
@@ -354,7 +303,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   $payload = [
       "model" => "grok_imagine_image_2_0",
       "params" => [
-          "prompt" => "비 오는 밤의 도쿄 거리, 젖은 노면에 반사되는 네온사인, 시네마틱 촬영",
+          "prompt" => "비 내리는 밤 도쿄 거리, 젖은 노면에 비친 네온사인, 영화 같은 사진",
           "aspect_ratio" => "16:9",
           "resolution" => "2K",
           "quality" => "medium",
@@ -389,7 +338,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload = {
     model: "grok_imagine_image_2_0",
     params: {
-      prompt: "비 오는 밤의 도쿄 거리, 젖은 노면에 반사되는 네온사인, 시네마틱 촬영",
+      prompt: "비 오는 밤 도쿄 거리, 젖은 노면에 비친 네온사인, 영화 같은 사진",
       aspect_ratio: "16:9",
       resolution: "2K",
       quality: "medium",
@@ -417,7 +366,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload: [String: Any] = [
       "model": "grok_imagine_image_2_0",
       "params": [
-          "prompt": "비 오는 밤의 도쿄 거리, 젖은 노면에 반사되는 네온사인, 시네마틱 촬영",
+          "prompt": "비 오는 밤 도쿄 거리, 젖은 노면에 비친 네온사인, 영화 같은 사진",
           "aspect_ratio": "16:9",
           "resolution": "2K",
           "quality": "medium",
@@ -462,7 +411,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
                 {
                     ""model"": ""grok_imagine_image_2_0"",
                     ""params"": {
-                        ""prompt"": ""비 오는 밤의 도쿄 거리, 젖은 노면에 반사되는 네온사인, 시네마틱 촬영"",
+                        ""prompt"": ""비 오는 밤 도쿄 거리, 젖은 노면에 비친 네온사인, 영화 같은 사진"",
                         ""aspect_ratio"": ""16:9"",
                         ""resolution"": ""2K"",
                         ""quality"": ""medium"",
@@ -483,7 +432,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   }
   ```
 
-  ```c c
+  ```c C
   #include <stdio.h>
   #include <curl/curl.h>
 
@@ -496,7 +445,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
       if(curl) {
           const char *url = "https://aireiter.com/api/openapi/submit";
-          const char *payload = "{\"model\":\"grok_imagine_image_2_0\",\"params\":{\"prompt\":\"비 오는 밤의 도쿄 거리, 젖은 노면에 반사되는 네온사인, 시네마틱 촬영\",\"aspect_ratio\":\"16:9\",\"resolution\":\"2K\",\"quality\":\"medium\",\"output_n\":1},\"out_task_id\":\"grok_image_2_text_001\"}";
+          const char *payload = "{\"model\":\"grok_imagine_image_2_0\",\"params\":{\"prompt\":\"비 오는 밤 도쿄 거리, 젖은 노면에 비친 네온사인, 영화 같은 사진\",\"aspect_ratio\":\"16:9\",\"resolution\":\"2K\",\"quality\":\"medium\",\"output_n\":1},\"out_task_id\":\"grok_image_2_text_001\"}";
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
@@ -532,7 +481,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
           NSDictionary *payload = @{
               @"model": @"grok_imagine_image_2_0",
               @"params": @{
-                  @"prompt": @"비 오는 밤의 도쿄 거리, 젖은 노면에 반사되는 네온사인, 시네마틱 촬영",
+                  @"prompt": @"비 오는 밤 도쿄 거리, 젖은 노면에 비친 네온사인, 영화 같은 사진",
                   @"aspect_ratio": @"16:9",
                   @"resolution": @"2K",
                   @"quality": @"medium",
@@ -582,7 +531,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   let payload = {|{
     "model": "grok_imagine_image_2_0",
     "params": {
-      "prompt": "비 오는 밤의 도쿄 거리, 젖은 노면에 반사되는 네온사인, 시네마틱 촬영",
+      "prompt": "비 내리는 밤 도쿄 거리, 젖은 노면에 반사되는 네온사인, 영화 같은 사진",
       "aspect_ratio": "16:9",
       "resolution": "2K",
       "quality": "medium",
@@ -615,7 +564,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
     final payload = {
           "model": "grok_imagine_image_2_0",
           "params": {
-              "prompt": "비 오는 밤의 도쿄 거리, 젖은 노면에 반사되는 네온사인, 시네마틱 촬영",
+              "prompt": "비 내리는 밤 도쿄 거리, 젖은 노면에 반사되는 네온사인, 영화 같은 사진",
               "aspect_ratio": "16:9",
               "resolution": "2K",
               "quality": "medium",
@@ -646,7 +595,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   payload <- list(
     model = "grok_imagine_image_2_0",
     params = list(
-      prompt = "비 오는 밤의 도쿄 거리, 젖은 노면에 반사되는 네온사인, 시네마틱 촬영",
+      prompt = "비 내리는 밤 도쿄 거리, 젖은 노면에 반사되는 네온사인, 영화 같은 사진",
       aspect_ratio = "16:9",
       resolution = "2K",
       quality = "medium",
@@ -686,7 +635,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   ```json 400
     {
         "statusCode": 400,
-        "message": "요청 파라미터가 유효하지 않습니다",
+        "message": "요청 매개변수가 유효하지 않습니다",
         "ok": false
     }
   ```
@@ -694,7 +643,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 401,
-      "message": "인증에 실패했습니다. API 키를 확인하세요"
+      "message": "인증에 실패했습니다. API 키를 확인해 주세요"
     }
   }
   ```
@@ -702,7 +651,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 433,
-      "message": "계정 잔액이 부족합니다. 충전 후 다시 시도하세요"
+      "message": "계정 잔액이 부족합니다. 충전 후 다시 시도해 주세요"
     }
   }
   ```
@@ -711,7 +660,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
   {
     "error": {
       "code": 500,
-      "message": "서버 내부 오류입니다. 잠시 후 다시 시도하세요"
+      "message": "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해 주세요"
     }
   }
   ```

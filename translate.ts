@@ -80,6 +80,9 @@ languageMap.tw = "Traditional Chinese";
 const openai = new OpenAI({
   baseURL: "http://95.216.117.43:8356/v1",
   apiKey: "sk-005a3af9e3d421100b561a97470d92a4fe6afa8b8a399d4787a8be5be31debaf",
+  // 默认 10 分钟超时 + SDK 内部重试 2 次，请求卡住时会挂起长达 30 分钟；重试由 translateSingleChunk 负责
+  timeout: 300_000,
+  maxRetries: 0,
 });
 
 
@@ -609,6 +612,8 @@ async function translateSingleChunk(sourceLang: string, targetLang: string, text
           { role: "user", content: userPrompt },
         ],
         response_format: { type: "json_object" },
+        // 不设置时代理默认上限约 8192 token（含思考），长段落会被截断（finish_reason=length）
+        max_tokens: 32768,
       });
 
       const translatedContent = response.choices[0].message.content?.trim();
@@ -616,7 +621,15 @@ async function translateSingleChunk(sourceLang: string, targetLang: string, text
         throw new Error("翻译响应为空");
       }
 
-      const translatedJson = parseJsonFromAI(translatedContent);
+      let translatedJson: any;
+      try {
+        translatedJson = parseJsonFromAI(translatedContent);
+      } catch (parseError) {
+        const finishReason = response.choices[0].finish_reason;
+        throw new Error(
+          `${parseError} [finish_reason=${finishReason}, 长度=${translatedContent.length}, 结尾=${JSON.stringify(translatedContent.slice(-80))}]`
+        );
+      }
       const translation = translatedJson.translation;
       // 校验返回的 key 是否齐全
       for (const key of Object.keys(textObj)) {
@@ -637,9 +650,60 @@ async function translateSingleChunk(sourceLang: string, targetLang: string, text
   throw lastError;
 }
 
-// 翻译文本对象（简化版，仅用于 MDX）
+// 将超长段落按代码块外的空行切分为若干块（每块约 maxSize 字符），避免 AI 输出过长被截断
+function splitLongContent(content: string, maxSize: number): string[] {
+  const chunks: string[] = [];
+  let current: string[] = [];
+  let currentSize = 0;
+  let inFence = false;
+
+  for (const line of content.split("\n")) {
+    if (line.trim().startsWith("```")) {
+      inFence = !inFence;
+    }
+    // 只在代码块外的空行处切分，切分用的空行由 join("\n\n") 还原
+    if (!inFence && line.trim() === "" && currentSize >= maxSize) {
+      chunks.push(current.join("\n"));
+      current = [];
+      currentSize = 0;
+      continue;
+    }
+    current.push(line);
+    currentSize += line.length + 1;
+  }
+  if (current.length > 0) {
+    chunks.push(current.join("\n"));
+  }
+  return chunks;
+}
+
+// 翻译文本对象（简化版，仅用于 MDX），超长段落分块翻译后拼接
 async function translateText(sourceLang: string, targetLang: string, textObj: any): Promise<any> {
-  return translateSingleChunk(sourceLang, targetLang, textObj);
+  const result: Record<string, string> = {};
+
+  for (const [key, value] of Object.entries(textObj)) {
+    const chunks = typeof value === "string" ? splitLongContent(value, MAX_CHUNK_SIZE) : [];
+    if (chunks.length <= 1) {
+      Object.assign(result, await translateSingleChunk(sourceLang, targetLang, { [key]: value }));
+      continue;
+    }
+
+    const parts: string[] = [];
+    for (let i = 0; i < chunks.length; i++) {
+      const partKey = `${key}__part${i}`;
+      const translated = await translateSingleChunk(sourceLang, targetLang, { [partKey]: chunks[i] });
+      // 只去掉首尾换行，保留块首缩进（如 <RequestExample> 内的 "  ```"）
+      let part = translated[partKey].replace(/^\n+|\s+$/g, "");
+      const indent = chunks[i].match(/^[ \t]*/)![0];
+      if (indent && !part.startsWith(indent)) {
+        part = indent + part.trimStart();
+      }
+      parts.push(part);
+    }
+    result[key] = parts.join("\n\n");
+  }
+
+  return result;
 }
 
 // 读取段落历史（支持新旧格式）

@@ -4,14 +4,14 @@ description: |
   - MiniMax H3 Turbo，加速版 MiniMax H3
   - 异步处理模式，返回任务 ID 用于后续查询
   - 支持文生视频，以及最多 8 张参考图、3 段参考视频、3 段参考音频
-  - 支持 768P 输出，视频时长 6-30 秒，6 种宽高比，默认带原生音轨
+  - 支持 768P 输出，视频时长 6-15 秒，6 种宽高比，默认带原生音轨
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 <Note>
-MiniMax H3 Turbo 在 AIReiter 中的模型名称为 `minimax_h3_turbo`。该模型与 `minimax_h3` 不同：分辨率固定为 768P（不支持 2K），时长为 6-30 秒，不支持首尾帧。
+MiniMax H3 Turbo 在 AIReiter 中的模型名称为 `minimax_h3_turbo`。该模型与 `minimax_h3` 不同：分辨率固定为 768P（不支持 2K），时长为 6-15 秒，不支持首尾帧。
 </Note>
 
 ## Authorizations
@@ -53,7 +53,7 @@ MiniMax H3 Turbo 在 AIReiter 中的模型名称为 `minimax_h3_turbo`。该模�
     <ParamField body="video_length" type="number" default="6">
       生成视频时长，单位为秒。
 
-      支持整数：`6` 到 `30`。
+      支持整数：`6` 到 `15`。
     </ParamField>
 
     <ParamField body="resolution" type="string" default="768p">

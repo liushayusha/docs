@@ -1,16 +1,16 @@
 ---
 title: 'MiniMax H3 Turbo 動画生成'
 description: |
-  - MiniMax H3 Turbo、MiniMax H3 の高速版
-  - 非同期処理モード、後続のクエリ用タスク ID を返却
-  - テキストからの動画生成、および最大8枚の参照画像、3本の参照動画、3本の参照音声をサポート
-  - 768P 出力をサポート、動画の長さ6-30秒、6種類のアスペクト比、デフォルトでネイティブ音声トラック付き
+  - MiniMax H3 Turbo、MiniMax H3の高速版
+  - 非同期処理モード、後続の照会用タスクIDを返却
+  - テキストからの動画生成、および最大8枚の参考画像、3本の参考動画、3本の参考音声に対応
+  - 768P出力をサポート、動画の長さ6-15秒、6種類のアスペクト比、デフォルトでネイティブオーディオトラック付き
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 <Note>
-MiniMax H3 Turbo の AIReiter におけるモデル名は `minimax_h3_turbo` です。本モデルは `minimax_h3` と異なり、解像度は 768P 固定（2K 非対応）、時間は 6-30秒で、先頭・末尾フレームには対応していません。
+MiniMax H3 Turbo の AIReiter におけるモデル名は `minimax_h3_turbo` です。このモデルは `minimax_h3` と異なり、解像度は768P固定（2K非対応）、動画の長さは6-15秒で、先頭および末尾フレームには対応していません。
 </Note>
 
 ## Authorizations
@@ -32,7 +32,7 @@ MiniMax H3 Turbo の AIReiter におけるモデル名は `minimax_h3_turbo` で
 ## Body
 
 <ParamField body="model" type="string" required>
-  モデル名。以下を固定で使用します：
+  モデル名。固定値：
 
   * `minimax_h3_turbo`
 </ParamField>
@@ -42,21 +42,21 @@ MiniMax H3 Turbo の AIReiter におけるモデル名は `minimax_h3_turbo` で
 
   <Expandable title="params オブジェクトのプロパティ">
     <ParamField body="prompt" type="string" required>
-      動画生成用のテキストプロンプト。
+      動画生成用のテキスト説明。
 
       被写体、シーン、カメラワーク、アクション、スタイル、ライティング、リズムなどの内容を記述できます。
 
-      参考素材を使用する場合、プロンプト内でアップロード順に「画像1 / 動画1 / 音声1」と指定できます。
+      参考素材を使用する場合、プロンプト内で「画像1 / 動画1 / 音声1」のように順番に指定してアップロードした内容を参照できます。
     </ParamField>
 
     <ParamField body="video_length" type="number" default="6">
       生成する動画の長さ（秒単位）。
 
-      サポートされている整数：`6` から `30`。
+      整数の `6` から `15` に対応。
     </ParamField>
 
     <ParamField body="resolution" type="string" default="768p">
-      出力解像度。`768p` 固定、省略可能。
+      出力解像度。`768p` に固定、省略可能。
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="16:9">
@@ -73,47 +73,47 @@ MiniMax H3 Turbo の AIReiter におけるモデル名は `minimax_h3_turbo` で
     </ParamField>
 
     <ParamField body="image_url" type="string | string[]">
-      参考画像の URL、任意。最大8枚。
+      参照画像の URL（任意）。最大8枚。
 
-      画像を指定しない場合はテキストからの動画生成となり、画像を指定した場合は被写体、スタイル、構図を誘導する参考画像として使用されます。
+      画像を指定しない場合はテキストからの動画生成となり、画像を指定した場合は被写体、スタイル、構図を誘導する参照画像として機能します。
 
       画像の要件：
 
       * JPEG、PNG、WEBP に対応
-      * 画像1枚あたり最大 20MB
-      * URL は公開アクセス可能である必要があります
+      * 1枚あたり最大20MB
+      * URL は一般公開アクセス可能である必要があります
     </ParamField>
 
     <ParamField body="video_url" type="string | string[]">
-      参考動画の URL、任意。最大3本。
+      参照動画の URL（任意）。最大3本。
 
-      アクション、カメラワーク、またはリズムの誘導に使用されます。
+      アクション、カメラワーク、リズムの誘導に使用されます。
 
       動画の要件：
 
       * MP4、MOV に対応
-      * 動画1本あたり最大 100MB
-      * 動画1本あたりの長さは15秒以内
-      * URL は公開アクセス可能である必要があります
+      * 1本あたり最大100MB
+      * 1本あたりの長さは15秒以内
+      * URL は一般公開アクセス可能である必要があります
     </ParamField>
 
     <ParamField body="audio_url" type="string | string[]">
-      参考音声の URL、任意。最大3本。
+      参照音声の URL（任意）。最大3本。
 
       音声の要件：
 
       * MP3、WAV に対応
-      * 音声1本あたり最大 20MB
-      * 音声1本あたりの長さは15秒以内
-      * URL は公開アクセス可能である必要があります
+      * 1ファイルあたり最大20MB
+      * 1ファイルあたりの長さは15秒以内
+      * URL は一般公開アクセス可能である必要があります
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  リクエスト元のタスク ID。
+  リクエスト側のタスク ID。
 
-  ユーザー定義のタスク識別子、必須。後からこの ID を使用してタスクのステータスと結果を照会できます。
+  ユーザー定義のタスク識別子（必須）。後からこの ID を使用してタスクのステータスや結果を照会できます。
 </ParamField>
 
 ## Response

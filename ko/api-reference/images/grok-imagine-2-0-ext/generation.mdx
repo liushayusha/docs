@@ -1,11 +1,11 @@
 ---
 title: 'Grok Imagine 2.0 Ext 이미지 생성'
 description: |
-    - 비동기 텍스트-이미지 생성, 제출 후 작업 조회 API를 통해 결과를 가져옵니다
-    - 7가지 일반적인 이미지 비율을 지원합니다
-    - 한 번에 1-12장의 이미지를 생성할 수 있으며, 수량은 허용 범위 내의 임의 정수일 수 있습니다
-    - 텍스트-이미지만 지원하며, 참고 이미지 입력은 지원하지 않습니다
-    - 제출된 prompt는 플랫폼의 민감한 단어 / 안전성 검사를 거치며, 규정을 위반하는 내용은 직접 거부됩니다
+    - 비동기 텍스트-이미지 생성, 제출 후 작업 조회 API를 통해 결과 확인
+    - 7가지 일반적인 이미지 비율 지원
+    - 1회 생성 시 1-12장의 이미지 생성을 지원하며, 수량은 범위 내 임의의 정수 사용 가능
+    - 텍스트-이미지 생성만 지원하며, 참조 이미지 입력 미지원
+    - 제출된 prompt는 플랫폼 민감어 / 안전 검토를 거치며, 규정 위반 콘텐츠는 즉시 거부됨
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -13,9 +13,9 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Authorizations
 
 <ParamField header="Authorization" type="string" required>
-  모든 인터페이스는 Bearer Token 인증이 필요합니다.
+  모든 API는 Bearer Token 인증이 필요합니다.
 
-  <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a>에 접속하여 API Key를 가져온 다음, 요청 헤더에 다음을 추가하세요:
+  <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a>에 접속하여 API Key를 발급받고, 요청 헤더에 추가하세요:
 
   ```text
   Authorization: Bearer YOUR_API_KEY
@@ -29,15 +29,15 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  모델 Parameters object.
+  모델 매개변수 객체입니다.
 
-  <Expandable title="params object Properties">
+  <Expandable title="params 객체 속성">
     <ParamField body="prompt" type="string" required>
-      이미지 생성 지시문. 중국어와 영어를 지원하며, 앞뒤 공백을 제거한 후 비어 있으면 안 됩니다.
+      이미지 생성 지시문입니다. 중국어와 영어를 지원하며, 앞뒤 공백을 제거한 후 비어 있을 수 없습니다.
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="1:1">
-      출력 이미지의 가로세로 비율입니다. 지원 항목:
+      출력 이미지 가로세로 비율입니다. 지원:
 
       * `1:1`(기본값)
       * `2:3` / `3:2`
@@ -45,99 +45,51 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       * `9:16` / `16:9`
 
       <Warning>
-        `auto`, 사용자 지정 픽셀 크기 또는 다른 비율은 지원하지 않습니다.
+        `auto`, 사용자 정의 픽셀 크기 또는 기타 비율은 지원하지 않습니다.
       </Warning>
     </ParamField>
 
     <ParamField body="output_n" type="integer" default="1">
-      출력 이미지 개수이며, 값 범위는 `1`에서 `12`입니다.
+      출력 이미지 수량으로, 값의 범위는 `1`부터 `12`까지입니다.
 
-      범위 내의 임의의 정수를 사용할 수 있습니다. 예를 들어 `3`, `5`, `7`은 사용할 수 있으며, `1`, `4`, `8`, `12`에만 제한되지 않습니다.
+      범위 내의 모든 정수를 사용할 수 있으며, 예를 들어 `3`, `5`, `7`과 같이 `1`, `4`, `8`, `12`에 국한되지 않습니다.
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  호출 측에서 정의한 task ID로, idempotent 제출과 결과 조회에 사용됩니다.
+  호출자 정의 작업 ID로, 멱등한 제출 및 결과 조회에 사용됩니다.
 
-  * 길이는 1-64자입니다.
-  * 문자, 숫자, 밑줄 및 하이픈만 지원합니다.
-  * 같은 API Key에서는 중복 사용이 불가능합니다.
+  * 길이는 1~64자
+  * 영문자, 숫자, 밑줄 및 하이픈만 지원
+  * 동일한 API Key에서 중복하여 사용할 수 없음
 </ParamField>
 
 <Warning>
-  이 모델은 text-to-image만 지원합니다. `image_url`, `resolution`, `quality`, `size` 또는 output format parameters를 전달하지 마세요.
+  이 모델은 텍스트-이미지 생성(Text-to-Image)만 지원합니다. `image_url`, `resolution`, `quality`, `size` 또는 출력 형식 매개변수를 전달하지 마세요.
 </Warning>
 
-## Query Results
+## Response
 
-After submission succeeds, call [Get Task Status](/en/api-reference/tasks/status) using the same `out_task_id` to query. Once the task is completed, the image results are located in `data.output`.
+<ResponseField name="out_task_id" type="string">
+  호출자 작업 ID로, 작업 상태 및 결과를 조회하는 데 사용할 수 있습니다.
+</ResponseField>
 
-<RequestExample>
-  ```bash cURL
-  curl --request POST \
-    --url https://aireiter.com/api/openapi/submit \
-    --header 'Authorization: Bearer <token>' \
-    --header 'Content-Type: application/json' \
-    --data '{
-      "model": "grok_imagine_2_0_ext",
-      "params": {
-        "prompt": "Red apples on a white ceramic plate, clean studio product photography",
-        "aspect_ratio": "1:1",
-        "output_n": 3
-      },
-      "out_task_id": "grok_image_2_ext_001"
-    }'
-  ```
+<ResponseField name="status" type="string">
+  초기 상태로, 일반적으로 `"pending"`입니다.
+</ResponseField>
 
-  ```python Python
-  import requests
+<ResponseField name="estimated_credits" type="number">
+  이번 작업의 예상 소모 크레딧입니다.
+</ResponseField>
 
-  response = requests.post(
-      "https://aireiter.com/api/openapi/submit",
-      headers={
-          "Authorization": "Bearer <token>",
-          "Content-Type": "application/json"
-      },
-      json={
-          "model": "grok_imagine_2_0_ext",
-          "params": {
-              "prompt": "A glass greenhouse in a wildflower meadow at sunrise, editorial photography style",
-              "aspect_ratio": "2:3",
-              "output_n": 3
-          },
-          "out_task_id": "grok_image_2_ext_python_001"
-      }
-  )
+<ResponseField name="created_at" type="string">
+  작업 생성 시간, ISO 8601 형식입니다.
+</ResponseField>
 
-  print(response.json())
-  ```
+## 查询结果
 
-  ```javascript JavaScript
-  const response = await fetch("https://aireiter.com/api/openapi/submit", {
-    method: "POST",
-    headers: {
-      Authorization: "Bearer <token>",
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model: "grok_imagine_2_0_ext",
-      params: {
-        prompt: "A futuristic city street in the rain at night, with neon light reflections",
-        aspect_ratio: "16:9",
-        output_n: 1
-      },
-      out_task_id: "grok_image_2_ext_js_001"
-    })
-  });
-
-  console.log(await response.json());
-  ```
-</RequestExample>
-
-## Query Results
-
-After submission succeeds, call [Get Task Status](/en/api-reference/tasks/status) and query using the same `out_task_id`. When the task is completed, the image results are located in `data.output`.
+제출 성공 후 [작업 상태 가져오기](/ko/api-reference/tasks/status)를 호출하여 동일한 `out_task_id`로 조회합니다. 작업이 완료되면 이미지 결과는 `data.output`에 위치합니다.
 
 <RequestExample>
   ```bash cURL
@@ -148,7 +100,7 @@ After submission succeeds, call [Get Task Status](/en/api-reference/tasks/status
     --data '{
       "model": "grok_imagine_2_0_ext",
       "params": {
-        "prompt": "Red apples on a white ceramic plate, clean studio product shot",
+        "prompt": "흰색 도자기 접시 위의 빨간 사과, 깔끔한 스튜디오 제품 사진",
         "aspect_ratio": "1:1",
         "output_n": 3
       },
@@ -164,7 +116,7 @@ After submission succeeds, call [Get Task Status](/en/api-reference/tasks/status
   payload = {
       "model": "grok_imagine_2_0_ext",
       "params": {
-          "prompt": "Red apples on a white ceramic plate, clean studio product shot",
+          "prompt": "흰색 도자기 접시 위의 빨간 사과, 깔끔한 스튜디오 제품 사진",
           "aspect_ratio": "1:1",
           "output_n": 3
       },
@@ -187,7 +139,7 @@ After submission succeeds, call [Get Task Status](/en/api-reference/tasks/status
   const payload = {
     model: "grok_imagine_2_0_ext",
     params: {
-      prompt: "Red apples on a white ceramic plate, clean studio product shot",
+      prompt: "흰색 도자기 접시 위의 빨간 사과, 깔끔한 스튜디오 제품 사진",
       aspect_ratio: "1:1",
       output_n: 3
     },
@@ -226,7 +178,7 @@ After submission succeeds, call [Get Task Status](/en/api-reference/tasks/status
       payload := map[string]interface{}{
           "model": "grok_imagine_2_0_ext",
           "params": map[string]interface{}{
-              "prompt": "Red apples on a white ceramic plate, clean studio product shot",
+              "prompt": "흰색 도자기 접시 위의 빨간 사과, 깔끔한 스튜디오 제품 사진",
               "aspect_ratio": "1:1",
               "output_n": 3,
           },
@@ -265,7 +217,7 @@ After submission succeeds, call [Get Task Status](/en/api-reference/tasks/status
               {
                 "model": "grok_imagine_2_0_ext",
                 "params": {
-                  "prompt": "Red apples on a white ceramic plate, clean studio product shot",
+                  "prompt": "흰색 도자기 접시 위의 빨간 사과, 깔끔한 스튜디오 제품 사진",
                   "aspect_ratio": "1:1",
                   "output_n": 3
                 },
@@ -297,7 +249,7 @@ After submission succeeds, call [Get Task Status](/en/api-reference/tasks/status
   $payload = [
       "model" => "grok_imagine_2_0_ext",
       "params" => [
-          "prompt" => "Red apples on a white ceramic plate, clean studio product shot",
+          "prompt" => "흰색 도자기 접시 위의 빨간 사과, 깔끔한 스튜디오 제품 사진",
           "aspect_ratio" => "1:1",
           "output_n" => 3
       ],
@@ -330,7 +282,7 @@ After submission succeeds, call [Get Task Status](/en/api-reference/tasks/status
   payload = {
     model: "grok_imagine_2_0_ext",
     params: {
-      prompt: "Red apples on a white ceramic plate, clean studio product shot",
+      prompt: "흰색 도자기 접시 위의 빨간 사과, 깔끔한 스튜디오 제품 사진",
       aspect_ratio: "1:1",
       output_n: 3
     },
@@ -356,7 +308,7 @@ After submission succeeds, call [Get Task Status](/en/api-reference/tasks/status
   let payload: [String: Any] = [
       "model": "grok_imagine_2_0_ext",
       "params": [
-          "prompt": "Red apples on a white ceramic plate, clean studio product shot",
+          "prompt": "흰 세라믹 접시 위의 빨간 사과, 깔끔한 스튜디오 제품 사진",
           "aspect_ratio": "1:1",
           "output_n": 3
       ],
@@ -399,7 +351,7 @@ After submission succeeds, call [Get Task Status](/en/api-reference/tasks/status
                 {
                     ""model"": ""grok_imagine_2_0_ext"",
                     ""params"": {
-                        ""prompt"": ""Red apples on a white ceramic plate, clean studio product shot"",
+                        ""prompt"": ""흰 세라믹 접시 위의 빨간 사과, 깔끔한 스튜디오 제품 사진"",
                         ""aspect_ratio"": ""1:1"",
                         ""output_n"": 3
                     },
@@ -431,7 +383,7 @@ After submission succeeds, call [Get Task Status](/en/api-reference/tasks/status
 
       if(curl) {
           const char *url = "https://aireiter.com/api/openapi/submit";
-          const char *payload = "{\"model\":\"grok_imagine_2_0_ext\",\"params\":{\"prompt\":\"Red apples on a white ceramic plate, clean studio product shot\",\"aspect_ratio\":\"1:1\",\"output_n\":3},\"out_task_id\":\"grok_image_2_ext_001\"}";
+          const char *payload = "{\"model\":\"grok_imagine_2_0_ext\",\"params\":{\"prompt\":\"흰 세라믹 접시 위의 빨간 사과, 깔끔한 스튜디오 제품 사진\",\"aspect_ratio\":\"1:1\",\"output_n\":3},\"out_task_id\":\"grok_image_2_ext_001\"}";
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
@@ -467,7 +419,7 @@ After submission succeeds, call [Get Task Status](/en/api-reference/tasks/status
           NSDictionary *payload = @{
               @"model": @"grok_imagine_2_0_ext",
               @"params": @{
-                  @"prompt": @"Red apples on a white ceramic plate, clean studio product shot",
+                  @"prompt": @"흰 세라믹 접시 위의 빨간 사과, 깔끔한 스튜디오 제품 사진",
                   @"aspect_ratio": @"1:1",
                   @"output_n": @3
               },
@@ -515,7 +467,7 @@ After submission succeeds, call [Get Task Status](/en/api-reference/tasks/status
   let payload = {|{
     "model": "grok_imagine_2_0_ext",
     "params": {
-      "prompt": "Red apples on a white ceramic plate, clean studio product shot",
+      "prompt": "하얀 도자기 접시 위의 빨간 사과, 깔끔한 스튜디오 제품 사진",
       "aspect_ratio": "1:1",
       "output_n": 3
     },
@@ -546,7 +498,7 @@ After submission succeeds, call [Get Task Status](/en/api-reference/tasks/status
     final payload = {
           "model": "grok_imagine_2_0_ext",
           "params": {
-              "prompt": "Red apples on a white ceramic plate, clean studio product shot",
+              "prompt": "하얀 도자기 접시 위의 빨간 사과, 깔끔한 스튜디오 제품 사진",
               "aspect_ratio": "1:1",
               "output_n": 3
           },
@@ -575,7 +527,7 @@ After submission succeeds, call [Get Task Status](/en/api-reference/tasks/status
   payload <- list(
     model = "grok_imagine_2_0_ext",
     params = list(
-      prompt = "Red apples on a white ceramic plate, clean studio product shot",
+      prompt = "하얀 도자기 접시 위의 빨간 사과, 깔끔한 스튜디오 제품 사진",
       aspect_ratio = "1:1",
       output_n = 3
     ),
@@ -613,7 +565,7 @@ After submission succeeds, call [Get Task Status](/en/api-reference/tasks/status
   ```json 400
     {
         "statusCode": 400,
-        "message": "Invalid request parameters",
+        "message": "요청 매개변수가 유효하지 않습니다",
         "ok": false
     }
   ```
@@ -621,7 +573,7 @@ After submission succeeds, call [Get Task Status](/en/api-reference/tasks/status
   {
     "error": {
       "code": 401,
-      "message": "Authentication failed, please check your API key"
+      "message": "인증에 실패했습니다. API 키를 확인해 주세요"
     }
   }
   ```
@@ -629,7 +581,7 @@ After submission succeeds, call [Get Task Status](/en/api-reference/tasks/status
   {
     "error": {
       "code": 433,
-      "message": "Insufficient account balance, please recharge and try again"
+      "message": "계정 잔액이 부족합니다. 충전 후 다시 시도해 주세요"
     }
   }
   ```
@@ -638,7 +590,7 @@ After submission succeeds, call [Get Task Status](/en/api-reference/tasks/status
   {
     "error": {
       "code": 500,
-      "message": "Internal server error, please try again later"
+      "message": "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해 주세요"
     }
   }
   ```

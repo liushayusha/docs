@@ -1,16 +1,16 @@
 ---
 title: 'MiniMax H3 Turbo 비디오 생성'
 description: |
-  - MiniMax H3 Turbo, MiniMax H3 가속 버전
-  - 비동기 처리 모드, 후속 조회를 위한 태스크 ID 반환
+  - MiniMax H3 Turbo, 가속 버전 MiniMax H3
+  - 비동기 처리 모드, 후속 조회를 위한 작업 ID 반환
   - 텍스트 투 비디오 및 최대 8장의 참조 이미지, 3개의 참조 비디오, 3개의 참조 오디오 지원
-  - 768P 출력 지원, 비디오 길이 6-30초, 6가지 화면비, 기본 네이티브 오디오 트랙 포함
+  - 768P 출력 지원, 비디오 길이 6-15초, 6가지 화면비, 기본적으로 네이티브 오디오 트랙 포함
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 <Note>
-MiniMax H3 Turbo의 AIReiter 내 모델 이름은 `minimax_h3_turbo`입니다. 이 모델은 `minimax_h3`와 다릅니다: 해상도는 768P로 고정되어 있으며(2K 미지원), 길이는 6-30초이고, 첫 프레임 및 마지막 프레임을 지원하지 않습니다.
+MiniMax H3 Turbo의 AIReiter 내 모델명은 `minimax_h3_turbo`입니다. 해당 모델은 `minimax_h3`과 다릅니다: 해상도가 768P로 고정되어 있으며(2K 미지원), 길이는 6-15초이고, 첫 프레임 및 마지막 프레임을 지원하지 않습니다.
 </Note>
 
 ## Authorizations
@@ -38,25 +38,25 @@ MiniMax H3 Turbo의 AIReiter 내 모델 이름은 `minimax_h3_turbo`입니다. �
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  모델 파라미터 객체.
+  모델 파라미터 객체입니다.
 
   <Expandable title="params 객체 속성">
     <ParamField body="prompt" type="string" required>
-      비디오 생성을 위한 텍스트 설명.
+      비디오 생성을 위한 텍스트 설명입니다.
 
-      주체, 장면, 카메라 워크, 동작, 스타일, 조명, 리듬 등의 내용을 묘사할 수 있습니다.
+      피사체, 장면, 카메라 무빙, 동작, 스타일, 조명, 템포 등의 내용을 설명할 수 있습니다.
 
-      참조 에셋 사용 시, 프롬프트에서 「이미지1 / 비디오1 / 오디오1」 순서로 업로드된 콘텐츠를 지정할 수 있습니다.
+      참조 소재를 사용할 경우, 프롬프트에서 순서대로 「이미지1 / 비디오1 / 오디오1」을 사용하여 업로드된 콘텐츠를 참조할 수 있습니다.
     </ParamField>
 
     <ParamField body="video_length" type="number" default="6">
-      생성할 비디오 길이(단위: 초).
+      생성 비디오 길이(단위: 초).
 
-      지원되는 정수: `6`부터 `30`까지.
+      지원 정수: `6` ~ `15`.
     </ParamField>
 
     <ParamField body="resolution" type="string" default="768p">
-      출력 해상도, `768p`로 고정되며 생략 가능합니다.
+      출력 해상도이며 `768p`로 고정되어 있습니다. 전달하지 않아도 됩니다.
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="16:9">
@@ -75,7 +75,7 @@ MiniMax H3 Turbo의 AIReiter 내 모델 이름은 `minimax_h3_turbo`입니다. �
     <ParamField body="image_url" type="string | string[]">
       참조 이미지 URL, 선택 사항. 최대 8장.
 
-      이미지를 전달하지 않으면 텍스트 투 비디오로 동작하며, 이미지를 전달하면 주체, 스타일 또는 구도를 가이드하는 참조 이미지로 사용됩니다.
+      이미지를 전달하지 않으면 텍스트 투 비디오로 동작하며, 이미지를 전달하면 피사체, 스타일 또는 구도를 유도하는 참조 이미지로 사용됩니다.
 
       이미지 요구 사항:
 
@@ -87,13 +87,13 @@ MiniMax H3 Turbo의 AIReiter 내 모델 이름은 `minimax_h3_turbo`입니다. �
     <ParamField body="video_url" type="string | string[]">
       참조 비디오 URL, 선택 사항. 최대 3개.
 
-      동작, 카메라 워크 또는 리듬을 가이드하는 데 사용됩니다.
+      동작, 카메라 무빙 또는 템포를 유도하는 데 사용됩니다.
 
       비디오 요구 사항:
 
       * MP4, MOV 지원
       * 단일 비디오 최대 100MB
-      * 단일 비디오 재생 시간 최대 15초
+      * 단일 비디오 길이는 15초를 초과할 수 없음
       * URL은 공개적으로 접근 가능해야 함
     </ParamField>
 
@@ -104,7 +104,7 @@ MiniMax H3 Turbo의 AIReiter 내 모델 이름은 `minimax_h3_turbo`입니다. �
 
       * MP3, WAV 지원
       * 단일 오디오 최대 20MB
-      * 단일 오디오 재생 시간 최대 15초
+      * 단일 오디오 길이는 15초를 초과할 수 없음
       * URL은 공개적으로 접근 가능해야 함
     </ParamField>
   </Expandable>
@@ -113,7 +113,7 @@ MiniMax H3 Turbo의 AIReiter 내 모델 이름은 `minimax_h3_turbo`입니다. �
 <ParamField body="out_task_id" type="string" required>
   요청자 작업 ID.
 
-  사용자 지정 작업 식별자, 필수. 이후 해당 ID를 사용하여 작업 상태와 결과를 조회할 수 있습니다.
+  사용자 정의 작업 식별자이며 필수 항목입니다. 이후 이 ID를 사용하여 작업 상태 및 결과를 조회할 수 있습니다.
 </ParamField>
 
 ## Response

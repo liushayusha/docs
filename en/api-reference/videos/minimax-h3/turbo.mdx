@@ -1,16 +1,16 @@
 ---
 title: 'MiniMax H3 Turbo Video Generation'
 description: |
-  - MiniMax H3 Turbo, an accelerated version of MiniMax H3
-  - Asynchronous processing mode, returns a task ID for subsequent queries
-  - Supports text-to-video, as well as up to 8 reference images, 3 reference videos, and 3 reference audio clips
-  - Supports 768P output, video duration of 6-30 seconds, 6 aspect ratios, with native audio track by default
+  - MiniMax H3 Turbo, accelerated version of MiniMax H3
+  - Asynchronous processing mode, returns task ID for subsequent queries
+  - Supports text-to-video, and up to 8 reference images, 3 reference videos, and 3 reference audio tracks
+  - Supports 768P output, video duration 6-15 seconds, 6 aspect ratios, with native audio track by default
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 <Note>
-The model name for MiniMax H3 Turbo in AIReiter is `minimax_h3_turbo`. This model differs from `minimax_h3`: the resolution is fixed at 768P (2K is not supported), the duration is 6-30 seconds, and first and last frames are not supported.
+The model name for MiniMax H3 Turbo in AIReiter is `minimax_h3_turbo`. This model differs from `minimax_h3`: the resolution is fixed at 768P (2K is not supported), the duration is 6-15 seconds, and first and last frames are not supported.
 </Note>
 
 ## Authorizations
@@ -32,7 +32,7 @@ The model name for MiniMax H3 Turbo in AIReiter is `minimax_h3_turbo`. This mode
 ## Body
 
 <ParamField body="model" type="string" required>
-  Model name, fixed value:
+  Model name, fixed to:
 
   * `minimax_h3_turbo`
 </ParamField>
@@ -44,15 +44,15 @@ The model name for MiniMax H3 Turbo in AIReiter is `minimax_h3_turbo`. This mode
     <ParamField body="prompt" type="string" required>
       Text description for video generation.
 
-      Can describe subjects, scenes, camera movements, actions, styles, lighting, pacing, etc.
+      Can describe subjects, scenes, camera movements, actions, styles, lighting, pacing, and more.
 
-      When using reference materials, you can use "Image 1 / Video 1 / Audio 1" in the prompt to refer to uploaded content in order.
+      When using reference assets, you can use "Image 1 / Video 1 / Audio 1" in the prompt to refer to uploaded content in sequential order.
     </ParamField>
 
     <ParamField body="video_length" type="number" default="6">
-      Generated video duration in seconds.
+      Generated video duration, in seconds.
 
-      Supports integers: `6` to `30`.
+      Supported integers: `6` to `15`.
     </ParamField>
 
     <ParamField body="resolution" type="string" default="768p">
@@ -69,51 +69,51 @@ The model name for MiniMax H3 Turbo in AIReiter is `minimax_h3_turbo`. This mode
       * `1:1` - Square
       * `4:3` - Standard landscape
       * `3:4` - Standard portrait
-      * `21:9` - Ultra-wide
+      * `21:9` - Ultra-widescreen
     </ParamField>
 
     <ParamField body="image_url" type="string | string[]">
-      Reference image URL, optional. Up to 8 images.
+      Reference image URL, optional. Maximum of 8 images.
 
-      If no image is provided, it generates video from text; when images are provided, they serve as reference images to guide subjects, styles, or composition.
+      Text-to-video mode when no images are provided; when images are provided, they serve as reference images to guide the subject, style, or composition.
 
       Image requirements:
 
       * Supports JPEG, PNG, WEBP
-      * Maximum 20MB per image
+      * Maximum 20 MB per image
       * URL must be publicly accessible
     </ParamField>
 
     <ParamField body="video_url" type="string | string[]">
-      Reference video URL, optional. Up to 3 videos.
+      Reference video URL, optional. Maximum of 3 videos.
 
-      Used to guide actions, camera movements, or pacing.
+      Used to guide action, camera movement, or pacing.
 
       Video requirements:
 
       * Supports MP4, MOV
-      * Maximum 100MB per video
-      * Single video duration cannot exceed 15 seconds
+      * Maximum 100 MB per video
+      * Single video duration must not exceed 15 seconds
       * URL must be publicly accessible
     </ParamField>
 
     <ParamField body="audio_url" type="string | string[]">
-      Reference audio URL, optional. Up to 3 tracks.
+      Reference audio URL, optional. Maximum of 3 audio clips.
 
       Audio requirements:
 
       * Supports MP3, WAV
-      * Maximum 20MB per audio
-      * Single audio duration cannot exceed 15 seconds
+      * Maximum 20 MB per audio file
+      * Single audio duration must not exceed 15 seconds
       * URL must be publicly accessible
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  Initiator task ID.
+  Caller task ID.
 
-  User-defined task identifier, required. Can be used later to query task status and results.
+  User-defined task identifier, required. Can be used subsequently to query task status and results.
 </ParamField>
 
 ## Response
