@@ -1,0 +1,524 @@
+---
+title: 'Kling 4.0 Video Generation'
+description: |
+  - Kuaishou Kling 4.0, asynchronous processing mode, returns a task ID for subsequent queries
+  - One model with four modes: Text-to-Video/Reference, Start & End Frames, Video Editing, and Video Extension
+  - Supports 720p / 1080p, video duration of 3-30 seconds, always with a stereo audio track
+  - Reference mode can mix up to 10 images, 5 videos, and 3 audio tracks
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+<Note>
+The model name for Kling 4.0 in AIReiter is `kling_v4`. Use `type` to select the generation mode. Different modes accept different assets, see [Mode Parameter Comparison](#模式参数对照) below.
+
+The generated video always includes a stereo audio track, which cannot be turned off. 4K, `negative_prompt`, and `seed` are not supported.
+</Note>
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  All endpoints require authentication using a Bearer Token.
+
+  Get API Key:
+
+  Visit the <a href={apiKeyUrl} target="_blank">API Key Management page</a> to get your API Key.
+
+  When using, add it to the request header:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  Model name, fixed to `kling_v4`.
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  Model parameter object.
+
+  <Expandable title="params Object Properties">
+    <ParamField body="prompt" type="string" required>
+      Text description for video generation, supporting Chinese and English. Required.
+
+      * `reference` - Can use `@Image1`, `@Video1`, and `@Audio1` to refer to assets, numbered starting from 1 in the order of the `image_url`, `video_url`, and `audio_url` arrays respectively
+      * `edit` - The original video is `@Video1`, reference images are `@Image1`, `@Image2`, etc. Clearly state what to modify
+      * `extend` - Describe what happens next
+    </ParamField>
+
+    <ParamField body="type" type="string" default="reference">
+      Generation mode:
+
+      * `reference` - Text-to-video / Reference, default value. Passing only a prompt generates text-to-video; reference images, reference videos, and reference audio can also be added
+      * `frame` - First and last frames. The first frame is required, with optional intermediate frames and last frame
+      * `edit` - Video editing. Modifies an original video based on the prompt
+      * `extend` - Video extension. Continues generation from the end of the original video
+    </ParamField>
+
+    <ParamField body="video_length" type="integer" default="5">
+      Video duration, in seconds. Supports integers from `3` to `30`.
+
+      * `edit` - Duration of the output video
+      * `extend` - Duration of the added segment; the returned video will be the original video plus the added segment
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="720p">
+      Output resolution:
+
+      * `720p` - Default value
+      * `1080p`
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="auto">
+      Video aspect ratio, only effective in `reference` mode:
+
+      * `auto` - Default value. Follows the assets when reference assets are provided; 16:9 for pure text
+      * `16:9` - Landscape
+      * `9:16` - Portrait
+      * `1:1` - Square
+      * `21:9` - Ultrawide
+
+      `frame` follows the aspect ratio of the first frame, while `edit` and `extend` inherit the aspect ratio of the original video. This field is ignored in these three modes.
+    </ParamField>
+
+    <ParamField body="image_url" type="string | string[]">
+      Image URL, must be directly accessible via the public network. Meaning varies by mode:
+
+      * `reference` - Reference images, up to 10 images
+      * `frame` - First frame, required. Only the first image is used; please use `end_image_url` for the last frame
+      * `edit` - Reference images, up to 10 images, used to guide editing effects
+      * `extend` - Not used
+
+      Image requirements: Short edge no less than 300px, each image not exceeding 20 MB.
+    </ParamField>
+
+    <ParamField body="keyframe_url" type="string[]">
+      Intermediate frame image URLs, only valid in `frame` mode. Up to 8 images, appearing between the first frame and last frame in array order.
+
+      <Warning>
+        The total number of first frames, intermediate frames, and last frames cannot exceed 10 images, and cannot exceed `video_length` + 1. For example, a 3-second video allows at most 4 images.
+      </Warning>
+    </ParamField>
+
+    <ParamField body="end_image_url" type="string">
+      Last frame image URL:
+
+      * `frame` - Last frame, optional
+      * `extend` - Target last frame, optional. The added segment will end with this image
+    </ParamField>
+
+    <ParamField body="video_url" type="string | string[]">
+      Video URL, must be directly accessible via the public network. Formats: MP4, MOV, each not exceeding 200 MB.
+
+      * `reference` - Reference videos, up to 5 segments, totaling no more than 30 seconds
+      * `edit` - Original video, required, exactly 1 segment, duration 3-30 seconds
+      * `extend` - Original video, required, exactly 1 segment, up to 30 seconds
+      * `frame` - Not used
+    </ParamField>
+
+    <ParamField body="audio_url" type="string | string[]">
+      Reference audio URL, only valid in `reference` mode. Up to 3 segments, formats: MP3, WAV, 5-30 seconds each, each not exceeding 20 MB.
+
+      <Warning>
+        In `reference` mode, the total count of reference images, reference videos, and reference audio cannot exceed 15.
+      </Warning>
+    </ParamField>
+
+    <ParamField body="audio_setting" type="string" default="origin">
+      Audio processing method for the original video, only valid in `edit` mode:
+
+      * `origin` - Retain original video audio, default value
+      * `auto` - Regenerate audio
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  Caller task ID.
+
+  User-defined task identifier, required. Supports only letters, digits, underscores, and hyphens, with a length of 1-64 characters. This ID can be used later to query task status and results.
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  Initiator task ID, which can be used to query results.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Initial status, usually `"pending"`.
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  Creation time, ISO format.
+</ResponseField>
+
+## Query Task
+
+Kling 4.0 is an asynchronous video generation model. After submitting a task, please use `out_task_id` to query the task status. You can also refer to [Get Task Status](/en/api-reference/tasks/status).
+
+<ParamField body="out_task_id" type="string" required>
+  The originator task ID passed when submitting the task.
+</ParamField>
+
+```bash
+curl --request POST \
+  --url https://aireiter.com/api/openapi/query \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "out_task_id": "kling_v4_t2v_123456"
+  }'
+```
+
+Once the query succeeds and is completed, the `output` array in the response will contain the generated video, with elements containing the `video` field.
+
+Generation time varies depending on the mode and duration: a 1080p 5-second text-to-video task takes approximately 4.5 minutes in actual testing. The longer the duration and the more assets involved, the longer it will take. Please continue polling and do not resubmit.
+
+## 模式参数对照
+
+| `type` | Required | Optional | Duration |
+|---|---|---|---|
+| `reference` | `prompt` | `image_url` (≤10), `video_url` (≤5, total ≤30 seconds), `audio_url` (≤3), total ≤15; `aspect_ratio` | `video_length` 3-30 seconds |
+| `frame` | `prompt`, first frame `image_url` | `keyframe_url` (≤8), `end_image_url` | `video_length` 3-30 seconds |
+| `edit` | `prompt`, original video `video_url` (3-30 seconds) | `image_url` (≤10), `audio_setting` | Output duration is `video_length` |
+| `extend` | `prompt`, original video `video_url` (≤30 seconds) | `end_image_url` | Adds `video_length` seconds, returns original video + new clip |
+
+<Warning>
+When `frame` mode is missing the first frame, or `edit` / `extend` mode is missing the original video, the task will end in failure. Please provide all required assets according to the table above.
+</Warning>
+
+## 使用说明
+
+* When passing only prompts, it operates as text-to-video; when any reference material is provided, it is processed as reference-based generation. When `aspect_ratio` is set to `auto`, it follows the aspect ratio of the reference material.
+* Video extension returns a single complete file: the original video comes first, followed by the newly added segment. In actual testing, extending a 5-second original video by 5 seconds returns a 10.0-second video with the same resolution as the original video and no noticeable seam at the transition.
+* Video extension preserves the audio of the original video portion and automatically generates audio for the newly added segment; if the original video has no audio, that portion remains silent.
+* Video editing preserves the original video audio by default; when new audio is required, pass `audio_setting: "auto"`.
+
+## Request Examples
+
+<RequestExample>
+  ```bash cURL (Text-to-Video)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "kling_v4",
+      "params": {
+        "prompt": "At dusk, a paper boat drifts down a rain-soaked street, neon reflections rippling across the water surface, slow tracking shot, cinematic quality",
+        "type": "reference",
+        "resolution": "1080p",
+        "aspect_ratio": "16:9",
+        "video_length": 5
+      },
+      "out_task_id": "kling_v4_t2v_123456"
+    }'
+  ```
+
+  ```bash cURL (Reference Generation)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "kling_v4",
+      "params": {
+        "prompt": "The girl in @Image1 wearing the jacket in @Image2 walks past the street corner following the camera movement in @Video1, background music refers to @Audio1",
+        "type": "reference",
+        "image_url": [
+          "https://example.com/person.png",
+          "https://example.com/jacket.png"
+        ],
+        "video_url": ["https://example.com/camera-move.mp4"],
+        "audio_url": ["https://example.com/bgm.mp3"],
+        "aspect_ratio": "auto",
+        "resolution": "720p",
+        "video_length": 8
+      },
+      "out_task_id": "kling_v4_ref_123456"
+    }'
+  ```
+
+  ```bash cURL (First and Last Frames)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "kling_v4",
+      "params": {
+        "prompt": "The camera slowly pushes in from the morning city skyline to a roadside café",
+        "type": "frame",
+        "image_url": "https://example.com/first-frame.png",
+        "keyframe_url": ["https://example.com/middle-frame.png"],
+        "end_image_url": "https://example.com/last-frame.png",
+        "resolution": "720p",
+        "video_length": 10
+      },
+      "out_task_id": "kling_v4_frame_123456"
+    }'
+  ```
+
+  ```bash cURL (Video Editing)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "kling_v4",
+      "params": {
+        "prompt": "Replace the person's jacket in @Video1 with the red trench coat in @Image1, keeping everything else unchanged",
+        "type": "edit",
+        "video_url": "https://example.com/source.mp4",
+        "image_url": ["https://example.com/red-coat.png"],
+        "audio_setting": "origin",
+        "resolution": "720p",
+        "video_length": 5
+      },
+      "out_task_id": "kling_v4_edit_123456"
+    }'
+  ```
+
+  ```bash cURL (Video Extension)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "kling_v4",
+      "params": {
+        "prompt": "A passerby enters the frame, bending down to pick up the paper boat from the water",
+        "type": "extend",
+        "video_url": "https://example.com/paper-boat.mp4",
+        "resolution": "720p",
+        "video_length": 5
+      },
+      "out_task_id": "kling_v4_extend_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "kling_v4",
+      "params": {
+          "prompt": "At dusk, a paper boat drifts down a rain-soaked street, neon reflections rippling across the water surface, slow tracking shot, cinematic quality",
+          "type": "reference",
+          "resolution": "1080p",
+          "aspect_ratio": "16:9",
+          "video_length": 5
+      },
+      "out_task_id": "kling_v4_t2v_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "kling_v4",
+    params: {
+      prompt: "At dusk, a paper boat drifts down a rain-soaked street, neon reflections rippling across the water surface, slow tracking shot, cinematic quality",
+      type: "reference",
+      resolution: "1080p",
+      aspect_ratio: "16:9",
+      video_length: 5
+    },
+    out_task_id: "kling_v4_t2v_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "kling_v4",
+          "params": map[string]interface{}{
+              "prompt":       "At dusk, a paper boat drifts down a rain-soaked street, neon reflections rippling across the water surface, slow tracking shot, cinematic quality",
+              "type":         "reference",
+              "resolution":   "1080p",
+              "aspect_ratio": "16:9",
+              "video_length": 5,
+          },
+          "out_task_id": "kling_v4_t2v_123456",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/openapi/submit";
+
+          String payload = """
+              {
+                "model": "kling_v4",
+                "params": {
+                  "prompt": "At dusk, a paper boat drifts down a rain-soaked street, neon reflections rippling across the water surface, slow tracking shot, cinematic quality",
+                  "type": "reference",
+                  "resolution": "1080p",
+                  "aspect_ratio": "16:9",
+                  "video_length": 5
+                },
+                "out_task_id": "kling_v4_t2v_123456"
+              }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = [
+      "model" => "kling_v4",
+      "params" => [
+          "prompt" => "At dusk, a paper boat drifts down a rain-soaked street, neon reflections rippling across the water surface, slow tracking shot, cinematic quality",
+          "type" => "reference",
+          "resolution" => "1080p",
+          "aspect_ratio" => "16:9",
+          "video_length" => 5
+      ],
+      "out_task_id" => "kling_v4_t2v_123456"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "out_task_id": "kling_v4_t2v_123456",
+        "status": "pending",
+        "created_at": "2026-11-04T09:02:00.000Z"
+    }
+}
+  ```
+
+  ```json 400
+    {
+        "statusCode": 400,
+        "message": "Invalid request parameters",
+        "ok": false
+    }
+  ```
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "Authentication failed, please check your API key"
+    }
+  }
+  ```
+```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "Insufficient account balance, please recharge and try again"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "Internal server error, please try again later"
+    }
+  }
+  ```
+</ResponseExample>

@@ -1,0 +1,524 @@
+---
+title: 'Kling 4.0 비디오 생성'
+description: |
+  - 콰이쇼우 Kling 4.0, 비동기 처리 모드, 후속 조회를 위한 태스크 ID 반환
+  - 하나의 모델에 4가지 모드: 텍스트 생성/참조, 시작/종료 프레임, 비디오 편집, 비디오 확장
+  - 720p / 1080p 지원, 비디오 길이 3-30초, 항상 스테레오 오디오 트랙 포함
+  - 참조 모드에서 최대 10장의 이미지, 5개의 비디오, 3개의 오디오 혼합 가능
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+<Note>
+AIReiter에서 Kling 4.0의 모델 이름은 `kling_v4`입니다. `type`을 사용하여 생성 모드를 선택하며, 모드에 따라 지원하는 에셋이 다릅니다. 아래 [모드 파라미터 비교](#模式参数对照)를 참고하세요.
+
+최종 영상에는 항상 스테레오 오디오 트랙이 포함되며 끌 수 없습니다. 4K, `negative_prompt`, `seed`는 지원하지 않습니다.
+</Note>
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  모든 API는 Bearer Token을 통한 인증이 필요합니다.
+
+  API Key 발급:
+
+  <a href={apiKeyUrl} target="_blank">API Key 관리 페이지</a>에 접속하여 API Key를 발급받으세요.
+
+  사용 시 요청 헤더에 추가:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  모델 이름으로, `kling_v4`로 고정됩니다.
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  모델 파라미터 객체입니다.
+
+  <Expandable title="params 객체 속성">
+    <ParamField body="prompt" type="string" required>
+      동영상 생성을 위한 텍스트 설명으로, 중국어와 영어를 지원합니다. 필수 항목입니다.
+
+      * `reference` - `@Image1`, `@Video1`, `@Audio1`을 사용하여 소스를 지정할 수 있으며, 번호는 각각 `image_url`, `video_url`, `audio_url` 배열 순서에 따라 1부터 시작합니다.
+      * `edit` - 원본 동영상은 `@Video1`, 참조 이미지는 `@Image1`, `@Image2` 등이며, 수정할 내용을 명확하게 작성합니다.
+      * `extend` - 다음에 일어날 상황을 설명합니다.
+    </ParamField>
+
+    <ParamField body="type" type="string" default="reference">
+      생성 모드:
+
+      * `reference` - 텍스트 투 비디오/참조, 기본값입니다. 프롬프트만 전달하면 텍스트 투 비디오가 되며, 참조 이미지, 참조 동영상, 참조 오디오를 추가할 수도 있습니다.
+      * `frame` - 시작 및 종료 프레임. 시작 프레임은 필수이며, 중간 프레임과 종료 프레임을 추가할 수 있습니다.
+      * `edit` - 동영상 편집. 프롬프트에 따라 원본 동영상을 수정합니다.
+      * `extend` - 동영상 이어붙이기. 원본 동영상의 끝에서부터 계속 이어서 생성합니다.
+    </ParamField>
+
+    <ParamField body="video_length" type="integer" default="5">
+      동영상 길이(단위: 초)입니다. 정수 `3`부터 `30`까지 지원합니다.
+
+      * `edit` - 출력 동영상의 길이
+      * `extend` - 새로 추가되는 구간의 길이이며, 반환되는 동영상은 원본 동영상에 새 구간이 추가된 형태입니다.
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="720p">
+      출력 해상도:
+
+      * `720p` - 기본값
+      * `1080p`
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="auto">
+      동영상 화면 비율로, `reference` 모드에서만 적용됩니다:
+
+      * `auto` - 기본값. 참조 소스가 있는 경우 소스를 따르며, 순수 텍스트인 경우 16:9가 됩니다.
+      * `16:9` - 가로 화면
+      * `9:16` - 세로 화면
+      * `1:1` - 정사각형
+      * `21:9` - 울트라 와이드 화면
+
+      `frame`은 시작 프레임 비율을 따르고, `edit`과 `extend`는 원본 동영상 비율을 유지하므로, 이 세 가지 모드에서는 해당 필드가 무시됩니다.
+    </ParamField>
+
+    <ParamField body="image_url" type="string | string[]">
+      이미지 URL로, 공용 네트워크에서 직접 접근할 수 있어야 합니다. 모드에 따라 의미가 달라집니다:
+
+      * `reference` - 참조 이미지, 최대 10장
+      * `frame` - 시작 프레임, 필수 항목입니다. 첫 번째 이미지만 사용되며, 종료 프레임은 `end_image_url`을 사용하세요.
+      * `edit` - 참조 이미지, 최대 10장으로 편집 효과를 가이드하는 데 사용됩니다.
+      * `extend` - 사용 안 함
+
+      이미지 요구 사항: 짧은 변이 300px 이상이어야 하며, 단일 파일당 20MB를 초과할 수 없습니다.
+    </ParamField>
+
+    <ParamField body="keyframe_url" type="string[]">
+      중간 프레임 이미지 URL로, `frame` 모드에서만 유효합니다. 최대 8장까지 가능하며, 배열 순서대로 시작 프레임과 종료 프레임 사이에 나타납니다.
+
+      <Warning>
+        시작 프레임, 중간 프레임, 종료 프레임을 합쳐 최대 10장이며, `video_length` + 1을 초과할 수 없습니다. 예를 들어 3초 동영상은 최대 4장까지 가능합니다.
+      </Warning>
+    </ParamField>
+
+    <ParamField body="end_image_url" type="string">
+      종료 프레임 이미지 URL:
+
+      * `frame` - 종료 프레임, 선택 사항
+      * `extend` - 목표 종료 프레임, 선택 사항. 새로 추가되는 구간은 이 이미지를 엔딩 화면으로 사용합니다.
+    </ParamField>
+
+    <ParamField body="video_url" type="string | string[]">
+      동영상 URL로, 공용 네트워크에서 직접 접근할 수 있어야 합니다. 형식은 MP4, MOV를 지원하며 단일 파일당 200MB를 초과할 수 없습니다.
+
+      * `reference` - 참조 동영상, 최대 5개 구간, 총합 30초 이하
+      * `edit` - 원본 동영상, 필수 항목, 정확히 1개 구간, 길이 3-30초
+      * `extend` - 원본 동영상, 필수 항목, 정확히 1개 구간, 최대 30초
+      * `frame` - 사용 안 함
+    </ParamField>
+
+    <ParamField body="audio_url" type="string | string[]">
+      참조 오디오 URL로, `reference` 모드에서만 유효합니다. 최대 3개 구간, 형식은 MP3, WAV를 지원하며 구간당 5-30초, 단일 파일당 20MB를 초과할 수 없습니다.
+
+      <Warning>
+        `reference` 모드에서는 참조 이미지, 참조 동영상, 참조 오디오를 합쳐 최대 15개까지 가능합니다.
+      </Warning>
+    </ParamField>
+
+    <ParamField body="audio_setting" type="string" default="origin">
+      원본 동영상의 오디오 처리 방식으로, `edit` 모드에서만 유효합니다:
+
+      * `origin` - 원본 동영상 오디오 유지, 기본값
+      * `auto` - 오디오 재생성
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  요청자 작업 ID입니다.
+
+  사용자 정의 작업 식별자로, 필수 항목입니다. 영문자, 숫자, 밑줄(_), 하이픈(-)만 지원하며 길이는 1-64자입니다. 추후 이 ID를 사용하여 작업 상태와 결과를 조회할 수 있습니다.
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  요청자 작업 ID로, 결과 조회에 사용할 수 있습니다.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  초기 상태로, 일반적으로 `"pending"`입니다.
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  생성 시간, ISO 형식입니다.
+</ResponseField>
+
+## Query Task
+
+Kling 4.0은 비동기 동영상 생성 모델입니다. 작업을 제출한 후 `out_task_id`를 사용하여 작업 상태를 조회하세요. [작업 상태 조회](/en/api-reference/tasks/status)도 참조할 수 있습니다.
+
+<ParamField body="out_task_id" type="string" required>
+  작업 제출 시 전달한 요청자 작업 ID입니다.
+</ParamField>
+
+```bash
+curl --request POST \
+  --url https://aireiter.com/api/openapi/query \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "out_task_id": "kling_v4_t2v_123456"
+  }'
+```
+
+조회가 성공하고 완료되면 응답의 `output` 배열에 생성된 동영상이 포함되며, 요소에는 `video` 필드가 포함됩니다.
+
+생성 소요 시간은 모드와 길이에 따라 다릅니다: 1080p 5초 텍스트 투 비디오(Text-to-Video) 실측 약 4.5분이 소요되며, 길이가 길고 소재가 많을수록 소요 시간이 길어지므로 중복 제출하지 마시고 계속 폴링해 주세요.
+
+## 模式参数对照
+
+| `type` | 필수 | 선택 | 재생 시간 |
+|---|---|---|---|
+| `reference` | `prompt` | `image_url`(≤10), `video_url`(≤5, 합계 ≤30초), `audio_url`(≤3), 합계 ≤15개; `aspect_ratio` | `video_length` 3-30초 |
+| `frame` | `prompt`, 첫 프레임 `image_url` | `keyframe_url`(≤8), `end_image_url` | `video_length` 3-30초 |
+| `edit` | `prompt`, 원본 비디오 `video_url`(3-30초) | `image_url`(≤10), `audio_setting` | 출력 길이는 `video_length` |
+| `extend` | `prompt`, 원본 비디오 `video_url`(≤30초) | `end_image_url` | `video_length`초 추가, 원본 비디오 + 추가 세그먼트 반환 |
+
+<Warning>
+`frame` 모드에서 첫 프레임이 누락되거나 `edit` / `extend` 모드에서 원본 비디오가 누락된 경우 작업이 실패로 종료됩니다. 위 표에 따라 필수 에셋을 모두 전달해 주세요.
+</Warning>
+
+## 사용 안내
+
+* 프롬프트만 전달하면 텍스트 투 비디오(Text-to-Video)로 동작하며, 참조 소재를 전달하면 참조 생성으로 처리됩니다. `aspect_ratio`가 `auto`일 때는 소재의 비율을 따릅니다.
+* 비디오 연장은 하나의 완전한 파일로 반환됩니다. 원본 비디오가 앞에 위치하고 새로 추가된 세그먼트가 뒤에 이어집니다. 실제 테스트 결과 5초 원본 비디오를 5초 연장하면 10.0초 비디오가 반환되며, 해상도는 원본 비디오와 동일하고 연결 부위에 눈에 띄는 이음매가 없습니다.
+* 비디오 연장은 원본 비디오 부분의 오디오를 유지하며, 새로 추가된 세그먼트는 오디오가 자동으로 생성됩니다. 원본 비디오에 오디오가 없는 경우 이 부분은 계속 무음으로 유지됩니다.
+* 비디오 편집은 기본적으로 원본 비디오 오디오를 유지하며, 새로운 오디오가 필요한 경우 `audio_setting: "auto"`를 전달합니다.
+
+## Request Examples
+
+<RequestExample>
+  ```bash cURL (텍스트 생성)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "kling_v4",
+      "params": {
+        "prompt": "황혼 무렵, 종이배 한 척이 비 온 뒤의 거리를 따라 떠내려가고, 수면에 네온사인의 반영이 일렁이며, 느린 팔로우 샷, 영화 같은 질감",
+        "type": "reference",
+        "resolution": "1080p",
+        "aspect_ratio": "16:9",
+        "video_length": 5
+      },
+      "out_task_id": "kling_v4_t2v_123456"
+    }'
+  ```
+
+  ```bash cURL (참조 생성)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "kling_v4",
+      "params": {
+        "prompt": "@Image1 속 여성이 @Image2의 겉옷을 입고, @Video1의 카메라 워크에 따라 길모퉁이를 지나가며, 배경음악은 @Audio1을 참조",
+        "type": "reference",
+        "image_url": [
+          "https://example.com/person.png",
+          "https://example.com/jacket.png"
+        ],
+        "video_url": ["https://example.com/camera-move.mp4"],
+        "audio_url": ["https://example.com/bgm.mp3"],
+        "aspect_ratio": "auto",
+        "resolution": "720p",
+        "video_length": 8
+      },
+      "out_task_id": "kling_v4_ref_123456"
+    }'
+  ```
+
+  ```bash cURL (시작 및 종료 프레임)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "kling_v4",
+      "params": {
+        "prompt": "카메라가 이른 아침 도시의 스카이라인에서 길가 카페로 천천히 줌인",
+        "type": "frame",
+        "image_url": "https://example.com/first-frame.png",
+        "keyframe_url": ["https://example.com/middle-frame.png"],
+        "end_image_url": "https://example.com/last-frame.png",
+        "resolution": "720p",
+        "video_length": 10
+      },
+      "out_task_id": "kling_v4_frame_123456"
+    }'
+  ```
+
+  ```bash cURL (비디오 편집)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "kling_v4",
+      "params": {
+        "prompt": "@Video1 속 인물의 겉옷을 @Image1의 빨간색 트렌치코트로 바꾸고, 나머지는 그대로 유지",
+        "type": "edit",
+        "video_url": "https://example.com/source.mp4",
+        "image_url": ["https://example.com/red-coat.png"],
+        "audio_setting": "origin",
+        "resolution": "720p",
+        "video_length": 5
+      },
+      "out_task_id": "kling_v4_edit_123456"
+    }'
+  ```
+
+  ```bash cURL (비디오 확장)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "kling_v4",
+      "params": {
+        "prompt": "행인 한 명이 화면 안으로 걸어 들어와, 허리를 굽혀 물에서 종이배를 건져 올린다",
+        "type": "extend",
+        "video_url": "https://example.com/paper-boat.mp4",
+        "resolution": "720p",
+        "video_length": 5
+      },
+      "out_task_id": "kling_v4_extend_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "kling_v4",
+      "params": {
+          "prompt": "황혼 무렵, 종이배 한 척이 비 온 뒤의 거리를 따라 떠내려가고, 수면에 네온사인의 반영이 일렁이며, 느린 팔로우 샷, 영화 같은 질감",
+          "type": "reference",
+          "resolution": "1080p",
+          "aspect_ratio": "16:9",
+          "video_length": 5
+      },
+      "out_task_id": "kling_v4_t2v_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "kling_v4",
+    params: {
+      prompt: "황혼 무렵, 종이배 한 척이 비 온 뒤의 거리를 따라 떠내려가고, 수면에 네온사인의 반영이 일렁이며, 느린 팔로우 샷, 영화 같은 질감",
+      type: "reference",
+      resolution: "1080p",
+      aspect_ratio: "16:9",
+      video_length: 5
+    },
+    out_task_id: "kling_v4_t2v_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "kling_v4",
+          "params": map[string]interface{}{
+              "prompt":       "황혼 무렵, 종이배 한 척이 비 온 뒤의 거리를 따라 떠내려가고, 수면에 네온사인의 반영이 일렁이며, 느린 팔로우 샷, 영화 같은 질감",
+              "type":         "reference",
+              "resolution":   "1080p",
+              "aspect_ratio": "16:9",
+              "video_length": 5,
+          },
+          "out_task_id": "kling_v4_t2v_123456",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/openapi/submit";
+
+          String payload = """
+              {
+                "model": "kling_v4",
+                "params": {
+                  "prompt": "황혼 무렵, 종이배 한 척이 비 온 뒤의 거리를 따라 떠내려가고, 수면에 네온사인의 반영이 일렁이며, 느린 팔로우 샷, 영화 같은 질감",
+                  "type": "reference",
+                  "resolution": "1080p",
+                  "aspect_ratio": "16:9",
+                  "video_length": 5
+                },
+                "out_task_id": "kling_v4_t2v_123456"
+              }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = [
+      "model" => "kling_v4",
+      "params" => [
+          "prompt" => "황혼 무렵, 종이배 한 척이 비 온 뒤의 거리를 따라 떠내려가고, 수면에 네온사인의 반영이 일렁이며, 느린 팔로우 샷, 영화 같은 질감",
+          "type" => "reference",
+          "resolution" => "1080p",
+          "aspect_ratio" => "16:9",
+          "video_length" => 5
+      ],
+      "out_task_id" => "kling_v4_t2v_123456"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "out_task_id": "kling_v4_t2v_123456",
+        "status": "pending",
+        "created_at": "2026-11-04T09:02:00.000Z"
+    }
+}
+  ```
+
+  ```json 400
+    {
+        "statusCode": 400,
+        "message": "유효하지 않은 요청 파라미터입니다",
+        "ok": false
+    }
+  ```
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "인증에 실패했습니다. API 키를 확인해 주세요"
+    }
+  }
+  ```
+```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "계정 잔액이 부족합니다. 충전 후 다시 시도해 주세요"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해 주세요"
+    }
+  }
+  ```
+</ResponseExample>

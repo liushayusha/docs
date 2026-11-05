@@ -3,14 +3,14 @@ title: 'MiniMax H3 Turbo Video Generation'
 description: |
   - MiniMax H3 Turbo, an accelerated version of MiniMax H3
   - Asynchronous processing mode, returns a task ID for subsequent queries
-  - Supports text-to-video, up to 9 reference images, and 3 reference audio tracks
-  - Supports 480P / 720P output, video duration of 5-15 seconds, with native audio track by default
+  - Supports text-to-video, as well as up to 8 reference images, 3 reference videos, and 3 reference audio clips
+  - Supports 768P output, video duration of 6-30 seconds, 6 aspect ratios, with native audio track by default
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 <Note>
-The model name for MiniMax H3 Turbo in AIReiter is `minimax_h3_turbo`. This model differs from `minimax_h3`: resolution is 480P / 720P, duration is 5-15 seconds, and it does not support reference videos or first/last frames.
+The model name for MiniMax H3 Turbo in AIReiter is `minimax_h3_turbo`. This model differs from `minimax_h3`: the resolution is fixed at 768P (2K is not supported), the duration is 6-30 seconds, and first and last frames are not supported.
 </Note>
 
 ## Authorizations
@@ -46,20 +46,17 @@ The model name for MiniMax H3 Turbo in AIReiter is `minimax_h3_turbo`. This mode
 
       Can describe subjects, scenes, camera movements, actions, styles, lighting, pacing, etc.
 
-      When using reference assets, you can use "Image 1 / Audio 1" in the prompt to refer to uploaded content in sequential order.
+      When using reference materials, you can use "Image 1 / Video 1 / Audio 1" in the prompt to refer to uploaded content in order.
     </ParamField>
 
-    <ParamField body="video_length" type="number" default="5">
-      Generated video duration, in seconds.
+    <ParamField body="video_length" type="number" default="6">
+      Generated video duration in seconds.
 
-      Supports integers: `5` to `15`.
+      Supports integers: `6` to `30`.
     </ParamField>
 
-    <ParamField body="resolution" type="string" default="720p">
-      Output resolution:
-
-      * `480p`
-      * `720p` - Default
+    <ParamField body="resolution" type="string" default="768p">
+      Output resolution, fixed to `768p`, optional.
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="16:9">
@@ -67,36 +64,47 @@ The model name for MiniMax H3 Turbo in AIReiter is `minimax_h3_turbo`. This mode
 
       Supported aspect ratios:
 
-      * `21:9` - Ultrawide
-      * `16:9` - Landscape, Default
-      * `4:3` - Standard landscape
-      * `3:2` - Photo landscape
-      * `1:1` - Square
-      * `3:4` - Standard portrait
-      * `2:3` - Photo portrait
+      * `16:9` - Landscape, default
       * `9:16` - Portrait
+      * `1:1` - Square
+      * `4:3` - Standard landscape
+      * `3:4` - Standard portrait
+      * `21:9` - Ultra-wide
     </ParamField>
 
     <ParamField body="image_url" type="string | string[]">
-      Reference image URL, optional. Up to 9 images.
+      Reference image URL, optional. Up to 8 images.
 
-      When no images are provided, it performs text-to-video; when images are provided, they serve as reference images to guide the subject, style, or composition.
+      If no image is provided, it generates video from text; when images are provided, they serve as reference images to guide subjects, styles, or composition.
 
       Image requirements:
 
       * Supports JPEG, PNG, WEBP
-      * Maximum 20 MB per image
+      * Maximum 20MB per image
+      * URL must be publicly accessible
+    </ParamField>
+
+    <ParamField body="video_url" type="string | string[]">
+      Reference video URL, optional. Up to 3 videos.
+
+      Used to guide actions, camera movements, or pacing.
+
+      Video requirements:
+
+      * Supports MP4, MOV
+      * Maximum 100MB per video
+      * Single video duration cannot exceed 15 seconds
       * URL must be publicly accessible
     </ParamField>
 
     <ParamField body="audio_url" type="string | string[]">
-      Reference audio URL, optional. Up to 3 clips.
+      Reference audio URL, optional. Up to 3 tracks.
 
       Audio requirements:
 
       * Supports MP3, WAV
-      * Maximum 20 MB per audio file
-      * Duration must not exceed 15 seconds per audio file
+      * Maximum 20MB per audio
+      * Single audio duration cannot exceed 15 seconds
       * URL must be publicly accessible
     </ParamField>
   </Expandable>
@@ -154,15 +162,15 @@ Once the query succeeds and the task is completed, the `output` field in the res
       "model": "minimax_h3_turbo",
       "params": {
         "prompt": "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-        "video_length": 5,
-        "resolution": "720p",
+        "video_length": 6,
+        "resolution": "768p",
         "aspect_ratio": "16:9"
       },
       "out_task_id": "minimax_h3_turbo_text_123456"
     }'
   ```
 
-  ```bash cURL (Reference Image + Reference Audio)
+  ```bash cURL (Reference Image + Reference Video + Reference Audio)
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
@@ -175,11 +183,14 @@ Once the query succeeds and the task is completed, the `output` field in the res
           "https://example.com/product-front.jpg",
           "https://example.com/product-lifestyle.jpg"
         ],
+        "video_url": [
+          "https://example.com/motion-reference.mp4"
+        ],
         "audio_url": [
           "https://example.com/voice-reference.mp3"
         ],
         "video_length": 8,
-        "resolution": "720p",
+        "resolution": "768p",
         "aspect_ratio": "16:9"
       },
       "out_task_id": "minimax_h3_turbo_reference_123456"
@@ -195,8 +206,8 @@ Once the query succeeds and the task is completed, the `output` field in the res
       "model": "minimax_h3_turbo",
       "params": {
           "prompt": "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-          "video_length": 5,
-          "resolution": "720p",
+          "video_length": 6,
+          "resolution": "768p",
           "aspect_ratio": "16:9"
       },
       "out_task_id": "minimax_h3_turbo_text_123456"
@@ -219,8 +230,8 @@ Once the query succeeds and the task is completed, the `output` field in the res
     model: "minimax_h3_turbo",
     params: {
       prompt: "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-      video_length: 5,
-      resolution: "720p",
+      video_length: 6,
+      resolution: "768p",
       aspect_ratio: "16:9"
     },
     out_task_id: "minimax_h3_turbo_text_123456"
@@ -259,8 +270,8 @@ Once the query succeeds and the task is completed, the `output` field in the res
           "model": "minimax_h3_turbo",
           "params": map[string]interface{}{
               "prompt":       "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-              "video_length": 5,
-              "resolution":   "720p",
+              "video_length": 6,
+              "resolution":   "768p",
               "aspect_ratio": "16:9",
           },
           "out_task_id": "minimax_h3_turbo_text_123456",
@@ -299,8 +310,8 @@ Once the query succeeds and the task is completed, the `output` field in the res
                 "model": "minimax_h3_turbo",
                 "params": {
                   "prompt": "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-                  "video_length": 5,
-                  "resolution": "720p",
+                  "video_length": 6,
+                  "resolution": "768p",
                   "aspect_ratio": "16:9"
                 },
                 "out_task_id": "minimax_h3_turbo_text_123456"
@@ -332,8 +343,8 @@ Once the query succeeds and the task is completed, the `output` field in the res
       "model" => "minimax_h3_turbo",
       "params" => [
           "prompt" => "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-          "video_length" => 5,
-          "resolution" => "720p",
+          "video_length" => 6,
+          "resolution" => "768p",
           "aspect_ratio" => "16:9"
       ],
       "out_task_id" => "minimax_h3_turbo_text_123456"
@@ -366,8 +377,8 @@ Once the query succeeds and the task is completed, the `output` field in the res
     model: "minimax_h3_turbo",
     params: {
       prompt: "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-      video_length: 5,
-      resolution: "720p",
+      video_length: 6,
+      resolution: "768p",
       aspect_ratio: "16:9"
     },
     out_task_id: "minimax_h3_turbo_text_123456"
@@ -393,8 +404,8 @@ Once the query succeeds and the task is completed, the `output` field in the res
       "model": "minimax_h3_turbo",
       "params": [
           "prompt": "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-          "video_length": 5,
-          "resolution": "720p",
+          "video_length": 6,
+          "resolution": "768p",
           "aspect_ratio": "16:9"
       ],
       "out_task_id": "minimax_h3_turbo_text_123456"
@@ -437,8 +448,8 @@ Once the query succeeds and the task is completed, the `output` field in the res
                     ""model"": ""minimax_h3_turbo"",
                     ""params"": {
                         ""prompt"": ""A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot"",
-                        ""video_length"": 5,
-                        ""resolution"": ""720p"",
+                        ""video_length"": 6,
+                        ""resolution"": ""768p"",
                         ""aspect_ratio"": ""16:9""
                     },
                     ""out_task_id"": ""minimax_h3_turbo_text_123456""
@@ -469,7 +480,7 @@ Once the query succeeds and the task is completed, the `output` field in the res
 
       if(curl) {
           const char *url = "https://aireiter.com/api/openapi/submit";
-          const char *payload = "{\"model\":\"minimax_h3_turbo\",\"params\":{\"prompt\":\"A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot\",\"video_length\":5,\"resolution\":\"720p\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"minimax_h3_turbo_text_123456\"}";
+          const char *payload = "{\"model\":\"minimax_h3_turbo\",\"params\":{\"prompt\":\"A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot\",\"video_length\":6,\"resolution\":\"768p\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"minimax_h3_turbo_text_123456\"}";
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
@@ -506,8 +517,8 @@ Once the query succeeds and the task is completed, the `output` field in the res
               @"model": @"minimax_h3_turbo",
               @"params": @{
                   @"prompt": @"A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-                  @"video_length": @5,
-                  @"resolution": @"720p",
+                  @"video_length": @6,
+                  @"resolution": @"768p",
                   @"aspect_ratio": @"16:9"
               },
               @"out_task_id": @"minimax_h3_turbo_text_123456"
@@ -555,8 +566,8 @@ Once the query succeeds and the task is completed, the `output` field in the res
     "model": "minimax_h3_turbo",
     "params": {
       "prompt": "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-      "video_length": 5,
-      "resolution": "720p",
+      "video_length": 6,
+      "resolution": "768p",
       "aspect_ratio": "16:9"
     },
     "out_task_id": "minimax_h3_turbo_text_123456"
@@ -587,8 +598,8 @@ Once the query succeeds and the task is completed, the `output` field in the res
           "model": "minimax_h3_turbo",
           "params": {
               "prompt": "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-              "video_length": 5,
-              "resolution": "720p",
+              "video_length": 6,
+              "resolution": "768p",
               "aspect_ratio": "16:9"
           },
           "out_task_id": "minimax_h3_turbo_text_123456"
@@ -617,8 +628,8 @@ Once the query succeeds and the task is completed, the `output` field in the res
     model = "minimax_h3_turbo",
     params = list(
       prompt = "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-      video_length = 5,
-      resolution = "720p",
+      video_length = 6,
+      resolution = "768p",
       aspect_ratio = "16:9"
     ),
     out_task_id = "minimax_h3_turbo_text_123456"
@@ -670,7 +681,7 @@ Once the query succeeds and the task is completed, the `output` field in the res
   {
     "error": {
       "code": 433,
-      "message": "Insufficient account balance, please recharge and try again"
+      "message": "Insufficient account balance, please top up and try again"
     }
   }
   ```
@@ -688,9 +699,13 @@ Once the query succeeds and the task is completed, the `output` field in the res
 ## Mode Notes
 
 <Note>
-When `image_url` is not provided, it defaults to text-to-video. When a reference image is provided, the image is used to guide the subject, style, or composition, rather than serving as the first or last frame.
+When `image_url` is not provided, it operates as text-to-video. When a reference image is provided, the image is used to guide the subject, style, or composition, not as the first or last frame.
+</Note>
+
+<Note>
+When `video_url` is provided, the reference video is used to guide motion, camera movement, or rhythm; it can be used simultaneously with reference images and reference audio.
 </Note>
 
 <Warning>
-This model does not support reference videos or the `first_last_frame` mode. Please do not pass `video_url`, `end_image_url`, `type`, or `quality`.
+This model does not support the `first_last_frame` mode. The resolution is only 768P (480P and 2K are not supported), and aspect ratios 3:2 / 2:3 are not supported. Please do not pass `end_image_url`, `type`, or `quality`.
 </Warning>

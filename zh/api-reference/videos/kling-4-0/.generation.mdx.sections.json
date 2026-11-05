@@ -1,0 +1,47 @@
+[
+  {
+    "id": "__frontmatter__",
+    "hash": "03da8a22",
+    "index": 0
+  },
+  {
+    "id": "__prologue__",
+    "hash": "50053009",
+    "index": 1
+  },
+  {
+    "id": "section-0-authorizations",
+    "hash": "e5ca9803",
+    "index": 2
+  },
+  {
+    "id": "section-1-body",
+    "hash": "0732229b",
+    "index": 3
+  },
+  {
+    "id": "section-2-response",
+    "hash": "2a019797",
+    "index": 4
+  },
+  {
+    "id": "section-3-query-task",
+    "hash": "2034acd1",
+    "index": 5
+  },
+  {
+    "id": "section-4-模式参数对照",
+    "hash": "bcd245ec",
+    "index": 6
+  },
+  {
+    "id": "section-5-使用说明",
+    "hash": "4ecd6084",
+    "index": 7
+  },
+  {
+    "id": "section-6-request-examples",
+    "hash": "51c77ec8",
+    "index": 8
+  }
+]

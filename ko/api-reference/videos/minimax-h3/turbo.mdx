@@ -2,15 +2,15 @@
 title: 'MiniMax H3 Turbo 비디오 생성'
 description: |
   - MiniMax H3 Turbo, MiniMax H3 가속 버전
-  - 비동기 처리 모드, 후속 조회를 위한 작업 ID 반환
-  - 텍스트 기반 비디오 생성 및 최대 9장의 참조 이미지, 3개의 참조 오디오 지원
-  - 480P / 720P 출력 지원, 비디오 길이 5-15초, 기본적으로 네이티브 오디오 트랙 포함
+  - 비동기 처리 모드, 후속 조회를 위한 태스크 ID 반환
+  - 텍스트 투 비디오 및 최대 8장의 참조 이미지, 3개의 참조 비디오, 3개의 참조 오디오 지원
+  - 768P 출력 지원, 비디오 길이 6-30초, 6가지 화면비, 기본 네이티브 오디오 트랙 포함
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 <Note>
-MiniMax H3 Turbo의 AIReiter 내 모델명은 `minimax_h3_turbo`입니다. 해당 모델은 `minimax_h3`과 다릅니다: 해상도는 480P / 720P, 길이는 5-15초이며, 참조 비디오 및 첫/마지막 프레임을 지원하지 않습니다.
+MiniMax H3 Turbo의 AIReiter 내 모델 이름은 `minimax_h3_turbo`입니다. 이 모델은 `minimax_h3`와 다릅니다: 해상도는 768P로 고정되어 있으며(2K 미지원), 길이는 6-30초이고, 첫 프레임 및 마지막 프레임을 지원하지 않습니다.
 </Note>
 
 ## Authorizations
@@ -38,74 +38,82 @@ MiniMax H3 Turbo의 AIReiter 내 모델명은 `minimax_h3_turbo`입니다. 해�
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  모델 파라미터 객체입니다.
+  모델 파라미터 객체.
 
   <Expandable title="params 객체 속성">
     <ParamField body="prompt" type="string" required>
-      비디오 생성을 위한 텍스트 설명입니다.
+      비디오 생성을 위한 텍스트 설명.
 
-      피사체, 장면, 카메라 무빙, 동작, 스타일, 조명, 템포 등의 내용을 설명할 수 있습니다.
+      주체, 장면, 카메라 워크, 동작, 스타일, 조명, 리듬 등의 내용을 묘사할 수 있습니다.
 
-      참조 소스를 사용할 경우, 프롬프트에서 '이미지 1 / 오디오 1'과 같이 순서대로 업로드한 콘텐츠를 지정할 수 있습니다.
+      참조 에셋 사용 시, 프롬프트에서 「이미지1 / 비디오1 / 오디오1」 순서로 업로드된 콘텐츠를 지정할 수 있습니다.
     </ParamField>
 
-    <ParamField body="video_length" type="number" default="5">
-      생성할 비디오 길이(초 단위)입니다.
+    <ParamField body="video_length" type="number" default="6">
+      생성할 비디오 길이(단위: 초).
 
-      지원 정수: `5` ~ `15`.
+      지원되는 정수: `6`부터 `30`까지.
     </ParamField>
 
-    <ParamField body="resolution" type="string" default="720p">
-      출력 해상도:
-
-      * `480p`
-      * `720p` - 기본값
+    <ParamField body="resolution" type="string" default="768p">
+      출력 해상도, `768p`로 고정되며 생략 가능합니다.
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="16:9">
-      비디오 화면 비율입니다.
+      비디오 화면비.
 
-      지원되는 화면 비율:
+      지원되는 화면비:
 
-      * `21:9` - 울트라 와이드
       * `16:9` - 가로 화면, 기본값
-      * `4:3` - 표준 가로 화면
-      * `3:2` - 사진 가로 화면
-      * `1:1` - 정사각형
-      * `3:4` - 표준 세로 화면
-      * `2:3` - 사진 세로 화면
       * `9:16` - 세로 화면
+      * `1:1` - 정사각형
+      * `4:3` - 표준 가로 화면
+      * `3:4` - 표준 세로 화면
+      * `21:9` - 울트라 와이드
     </ParamField>
 
     <ParamField body="image_url" type="string | string[]">
-      참조 이미지 URL, 선택 사항. 최대 9장.
+      참조 이미지 URL, 선택 사항. 최대 8장.
 
-      이미지를 전달하지 않으면 텍스트 투 비디오로 동작하며, 이미지를 전달하면 피사체, 스타일 또는 구도를 유도하는 참조 이미지로 사용됩니다.
+      이미지를 전달하지 않으면 텍스트 투 비디오로 동작하며, 이미지를 전달하면 주체, 스타일 또는 구도를 가이드하는 참조 이미지로 사용됩니다.
 
-      이미지 요구사항:
+      이미지 요구 사항:
 
       * JPEG, PNG, WEBP 지원
-      * 이미지당 최대 20MB
+      * 단일 이미지 최대 20MB
+      * URL은 공개적으로 접근 가능해야 함
+    </ParamField>
+
+    <ParamField body="video_url" type="string | string[]">
+      참조 비디오 URL, 선택 사항. 최대 3개.
+
+      동작, 카메라 워크 또는 리듬을 가이드하는 데 사용됩니다.
+
+      비디오 요구 사항:
+
+      * MP4, MOV 지원
+      * 단일 비디오 최대 100MB
+      * 단일 비디오 재생 시간 최대 15초
       * URL은 공개적으로 접근 가능해야 함
     </ParamField>
 
     <ParamField body="audio_url" type="string | string[]">
       참조 오디오 URL, 선택 사항. 최대 3개.
 
-      오디오 요구사항:
+      오디오 요구 사항:
 
       * MP3, WAV 지원
-      * 개별 오디오 최대 20MB
-      * 개별 오디오 길이는 15초를 초과할 수 없음
+      * 단일 오디오 최대 20MB
+      * 단일 오디오 재생 시간 최대 15초
       * URL은 공개적으로 접근 가능해야 함
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  요청 측 작업 ID입니다.
+  요청자 작업 ID.
 
-  사용자 정의 작업 식별자로, 필수 항목입니다. 추후 이 ID를 사용하여 작업 상태와 결과를 조회할 수 있습니다.
+  사용자 지정 작업 식별자, 필수. 이후 해당 ID를 사용하여 작업 상태와 결과를 조회할 수 있습니다.
 </ParamField>
 
 ## Response
@@ -145,7 +153,7 @@ curl --request POST \
 ## Request Examples
 
 <RequestExample>
-  ```bash cURL (텍스트 투 비디오)
+  ```bash cURL(텍스트 투 비디오)
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
@@ -154,15 +162,15 @@ curl --request POST \
       "model": "minimax_h3_turbo",
       "params": {
         "prompt": "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-        "video_length": 5,
-        "resolution": "720p",
+        "video_length": 6,
+        "resolution": "768p",
         "aspect_ratio": "16:9"
       },
       "out_task_id": "minimax_h3_turbo_text_123456"
     }'
   ```
 
-  ```bash cURL (참조 이미지 + 참조 오디오)
+  ```bash cURL(참조 이미지 + 참조 비디오 + 참조 오디오)
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
@@ -175,11 +183,14 @@ curl --request POST \
           "https://example.com/product-front.jpg",
           "https://example.com/product-lifestyle.jpg"
         ],
+        "video_url": [
+          "https://example.com/motion-reference.mp4"
+        ],
         "audio_url": [
           "https://example.com/voice-reference.mp3"
         ],
         "video_length": 8,
-        "resolution": "720p",
+        "resolution": "768p",
         "aspect_ratio": "16:9"
       },
       "out_task_id": "minimax_h3_turbo_reference_123456"
@@ -195,8 +206,8 @@ curl --request POST \
       "model": "minimax_h3_turbo",
       "params": {
           "prompt": "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-          "video_length": 5,
-          "resolution": "720p",
+          "video_length": 6,
+          "resolution": "768p",
           "aspect_ratio": "16:9"
       },
       "out_task_id": "minimax_h3_turbo_text_123456"
@@ -219,8 +230,8 @@ curl --request POST \
     model: "minimax_h3_turbo",
     params: {
       prompt: "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-      video_length: 5,
-      resolution: "720p",
+      video_length: 6,
+      resolution: "768p",
       aspect_ratio: "16:9"
     },
     out_task_id: "minimax_h3_turbo_text_123456"
@@ -259,11 +270,11 @@ curl --request POST \
           "model": "minimax_h3_turbo",
           "params": map[string]interface{}{
               "prompt":       "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-              "video_length": 5,
-              "resolution":   "720p",
+              "video_length": 6,
+              "resolution":   "768p",
               "aspect_ratio": "16:9",
           },
-          "out_task_id": "minimax_h3_turbo_text_123456"
+          "out_task_id": "minimax_h3_turbo_text_123456",
       }
 
       jsonData, _ := json.Marshal(payload)
@@ -299,8 +310,8 @@ curl --request POST \
                 "model": "minimax_h3_turbo",
                 "params": {
                   "prompt": "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-                  "video_length": 5,
-                  "resolution": "720p",
+                  "video_length": 6,
+                  "resolution": "768p",
                   "aspect_ratio": "16:9"
                 },
                 "out_task_id": "minimax_h3_turbo_text_123456"
@@ -332,8 +343,8 @@ curl --request POST \
       "model" => "minimax_h3_turbo",
       "params" => [
           "prompt" => "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-          "video_length" => 5,
-          "resolution" => "720p",
+          "video_length" => 6,
+          "resolution" => "768p",
           "aspect_ratio" => "16:9"
       ],
       "out_task_id" => "minimax_h3_turbo_text_123456"
@@ -366,8 +377,8 @@ curl --request POST \
     model: "minimax_h3_turbo",
     params: {
       prompt: "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-      video_length: 5,
-      resolution: "720p",
+      video_length: 6,
+      resolution: "768p",
       aspect_ratio: "16:9"
     },
     out_task_id: "minimax_h3_turbo_text_123456"
@@ -393,8 +404,8 @@ curl --request POST \
       "model": "minimax_h3_turbo",
       "params": [
           "prompt": "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-          "video_length": 5,
-          "resolution": "720p",
+          "video_length": 6,
+          "resolution": "768p",
           "aspect_ratio": "16:9"
       ],
       "out_task_id": "minimax_h3_turbo_text_123456"
@@ -437,8 +448,8 @@ curl --request POST \
                     ""model"": ""minimax_h3_turbo"",
                     ""params"": {
                         ""prompt"": ""A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot"",
-                        ""video_length"": 5,
-                        ""resolution"": ""720p"",
+                        ""video_length"": 6,
+                        ""resolution"": ""768p"",
                         ""aspect_ratio"": ""16:9""
                     },
                     ""out_task_id"": ""minimax_h3_turbo_text_123456""
@@ -469,7 +480,7 @@ curl --request POST \
 
       if(curl) {
           const char *url = "https://aireiter.com/api/openapi/submit";
-          const char *payload = "{\"model\":\"minimax_h3_turbo\",\"params\":{\"prompt\":\"A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot\",\"video_length\":5,\"resolution\":\"720p\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"minimax_h3_turbo_text_123456\"}";
+          const char *payload = "{\"model\":\"minimax_h3_turbo\",\"params\":{\"prompt\":\"A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot\",\"video_length\":6,\"resolution\":\"768p\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"minimax_h3_turbo_text_123456\"}";
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
@@ -506,8 +517,8 @@ curl --request POST \
               @"model": @"minimax_h3_turbo",
               @"params": @{
                   @"prompt": @"A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-                  @"video_length": @5,
-                  @"resolution": @"720p",
+                  @"video_length": @6,
+                  @"resolution": @"768p",
                   @"aspect_ratio": @"16:9"
               },
               @"out_task_id": @"minimax_h3_turbo_text_123456"
@@ -555,8 +566,8 @@ curl --request POST \
     "model": "minimax_h3_turbo",
     "params": {
       "prompt": "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-      "video_length": 5,
-      "resolution": "720p",
+      "video_length": 6,
+      "resolution": "768p",
       "aspect_ratio": "16:9"
     },
     "out_task_id": "minimax_h3_turbo_text_123456"
@@ -587,8 +598,8 @@ curl --request POST \
           "model": "minimax_h3_turbo",
           "params": {
               "prompt": "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-              "video_length": 5,
-              "resolution": "720p",
+              "video_length": 6,
+              "resolution": "768p",
               "aspect_ratio": "16:9"
           },
           "out_task_id": "minimax_h3_turbo_text_123456"
@@ -617,8 +628,8 @@ curl --request POST \
     model = "minimax_h3_turbo",
     params = list(
       prompt = "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-      video_length = 5,
-      resolution = "720p",
+      video_length = 6,
+      resolution = "768p",
       aspect_ratio = "16:9"
     ),
     out_task_id = "minimax_h3_turbo_text_123456"
@@ -654,7 +665,7 @@ curl --request POST \
   ```json 400
     {
         "statusCode": 400,
-        "message": "요청 매개변수가 유효하지 않습니다",
+        "message": "유효하지 않은 요청 파라미터입니다",
         "ok": false
     }
   ```
@@ -688,9 +699,13 @@ curl --request POST \
 ## Mode Notes
 
 <Note>
-`image_url`을 전달하지 않으면 텍스트 투 비디오 모드로 동작합니다. 참조 이미지를 전달하면 이미지는 피사체, 스타일 또는 구도를 유도하는 데 사용되며 첫 프레임이나 마지막 프레임 역할을 하지 않습니다.
+`image_url`을 전달하지 않으면 텍스트 투 비디오(Text-to-Video)로 동작합니다. 참조 이미지를 전달하면 이미지는 피사체, 스타일 또는 구도를 가이드하는 데 사용되며, 첫 프레임이나 마지막 프레임으로 사용되지 않습니다.
+</Note>
+
+<Note>
+`video_url`을 전달할 경우 참조 비디오는 동작, 카메라 워크 또는 리듬을 가이드하는 데 사용되며, 참조 이미지 및 참조 오디오와 동시에 사용할 수 있습니다.
 </Note>
 
 <Warning>
-이 모델은 참조 비디오를 지원하지 않으며, `first_last_frame` 시작/종료 프레임 모드도 지원하지 않습니다. `video_url`, `end_image_url`, `type` 또는 `quality`를 전달하지 마세요.
+본 모델은 `first_last_frame` 첫/마지막 프레임 모드를 지원하지 않으며, 해상도는 768P만 지원하고(480P 및 2K 미지원), 화면비는 3:2 / 2:3을 지원하지 않습니다. `end_image_url`, `type` 또는 `quality`를 전달하지 마세요.
 </Warning>

@@ -576,40 +576,65 @@ function parseJsonFromAI(content: string): any {
   // 尝试直接解析
   try {
     return JSON.parse(content);
-  } catch {
-    // 尝试提取 JSON 块
-    const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
-    if (jsonMatch) {
-      return JSON.parse(jsonMatch[1].trim());
+  } catch (error) {
+    // 只剥离包裹整个响应的 ``` 围栏（文档内容本身含代码块，不能匹配第一对 ```）
+    const fenceMatch = content.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/);
+    if (fenceMatch) {
+      return JSON.parse(fenceMatch[1]);
     }
-    throw new Error("无法解析 AI 返回的 JSON");
+    // 截取首个 { 到最后一个 } 之间的内容
+    const start = content.indexOf("{");
+    const end = content.lastIndexOf("}");
+    if (start !== -1 && end > start) {
+      return JSON.parse(content.slice(start, end + 1));
+    }
+    throw error;
   }
 }
 
+// 翻译失败重试次数（AI 偶尔返回截断/非法的 JSON）
+const MAX_TRANSLATE_RETRIES = 3;
+
 // 翻译单个块
 async function translateSingleChunk(sourceLang: string, targetLang: string, textObj: any): Promise<any> {
-  try {
-    const userPrompt = createTranslateUserPrompt(sourceLang, targetLang, textObj);
-    const response = await openai.chat.completions.create({
-      model: process.env.TRANSLATE_MODEL || "gemini-3.8-flash-high",
-      messages: [
-        { role: "system", content: translateSystemPrompt },
-        { role: "user", content: userPrompt },
-      ],
-      response_format: { type: "json_object" },
-    });
+  const userPrompt = createTranslateUserPrompt(sourceLang, targetLang, textObj);
+  let lastError: unknown;
 
-    const translatedContent = response.choices[0].message.content?.trim();
-    if (!translatedContent) {
-      throw new Error("翻译响应为空");
+  for (let attempt = 1; attempt <= MAX_TRANSLATE_RETRIES; attempt++) {
+    try {
+      const response = await openai.chat.completions.create({
+        model: process.env.TRANSLATE_MODEL || "gemini-3.8-flash-high",
+        messages: [
+          { role: "system", content: translateSystemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        response_format: { type: "json_object" },
+      });
+
+      const translatedContent = response.choices[0].message.content?.trim();
+      if (!translatedContent) {
+        throw new Error("翻译响应为空");
+      }
+
+      const translatedJson = parseJsonFromAI(translatedContent);
+      const translation = translatedJson.translation;
+      // 校验返回的 key 是否齐全
+      for (const key of Object.keys(textObj)) {
+        if (typeof translation?.[key] !== "string") {
+          throw new Error(`翻译结果缺少字段: ${key}`);
+        }
+      }
+      return translation;
+    } catch (error) {
+      lastError = error;
+      console.warn(`  ⚠️  ${targetLang} 翻译失败 (第 ${attempt}/${MAX_TRANSLATE_RETRIES} 次): ${error}`);
+      if (attempt < MAX_TRANSLATE_RETRIES) {
+        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+      }
     }
-
-    const translatedJson = parseJsonFromAI(translatedContent);
-    return translatedJson.translation;
-  } catch (error) {
-    console.error(`翻译错误: ${error}`);
-    throw error;
   }
+
+  throw lastError;
 }
 
 // 翻译文本对象（简化版，仅用于 MDX）
@@ -752,8 +777,11 @@ async function translateMdxFiles(
         changes.modified.length > 0 ||
         changes.deleted.length > 0;
 
-      // 如果没有变更且不是强制更新，跳过
-      if (!hasChanges && !forceUpdate) {
+      // 如果没有变更、目标语言文件齐全且不是强制更新，跳过
+      const missingTargets = targetLanguages.filter(
+        (locale) => !existsSync(join(projectPath, locale.code, relativePath))
+      );
+      if (!hasChanges && missingTargets.length === 0 && !forceUpdate) {
         console.log(`📄 ${relativePath}: 无变更，跳过`);
         skippedCount += targetLanguages.length;
         continue;
@@ -765,9 +793,15 @@ async function translateMdxFiles(
         console.log(
           `  🔍 变更: +${changes.added.length} ~${changes.modified.length} -${changes.deleted.length} =${changes.unchanged.length}`
         );
+      } else if (missingTargets.length > 0 && !forceUpdate) {
+        console.log(
+          `📄 补译缺失语言: ${SOURCE_LOCALE.code}/${relativePath} → ${missingTargets.map((l) => l.code).join(", ")}`
+        );
       } else {
         console.log(`📄 强制翻译: ${SOURCE_LOCALE.code}/${relativePath}`);
       }
+
+      let fileHasError = false;
 
       // 4. 翻译每种语言
       for (let i = 0; i < targetLanguages.length; i += CONCURRENT_BATCH_SIZE) {
@@ -886,9 +920,11 @@ async function translateMdxFiles(
               successCount++;
             } else {
               errorCount++;
+              fileHasError = true;
             }
           } else {
             errorCount++;
+            fileHasError = true;
           }
         });
 
@@ -897,8 +933,12 @@ async function translateMdxFiles(
         }
       }
 
-      // 翻译成功后，保存段落历史记录（V3.0 新格式）
-      saveSectionHistory(hashPath, sourceSections);
+      // 所有语言翻译成功后，才保存段落历史记录（V3.0 新格式），否则下次运行会误判为无变更
+      if (fileHasError) {
+        console.warn(`  ⚠️  ${relativePath} 存在翻译失败的语言，未更新段落历史，请重新运行`);
+      } else {
+        saveSectionHistory(hashPath, sourceSections);
+      }
     } catch (error) {
       console.error(`  ❌ 处理文件失败: ${error}`);
       errorCount += targetLanguages.length;

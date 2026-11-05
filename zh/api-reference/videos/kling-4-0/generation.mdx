@@ -1,0 +1,525 @@
+---
+title: 'Kling 4.0 视频生成'
+description: |
+  - 快手可灵 Kling 4.0，异步处理模式，返回任务 ID 用于后续查询
+  - 一个模型四种模式：文生/参考、首尾帧、视频编辑、视频续写
+  - 支持 720p / 1080p，视频时长 3-30 秒，始终带立体声音轨
+  - 参考模式可混合最多 10 张图、5 段视频、3 段音频
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+<Note>
+Kling 4.0 在 AIReiter 中的模型名称为 `kling_v4`。用 `type` 选择生成模式，不同模式接收的素材不同，见下方 [模式参数对照](#模式参数对照)。
+
+成片始终带立体声音轨，不能关闭。不支持 4K、`negative_prompt`、`seed`。
+</Note>
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  所有接口均需要使用 Bearer Token 进行认证。
+
+  获取 API Key：
+
+  访问 <a href={apiKeyUrl} target="_blank">API Key 管理页面</a> 获取您的 API Key。
+
+  使用时在请求头中添加：
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  模型名称，固定为 `kling_v4`。
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  模型参数对象。
+
+  <Expandable title="params 对象属性">
+    <ParamField body="prompt" type="string" required>
+      视频生成的文本描述，支持中文和英文。必填。
+
+      * `reference` - 可用 `@Image1`、`@Video1`、`@Audio1` 指代素材，编号分别按 `image_url`、`video_url`、`audio_url` 数组顺序从 1 开始
+      * `edit` - 原视频为 `@Video1`，参考图为 `@Image1`、`@Image2` 等，写清楚要改什么
+      * `extend` - 描述接下来发生什么
+    </ParamField>
+
+    <ParamField body="type" type="string" default="reference">
+      生成模式：
+
+      * `reference` - 文生/参考，默认值。只传提示词即文生视频；也可加参考图、参考视频、参考音频
+      * `frame` - 首尾帧。首帧必填，可加中间帧和尾帧
+      * `edit` - 视频编辑。按提示词修改一段原视频
+      * `extend` - 视频续写。从原视频结尾继续往下生成
+    </ParamField>
+
+    <ParamField body="video_length" type="integer" default="5">
+      视频时长，单位为秒。支持整数 `3` 到 `30`。
+
+      * `edit` - 输出视频的时长
+      * `extend` - 新增片段的时长，返回的视频为原视频加新增片段
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="720p">
+      输出分辨率：
+
+      * `720p` - 默认值
+      * `1080p`
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="auto">
+      视频宽高比，仅 `reference` 模式生效：
+
+      * `auto` - 默认值。有参考素材时跟随素材，纯文字时为 16:9
+      * `16:9` - 横屏
+      * `9:16` - 竖屏
+      * `1:1` - 方形
+      * `21:9` - 超宽屏
+
+      `frame` 跟随首帧比例，`edit` 和 `extend` 沿用原视频比例，这三种模式下该字段会被忽略。
+    </ParamField>
+
+    <ParamField body="image_url" type="string | string[]">
+      图片 URL，必须可由公网直接访问。含义随模式不同：
+
+      * `reference` - 参考图，最多 10 张
+      * `frame` - 首帧，必填。只取第一张，尾帧请用 `end_image_url`
+      * `edit` - 参考图，最多 10 张，用来引导编辑效果
+      * `extend` - 不使用
+
+      图片要求：短边不小于 300px，单张不超过 20MB。
+    </ParamField>
+
+    <ParamField body="keyframe_url" type="string[]">
+      中间帧图片 URL，仅 `frame` 模式有效。最多 8 张，按数组顺序出现在首帧和尾帧之间。
+
+      <Warning>
+        首帧、中间帧、尾帧合计最多 10 张，且不能超过 `video_length` + 1。例如 3 秒视频最多 4 张。
+      </Warning>
+    </ParamField>
+
+    <ParamField body="end_image_url" type="string">
+      尾帧图片 URL：
+
+      * `frame` - 尾帧，可选
+      * `extend` - 目标尾帧，可选。新增片段会以这张图作为结尾画面
+    </ParamField>
+
+    <ParamField body="video_url" type="string | string[]">
+      视频 URL，必须可由公网直接访问。格式 MP4、MOV，单个不超过 200MB。
+
+      * `reference` - 参考视频，最多 5 段，合计不超过 30 秒
+      * `edit` - 原视频，必填，恰好 1 段，时长 3-30 秒
+      * `extend` - 原视频，必填，恰好 1 段，最长 30 秒
+      * `frame` - 不使用
+    </ParamField>
+
+    <ParamField body="audio_url" type="string | string[]">
+      参考音频 URL，仅 `reference` 模式有效。最多 3 段，格式 MP3、WAV，每段 5-30 秒，单个不超过 20MB。
+
+      <Warning>
+        `reference` 模式下参考图、参考视频、参考音频合计最多 15 个。
+      </Warning>
+    </ParamField>
+
+    <ParamField body="audio_setting" type="string" default="origin">
+      原视频的声音处理方式，仅 `edit` 模式有效：
+
+      * `origin` - 保留原视频声音，默认值
+      * `auto` - 重新生成声音
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  发起方任务 ID。
+
+  用户自定义的任务标识，必填。仅支持字母、数字、下划线和横线，长度为 1-64 个字符。后续可使用该 ID 查询任务状态和结果。
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  发起方任务 ID，可用于查询结果。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  初始状态，通常为 `"pending"`。
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  创建时间，ISO 格式。
+</ResponseField>
+
+## Query Task
+
+Kling 4.0 是异步视频生成模型。提交任务后，请使用 `out_task_id` 查询任务状态。也可参见 [获取任务状态](/zh/api-reference/tasks/status)。
+
+<ParamField body="out_task_id" type="string" required>
+  提交任务时传入的发起方任务 ID。
+</ParamField>
+
+```bash
+curl --request POST \
+  --url https://aireiter.com/api/openapi/query \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "out_task_id": "kling_v4_t2v_123456"
+  }'
+```
+
+查询成功并完成后，响应中的 `output` 数组会包含生成的视频，元素含 `video` 字段。
+
+生成耗时因模式和时长而异：1080p 5 秒文生视频实测约 4.5 分钟，时长越长、素材越多耗时越久，请持续轮询，不要重复提交。
+
+## 模式参数对照
+
+| `type` | 必需 | 可选 | 时长 |
+|---|---|---|---|
+| `reference` | `prompt` | `image_url`（≤10）、`video_url`（≤5，合计 ≤30 秒）、`audio_url`（≤3），合计 ≤15 个；`aspect_ratio` | `video_length` 3-30 秒 |
+| `frame` | `prompt`、首帧 `image_url` | `keyframe_url`（≤8）、`end_image_url` | `video_length` 3-30 秒 |
+| `edit` | `prompt`、原视频 `video_url`（3-30 秒） | `image_url`（≤10）、`audio_setting` | 输出时长为 `video_length` |
+| `extend` | `prompt`、原视频 `video_url`（≤30 秒） | `end_image_url` | 新增 `video_length` 秒，返回原视频 + 新增片段 |
+
+<Warning>
+`frame` 模式缺少首帧、`edit` / `extend` 模式缺少原视频时，任务会以失败结束。请按上表传齐必需素材。
+</Warning>
+
+## 使用说明
+
+* 只传提示词时就是文生视频；传了任意参考素材后按参考生成处理，`aspect_ratio` 为 `auto` 时跟随素材比例。
+* 视频续写返回一个完整文件：原视频在前，新增片段在后。实测 5 秒原视频续写 5 秒，返回 10.0 秒的视频，分辨率与原视频一致，衔接处无明显接缝。
+* 视频续写会保留原视频部分的声音，新增片段自动生成声音；原视频没有声音时，这部分仍然无声。
+* 视频编辑默认保留原视频声音，需要新的声音时传 `audio_setting: "auto"`。
+
+## Request Examples
+
+<RequestExample>
+  ```bash cURL（文生）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "kling_v4",
+      "params": {
+        "prompt": "黄昏时分，一只纸船顺着雨后的街道漂流，霓虹倒影在水面荡漾，缓慢跟拍，电影质感",
+        "type": "reference",
+        "resolution": "1080p",
+        "aspect_ratio": "16:9",
+        "video_length": 5
+      },
+      "out_task_id": "kling_v4_t2v_123456"
+    }'
+  ```
+
+  ```bash cURL（参考生成）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "kling_v4",
+      "params": {
+        "prompt": "@Image1 中的女生穿着 @Image2 的外套，按 @Video1 的运镜走过街角，背景音乐参考 @Audio1",
+        "type": "reference",
+        "image_url": [
+          "https://example.com/person.png",
+          "https://example.com/jacket.png"
+        ],
+        "video_url": ["https://example.com/camera-move.mp4"],
+        "audio_url": ["https://example.com/bgm.mp3"],
+        "aspect_ratio": "auto",
+        "resolution": "720p",
+        "video_length": 8
+      },
+      "out_task_id": "kling_v4_ref_123456"
+    }'
+  ```
+
+  ```bash cURL（首尾帧）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "kling_v4",
+      "params": {
+        "prompt": "镜头从清晨的城市天际线缓慢推进到街边咖啡馆",
+        "type": "frame",
+        "image_url": "https://example.com/first-frame.png",
+        "keyframe_url": ["https://example.com/middle-frame.png"],
+        "end_image_url": "https://example.com/last-frame.png",
+        "resolution": "720p",
+        "video_length": 10
+      },
+      "out_task_id": "kling_v4_frame_123456"
+    }'
+  ```
+
+  ```bash cURL（视频编辑）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "kling_v4",
+      "params": {
+        "prompt": "把 @Video1 中人物的外套换成 @Image1 的红色风衣，其他保持不变",
+        "type": "edit",
+        "video_url": "https://example.com/source.mp4",
+        "image_url": ["https://example.com/red-coat.png"],
+        "audio_setting": "origin",
+        "resolution": "720p",
+        "video_length": 5
+      },
+      "out_task_id": "kling_v4_edit_123456"
+    }'
+  ```
+
+  ```bash cURL（视频续写）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "kling_v4",
+      "params": {
+        "prompt": "一位路人走进画面，弯腰把纸船从水里拿起",
+        "type": "extend",
+        "video_url": "https://example.com/paper-boat.mp4",
+        "resolution": "720p",
+        "video_length": 5
+      },
+      "out_task_id": "kling_v4_extend_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "kling_v4",
+      "params": {
+          "prompt": "黄昏时分，一只纸船顺着雨后的街道漂流，霓虹倒影在水面荡漾，缓慢跟拍，电影质感",
+          "type": "reference",
+          "resolution": "1080p",
+          "aspect_ratio": "16:9",
+          "video_length": 5
+      },
+      "out_task_id": "kling_v4_t2v_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "kling_v4",
+    params: {
+      prompt: "黄昏时分，一只纸船顺着雨后的街道漂流，霓虹倒影在水面荡漾，缓慢跟拍，电影质感",
+      type: "reference",
+      resolution: "1080p",
+      aspect_ratio: "16:9",
+      video_length: 5
+    },
+    out_task_id: "kling_v4_t2v_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "kling_v4",
+          "params": map[string]interface{}{
+              "prompt":       "黄昏时分，一只纸船顺着雨后的街道漂流，霓虹倒影在水面荡漾，缓慢跟拍，电影质感",
+              "type":         "reference",
+              "resolution":   "1080p",
+              "aspect_ratio": "16:9",
+              "video_length": 5,
+          },
+          "out_task_id": "kling_v4_t2v_123456",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/openapi/submit";
+
+          String payload = """
+              {
+                "model": "kling_v4",
+                "params": {
+                  "prompt": "黄昏时分，一只纸船顺着雨后的街道漂流，霓虹倒影在水面荡漾，缓慢跟拍，电影质感",
+                  "type": "reference",
+                  "resolution": "1080p",
+                  "aspect_ratio": "16:9",
+                  "video_length": 5
+                },
+                "out_task_id": "kling_v4_t2v_123456"
+              }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = [
+      "model" => "kling_v4",
+      "params" => [
+          "prompt" => "黄昏时分，一只纸船顺着雨后的街道漂流，霓虹倒影在水面荡漾，缓慢跟拍，电影质感",
+          "type" => "reference",
+          "resolution" => "1080p",
+          "aspect_ratio" => "16:9",
+          "video_length" => 5
+      ],
+      "out_task_id" => "kling_v4_t2v_123456"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "out_task_id": "kling_v4_t2v_123456",
+        "status": "pending",
+        "created_at": "2026-11-04T09:02:00.000Z"
+    }
+}
+  ```
+
+  ```json 400
+    {
+        "statusCode": 400,
+        "message": "请求参数无效",
+        "ok": false
+    }
+  ```
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "身份验证失败，请检查您的API密钥"
+    }
+  }
+  ```
+```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "账户余额不足，请充值后再试"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "服务器内部错误，请稍后重试"
+    }
+  }
+  ```
+</ResponseExample>

@@ -3,15 +3,15 @@ title: 'MiniMax H3 Turbo 视频生成'
 description: |
   - MiniMax H3 Turbo，加速版 MiniMax H3
   - 异步处理模式，返回任务 ID 用于后续查询
-  - 支持文生视频，以及最多 9 张参考图、3 段参考音频
-  - 支持 480P / 720P 输出，视频时长 5-15 秒，默认带原生音轨
+  - 支持文生视频，以及最多 8 张参考图、3 段参考视频、3 段参考音频
+  - 支持 768P 输出，视频时长 6-30 秒，6 种宽高比，默认带原生音轨
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 <Note>
-MiniMax H3 Turbo 在 AIReiter 中的模型名称为 `minimax_h3_turbo`。该模型与 `minimax_h3` 不同：分辨率为 480P / 720P，时长为 5-15 秒，不支持参考视频和首尾帧。
+MiniMax H3 Turbo 在 AIReiter 中的模型名称为 `minimax_h3_turbo`。该模型与 `minimax_h3` 不同：分辨率固定为 768P（不支持 2K），时长为 6-30 秒，不支持首尾帧。
 </Note>
 
 ## Authorizations
@@ -47,20 +47,17 @@ MiniMax H3 Turbo 在 AIReiter 中的模型名称为 `minimax_h3_turbo`。该模�
 
       可描述主体、场景、镜头运动、动作、风格、光线、节奏等内容。
 
-      使用参考素材时，可在提示词中用「图1 / 音频1」按顺序指代上传内容。
+      使用参考素材时，可在提示词中用「图1 / 视频1 / 音频1」按顺序指代上传内容。
     </ParamField>
 
-    <ParamField body="video_length" type="number" default="5">
+    <ParamField body="video_length" type="number" default="6">
       生成视频时长，单位为秒。
 
-      支持整数：`5` 到 `15`。
+      支持整数：`6` 到 `30`。
     </ParamField>
 
-    <ParamField body="resolution" type="string" default="720p">
-      输出分辨率：
-
-      * `480p`
-      * `720p` - 默认值
+    <ParamField body="resolution" type="string" default="768p">
+      输出分辨率，固定为 `768p`，可不传。
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="16:9">
@@ -68,18 +65,16 @@ MiniMax H3 Turbo 在 AIReiter 中的模型名称为 `minimax_h3_turbo`。该模�
 
       支持的宽高比：
 
-      * `21:9` - 超宽屏
       * `16:9` - 横屏，默认值
-      * `4:3` - 标准横屏
-      * `3:2` - 照片横屏
-      * `1:1` - 方形
-      * `3:4` - 竖版标准
-      * `2:3` - 照片竖屏
       * `9:16` - 竖屏
+      * `1:1` - 方形
+      * `4:3` - 标准横屏
+      * `3:4` - 竖版标准
+      * `21:9` - 超宽屏
     </ParamField>
 
     <ParamField body="image_url" type="string | string[]">
-      参考图片 URL，可选。最多 9 张。
+      参考图片 URL，可选。最多 8 张。
 
       不传图片时为文生视频；传入图片时作为参考图引导主体、风格或构图。
 
@@ -87,6 +82,19 @@ MiniMax H3 Turbo 在 AIReiter 中的模型名称为 `minimax_h3_turbo`。该模�
 
       * 支持 JPEG、PNG、WEBP
       * 单张图片最大 20MB
+      * URL 必须可公开访问
+    </ParamField>
+
+    <ParamField body="video_url" type="string | string[]">
+      参考视频 URL，可选。最多 3 段。
+
+      用于引导动作、运镜或节奏。
+
+      视频要求：
+
+      * 支持 MP4、MOV
+      * 单个视频最大 100MB
+      * 单个视频时长不超过 15 秒
       * URL 必须可公开访问
     </ParamField>
 
@@ -155,15 +163,15 @@ curl --request POST \
       "model": "minimax_h3_turbo",
       "params": {
         "prompt": "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-        "video_length": 5,
-        "resolution": "720p",
+        "video_length": 6,
+        "resolution": "768p",
         "aspect_ratio": "16:9"
       },
       "out_task_id": "minimax_h3_turbo_text_123456"
     }'
   ```
 
-  ```bash cURL（参考图 + 参考音频）
+  ```bash cURL（参考图 + 参考视频 + 参考音频）
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
@@ -176,11 +184,14 @@ curl --request POST \
           "https://example.com/product-front.jpg",
           "https://example.com/product-lifestyle.jpg"
         ],
+        "video_url": [
+          "https://example.com/motion-reference.mp4"
+        ],
         "audio_url": [
           "https://example.com/voice-reference.mp3"
         ],
         "video_length": 8,
-        "resolution": "720p",
+        "resolution": "768p",
         "aspect_ratio": "16:9"
       },
       "out_task_id": "minimax_h3_turbo_reference_123456"
@@ -196,8 +207,8 @@ curl --request POST \
       "model": "minimax_h3_turbo",
       "params": {
           "prompt": "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-          "video_length": 5,
-          "resolution": "720p",
+          "video_length": 6,
+          "resolution": "768p",
           "aspect_ratio": "16:9"
       },
       "out_task_id": "minimax_h3_turbo_text_123456"
@@ -220,8 +231,8 @@ curl --request POST \
     model: "minimax_h3_turbo",
     params: {
       prompt: "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-      video_length: 5,
-      resolution: "720p",
+      video_length: 6,
+      resolution: "768p",
       aspect_ratio: "16:9"
     },
     out_task_id: "minimax_h3_turbo_text_123456"
@@ -260,8 +271,8 @@ curl --request POST \
           "model": "minimax_h3_turbo",
           "params": map[string]interface{}{
               "prompt":       "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-              "video_length": 5,
-              "resolution":   "720p",
+              "video_length": 6,
+              "resolution":   "768p",
               "aspect_ratio": "16:9",
           },
           "out_task_id": "minimax_h3_turbo_text_123456",
@@ -300,8 +311,8 @@ curl --request POST \
                 "model": "minimax_h3_turbo",
                 "params": {
                   "prompt": "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-                  "video_length": 5,
-                  "resolution": "720p",
+                  "video_length": 6,
+                  "resolution": "768p",
                   "aspect_ratio": "16:9"
                 },
                 "out_task_id": "minimax_h3_turbo_text_123456"
@@ -333,8 +344,8 @@ curl --request POST \
       "model" => "minimax_h3_turbo",
       "params" => [
           "prompt" => "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-          "video_length" => 5,
-          "resolution" => "720p",
+          "video_length" => 6,
+          "resolution" => "768p",
           "aspect_ratio" => "16:9"
       ],
       "out_task_id" => "minimax_h3_turbo_text_123456"
@@ -367,8 +378,8 @@ curl --request POST \
     model: "minimax_h3_turbo",
     params: {
       prompt: "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-      video_length: 5,
-      resolution: "720p",
+      video_length: 6,
+      resolution: "768p",
       aspect_ratio: "16:9"
     },
     out_task_id: "minimax_h3_turbo_text_123456"
@@ -394,8 +405,8 @@ curl --request POST \
       "model": "minimax_h3_turbo",
       "params": [
           "prompt": "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-          "video_length": 5,
-          "resolution": "720p",
+          "video_length": 6,
+          "resolution": "768p",
           "aspect_ratio": "16:9"
       ],
       "out_task_id": "minimax_h3_turbo_text_123456"
@@ -438,8 +449,8 @@ curl --request POST \
                     ""model"": ""minimax_h3_turbo"",
                     ""params"": {
                         ""prompt"": ""A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot"",
-                        ""video_length"": 5,
-                        ""resolution"": ""720p"",
+                        ""video_length"": 6,
+                        ""resolution"": ""768p"",
                         ""aspect_ratio"": ""16:9""
                     },
                     ""out_task_id"": ""minimax_h3_turbo_text_123456""
@@ -470,7 +481,7 @@ curl --request POST \
 
       if(curl) {
           const char *url = "https://aireiter.com/api/openapi/submit";
-          const char *payload = "{\"model\":\"minimax_h3_turbo\",\"params\":{\"prompt\":\"A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot\",\"video_length\":5,\"resolution\":\"720p\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"minimax_h3_turbo_text_123456\"}";
+          const char *payload = "{\"model\":\"minimax_h3_turbo\",\"params\":{\"prompt\":\"A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot\",\"video_length\":6,\"resolution\":\"768p\",\"aspect_ratio\":\"16:9\"},\"out_task_id\":\"minimax_h3_turbo_text_123456\"}";
 
           struct curl_slist *headers = NULL;
           headers = curl_slist_append(headers, "Authorization: Bearer <token>");
@@ -507,8 +518,8 @@ curl --request POST \
               @"model": @"minimax_h3_turbo",
               @"params": @{
                   @"prompt": @"A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-                  @"video_length": @5,
-                  @"resolution": @"720p",
+                  @"video_length": @6,
+                  @"resolution": @"768p",
                   @"aspect_ratio": @"16:9"
               },
               @"out_task_id": @"minimax_h3_turbo_text_123456"
@@ -556,8 +567,8 @@ curl --request POST \
     "model": "minimax_h3_turbo",
     "params": {
       "prompt": "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-      "video_length": 5,
-      "resolution": "720p",
+      "video_length": 6,
+      "resolution": "768p",
       "aspect_ratio": "16:9"
     },
     "out_task_id": "minimax_h3_turbo_text_123456"
@@ -588,8 +599,8 @@ curl --request POST \
           "model": "minimax_h3_turbo",
           "params": {
               "prompt": "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-              "video_length": 5,
-              "resolution": "720p",
+              "video_length": 6,
+              "resolution": "768p",
               "aspect_ratio": "16:9"
           },
           "out_task_id": "minimax_h3_turbo_text_123456"
@@ -618,8 +629,8 @@ curl --request POST \
     model = "minimax_h3_turbo",
     params = list(
       prompt = "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
-      video_length = 5,
-      resolution = "720p",
+      video_length = 6,
+      resolution = "768p",
       aspect_ratio = "16:9"
     ),
     out_task_id = "minimax_h3_turbo_text_123456"
@@ -692,6 +703,10 @@ curl --request POST \
 不传 `image_url` 时为文生视频。传入参考图后，图片用于引导主体、风格或构图，不是首尾帧。
 </Note>
 
+<Note>
+传入 `video_url` 时，参考视频用于引导动作、运镜或节奏；可与参考图、参考音频同时使用。
+</Note>
+
 <Warning>
-本模型不支持参考视频，也不支持 `first_last_frame` 首尾帧模式。请不要传入 `video_url`、`end_image_url`、`type` 或 `quality`。
+本模型不支持 `first_last_frame` 首尾帧模式，分辨率只有 768P（不支持 480P 和 2K），宽高比不支持 3:2 / 2:3。请不要传入 `end_image_url`、`type` 或 `quality`。
 </Warning>

@@ -1,0 +1,775 @@
+---
+title: 'Seedream 5.0 Flash Layerize レイヤー分割'
+description: |
+    - 非同期処理モード。後続の照会用タスクIDを返却
+    - 1枚の画像をベース画像 + 最大16枚の個別に編集可能な透明PNGレイヤーに分割
+    - 各レイヤーに名前、説明、z_index、bounding_boxを含む
+    - 後払いモード：送信時に残高を検証し、タスク完了後に実際の出力枚数に応じて精算（ベース画像と各レイヤーをそれぞれ1枚としてカウント）
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  すべてのAPIでBearer Tokenによる認証が必要です
+
+  API Keyの取得：
+
+  <a href={apiKeyUrl} target="_blank">API Key管理ページ</a>にアクセスしてAPI Keyを取得します
+
+  使用時はリクエストヘッダーに追加します：
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  モデル名
+
+  固定値：`"seedream_v5_flash_layerize"`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  モデルパラメータオブジェクト
+
+  <Expandable title="params オブジェクトのプロパティ">
+    <ParamField body="image_url" type="string | string[]" required>
+      分割対象の元画像
+
+      * 必須。送信できる画像は **1枚** のみです
+      * サポートされている画像形式：png、jpeg、1枚あたり最大 30MB
+      * 総ピクセル数範囲 262,144 – 36,000,000、アスペクト比範囲 1:16 – 16:1
+      * 以下の2つの形式をサポート：
+        1. 公開アクセス可能な URL
+        2. Base64 エンコード形式
+           * 完全な Data URI 形式を使用する必要があります：`data:image/{形式};base64,{base64データ}`
+           * 例：`data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+           * ⚠️ 注意：`data:image/jpeg;base64,` プレフィックスを必ず含める必要があります。Base64 画像サイズは 10MB を超えないようにしてください
+    </ParamField>
+
+    <ParamField body="prompt" type="string">
+      分割プロンプト（オプション）
+
+      * 指定した場合、プロンプトに従って指定された要素を分割します（例：`Separate the title text and the parrot into independent layers`）
+      * `<bbox>x1 y1 x2 y2</bbox>` を使用して要素の位置を正確に指定できます。座標は 0–1000 の正規化値です（例：`Separate the parrot <bbox>330 274 641 991</bbox> into a layer`）
+      * 指定しない場合や 4 文字未満の場合は、モデルが画像内の主要な要素を自動認識します
+      * 最大 5000 文字
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="auto">
+      出力解像度レベル
+
+      * `auto` - 元画像のサイズに基づいて自動選択（デフォルト）
+      * `1K` - 1K 解像度
+      * `1.5K` - 1.5K 解像度
+      * `2K` - 2K 解像度
+
+      背景画像は元画像のアスペクト比を維持し、各レイヤーは元画像内の対応する要素のアスペクト比を維持します。
+    </ParamField>
+
+    <ParamField body="output_format" type="string" default="png">
+      背景画像の出力形式
+
+      * `png` - PNG（デフォルト）
+      * `jpeg` - JPEG
+
+      背景画像の形式のみを制御し、分割されたレイヤーは透過 PNG に固定されます。
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="callback_url" type="string">
+  タスク完了後のコールバック URL
+</ParamField>
+
+<ParamField body="metadata" type="object">
+  カスタムメタデータ、そのまま返されます
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  リクエスト元タスクID
+
+  ユーザー定義のタスク識別子、必須
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  リクエスト元のタスクID。結果の照会に使用可能
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  初期ステータス。固定値は `"pending"`
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  作成日時（ISO形式）
+</ResponseField>
+
+タスク完了後、クエリAPIを通じて結果を取得します：`data.output` にはベース画像と各レイヤーが含まれ、課金対象の枚数は `output` の要素数となります。
+
+<RequestExample>
+  ```bash cURL
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "seedream_v5_flash_layerize",
+      "params": {
+        "image_url": "https://example.com/poster.png",
+        "prompt": "Separate the title text and the parrot into independent layers",
+        "resolution": "auto",
+        "output_format": "png"
+      },
+      "out_task_id": "my_task_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "seedream_v5_flash_layerize",
+      "params": {
+          "image_url": "https://example.com/poster.png",
+          "prompt": "Separate the title text and the parrot into independent layers",
+          "resolution": "auto",
+          "output_format": "png"
+      },
+      "out_task_id": "my_task_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "seedream_v5_flash_layerize",
+    params: {
+      image_url: "https://example.com/poster.png",
+      prompt: "Separate the title text and the parrot into independent layers",
+      resolution: "auto",
+      output_format: "png"
+    },
+    out_task_id: "my_task_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "seedream_v5_flash_layerize",
+          "params": map[string]interface{}{
+              "image_url": "https://example.com/poster.png",
+              "prompt": "Separate the title text and the parrot into independent layers",
+              "resolution": "auto",
+              "output_format": "png",
+          },
+          "out_task_id": "my_task_123456",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/openapi/submit";
+
+          String payload = """
+          {
+            "model": "seedream_v5_flash_layerize",
+            "params": {
+              "image_url": "https://example.com/poster.png",
+              "prompt": "Separate the title text and the parrot into independent layers",
+              "resolution": "auto",
+              "output_format": "png"
+            },
+            "out_task_id": "my_task_123456"
+          }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = [
+      "model" => "seedream_v5_flash_layerize",
+      "params" => [
+          "image_url" => "https://example.com/poster.png",
+          "prompt" => "Separate the title text and the parrot into independent layers",
+          "resolution" => "auto",
+          "output_format" => "png"
+      ],
+      "out_task_id" => "my_task_123456"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url = URI("https://aireiter.com/api/openapi/submit")
+
+  payload = {
+    model: "seedream_v5_flash_layerize",
+    params: {
+      image_url: "https://example.com/poster.png",
+      prompt: "Separate the title text and the parrot into independent layers",
+      resolution: "auto",
+      output_format: "png"
+    },
+    out_task_id: "my_task_123456"
+  }
+
+  http = Net::HTTP.new(url.host, url.port)
+  http.use_ssl = true
+
+  request = Net::HTTP::Post.new(url)
+  request["Authorization"] = "Bearer <token>"
+  request["Content-Type"] = "application/json"
+  request.body = payload.to_json
+
+  response = http.request(request)
+  puts response.body
+  ```
+
+  ```swift Swift
+  import Foundation
+
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
+
+  let payload: [String: Any] = [
+      "model": "seedream_v5_flash_layerize",
+      "params": [
+          "image_url": "https://example.com/poster.png",
+          "prompt": "Separate the title text and the parrot into independent layers",
+          "resolution": "auto",
+          "output_format": "png"
+      ],
+      "out_task_id": "my_task_123456"
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      if let error = error {
+          print("Error: \(error)")
+          return
+      }
+
+      if let data = data, let responseString = String(data: data, encoding: .utf8) {
+          print(responseString)
+      }
+  }
+
+  task.resume()
+  ```
+
+  ```csharp C#
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url = "https://aireiter.com/api/openapi/submit";
+
+          var payload = @"{
+                ""model"": ""seedream_v5_flash_layerize"",
+                ""params"": {
+                  ""image_url"": ""https://example.com/poster.png"",
+                  ""prompt"": ""Separate the title text and the parrot into independent layers"",
+                  ""resolution"": ""auto"",
+                  ""output_format"": ""png""
+                },
+                ""out_task_id"": ""my_task_123456""
+              }";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+
+          var content = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          var result = await response.Content.ReadAsStringAsync();
+
+          Console.WriteLine(result);
+      }
+  }
+  ```
+
+  ```c C
+  #include <stdio.h>
+  #include <curl/curl.h>
+
+  int main(void) {
+      CURL *curl;
+      CURLcode res;
+
+      curl_global_init(CURL_GLOBAL_DEFAULT);
+      curl = curl_easy_init();
+
+      if(curl) {
+          const char *url = "https://aireiter.com/api/openapi/submit";
+          const char *payload = "{\"model\":\"seedream_v5_flash_layerize\",\"params\":{\"image_url\":\"https://example.com/poster.png\",\"prompt\":\"Separate the title text and the parrot into independent layers\",\"resolution\":\"auto\",\"output_format\":\"png\"},\"out_task_id\":\"my_task_123456\"}";
+
+          struct curl_slist *headers = NULL;
+          headers = curl_slist_append(headers, "Authorization: Bearer <token>");
+          headers = curl_slist_append(headers, "Content-Type: application/json");
+
+          curl_easy_setopt(curl, CURLOPT_URL, url);
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
+          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+          res = curl_easy_perform(curl);
+
+          if(res != CURLE_OK) {
+              fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                      curl_easy_strerror(res));
+          }
+
+          curl_slist_free_all(headers);
+          curl_easy_cleanup(curl);
+      }
+
+      curl_global_cleanup();
+      return 0;
+  }
+  ```
+
+  ```objectivec Objective-C
+  #import <Foundation/Foundation.h>
+
+  int main(int argc, const char * argv[]) {
+      @autoreleasepool {
+          NSURL *url = [NSURL URLWithString:@"https://aireiter.com/api/openapi/submit"];
+
+          NSDictionary *payload = @{
+              @"model": @"seedream_v5_flash_layerize",
+              @"params": @{
+                  @"image_url": @"https://example.com/poster.png",
+                  @"prompt": @"Separate the title text and the parrot into independent layers",
+                  @"resolution": @"auto",
+                  @"output_format": @"png"
+              },
+              @"out_task_id": @"my_task_123456"
+          };
+
+          NSError *error;
+          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
+                                                            options:0
+                                                              error:&error];
+
+          NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+          [request setHTTPMethod:@"POST"];
+          [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
+          [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+          [request setHTTPBody:jsonData];
+
+          NSURLSessionDataTask *task = [[NSURLSession sharedSession]
+              dataTaskWithRequest:request
+              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+                  if (error) {
+                      NSLog(@"Error: %@", error);
+                      return;
+                  }
+                  NSString *result = [[NSString alloc] initWithData:data
+                                                          encoding:NSUTF8StringEncoding];
+                  NSLog(@"%@", result);
+              }];
+
+          [task resume];
+          [[NSRunLoop mainRunLoop] run];
+      }
+      return 0;
+  }
+  ```
+
+  ```ocaml OCaml
+  (* Requires cohttp and yojson libraries *)
+  open Lwt
+  open Cohttp
+  open Cohttp_lwt_unix
+
+  let url = "https://aireiter.com/api/openapi/submit"
+
+  let payload = {|{
+    "model": "seedream_v5_flash_layerize",
+    "params": {
+      "image_url": "https://example.com/poster.png",
+      "prompt": "Separate the title text and the parrot into independent layers",
+      "resolution": "auto",
+      "output_format": "png"
+    },
+    "out_task_id": "my_task_123456"
+  }|}
+
+  let () =
+    let headers = Header.init ()
+      |> fun h -> Header.add h "Authorization" "Bearer <token>"
+      |> fun h -> Header.add h "Content-Type" "application/json"
+    in
+    let body = Cohttp_lwt.Body.of_string payload in
+
+    let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
+      body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
+      print_endline body_str
+    in
+    Lwt_main.run response
+  ```
+
+  ```dart Dart
+  import 'dart:convert';
+  import 'package:http/http.dart' as http;
+
+  void main() async {
+    final url = Uri.parse('https://aireiter.com/api/openapi/submit');
+
+    final payload = {
+      'model': 'seedream_v5_flash_layerize',
+      'params': {
+        'image_url': 'https://example.com/poster.png',
+        'prompt': 'Separate the title text and the parrot into independent layers',
+        'resolution': 'auto',
+        'output_format': 'png'
+      },
+      'out_task_id': 'my_task_123456'
+    };
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer <token>',
+        'Content-Type': 'application/json'
+      },
+      body: jsonEncode(payload),
+    );
+
+    print(response.body);
+  }
+  ```
+
+  ```r R
+  library(httr)
+  library(jsonlite)
+
+  url <- "https://aireiter.com/api/openapi/submit"
+
+  payload <- list(
+    model = "seedream_v5_flash_layerize",
+    params = list(
+      image_url = "https://example.com/poster.png",
+      prompt = "Separate the title text and the parrot into independent layers",
+      resolution = "auto",
+      output_format = "png"
+    ),
+    out_task_id = "my_task_123456"
+  )
+
+  response <- POST(
+    url,
+    add_headers(
+      Authorization = "Bearer <token>",
+      `Content-Type` = "application/json"
+    ),
+    body = toJSON(payload, auto_unbox = TRUE),
+    encode = "raw"
+  )
+
+  cat(content(response, "text"))
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+  {
+    "statusCode": 200,
+    "message": "",
+    "data": {
+      "out_task_id": "my_task_123456",
+      "status": "pending",
+      "created_at": "2026-10-16T06:03:28.242Z"
+    }
+  }
+  ```
+
+  ```json 400
+  {
+    "statusCode": 400,
+    "message": "リクエストパラメータが無効です",
+    "ok": false
+  }
+  ```
+
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "認証に失敗しました。APIキーを確認してください"
+    }
+  }
+  ```
+
+  ```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "アカウント残高が不足しています。チャージしてから再試行してください"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "サーバー内部エラーが発生しました。しばらくしてから再試行してください"
+    }
+  }
+  ```
+</ResponseExample>
+
+## 查询任务结果
+
+タスク送信後、`POST /api/openapi/query` APIを使用して、`status` が `completed` または `failed` になるまでタスクステータスをポーリングします。タスク完了後、`output` フィールドにレイヤーリストが返されます。
+
+<RequestExample>
+  ```bash cURL
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/query \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "out_task_id": "my_task_123456"
+    }'
+  ```
+</RequestExample>
+
+### クエリレスポンス - レイヤー出力構造
+
+タスク完了後、`output` はレイヤーオブジェクトの配列となり、各レイヤーには `url` と `metadata` が含まれます：
+
+<ResponseField name="output" type="array">
+  レイヤーのリスト。各要素はレイヤーオブジェクトで、最大17個（ベース画像1枚 + レイヤー16個）
+
+  <Expandable title="レイヤーオブジェクトのプロパティ">
+    <ResponseField name="url" type="string">
+      このレイヤーの画像URL。ベース画像の形式は `output_format` によって決定され、その他のレイヤーは透過PNGになります
+    </ResponseField>
+
+    <ResponseField name="metadata" type="object">
+      レイヤーのメタデータ
+
+      <Expandable title="metadata プロパティ">
+        <ResponseField name="kind" type="string">
+          固定値 `"layer"`。これがレイヤー出力であることを示します
+        </ResponseField>
+
+        <ResponseField name="z_index" type="number">
+          レイヤーの階層インデックス
+
+          * `z_index = 0`：ベース画像（完全な背景）、`bounding_box` は `null`
+          * `z_index ≥ 1`：前景レイヤー、奥から手前への順序で配置
+        </ResponseField>
+
+        <ResponseField name="bounding_box" type="object | null">
+          元の画像内におけるレイヤーの位置領域
+
+          ベース画像（z_index=0）は `null` となり、その他のレイヤーは座標オブジェクトを返します：
+
+          <Expandable title="bounding_box プロパティ">
+            <ResponseField name="absolute" type="array">
+              絶対ピクセル座標 `[x1, y1, x2, y2]`。出力ベース画像の解像度に基づきます
+            </ResponseField>
+
+            <ResponseField name="normalized" type="array">
+              正規化座標 `[x1, y1, x2, y2]`、範囲は 0–1000
+            </ResponseField>
+          </Expandable>
+        </ResponseField>
+
+        <ResponseField name="name" type="string | null">
+          レイヤー名。ベース画像の場合は `null`
+        </ResponseField>
+
+        <ResponseField name="description" type="string | null">
+          レイヤーの説明。ベース画像の場合は `null`
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### クエリレスポンス例
+
+<ResponseExample>
+  ```json 200
+  {
+    "statusCode": 200,
+    "message": "",
+    "data": {
+      "out_task_id": "my_task_123456",
+      "status": "completed",
+      "created_at": "2026-10-16T06:03:28.000Z",
+      "completed_at": "2026-10-16T06:04:26.000Z",
+      "output": [
+        {
+          "url": "https://static.aireiter.com/upload/example/layer-0.png",
+          "metadata": {
+            "kind": "layer",
+            "z_index": 0,
+            "bounding_box": null,
+            "name": null,
+            "description": null
+          }
+        },
+        {
+          "url": "https://static.aireiter.com/upload/example/layer-1.png",
+          "metadata": {
+            "kind": "layer",
+            "z_index": 1,
+            "bounding_box": {
+              "absolute": [755, 47, 1776, 855],
+              "normalized": [393, 43, 924, 785]
+            },
+            "name": "Canyon and sunset sky",
+            "description": "Distant canyon, winding river valley, setting sun and orange gradient sky, without the car and road"
+          }
+        },
+        {
+          "url": "https://static.aireiter.com/upload/example/layer-2.png",
+          "metadata": {
+            "kind": "layer",
+            "z_index": 2,
+            "bounding_box": {
+              "absolute": [0, 707, 1920, 1088],
+              "normalized": [0, 650, 999, 999]
+            },
+            "name": "Gravel road",
+            "description": "Gravel dirt road under the car, including stones and tire tracks"
+          }
+        },
+        {
+          "url": "https://static.aireiter.com/upload/example/layer-3.png",
+          "metadata": {
+            "kind": "layer",
+            "z_index": 3,
+            "bounding_box": {
+              "absolute": [232, 184, 1529, 858],
+              "normalized": [121, 169, 796, 788]
+            },
+            "name": "Blue rally car",
+            "description": "The whole blue rally car including body, wheels and windows"
+          }
+        }
+      ]
+    }
+  }
+  ```
+
+  > 上記の例では 4 つの要素のみを表示していますが、実際には元画像の内容とプロンプトに応じて 2–17 個（ベース画像 + 最大 16 個のレイヤー）が返されます。レイヤー名と説明の言語はプロンプトに従います。
+</ResponseExample>
+
+> 結果画像のURLは一時的なストレージであるため、速やかにダウンロードしてご自身のストレージに保存してください。
