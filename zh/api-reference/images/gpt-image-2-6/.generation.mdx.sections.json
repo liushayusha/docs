@@ -1,0 +1,52 @@
+[
+  {
+    "id": "__frontmatter__",
+    "hash": "61b902f4",
+    "index": 0
+  },
+  {
+    "id": "__prologue__",
+    "hash": "5f31a2b3",
+    "index": 1
+  },
+  {
+    "id": "section-0-authorizations",
+    "hash": "3660f703",
+    "index": 2
+  },
+  {
+    "id": "section-1-body",
+    "hash": "c099b9b5",
+    "index": 3
+  },
+  {
+    "id": "section-2-尺寸-分辨率映射表",
+    "hash": "c6822a8b",
+    "index": 4
+  },
+  {
+    "id": "section-3-gif-帧尺寸",
+    "hash": "d7ed00ce",
+    "index": 5
+  },
+  {
+    "id": "section-4-response",
+    "hash": "99cf5599",
+    "index": 6
+  },
+  {
+    "id": "section-5-query-task",
+    "hash": "60b57ba3",
+    "index": 7
+  },
+  {
+    "id": "section-6-使用说明",
+    "hash": "19fa4c2d",
+    "index": 8
+  },
+  {
+    "id": "section-7-request-examples",
+    "hash": "aa177406",
+    "index": 9
+  }
+]

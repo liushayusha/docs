@@ -1,0 +1,428 @@
+---
+title: 'GPT-Image-2.6 画像生成'
+description: |
+    - 非同期処理モード、後続の問い合わせ用タスクIDを返却
+    - OpenAI GPT-Image 2.6 ファミリー：Flare（より高速な画像生成）と Sunburst（ディテール重視および編集の忠実性）
+    - Text-to-Image / Image-to-Image / 参照画像編集に対応、参照画像は最大10枚
+    - 14種類のアスペクト比（autoを含む）に対応、aspect_ratio で指定
+    - resolution レベル 1K / 2K / 4K、およびAPI専用のカスタムピクセル size に対応
+    - GIFアニメーション出力に対応：output_format に gif を指定、フレーム数（2–9）および各フレームの表示時間を設定可能
+    - 1回のリクエストにつき1枚の画像（PNGまたはGIF）を返却
+    - 送信された prompt はプラットフォームのNGワード／安全性審査を受け、違反コンテンツは直接拒絶されます
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+<Note>
+GPT-Image 2.6 には AIReiter 内で2つのモデル名があります：`gpt_image_2_6_flare` と `gpt_image_2_6_sunburst`。単独の `gpt_image_2_6` はありません。両モデルのパラメータは完全に同一です。
+
+`output_format` は `png`（デフォルト）または `gif` を選択できます。本インターフェースでは `quality`、`output_n`、`background` は提供されておらず、SVGベクター画像やマスク / 囲み選択による部分編集もサポートしていません。
+</Note>
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  すべてのAPIで Bearer Token による認証が必要です
+
+  API Key の取得：
+
+  <a href={apiKeyUrl} target="_blank">API Key 管理ページ</a>にアクセスして API Key を取得してください
+
+  使用時はリクエストヘッダーに追加します：
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  モデル名、以下のいずれかを選択：
+
+  * `"gpt_image_2_6_flare"` — Flare、画像生成がより高速で、下書きや一括生成に最適
+  * `"gpt_image_2_6_sunburst"` — Sunburst、ディテールをより重視し、人物や商品、レイアウトを保持したい編集に最適
+
+  2つのモデルを比較する際は、prompt、参照画像、アスペクト比、解像度を同じに保ってください。
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  モデルパラメータオブジェクト
+
+  <Expandable title="params オブジェクトのプロパティ">
+    <ParamField body="prompt" type="string" required>
+      画像生成のテキスト記述
+
+      * 中国語と英語をサポート、詳細な記述を推奨
+      * 画像編集時は、変更する内容と保持すべき内容を明確に記述してください
+      * 透明な背景が必要な場合は、プロンプトで直接指定してください（例："transparent background"）。透明になるかどうかはモデルによって決定されます
+      * 送信前にプラットフォームの機微語／セキュリティ審査が行われ、規約違反コンテンツに該当した場合は直接エラーが返されます
+    </ParamField>
+
+    <ParamField body="output_format" type="string" default="png">
+      出力形式、デフォルトは `png`
+
+      * `png` - 静止画
+      * `gif` - ループアニメーション、`frame_count`、`frame_duration_ms` と組み合わせて使用
+
+      <Warning>
+        `gif` の場合、`image_url` 参照画像はサポートされず（渡すとタスクが失敗します）、`resolution` は使用されません。`aspect_ratio` は `auto`、`1:1`、`16:9`、`9:16`、`4:3`、`3:4`、`3:2`、`2:3` のみをサポートし、それ以外の比率を渡すと 400 が返されます。
+      </Warning>
+    </ParamField>
+
+    <ParamField body="image_url" type="string[]">
+      参照画像配列。渡すと Image-to-Image／編集モードで処理されます（`output_format` が `png` の場合のみ利用可能）
+
+      * 最大 10 枚の参照画像
+      * 渡さない場合は純粋な Text-to-Image として処理されます
+      * 以下の2つの形式をサポート：
+        1. 一般公開されているアクセス可能な URL
+        2. Base64 エンコード形式
+           * 完全な Data URI 形式を使用する必要があります：`data:image/{形式};base64,{base64データ}`
+           * サポートされている画像形式：jpeg、png、webp
+           * 例：`data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+           * ⚠️ 注意：必ず `data:image/jpeg;base64,` プレフィックス部分を含める必要があります
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="auto">
+      画像生成のアスペクト比、デフォルトは `auto`
+
+      以下の値をサポート：
+
+      * `auto` - 最適な比率を自動選択
+      * `1:1` - 正方形
+      * `16:9` / `9:16` - ワイド横 / 縦
+      * `4:3` / `3:4` - 標準横 / 縦
+      * `3:2` / `2:3` - クラシック横 / 縦
+      * `5:4` / `4:5` - ほぼ正方形の横 / 縦
+      * `2:1` / `1:2` - ワイド横 / ロング縦
+      * `21:9` / `9:21` - ウルトラワイド横 / ウルトラロング縦
+
+      <Warning>
+        比率文字列または `auto` のみをサポートします。ピクセル寸法（例：`1024x1024`）を渡すと直接エラーになります。正確なピクセルが必要な場合は `size` を使用してください。
+      </Warning>
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="1K">
+      解像度グレード、デフォルトは `1K`
+
+      * `1K` - 約 1024 基準
+      * `2K` - 約 2048 基準
+      * `4K` - 約 3840 基準
+
+      <Warning>
+        `size` を渡す場合は、`resolution` / `aspect_ratio` を同時に渡さないでください。渡すと 400 が返されます。
+      </Warning>
+    </ParamField>
+
+    <ParamField body="frame_count" type="integer" default="9">
+      GIF フレーム数、`output_format` が `gif` の場合のみ有効、デフォルトは `9`
+
+      * 設定可能な範囲は `2` 〜 `9`、範囲を超えると 400 が返されます
+    </ParamField>
+
+    <ParamField body="frame_duration_ms" type="integer" default="200">
+      GIF の1フレームあたりの再生時間（ミリ秒）、`output_format` が `gif` の場合のみ有効、デフォルトは `200`
+
+      * 設定可能な範囲は `100` 〜 `500`（10ミリ秒単位で丸め処理）、範囲を超えると 400 が返されます
+      * 例：9フレーム × 200ミリ秒で、1周 1.8 秒のループ
+    </ParamField>
+
+    <ParamField body="size" type="string">
+      カスタムピクセル寸法（API 専用、`aspect_ratio` / `resolution` と**排他**）
+
+      形式は `幅x高さ`、例：`2048x1536`、`3840x2160`。
+
+      **利用制限：**
+
+      * 形式は必ず `^\d+x\d+$`
+      * 幅と高さは両方とも 16 の倍数
+      * 各辺は 3840 以下
+      * 長辺 / 短辺の比率は 3:1 以下
+      * 総ピクセル数（幅 × 高さ）は **655,360 〜 8,294,400**
+      * `aspect_ratio`、`resolution` と排他であり、同時に渡すと 400 が返されます
+      * `gif` の場合は比率に応じて最も近い GIF フレームサイズに変換されます（下の GIF フレームサイズ表を参照）
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  リクエスト元のタスク ID
+
+  ユーザー定義のタスク識別子、必須。結果をクエリする際は、同じ値を使用して `POST /api/openapi/query` を呼び出します。
+</ParamField>
+
+## 尺寸 × 分辨率映射表
+
+`aspect_ratio × resolution` → 実際のピクセル（`auto` はモデルが自動選択するため、表には含まれません）：
+
+| aspect\_ratio | `1K`      | `2K`      | `4K`      |
+| ------------- | --------- | --------- | --------- |
+| `1:1`         | 1024×1024 | 2048×2048 | 2880×2880 |
+| `3:2`         | 1536×1024 | 2048×1360 | 3520×2336 |
+| `2:3`         | 1024×1536 | 1360×2048 | 2336×3520 |
+| `4:3`         | 1024×768  | 2048×1536 | 3312×2480 |
+| `3:4`         | 768×1024  | 1536×2048 | 2480×3312 |
+| `5:4`         | 1280×1024 | 2560×2048 | 3216×2576 |
+| `4:5`         | 1024×1280 | 2048×2560 | 2576×3216 |
+| `16:9`        | 1536×864  | 2048×1152 | 3840×2160 |
+| `9:16`        | 864×1536  | 1152×2048 | 2160×3840 |
+| `2:1`         | 1760×880  | 2688×1344 | 3840×1920 |
+| `1:2`         | 880×1760  | 1344×2688 | 1920×3840 |
+| `21:9`        | 1904×816  | 2688×1152 | 3840×1648 |
+| `9:21`        | 816×1904  | 1152×2688 | 1648×3840 |
+
+> `3:2` / `2:3` @ 2K は実際には 2048×1360（近似比率）です。表以外の比率が必要な場合は `size` を使用してください。
+
+## GIF 帧尺寸
+
+`output_format` が `gif` の場合、各フレームのサイズは `aspect_ratio` によって決定されます（`auto` は `1:1`）：
+
+| aspect\_ratio | 各フレームのサイズ |
+| ------------- | -------- |
+| `1:1`         | 896×896  |
+| `16:9`        | 1088×608 |
+| `9:16`        | 608×1088 |
+| `4:3`         | 960×720  |
+| `3:4`         | 720×960  |
+| `3:2`         | 1008×672 |
+| `2:3`         | 672×1008 |
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  リクエスト元タスクID、結果の照会に使用可能
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  初期ステータス、通常は `"pending"`
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  作成日時（ISO形式）
+</ResponseField>
+
+## Query Task
+
+GPT-Image 2.6は非同期画像生成モデルです。タスク送信後、`out_task_id`を使用してタスクステータスを照会してください。[タスクステータスの取得](/ja/api-reference/tasks/status)も参照してください。
+
+<ParamField body="out_task_id" type="string" required>
+  タスク送信時に渡されたリクエスター側のタスクID。
+</ParamField>
+
+```bash
+curl --request POST \
+  --url https://aireiter.com/api/openapi/query \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "out_task_id": "my_task_123456"
+  }'
+```
+
+照会が成功して完了すると、レスポンス内の `output` 配列に生成された画像（PNGまたはGIF）が含まれます。
+
+実測値として、1K画像1枚は約25〜45秒、GIFは約25〜70秒で完了し、Sunburstは通常Flareよりやや遅くなります。解像度が高いほど、また参照画像が多いほど処理時間が長くなりますので、重複して送信せず、継続的にポーリングを行ってください。
+
+## 使用说明
+
+* `prompt` のみを渡した場合はテキストからの画像生成となり、`image_url` を渡した場合は参照画像に基づく編集処理が行われ、プロンプトで指定されていない部分は可能な限り維持されます。
+* 1回のリクエストにつき1枚の画像のみが返されます。複数枚が必要な場合は個別にリクエストしてください。
+* デフォルトでは PNG を出力します。`output_format: "gif"` を渡すとループ GIF アニメーションを出力します。
+* GIF は `prompt` のみに基づいて生成されます。プロンプトには主体、動作、ループ方法（例: 「手を振った後に元の姿勢に戻る」など）を明確に記述してください。動作がシンプルなほど、フレーム間の連続性が高くなります。
+* 4K 設定は大サイズでの納品が必要なシーンに適しています。ディテールが重視される写実的な画像の場合は、まず 1K / 2K で構図を確認した上で 4K を出力することをお勧めします。
+
+## Request Examples
+
+<RequestExample>
+  ```bash cURL（Flare + aspect_ratio）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gpt_image_2_6_flare",
+      "params": {
+        "prompt": "フラットなベクタースタイルのポスター：三日月の下に座っているキツネ、タイトルテキスト \"NIGHT SHIFT\"、フラットカラー、白背景",
+        "aspect_ratio": "16:9",
+        "resolution": "1K"
+      },
+      "out_task_id": "my_task_123456"
+    }'
+  ```
+
+  ```bash cURL（Sunburst + 参照画像）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gpt_image_2_6_sunburst",
+      "params": {
+        "prompt": "オレンジ色のブロックを段ボール箱に変更し、その他の部分は変更なし",
+        "image_url": ["https://example.com/product.png"],
+        "aspect_ratio": "1:1",
+        "resolution": "2K"
+      },
+      "out_task_id": "my_task_edit_001"
+    }'
+  ```
+
+  ```bash cURL（size カスタムサイズ）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gpt_image_2_6_flare",
+      "params": {
+        "prompt": "フラットなベクタースタイルのポスター：三日月の下に座っているキツネ、タイトルテキスト \"NIGHT SHIFT\"、フラットカラー、白背景",
+        "size": "2048x1152"
+      },
+      "out_task_id": "my_task_size_001"
+    }'
+  ```
+
+  ```bash cURL（GIF アニメーション）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gpt_image_2_6_flare",
+      "params": {
+        "prompt": "赤い肉球柄のスカーフを巻いた子猫が立ち上がって手を振る、温かみのあるリビング、手を振った後は元のポーズに戻る、シームレスループ",
+        "output_format": "gif",
+        "aspect_ratio": "1:1",
+        "frame_count": 9,
+        "frame_duration_ms": 200
+      },
+      "out_task_id": "my_task_gif_001"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "gpt_image_2_6_flare",
+      "params": {
+          "prompt": "フラットなベクタースタイルのポスター：三日月の下に座っているキツネ、タイトルテキスト \"NIGHT SHIFT\"、フラットカラー、白背景",
+          "aspect_ratio": "16:9",
+          "resolution": "1K"
+      },
+      "out_task_id": "my_task_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "gpt_image_2_6_flare",
+    params: {
+      prompt: "フラットなベクタースタイルのポスター：三日月の下に座っているキツネ、タイトルテキスト \"NIGHT SHIFT\"、フラットカラー、白背景",
+      aspect_ratio: "16:9",
+      resolution: "1K"
+    },
+    out_task_id: "my_task_123456"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer <token>",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  })
+    .then((response) => response.json())
+    .then((data) => console.log(data));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+      payload := map[string]interface{}{
+          "model": "gpt_image_2_6_flare",
+          "params": map[string]interface{}{
+              "prompt":       "フラットなベクタースタイルのポスター：三日月の下に座っているキツネ、タイトルテキスト \"NIGHT SHIFT\"、フラットカラー、白背景",
+              "aspect_ratio": "16:9",
+              "resolution":   "1K",
+          },
+          "out_task_id": "my_task_123456",
+      }
+      jsonData, _ := json.Marshal(payload)
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+      resp, err := http.DefaultClient.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+      body, _ := io.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+  {
+      "statusCode": 200,
+      "message": "",
+      "data": {
+          "out_task_id": "my_task_123456",
+          "status": "pending",
+          "created_at": "2026-11-06T06:00:00.000Z"
+      }
+  }
+  ```
+
+  ```json 400
+  {
+      "statusCode": 400,
+      "message": "リクエストパラメータが無効です",
+      "ok": false
+  }
+  ```
+
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "認証に失敗しました。APIキーを確認してください"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "サーバー内部エラーが発生しました。しばらくしてからもう一度お試しください"
+    }
+  }
+  ```
+</ResponseExample>

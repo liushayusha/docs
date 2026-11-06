@@ -1,0 +1,428 @@
+---
+title: 'GPT-Image-2.6 Image Generation'
+description: |
+    - Asynchronous processing mode, returns a task ID for subsequent queries
+    - OpenAI GPT-Image 2.6 family: Flare (faster image generation) and Sunburst (greater emphasis on detail and editing fidelity)
+    - Supports text-to-image / image-to-image / reference image editing, with up to 10 reference images
+    - Supports 14 aspect ratios (including auto), passed via aspect_ratio
+    - Supports resolution tiers of 1K / 2K / 4K, as well as API-exclusive custom size in pixels
+    - Supports animated GIF output: pass gif to output_format, with configurable frame count (2–9) and duration per frame
+    - Each request returns 1 image (PNG or GIF)
+    - Submitted prompts undergo platform sensitive word / safety review, and violating content will be directly rejected
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+<Note>
+GPT-Image 2.6 has two model names in AIReiter: `gpt_image_2_6_flare` and `gpt_image_2_6_sunburst`, with no standalone `gpt_image_2_6`. The parameters for both models are completely identical.
+
+`output_format` can be `png` (default) or `gif`. This endpoint does not expose `quality`, `output_n`, or `background`, nor does it support SVG vector graphics and mask / selection local editing.
+</Note>
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  All endpoints require Bearer Token authentication
+
+  Get the API key:
+
+  Visit the <a href={apiKeyUrl} target="_blank">API Key Management page</a> to get your API Key
+
+  Add to the request header when using:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  Model name, choose one of two:
+
+  * `"gpt_image_2_6_flare"` — Flare, faster image generation, suitable for drafts and batch generation
+  * `"gpt_image_2_6_sunburst"` — Sunburst, more detail-focused, suitable for edits requiring preservation of characters, products, or layouts
+
+  When comparing the two models, please keep the prompt, reference images, aspect ratio, and resolution consistent.
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  Model parameter object
+
+  <Expandable title="params Object Properties">
+    <ParamField body="prompt" type="string" required>
+      Text description for image generation
+
+      * Supports Chinese and English; detailed descriptions are recommended
+      * When editing images, clearly specify what to change and what must remain unchanged
+      * If a transparent background is required, please specify directly in the prompt (e.g., "transparent background"); whether it is transparent is determined by the model
+      * Submissions undergo platform sensitive words / safety moderation; any violating content will directly return an error
+    </ParamField>
+
+    <ParamField body="output_format" type="string" default="png">
+      Output format, default `png`
+
+      * `png` - Static image
+      * `gif` - Looping animated image, used with `frame_count` and `frame_duration_ms`
+
+      <Warning>
+        When `gif`, `image_url` reference images are not supported (passing them will cause the task to fail), `resolution` is not used, and `aspect_ratio` only supports `auto`, `1:1`, `16:9`, `9:16`, `4:3`, `3:4`, `3:2`, `2:3`; passing other ratios returns 400.
+      </Warning>
+    </ParamField>
+
+    <ParamField body="image_url" type="string[]">
+      Array of reference images; triggers image-to-image / editing mode when provided (only available when `output_format` is `png`)
+
+      * Up to 10 reference images
+      * If omitted, falls back to text-to-image mode
+      * Supports the following two formats:
+        1. Publicly accessible URL
+        2. Base64 encoded format
+           * Must use the complete Data URI format: `data:image/{format};base64,{base64_data}`
+           * Supported image formats: jpeg, png, webp
+           * Example: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+           * ⚠️ Note: Must include the `data:image/jpeg;base64,` prefix
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="auto">
+      Aspect ratio for image generation, default `auto`
+
+      Supports the following values:
+
+      * `auto` - Automatically select the most suitable aspect ratio
+      * `1:1` - Square
+      * `16:9` / `9:16` - Widescreen landscape / portrait
+      * `4:3` / `3:4` - Standard landscape / portrait
+      * `3:2` / `2:3` - Classic landscape / portrait
+      * `5:4` / `4:5` - Near-square landscape / portrait
+      * `2:1` / `1:2` - Wide landscape / tall portrait
+      * `21:9` / `9:21` - Ultrawide landscape / ultra-tall portrait
+
+      <Warning>
+        Only aspect ratio strings or `auto` are supported; passing pixel dimensions (e.g., `1024x1024`) will return an error directly. If exact pixels are needed, please use `size`.
+      </Warning>
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="1K">
+      Resolution tier, default `1K`
+
+      * `1K` - Approx. 1024 baseline
+      * `2K` - Approx. 2048 baseline
+      * `4K` - Approx. 3840 baseline
+
+      <Warning>
+        Do not pass `resolution` / `aspect_ratio` when passing `size`; otherwise, 400 will be returned.
+      </Warning>
+    </ParamField>
+
+    <ParamField body="frame_count" type="integer" default="9">
+      GIF frame count, only takes effect when `output_format` is `gif`, default `9`
+
+      * Value range `2` to `9`; returns 400 if out of range
+    </ParamField>
+
+    <ParamField body="frame_duration_ms" type="integer" default="200">
+      GIF frame duration (in milliseconds), only takes effect when `output_format` is `gif`, default `200`
+
+      * Value range `100` to `500`, rounded to multiples of 10 ms; returns 400 if out of range
+      * For example, 9 frames × 200 ms results in a 1.8-second loop
+    </ParamField>
+
+    <ParamField body="size" type="string">
+      Custom pixel dimensions (API only, **mutually exclusive** with `aspect_ratio` / `resolution`)
+
+      Format is `widthxheight`, for example `2048x1536`, `3840x2160`.
+
+      **Usage Limitations:**
+
+      * Format must be `^\d+x\d+$`
+      * Both width and height must be multiples of 16
+      * Each side must not exceed 3840
+      * Long side / short side must not exceed 3:1
+      * Total pixels (width × height) must be between **655,360 ~ 8,294,400**
+      * Mutually exclusive with `aspect_ratio` and `resolution`; passing them simultaneously returns 400
+      * When `gif`, it will be converted proportionally to the closest GIF frame size (see the GIF frame size table below)
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  Initiator task ID
+
+  User-defined task identifier, required. Use the same value to call `POST /api/openapi/query` when querying results.
+</ParamField>
+
+## 尺寸 × 分辨率映射表
+
+`aspect_ratio × resolution` → Actual pixels (`auto` is selected by the model and not included in the table):
+
+| aspect\_ratio | `1K`      | `2K`      | `4K`      |
+| ------------- | --------- | --------- | --------- |
+| `1:1`         | 1024×1024 | 2048×2048 | 2880×2880 |
+| `3:2`         | 1536×1024 | 2048×1360 | 3520×2336 |
+| `2:3`         | 1024×1536 | 1360×2048 | 2336×3520 |
+| `4:3`         | 1024×768  | 2048×1536 | 3312×2480 |
+| `3:4`         | 768×1024  | 1536×2048 | 2480×3312 |
+| `5:4`         | 1280×1024 | 2560×2048 | 3216×2576 |
+| `4:5`         | 1024×1280 | 2048×2560 | 2576×3216 |
+| `16:9`        | 1536×864  | 2048×1152 | 3840×2160 |
+| `9:16`        | 864×1536  | 1152×2048 | 2160×3840 |
+| `2:1`         | 1760×880  | 2688×1344 | 3840×1920 |
+| `1:2`         | 880×1760  | 1344×2688 | 1920×3840 |
+| `21:9`        | 1904×816  | 2688×1152 | 3840×1648 |
+| `9:21`        | 816×1904  | 1152×2688 | 1648×3840 |
+
+> `3:2` / `2:3` @ 2K is actually 2048×1360 (approximate ratio). For aspect ratios not in the table, please use `size`.
+
+## GIF 帧尺寸
+
+When `output_format` is `gif`, the size of each frame is determined by `aspect_ratio` (`auto` defaults to `1:1`):
+
+| aspect\_ratio | Frame Size |
+| ------------- | -------- |
+| `1:1`         | 896×896  |
+| `16:9`        | 1088×608 |
+| `9:16`        | 608×1088 |
+| `4:3`         | 960×720  |
+| `3:4`         | 720×960  |
+| `3:2`         | 1008×672 |
+| `2:3`         | 672×1008 |
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  Initiator task ID, can be used to query results
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Initial status, usually `"pending"`
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  Creation time (ISO format)
+</ResponseField>
+
+## Query Task
+
+GPT-Image 2.6 is an asynchronous image generation model. After submitting a task, please use `out_task_id` to query the task status. You can also refer to [Get Task Status](/en/api-reference/tasks/status).
+
+<ParamField body="out_task_id" type="string" required>
+  The initiator task ID passed when submitting the task.
+</ParamField>
+
+```bash
+curl --request POST \
+  --url https://aireiter.com/api/openapi/query \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "out_task_id": "my_task_123456"
+  }'
+```
+
+After the query succeeds and is completed, the `output` array in the response will contain the generated image (PNG or GIF).
+
+In actual testing, a single 1K image takes about 25–45 seconds to complete, and a GIF takes about 25–70 seconds. Sunburst is usually slightly slower than Flare; the higher the resolution and the more reference images, the longer it takes. Please continue polling and do not submit repeatedly.
+
+## 使用说明
+
+* When only `prompt` is passed, it is text-to-image; when `image_url` is passed, it performs editing based on the reference image, and parts not mentioned in the prompt will be kept unchanged as much as possible.
+* Each request returns only 1 image; if multiple images are needed, please submit them separately.
+* The default output is PNG; pass `output_format: "gif"` to output a looping animated GIF.
+* GIFs are generated based only on `prompt`. Please clearly describe the subject, action, and looping method in the prompt (e.g., "wave and return to the initial pose"); the simpler the action, the more coherent the frames.
+* The 4K tier is suitable for scenarios requiring large-format delivery; for realistic images with high detail requirements, it is recommended to first use 1K / 2K to confirm the composition before generating 4K.
+
+## Request Examples
+
+<RequestExample>
+  ```bash cURL (Flare + aspect_ratio)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gpt_image_2_6_flare",
+      "params": {
+        "prompt": "A flat vector style poster: a fox sitting under a crescent moon, title text \"NIGHT SHIFT\", solid color blocks, white background",
+        "aspect_ratio": "16:9",
+        "resolution": "1K"
+      },
+      "out_task_id": "my_task_123456"
+    }'
+  ```
+
+  ```bash cURL (Sunburst + Reference Image)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gpt_image_2_6_sunburst",
+      "params": {
+        "prompt": "Change the orange cube into a cardboard box, keep the rest of the image unchanged",
+        "image_url": ["https://example.com/product.png"],
+        "aspect_ratio": "1:1",
+        "resolution": "2K"
+      },
+      "out_task_id": "my_task_edit_001"
+    }'
+  ```
+
+  ```bash cURL (size Custom Size)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gpt_image_2_6_flare",
+      "params": {
+        "prompt": "A flat vector style poster: a fox sitting under a crescent moon, title text \"NIGHT SHIFT\", solid color blocks, white background",
+        "size": "2048x1152"
+      },
+      "out_task_id": "my_task_size_001"
+    }'
+  ```
+
+  ```bash cURL (GIF Animation)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "gpt_image_2_6_flare",
+      "params": {
+        "prompt": "A kitten wearing a red paw-print scarf stands up and waves its paw, cozy living room, returns to initial pose after waving, seamless loop",
+        "output_format": "gif",
+        "aspect_ratio": "1:1",
+        "frame_count": 9,
+        "frame_duration_ms": 200
+      },
+      "out_task_id": "my_task_gif_001"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "gpt_image_2_6_flare",
+      "params": {
+          "prompt": "A flat vector style poster: a fox sitting under a crescent moon, title text \"NIGHT SHIFT\", solid color blocks, white background",
+          "aspect_ratio": "16:9",
+          "resolution": "1K"
+      },
+      "out_task_id": "my_task_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "gpt_image_2_6_flare",
+    params: {
+      prompt: "A flat vector style poster: a fox sitting under a crescent moon, title text \"NIGHT SHIFT\", solid color blocks, white background",
+      aspect_ratio: "16:9",
+      resolution: "1K"
+    },
+    out_task_id: "my_task_123456"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer <token>",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  })
+    .then((response) => response.json())
+    .then((data) => console.log(data));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+      payload := map[string]interface{}{
+          "model": "gpt_image_2_6_flare",
+          "params": map[string]interface{}{
+              "prompt":       "A flat vector style poster: a fox sitting under a crescent moon, title text \"NIGHT SHIFT\", solid color blocks, white background",
+              "aspect_ratio": "16:9",
+              "resolution":   "1K",
+          },
+          "out_task_id": "my_task_123456",
+      }
+      jsonData, _ := json.Marshal(payload)
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+      resp, err := http.DefaultClient.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+      body, _ := io.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+  {
+      "statusCode": 200,
+      "message": "",
+      "data": {
+          "out_task_id": "my_task_123456",
+          "status": "pending",
+          "created_at": "2026-11-06T06:00:00.000Z"
+      }
+  }
+  ```
+
+  ```json 400
+  {
+      "statusCode": 400,
+      "message": "Invalid request parameters",
+      "ok": false
+  }
+  ```
+
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "Authentication failed, please check your API key"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "Internal server error, please try again later"
+    }
+  }
+  ```
+</ResponseExample>
