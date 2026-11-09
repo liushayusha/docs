@@ -2,9 +2,10 @@
 title: 'MiniMax H3 Turbo 動画生成'
 description: |
   - MiniMax H3 Turbo、MiniMax H3の高速版
-  - 非同期処理モード、後続の照会用タスクIDを返却
-  - テキストからの動画生成、および最大8枚の参考画像、3本の参考動画、3本の参考音声に対応
-  - 768P出力をサポート、動画の長さ6-15秒、6種類のアスペクト比、デフォルトでネイティブオーディオトラック付き
+  - 非同期処理モード、後続の照会用にタスクIDを返却
+  - テキスト動画生成、および最大8枚の参照画像、3本の参照動画、3本の参照音声に対応
+  - 768P出力に対応、動画の長さは6〜15秒、6種類のアスペクト比、デフォルトでネイティブオーディオトラック付き
+  - デフォルト / 高品質の2つの生成モードに対応
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -32,7 +33,7 @@ MiniMax H3 Turbo の AIReiter におけるモデル名は `minimax_h3_turbo` で
 ## Body
 
 <ParamField body="model" type="string" required>
-  モデル名。固定値：
+  モデル名。以下を固定で使用：
 
   * `minimax_h3_turbo`
 </ParamField>
@@ -42,78 +43,87 @@ MiniMax H3 Turbo の AIReiter におけるモデル名は `minimax_h3_turbo` で
 
   <Expandable title="params オブジェクトのプロパティ">
     <ParamField body="prompt" type="string" required>
-      動画生成用のテキスト説明。
+      動画生成用のテキスト記述。
 
       被写体、シーン、カメラワーク、アクション、スタイル、ライティング、リズムなどの内容を記述できます。
 
-      参考素材を使用する場合、プロンプト内で「画像1 / 動画1 / 音声1」のように順番に指定してアップロードした内容を参照できます。
+      参照素材を使用する場合、プロンプト内で「画像1 / 動画1 / 音声1」のように順序に従ってアップロードしたコンテンツを指定できます。
     </ParamField>
 
     <ParamField body="video_length" type="number" default="6">
-      生成する動画の長さ（秒単位）。
+      生成する動画の長さ（単位：秒）。
 
-      整数の `6` から `15` に対応。
+      サポートされる整数：`6`〜`15`。
     </ParamField>
 
     <ParamField body="resolution" type="string" default="768p">
       出力解像度。`768p` に固定、省略可能。
     </ParamField>
 
+    <ParamField body="supported_params" type="string" default="fast">
+      生成モード。
+
+      サポートされる値：
+
+      * `fast` - デフォルトモード、デフォルト値
+      * `quality` - 高画質モード
+    </ParamField>
+
     <ParamField body="aspect_ratio" type="string" default="16:9">
       動画のアスペクト比。
 
-      サポートされているアスペクト比：
+      サポートされるアスペクト比：
 
-      * `16:9` - 横向き、デフォルト値
-      * `9:16` - 縦向き
+      * `16:9` - 横画面、デフォルト値
+      * `9:16` - 縦画面
       * `1:1` - 正方形
-      * `4:3` - 標準横向き
-      * `3:4` - 標準縦向き
+      * `4:3` - 標準横画面
+      * `3:4` - 標準縦画面
       * `21:9` - ウルトラワイド
     </ParamField>
 
     <ParamField body="image_url" type="string | string[]">
-      参照画像の URL（任意）。最大8枚。
+      参照画像のURL。省略可能。最大8枚。
 
-      画像を指定しない場合はテキストからの動画生成となり、画像を指定した場合は被写体、スタイル、構図を誘導する参照画像として機能します。
+      画像を渡さない場合はテキストからの動画生成となり、画像を渡した場合は被写体、スタイル、構図を誘導する参照画像として機能します。
 
-      画像の要件：
+      画像要件：
 
-      * JPEG、PNG、WEBP に対応
+      * JPEG、PNG、WEBPに対応
       * 1枚あたり最大20MB
-      * URL は一般公開アクセス可能である必要があります
+      * URLはパブリックアクセス可能である必要があります
     </ParamField>
 
     <ParamField body="video_url" type="string | string[]">
-      参照動画の URL（任意）。最大3本。
+      参照動画のURL。省略可能。最大3本。
 
       アクション、カメラワーク、リズムの誘導に使用されます。
 
-      動画の要件：
+      動画要件：
 
-      * MP4、MOV に対応
+      * MP4、MOVに対応
       * 1本あたり最大100MB
       * 1本あたりの長さは15秒以内
-      * URL は一般公開アクセス可能である必要があります
+      * URLはパブリックアクセス可能である必要があります
     </ParamField>
 
     <ParamField body="audio_url" type="string | string[]">
-      参照音声の URL（任意）。最大3本。
+      参照音声のURL。省略可能。最大3本。
 
-      音声の要件：
+      音声要件：
 
-      * MP3、WAV に対応
-      * 1ファイルあたり最大20MB
-      * 1ファイルあたりの長さは15秒以内
-      * URL は一般公開アクセス可能である必要があります
+      * MP3、WAVに対応
+      * 1本あたり最大20MB
+      * 1本あたりの長さは15秒以内
+      * URLはパブリックアクセス可能である必要があります
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  リクエスト側のタスク ID。
+  リクエスト元のタスクID。
 
-  ユーザー定義のタスク識別子（必須）。後からこの ID を使用してタスクのステータスや結果を照会できます。
+  ユーザー定義のタスク識別子、必須。後からこのIDを使用してタスクのステータスと結果を照会できます。
 </ParamField>
 
 ## Response
@@ -191,6 +201,7 @@ curl --request POST \
         ],
         "video_length": 8,
         "resolution": "768p",
+        "supported_params": "quality",
         "aspect_ratio": "16:9"
       },
       "out_task_id": "minimax_h3_turbo_reference_123456"
@@ -268,13 +279,13 @@ curl --request POST \
 
       payload := map[string]interface{}{
           "model": "minimax_h3_turbo",
-          "params": map[string]interface{}{
+          "params": map[string]interface{},
               "prompt":       "A lone traveler walks along a windswept cliff at golden hour, cinematic tracking shot",
               "video_length": 6,
               "resolution":   "768p",
               "aspect_ratio": "16:9",
           },
-          "out_task_id": "minimax_h3_turbo_text_123456"
+          "out_task_id": "minimax_h3_turbo_text_123456",
       }
 
       jsonData, _ := json.Marshal(payload)
@@ -699,13 +710,17 @@ curl --request POST \
 ## Mode Notes
 
 <Note>
-`image_url` を渡さない場合はテキストから動画を生成します。参考画像を渡した場合、画像は被写体、スタイル、構図をガイドするために使用され、最初や最後のフレームではありません。
+`image_url` を渡さない場合はテキストから動画を生成します。参照画像を渡した場合、画像は被写体、スタイル、構図の案内に使用され、最初や最後のフレームではありません。
 </Note>
 
 <Note>
-`video_url` を渡す場合、参考動画はアクション、カメラワーク、リズムのガイドに使用されます。参考画像や参考音声と同時に使用できます。
+`video_url` を渡した場合、参照動画はアクション、カメラワーク、またはリズムの案内に使用されます。参照画像や参照音声と同時に使用できます。
+</Note>
+
+<Note>
+`supported_params` を渡さない場合はデフォルトの `fast` 設定で生成されます。高品質設定が必要な場合は `"quality"` を渡してください。
 </Note>
 
 <Warning>
-本モデルは `first_last_frame`（最初と最後のフレーム）モードに対応しておらず、解像度は768Pのみ（480Pおよび2Kには非対応）、アスペクト比は3:2 / 2:3に対応していません。`end_image_url`、`type`、または `quality` を渡さないでください。
+本モデルは `first_last_frame`（最初と最後のフレーム）モードをサポートしておらず、解像度は768Pのみ（480Pおよび2Kは非対応）、アスペクト比は 3:2 / 2:3 をサポートしていません。`end_image_url`、`type`、または `quality` パラメータを渡さないでください。高品質設定を使用する場合は `supported_params: "quality"` を渡してください。
 </Warning>

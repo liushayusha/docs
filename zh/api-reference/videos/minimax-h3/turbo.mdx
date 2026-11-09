@@ -5,6 +5,7 @@ description: |
   - 异步处理模式，返回任务 ID 用于后续查询
   - 支持文生视频，以及最多 8 张参考图、3 段参考视频、3 段参考音频
   - 支持 768P 输出，视频时长 6-15 秒，6 种宽高比，默认带原生音轨
+  - 支持默认 / 高质量两种生成档位
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 
@@ -58,6 +59,15 @@ MiniMax H3 Turbo 在 AIReiter 中的模型名称为 `minimax_h3_turbo`。该模�
 
     <ParamField body="resolution" type="string" default="768p">
       输出分辨率，固定为 `768p`，可不传。
+    </ParamField>
+
+    <ParamField body="supported_params" type="string" default="fast">
+      生成档位。
+
+      支持的值：
+
+      * `fast` - 默认档，默认值
+      * `quality` - 高质量档
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="16:9">
@@ -192,6 +202,7 @@ curl --request POST \
         ],
         "video_length": 8,
         "resolution": "768p",
+        "supported_params": "quality",
         "aspect_ratio": "16:9"
       },
       "out_task_id": "minimax_h3_turbo_reference_123456"
@@ -707,6 +718,10 @@ curl --request POST \
 传入 `video_url` 时，参考视频用于引导动作、运镜或节奏；可与参考图、参考音频同时使用。
 </Note>
 
+<Note>
+`supported_params` 不传时按 `fast` 默认档生成；需要高质量档时传 `"quality"`。
+</Note>
+
 <Warning>
-本模型不支持 `first_last_frame` 首尾帧模式，分辨率只有 768P（不支持 480P 和 2K），宽高比不支持 3:2 / 2:3。请不要传入 `end_image_url`、`type` 或 `quality`。
+本模型不支持 `first_last_frame` 首尾帧模式，分辨率只有 768P（不支持 480P 和 2K），宽高比不支持 3:2 / 2:3。请不要传入 `end_image_url`、`type` 或 `quality` 参数；要用高质量档请传 `supported_params: "quality"`。
 </Warning>

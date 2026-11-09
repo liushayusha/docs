@@ -1,10 +1,11 @@
 ---
 title: 'MiniMax H3 Turbo Video Generation'
 description: |
-  - MiniMax H3 Turbo, accelerated version of MiniMax H3
-  - Asynchronous processing mode, returns task ID for subsequent queries
-  - Supports text-to-video, and up to 8 reference images, 3 reference videos, and 3 reference audio tracks
-  - Supports 768P output, video duration 6-15 seconds, 6 aspect ratios, with native audio track by default
+  - MiniMax H3 Turbo, an accelerated version of MiniMax H3
+  - Asynchronous processing mode, returns a task ID for subsequent queries
+  - Supports text-to-video, and up to 8 reference images, 3 reference videos, and 3 reference audio clips
+  - Supports 768P output, video duration of 6-15 seconds, 6 aspect ratios, with native audio tracks by default
+  - Supports two generation quality tiers: default / high quality
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
 import { apiKeyUrl } from '/snippets/_variables.mdx';
@@ -32,7 +33,7 @@ The model name for MiniMax H3 Turbo in AIReiter is `minimax_h3_turbo`. This mode
 ## Body
 
 <ParamField body="model" type="string" required>
-  Model name, fixed to:
+  Model name, fixed as:
 
   * `minimax_h3_turbo`
 </ParamField>
@@ -44,9 +45,9 @@ The model name for MiniMax H3 Turbo in AIReiter is `minimax_h3_turbo`. This mode
     <ParamField body="prompt" type="string" required>
       Text description for video generation.
 
-      Can describe subjects, scenes, camera movements, actions, styles, lighting, pacing, and more.
+      Can describe subjects, scenes, camera movements, actions, styles, lighting, pacing, etc.
 
-      When using reference assets, you can use "Image 1 / Video 1 / Audio 1" in the prompt to refer to uploaded content in sequential order.
+      When using reference assets, you can refer to the uploaded content in sequence using "Image 1 / Video 1 / Audio 1" in the prompt.
     </ParamField>
 
     <ParamField body="video_length" type="number" default="6">
@@ -56,7 +57,16 @@ The model name for MiniMax H3 Turbo in AIReiter is `minimax_h3_turbo`. This mode
     </ParamField>
 
     <ParamField body="resolution" type="string" default="768p">
-      Output resolution, fixed to `768p`, optional.
+      Output resolution, fixed as `768p`, optional.
+    </ParamField>
+
+    <ParamField body="supported_params" type="string" default="fast">
+      Generation tier.
+
+      Supported values:
+
+      * `fast` - Default tier, default value
+      * `quality` - High-quality tier
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="16:9">
@@ -64,7 +74,7 @@ The model name for MiniMax H3 Turbo in AIReiter is `minimax_h3_turbo`. This mode
 
       Supported aspect ratios:
 
-      * `16:9` - Landscape, default
+      * `16:9` - Landscape, default value
       * `9:16` - Portrait
       * `1:1` - Square
       * `4:3` - Standard landscape
@@ -73,9 +83,9 @@ The model name for MiniMax H3 Turbo in AIReiter is `minimax_h3_turbo`. This mode
     </ParamField>
 
     <ParamField body="image_url" type="string | string[]">
-      Reference image URL, optional. Maximum of 8 images.
+      Reference image URL, optional. Up to 8 images.
 
-      Text-to-video mode when no images are provided; when images are provided, they serve as reference images to guide the subject, style, or composition.
+      When no image is provided, it operates as text-to-video; when images are provided, they serve as reference images to guide the subject, style, or composition.
 
       Image requirements:
 
@@ -85,35 +95,35 @@ The model name for MiniMax H3 Turbo in AIReiter is `minimax_h3_turbo`. This mode
     </ParamField>
 
     <ParamField body="video_url" type="string | string[]">
-      Reference video URL, optional. Maximum of 3 videos.
+      Reference video URL, optional. Up to 3 videos.
 
-      Used to guide action, camera movement, or pacing.
+      Used to guide motion, camera movement, or pacing.
 
       Video requirements:
 
       * Supports MP4, MOV
       * Maximum 100 MB per video
-      * Single video duration must not exceed 15 seconds
+      * Maximum duration of 15 seconds per video
       * URL must be publicly accessible
     </ParamField>
 
     <ParamField body="audio_url" type="string | string[]">
-      Reference audio URL, optional. Maximum of 3 audio clips.
+      Reference audio URL, optional. Up to 3 audio tracks.
 
       Audio requirements:
 
       * Supports MP3, WAV
       * Maximum 20 MB per audio file
-      * Single audio duration must not exceed 15 seconds
+      * Maximum duration of 15 seconds per audio file
       * URL must be publicly accessible
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  Caller task ID.
+  Initiator task ID.
 
-  User-defined task identifier, required. Can be used subsequently to query task status and results.
+  User-defined task identifier, required. Can be used later to query task status and results.
 </ParamField>
 
 ## Response
@@ -191,6 +201,7 @@ Once the query succeeds and the task is completed, the `output` field in the res
         ],
         "video_length": 8,
         "resolution": "768p",
+        "supported_params": "quality",
         "aspect_ratio": "16:9"
       },
       "out_task_id": "minimax_h3_turbo_reference_123456"
@@ -681,7 +692,7 @@ Once the query succeeds and the task is completed, the `output` field in the res
   {
     "error": {
       "code": 433,
-      "message": "Insufficient account balance, please top up and try again"
+      "message": "Insufficient account balance, please recharge and try again"
     }
   }
   ```
@@ -699,13 +710,17 @@ Once the query succeeds and the task is completed, the `output` field in the res
 ## Mode Notes
 
 <Note>
-When `image_url` is not provided, it operates as text-to-video. When a reference image is provided, the image is used to guide the subject, style, or composition, not as the first or last frame.
+When `image_url` is not passed, it operates in text-to-video mode. When a reference image is passed, the image is used to guide the subject, style, or composition, not as the first or last frame.
 </Note>
 
 <Note>
-When `video_url` is provided, the reference video is used to guide motion, camera movement, or rhythm; it can be used simultaneously with reference images and reference audio.
+When `video_url` is passed, the reference video is used to guide motion, camera movement, or pacing; it can be used simultaneously with reference images and reference audio.
+</Note>
+
+<Note>
+When `supported_params` is not passed, it generates using the default `fast` tier; pass `"quality"` when the high-quality tier is required.
 </Note>
 
 <Warning>
-This model does not support the `first_last_frame` mode. The resolution is only 768P (480P and 2K are not supported), and aspect ratios 3:2 / 2:3 are not supported. Please do not pass `end_image_url`, `type`, or `quality`.
+This model does not support the `first_last_frame` mode, only supports 768P resolution (does not support 480P and 2K), and does not support 3:2 / 2:3 aspect ratios. Please do not pass the `end_image_url`, `type`, or `quality` parameters; to use the high-quality tier, please pass `supported_params: "quality"`.
 </Warning>
