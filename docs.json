@@ -159,6 +159,13 @@
                 ]
               },
               {
+                "group": "FLUX 3 Klein",
+                "icon": "image",
+                "pages": [
+                  "zh/api-reference/images/flux-3-klein/generation"
+                ]
+              },
+              {
                 "group": "Midjourney V7",
                 "icon": "image",
                 "pages": [
@@ -621,6 +628,13 @@
                 ]
               },
               {
+                "group": "FLUX 3 Klein",
+                "icon": "image",
+                "pages": [
+                  "en/api-reference/images/flux-3-klein/generation"
+                ]
+              },
+              {
                 "group": "Midjourney V7",
                 "icon": "image",
                 "pages": [
@@ -1076,6 +1090,13 @@
                 ]
               },
               {
+                "group": "FLUX 3 Klein",
+                "icon": "image",
+                "pages": [
+                  "ja/api-reference/images/flux-3-klein/generation"
+                ]
+              },
+              {
                 "group": "Midjourney V7",
                 "icon": "image",
                 "pages": [
@@ -1528,6 +1549,13 @@
                 "icon": "image",
                 "pages": [
                   "ko/api-reference/images/flux-2-pro/generation"
+                ]
+              },
+              {
+                "group": "FLUX 3 Klein",
+                "icon": "image",
+                "pages": [
+                  "ko/api-reference/images/flux-3-klein/generation"
                 ]
               },
               {

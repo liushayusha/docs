@@ -1,0 +1,646 @@
+---
+title: 'FLUX 3 Klein Image Generation'
+description: |
+    - Asynchronous processing mode, returning a task ID for subsequent queries
+    - A lightweight open-source weights version of FLUX 3 Image (5.6B parameters) released by Black Forest Labs in October 2026, focused on fast image editing while also supporting text-to-image
+    - Supports text-to-image and image-to-image, automatically switching to image-to-image when image_url is passed
+    - Supports up to 3 reference images, with the first being the image to edit and the rest providing subject, product, and style references
+    - Prompts are automatically expanded before generation
+    - Supports 7 common image aspect ratios
+    - Supports 1K / 2K resolution tiers, generating up to 4 images at a time
+    - Submitted prompts undergo platform sensitive word / safety review, and non-compliant content will be directly rejected
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  All endpoints require Bearer Token authentication.
+
+  Get the API key:
+
+  Visit the <a href={apiKeyUrl} target="_blank">API Key Management page</a> to get your API Key.
+
+  Add to the request header when using:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  Model name.
+
+  Fixed value: `"flux_3_klein"`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  Model parameter object.
+
+  <Expandable title="params Object Properties">
+    <ParamField body="prompt" type="string" required>
+      Image generation or editing prompt, up to 4000 characters.
+
+      * Supports Chinese and English. It is recommended to clearly describe the subject, scene, composition, lighting, material, and reference image features to be retained
+      * In image-to-image mode, clearly specify in the prompt what needs to be retained and what needs to be modified
+      * The model will automatically expand the prompt before generation. Simply state your intent clearly without stacking modifiers
+      * Submissions will undergo platform sensitive word / security review. If violating content is hit, an error will be returned directly
+    </ParamField>
+
+    <ParamField body="image_url" type="string[]">
+      Reference image array. When passed, image-to-image mode is automatically used; when omitted, text-to-image mode is used.
+
+      * Up to 3 reference images. The first image is the one being edited, while the rest are used to provide subject, product, or style references
+      * Maximum 10 MB per image
+      * Supports jpeg, png, and webp
+      * Supports the following two formats:
+        1. Publicly accessible URL
+        2. Complete Base64 Data URI, for example `data:image/jpeg;base64,/9j/4AAQ...`
+
+      <Warning>
+        The URL must be directly accessible over the public internet and cannot require login, cookies, or temporary page authorization.
+      </Warning>
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="1:1">
+      Image aspect ratio.
+
+      Supports the following values:
+
+      * `1:1` - Square (default)
+      * `5:4` / `4:5` - Slight landscape / portrait
+      * `4:3` / `3:4` - Standard landscape / portrait
+      * `16:9` / `9:16` - Widescreen landscape / portrait
+
+      <Warning>
+        `aspect_ratio` indicates the target ratio setting of the model and does not guarantee fixed pixel dimensions. The returned dimensions will be the model native size close to this ratio.
+      </Warning>
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="1K">
+      Image resolution tier.
+
+      * `1K` - Standard resolution (default)
+      * `2K` - High-definition resolution
+    </ParamField>
+
+    <ParamField body="output_n" type="string" default="1">
+      Number of images to generate.
+
+      Supports the following values:
+
+      * `"1"` - Generate 1 image (default)
+      * `"2"` - Generate 2 images
+      * `"4"` - Generate 4 images
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  Custom task ID provided by the caller, used for idempotent submission and querying results.
+
+  * Length is 1-64 characters
+  * Only letters, numbers, underscores, and hyphens are allowed
+  * Cannot be reused under the same API Key
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  Caller task ID, can be used to query results.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Initial status, fixed as `"pending"`.
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  Creation time, in ISO 8601 format.
+</ResponseField>
+
+## 查询结果
+
+After successful submission, use the same `out_task_id` to call:
+
+```bash
+curl --request POST \
+  --url https://aireiter.com/api/openapi/query \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "out_task_id": "flux_3_klein_task_001"
+  }'
+```
+
+Task statuses include `pending`, `processing`, `completed`, and `failed`. After the task is completed, the result images are located in `data.output`, which is an array of multiple image URLs when multiple images are generated.
+
+<RequestExample>
+  ```bash cURL (Text-to-Image)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "flux_3_klein",
+      "params": {
+        "prompt": "A futuristic electric sports car parked in front of a modern glass building, blue hour, wet ground reflecting building lights, commercial automotive photography, realistic materials and natural shadows, no text, no watermark",
+        "aspect_ratio": "16:9",
+        "resolution": "2K",
+        "output_n": "2"
+      },
+      "out_task_id": "flux_3_klein_task_001"
+    }'
+  ```
+
+  ```bash cURL (Image-to-Image)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "flux_3_klein",
+      "params": {
+        "prompt": "Change the product bottle in the first reference image to a high-end nighttime commercial style, keeping the bottle shape, proportions, nozzle, transparent glass structure, and label text, referencing the product appearance from the second image, and referencing the background and lighting from the third image",
+        "image_url": [
+          "https://example.com/product-original.png",
+          "https://example.com/product-texture.png",
+          "https://example.com/style-reference.png"
+        ],
+        "aspect_ratio": "16:9",
+        "resolution": "1K",
+        "output_n": "2"
+      },
+      "out_task_id": "flux_3_klein_image_task_001"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "flux_3_klein",
+      "params": {
+          "prompt": "Cinematic product commercial photography, glass perfume bottle placed on a black stone pedestal, realistic reflections and natural shadows",
+          "aspect_ratio": "16:9",
+          "resolution": "1K",
+          "output_n": "1"
+      },
+      "out_task_id": "flux_3_klein_python_001"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const response = await fetch("https://aireiter.com/api/openapi/submit", {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer <token>",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model: "flux_3_klein",
+      params: {
+        prompt: "Cinematic product commercial photography, glass perfume bottle placed on a black stone pedestal, realistic reflections and natural shadows",
+        aspect_ratio: "16:9",
+        resolution: "1K",
+        output_n: "1"
+      },
+      out_task_id: "flux_3_klein_javascript_001"
+    })
+  });
+
+  console.log(await response.json());
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "fmt"
+      "io"
+      "net/http"
+  )
+
+  func main() {
+      payload := []byte(`{
+        "model":"flux_3_klein",
+        "params":{
+          "prompt":"Cinematic product commercial photography, glass perfume bottle placed on a black stone pedestal, realistic reflections and natural shadows",
+          "aspect_ratio":"16:9",
+          "resolution":"1K"
+        },
+        "out_task_id":"flux_3_klein_go_001"
+      }`)
+
+      req, _ := http.NewRequest(
+          http.MethodPost,
+          "https://aireiter.com/api/openapi/submit",
+          bytes.NewBuffer(payload),
+      )
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      response, err := http.DefaultClient.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer response.Body.Close()
+
+      body, _ := io.ReadAll(response.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.URI;
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String payload = """
+          {
+            "model": "flux_3_klein",
+            "params": {
+              "prompt": "Cinematic product commercial photography, glass perfume bottle placed on a black stone pedestal, realistic reflections and natural shadows",
+              "aspect_ratio": "16:9",
+              "resolution": "1K"
+            },
+            "out_task_id": "flux_3_klein_java_001"
+          }
+          """;
+
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create("https://aireiter.com/api/openapi/submit"))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = HttpClient.newHttpClient().send(
+              request,
+              HttpResponse.BodyHandlers.ofString()
+          );
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $payload = [
+      "model" => "flux_3_klein",
+      "params" => [
+          "prompt" => "Cinematic product commercial photography, glass perfume bottle placed on a black stone pedestal, realistic reflections and natural shadows",
+          "aspect_ratio" => "16:9",
+          "resolution" => "1K"
+      ],
+      "out_task_id" => "flux_3_klein_php_001"
+  ];
+
+  $ch = curl_init("https://aireiter.com/api/openapi/submit");
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  echo curl_exec($ch);
+  curl_close($ch);
+  ?>
+  ```
+
+  ```ruby Ruby
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url = URI("https://aireiter.com/api/openapi/submit")
+
+  payload = {
+    model: "flux_3_klein",
+    params: {
+      prompt: "A futuristic electric sports car parked in front of a modern glass building, blue hour, wet ground reflecting building lights, commercial automotive photography, realistic textures and natural shadows, no text, no watermark",
+      aspect_ratio: "16:9",
+      resolution: "2K"
+    },
+    out_task_id: "flux_3_klein_task_001"
+  }
+
+  http = Net::HTTP.new(url.host, url.port)
+
+  request = Net::HTTP::Post.new(url)
+  request["Authorization"] = "Bearer <token>"
+  request["Content-Type"] = "application/json"
+  request.body = payload.to_json
+
+  response = http.request(request)
+  puts response.body
+  ```
+
+  ```swift Swift
+  import Foundation
+
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
+
+  let payload: [String: Any] = [
+      "model": "flux_3_klein",
+      "params": [
+          "prompt": "A futuristic electric sports car parked in front of a modern glass building, blue hour, wet ground reflecting building lights, commercial automotive photography, realistic textures and natural shadows, no text, no watermark",
+          "aspect_ratio": "16:9",
+          "resolution": "2K"
+      ],
+      "out_task_id": "flux_3_klein_task_001"
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      if let error = error {
+          print("Error: \(error)")
+          return
+      }
+
+      if let data = data, let responseString = String(data: data, encoding: .utf8) {
+          print(responseString)
+      }
+  }
+
+  task.resume()
+  ```
+
+  ```csharp C#
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url = "https://aireiter.com/api/openapi/submit";
+
+          var payload = @"
+                {
+                    ""model"": ""flux_3_klein"",
+                    ""params"": {
+                        ""prompt"": ""A futuristic electric sports car parked in front of a modern glass building, blue hour, wet ground reflecting building lights, commercial automotive photography, realistic textures and natural shadows, no text, no watermark"",
+                        ""aspect_ratio"": ""16:9"",
+                        ""resolution"": ""2K""
+                    },
+                    ""out_task_id"": ""flux_3_klein_task_001""
+                }";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+
+          var content = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          var result = await response.Content.ReadAsStringAsync();
+
+          Console.WriteLine(result);
+      }
+  }
+  ```
+
+  ```c C
+  #include <stdio.h>
+  #include <curl/curl.h>
+
+  int main(void) {
+      CURL *curl;
+      CURLcode res;
+
+      curl_global_init(CURL_GLOBAL_DEFAULT);
+      curl = curl_easy_init();
+
+      if(curl) {
+          const char *url = "https://aireiter.com/api/openapi/submit";
+          const char *payload = "{\"model\":\"flux_3_klein\",\"params\":{\"prompt\":\"A futuristic electric sports car parked in front of a modern glass building, blue hour, wet ground reflecting building lights, commercial automotive photography, realistic textures and natural shadows, no text, no watermark\",\"aspect_ratio\":\"16:9\",\"resolution\":\"2K\"},\"out_task_id\":\"flux_3_klein_task_001\"}";
+
+          struct curl_slist *headers = NULL;
+          headers = curl_slist_append(headers, "Authorization: Bearer <token>");
+          headers = curl_slist_append(headers, "Content-Type: application/json");
+
+          curl_easy_setopt(curl, CURLOPT_URL, url);
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
+          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+          res = curl_easy_perform(curl);
+
+          if(res != CURLE_OK) {
+              fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                      curl_easy_strerror(res));
+          }
+
+          curl_slist_free_all(headers);
+          curl_easy_cleanup(curl);
+      }
+
+      curl_global_cleanup();
+      return 0;
+  }
+  ```
+
+  ```objectivec Objective-C
+  #import <Foundation/Foundation.h>
+
+  int main(int argc, const char * argv[]) {
+      @autoreleasepool {
+          NSURL *url = [NSURL URLWithString:@"https://aireiter.com/api/openapi/submit"];
+
+          NSDictionary *payload = @{
+              @"model": @"flux_3_klein",
+              @"params": @{
+                  @"prompt": @"A futuristic electric sports car parked in front of a modern glass building, blue hour, wet ground reflecting building lights, commercial automotive photography, realistic textures and natural shadows, no text, no watermark",
+                  @"aspect_ratio": @"16:9",
+                  @"resolution": @"2K"
+              },
+              @"out_task_id": @"flux_3_klein_task_001"
+          };
+
+          NSError *error;
+          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
+                                                            options:0
+                                                              error:&error];
+
+          NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+          [request setHTTPMethod:@"POST"];
+          [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
+          [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+          [request setHTTPBody:jsonData];
+
+          NSURLSessionDataTask *task = [[NSURLSession sharedSession]
+              dataTaskWithRequest:request
+              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+                  if (error) {
+                      NSLog(@"Error: %@", error);
+                      return;
+                  }
+                  NSString *result = [[NSString alloc] initWithData:data
+                                                          encoding:NSUTF8StringEncoding];
+                  NSLog(@"%@", result);
+              }];
+
+          [task resume];
+          [[NSRunLoop mainRunLoop] run];
+      }
+      return 0;
+  }
+  ```
+
+  ```ocaml OCaml
+  (* Requires cohttp and yojson libraries *)
+  open Lwt
+  open Cohttp
+  open Cohttp_lwt_unix
+
+  let url = "https://aireiter.com/api/openapi/submit"
+
+  let payload = {|{
+    "model": "flux_3_klein",
+    "params": {
+      "prompt": "A futuristic electric sports car parked in front of a modern glass building, blue hour, wet ground reflecting building lights, commercial automotive photography, realistic textures and natural shadows, no text, no watermark",
+      "aspect_ratio": "16:9",
+      "resolution": "2K"
+    },
+    "out_task_id": "flux_3_klein_task_001"
+  }|}
+
+  let () =
+    let headers = Header.init ()
+      |> fun h -> Header.add h "Authorization" "Bearer <token>"
+      |> fun h -> Header.add h "Content-Type" "application/json"
+    in
+    let body = Cohttp_lwt.Body.of_string payload in
+
+    let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
+      body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
+      print_endline body_str
+    in
+    Lwt_main.run response
+  ```
+
+  ```dart Dart
+  import 'dart:convert';
+  import 'package:http/http.dart' as http;
+
+  void main() async {
+    final url = Uri.parse('https://aireiter.com/api/openapi/submit');
+
+    final payload = {
+          "model": "flux_3_klein",
+          "params": {
+              "prompt": "A futuristic electric sports car parked in front of a modern glass building, blue hour, wet ground reflecting building lights, commercial automotive photography, realistic textures and natural shadows, no text, no watermark",
+              "aspect_ratio": "16:9",
+              "resolution": "2K"
+          },
+          "out_task_id": "flux_3_klein_task_001"
+      };
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer <token>',
+        'Content-Type': 'application/json'
+      },
+      body: jsonEncode(payload),
+    );
+
+    print(response.body);
+  }
+  ```
+
+  ```r R
+  library(httr)
+  library(jsonlite)
+
+  url <- "https://aireiter.com/api/openapi/submit"
+
+  payload <- list(
+    model = "flux_3_klein",
+    params = list(
+      prompt = "A futuristic electric sports car parked in front of a modern glass building, blue hour, wet ground reflecting building lights, commercial automotive photography, realistic textures and natural shadows, no text, no watermark",
+      aspect_ratio = "16:9",
+      resolution = "2K"
+    ),
+    out_task_id = "flux_3_klein_task_001"
+  )
+
+  response <- POST(
+    url,
+    add_headers(
+      Authorization = "Bearer <token>",
+      `Content-Type` = "application/json"
+    ),
+    body = toJSON(payload, auto_unbox = TRUE),
+    encode = "raw"
+  )
+
+  cat(content(response, "text"))
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+  {
+    "statusCode": 200,
+    "message": "",
+    "data": {
+      "task_id": "",
+      "status": "pending",
+      "created_at": "2026-07-22T10:37:44.800Z",
+      "out_task_id": "flux_3_klein_task_001"
+    },
+    "ok": true
+  }
+  ```
+
+  ```json 400
+  {
+    "statusCode": 400,
+    "message": "Invalid aspect_ratio: \"widescreen\". Allowed: [1:1, 5:4, 4:5, 4:3, 3:4, 16:9, 9:16]",
+    "ok": false
+  }
+  ```
+
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "Authentication failed, please check your API key"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "Internal server error, please try again later"
+    }
+  }
+  ```
+</ResponseExample>
