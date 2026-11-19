@@ -1,19 +1,17 @@
 ---
-title: 'Gemini Omni Flash Ext 비디오 생성'
+title: 'Gemini Omni 1.2 Flash 비디오 생성'
 description: |
-  - 동일한 파라미터 세트, 두 개의 모델 ID: `gemini_omni_flash_ext`(1.0) 및 `gemini_omni_1_1_flash_ext`(1.1)
+  - 모델 ID: `gemini_omni_1_2_flash`
   - 비동기 처리 모드, 후속 조회를 위한 태스크 ID 반환
-  - 텍스트 기반 생성, 최대 7장의 참조 이미지, 선택 사항으로 1개의 참조 비디오 지원; 이미지와 비디오 동시 전달 가능
-  - 720p / 1080p / 4K 지원, 길이는 4 / 6 / 8 / 10초만 지원
+  - 텍스트 기반 비디오 생성 또는 최대 3장의 참조 이미지 지원
+  - 네이티브 720p, 길이 3–15초 중 선택; 11–15초는 9:16만 지원
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
+
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 <Note>
-1.0과 1.1은 본 페이지의 매개변수를 공유합니다. 모델을 변경하려면 `model` 필드만 수정하면 됩니다.
-
-* `gemini_omni_flash_ext` — Gemini Omni Flash Ext(1.0)
-* `gemini_omni_1_1_flash_ext` — Gemini Omni 1.1 Flash Ext
+출력은 항상 720p H.264 MP4입니다: 가로 1280×720, 세로 720×1280. 1080p / 4K, 참조 비디오, 첫/마지막 프레임 지정은 지원하지 않습니다.
 </Note>
 
 ## Authorizations
@@ -35,12 +33,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  모델 이름, 둘 중 하나를 선택합니다:
-
-  * `gemini_omni_flash_ext`
-  * `gemini_omni_1_1_flash_ext`
-
-  파라미터 필드는 동일하므로 `type`을 다시 전달하지 마십시오.
+  모델 이름. 항상 `gemini_omni_1_2_flash`를 전달하세요.
 </ParamField>
 
 <ParamField body="params" type="object" required>
@@ -48,61 +41,37 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
   <Expandable title="params 객체 속성">
     <ParamField body="prompt" type="string" required>
-      비디오 생성을 위한 텍스트 프롬프트입니다. 필수 항목입니다.
+      비디오 생성을 위한 텍스트 설명. 필수.
     </ParamField>
 
-    <ParamField body="video_length" type="string" default="6">
-      생성할 비디오 길이(단위: 초)입니다. 문자열만 지원합니다:
+    <ParamField body="video_length" type="string" default="8">
+      생성할 비디오 길이(초). `"3"`부터 `"15"`까지의 정수 초 문자열만 허용됩니다:
 
-      * `"4"`
-      * `"6"` - 기본값
-      * `"8"`
-      * `"10"`
-
-      참조 비디오가 있는 경우 이 필드를 전달하지 마십시오. 출력 길이는 업로드된 비디오를 따릅니다.
+      * `"3"` / `"4"` / `"5"` / `"6"` / `"7"`
+      * `"8"` - 기본값
+      * `"9"` / `"10"` / `"11"` / `"12"` / `"13"` / `"14"` / `"15"`
 
       <Warning>
-        `3`, `5`, `7`, `9` 또는 기타 초 단위를 전달하지 마십시오. 열거형(Enum) 유효성 검사에서 문자열을 요구하므로 숫자 `6`이 아닌 `"6"`을 전달하십시오.
+        열거형 검증은 문자열을 요구합니다. 숫자 `8`이 아닌 `"8"`을 전달하세요. `"11"`~`"15"`는 `aspect_ratio`가 `9:16`일 때만 사용할 수 있습니다.
       </Warning>
-    </ParamField>
-
-    <ParamField body="resolution" type="string" default="720p">
-      출력 해상도:
-
-      * `720p` - 기본값
-      * `1080p`
-      * `4K`
-
-      720p와 1080p는 가격이 동일하며, 4K는 더 비쌉니다.
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="16:9">
       비디오 화면비:
 
-      * `16:9` - 가로 모드, 기본값
-      * `9:16` - 세로 모드
+      * `16:9` - 가로 1280×720, 기본값
+      * `9:16` - 세로 720×1280
+
+      길이가 11–15초인 경우 `9:16`만 전달할 수 있으며, `16:9`는 거부됩니다.
     </ParamField>
 
     <ParamField body="image_url" type="string | string[]">
-      참조 이미지 URL로, 공용 네트워크에서 직접 액세스할 수 있어야 합니다. 단일 문자열로 전달할 수도 있습니다. 전달하지 않으면 텍스트 투 비디오로 동작합니다.
+      참조 이미지 URL이며, 공개 인터넷에서 직접 접근 가능해야 합니다. 단일 문자열도 허용됩니다. 생략하면 텍스트 기반 비디오 생성입니다.
 
-      * 최대 7장, **2장 허용**
-      * 짧은 변 기준 300px 이상, 단일 이미지당 10MB 이하
+      * 최대 3장, 4번째 이미지는 거부됩니다
+      * 짧은 변 300px 이상, 장당 10MB 이하
 
-      참조 비디오와 함께 전달하는 경우, 이미지 수 + 2는 반드시 ≤ 7이어야 합니다.
-    </ParamField>
-
-    <ParamField body="video_url" type="string | string[]">
-      참조 비디오 URL, 선택 사항이며 최대 1개까지 가능합니다. 단일 문자열로 전달할 수도 있습니다. 참조 이미지와 함께 전달할 수 있습니다.
-
-      비디오 요구 사양:
-
-      * MP4, MOV 형식
-      * 재생 시간 10초 이하
-      * 100MB 이하
-      * 짧은 변 기준 300px 이상
-
-      참조 비디오를 전달할 때는 `video_length`를 전달하지 마십시오. 출력 길이는 업로드된 비디오를 따르며 최대 10초입니다. 참조 비디오는 7개 슬롯 할당량 중 2개 슬롯을 차지합니다.
+      참조 이미지는 피사체와 스타일을 정하는 데 사용되며 첫/마지막 프레임이 아닙니다. 영상이 특정 이미지로 시작하거나 끝나도록 강제되지 않습니다.
     </ParamField>
   </Expandable>
 </ParamField>
@@ -133,7 +102,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 ## Query Task
 
-두 모델 모두 비동기 비디오 생성 방식입니다. 작업을 제출한 후 `out_task_id`를 사용하여 작업 상태를 조회하세요. [작업 상태 조회](/ko/api-reference/tasks/status)도 참조할 수 있습니다.
+이 모델은 비동기 비디오 생성 방식입니다. 작업을 제출한 후 `out_task_id`를 사용하여 작업 상태를 조회하세요. [작업 상태 조회](/ko/api-reference/tasks/status)도 참조할 수 있습니다.
 
 <ParamField body="out_task_id" type="string" required>
   작업 제출 시 전달된 요청자 작업 ID입니다.
@@ -145,94 +114,76 @@ curl --request POST \
   --header 'Authorization: Bearer <token>' \
   --header 'Content-Type: application/json' \
   --data '{
-    "out_task_id": "omni_ext_t2v_123456"
+    "out_task_id": "omni_12_t2v_123456"
   }'
 ```
 
 조회가 성공하여 완료되면 응답의 `output` 배열에 생성된 비디오가 포함되며, 요소에는 `video` 필드가 포함됩니다.
 
-## 参数对照
+## 파라미터 대조표
 
-| 입력 | `image_url` | `video_url` | 재생 시간 |
+| 입력 | `image_url` | `video_length` | `aspect_ratio` |
 |---|---|---|---|
-| 텍스트 생성 | 전달하지 않거나 빈 배열 | 전달하지 않음 | `video_length` `"4"` / `"6"` / `"8"` / `"10"` |
-| 참조 이미지 | 1~7장(2장 포함) | 전달하지 않음 | 동일 |
-| 참조 비디오 | 전달하지 않거나 빈 배열 | 1개, 최대 10초 | `video_length`를 전달하지 않음, 원본 영상을 따름 |
-| 이미지 + 비디오 | 최대 5장(이미지 수 + 2 ≤ 7) | 1개, 최대 10초 | `video_length`를 전달하지 않음, 원본 영상을 따름 |
+| 텍스트 기반 생성 | 전달하지 않거나 빈 배열 | `"3"`–`"10"` | `16:9` 또는 `9:16` |
+| 텍스트 기반 생성(장시간) | 전달하지 않거나 빈 배열 | `"11"`–`"15"` | `9:16`만 |
+| 참조 이미지 | 1–3장 | `"3"`–`"10"` | `16:9` 또는 `9:16` |
+| 참조 이미지(장시간) | 1–3장 | `"11"`–`"15"` | `9:16`만 |
+
+지원하지 않는 필드: `resolution`(720p 고정), `video_url`(참조 비디오 미지원).
 
 ## Request Examples
 
 <RequestExample>
-  ```bash cURL (텍스트 생성, 1.0)
+  ```bash cURL (텍스트 기반 생성)
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
-      "model": "gemini_omni_flash_ext",
+      "model": "gemini_omni_1_2_flash",
       "params": {
-        "prompt": "햇살 가득한 정원에서 행복하게 춤추는 소녀, 시네마틱한 느낌",
-        "resolution": "720p",
+        "prompt": "햇살 가득한 해변을 달리는 골든 리트리버, 트래킹 숏, 사실적인 스타일",
         "aspect_ratio": "16:9",
-        "video_length": "6"
+        "video_length": "8"
       },
-      "out_task_id": "omni_ext_t2v_123456"
+      "out_task_id": "omni_12_t2v_123456"
     }'
   ```
 
-  ```bash cURL (참조 이미지 2장, 1.1)
+  ```bash cURL (참조 이미지 3장)
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
-      "model": "gemini_omni_1_1_flash_ext",
+      "model": "gemini_omni_1_2_flash",
       "params": {
-        "prompt": "두 참조 이미지의 인물과 의상을 유지하며 정원을 걷기",
+        "prompt": "참조 이미지의 인물과 의상을 유지하며 정원을 걷기",
         "image_url": [
           "https://example.com/ref-1.jpg",
-          "https://example.com/ref-2.jpg"
+          "https://example.com/ref-2.jpg",
+          "https://example.com/ref-3.jpg"
         ],
-        "resolution": "1080p",
         "aspect_ratio": "16:9",
         "video_length": "6"
       },
-      "out_task_id": "omni_11_img2_123456"
+      "out_task_id": "omni_12_img3_123456"
     }'
   ```
 
-  ```bash cURL (참조 비디오)
+  ```bash cURL (15초 세로)
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
-      "model": "gemini_omni_flash_ext",
+      "model": "gemini_omni_1_2_flash",
       "params": {
-        "prompt": "참조 비디오의 피사체와 카메라 무빙을 유지하고, 조명을 더 깔끔하게",
-        "video_url": ["https://example.com/reference.mp4"],
-        "resolution": "4K",
-        "aspect_ratio": "16:9"
+        "prompt": "도시 야경 타임랩스, 차량 불빛 궤적, 세로 구도",
+        "aspect_ratio": "9:16",
+        "video_length": "15"
       },
-      "out_task_id": "omni_ext_v2v_123456"
-    }'
-  ```
-
-  ```bash cURL (이미지 + 참조 비디오)
-  curl --request POST \
-    --url https://aireiter.com/api/openapi/submit \
-    --header 'Authorization: Bearer <token>' \
-    --header 'Content-Type: application/json' \
-    --data '{
-      "model": "gemini_omni_1_1_flash_ext",
-      "params": {
-        "prompt": "참조 이미지의 인물을 사용하고, 참조 비디오의 카메라 무빙을 따름",
-        "image_url": ["https://example.com/ref-1.jpg"],
-        "video_url": ["https://example.com/reference.mp4"],
-        "resolution": "720p",
-        "aspect_ratio": "16:9"
-      },
-      "out_task_id": "omni_11_img_v2v_123456"
+      "out_task_id": "omni_12_t2v_15s_123456"
     }'
   ```
 
@@ -242,14 +193,13 @@ curl --request POST \
   url = "https://aireiter.com/api/openapi/submit"
 
   payload = {
-      "model": "gemini_omni_flash_ext",
+      "model": "gemini_omni_1_2_flash",
       "params": {
-          "prompt": "햇살 가득한 정원에서 행복하게 춤추는 소녀, 시네마틱한 느낌",
-          "resolution": "720p",
+          "prompt": "햇살 가득한 해변을 달리는 골든 리트리버, 트래킹 숏, 사실적인 스타일",
           "aspect_ratio": "16:9",
-          "video_length": "6"
+          "video_length": "8"
       },
-      "out_task_id": "omni_ext_t2v_123456"
+      "out_task_id": "omni_12_t2v_123456"
   }
 
   headers = {
@@ -266,14 +216,13 @@ curl --request POST \
   const url = "https://aireiter.com/api/openapi/submit";
 
   const payload = {
-    model: "gemini_omni_flash_ext",
+    model: "gemini_omni_1_2_flash",
     params: {
-      prompt: "햇살 가득한 정원에서 행복하게 춤추는 소녀, 시네마틱한 느낌",
-      resolution: "720p",
+      prompt: "햇살 가득한 해변을 달리는 골든 리트리버, 트래킹 숏, 사실적인 스타일",
       aspect_ratio: "16:9",
-      video_length: "6"
+      video_length: "8"
     },
-    out_task_id: "omni_ext_t2v_123456"
+    out_task_id: "omni_12_t2v_123456"
   };
 
   const headers = {
@@ -306,14 +255,13 @@ curl --request POST \
       url := "https://aireiter.com/api/openapi/submit"
 
       payload := map[string]interface{}{
-          "model": "gemini_omni_flash_ext",
+          "model": "gemini_omni_1_2_flash",
           "params": map[string]interface{}{
-              "prompt":       "햇살 가득한 정원에서 행복하게 춤추는 소녀, 시네마틱한 느낌",
-              "resolution":   "720p",
+              "prompt":       "햇살 가득한 해변을 달리는 골든 리트리버, 트래킹 숏, 사실적인 스타일",
               "aspect_ratio": "16:9",
-              "video_length": "6",
+              "video_length": "8",
           },
-          "out_task_id": "omni_ext_t2v_123456",
+          "out_task_id": "omni_12_t2v_123456",
       }
 
       jsonData, _ := json.Marshal(payload)
@@ -346,14 +294,13 @@ curl --request POST \
 
           String payload = """
               {
-                "model": "gemini_omni_flash_ext",
+                "model": "gemini_omni_1_2_flash",
                 "params": {
-                  "prompt": "햇살 가득한 정원에서 행복하게 춤추는 소녀, 시네마틱한 느낌",
-                  "resolution": "720p",
+                  "prompt": "햇살 가득한 해변을 달리는 골든 리트리버, 트래킹 숏, 사실적인 스타일",
                   "aspect_ratio": "16:9",
-                  "video_length": "6"
+                  "video_length": "8"
                 },
-                "out_task_id": "omni_ext_t2v_123456"
+                "out_task_id": "omni_12_t2v_123456"
               }
           """;
 
@@ -379,14 +326,13 @@ curl --request POST \
   $url = "https://aireiter.com/api/openapi/submit";
 
   $payload = [
-      "model" => "gemini_omni_flash_ext",
+      "model" => "gemini_omni_1_2_flash",
       "params" => [
-          "prompt" => "햇살 가득한 정원에서 행복하게 춤추는 소녀, 시네마틱한 느낌",
-          "resolution" => "720p",
+          "prompt" => "햇살 가득한 해변을 달리는 골든 리트리버, 트래킹 숏, 사실적인 스타일",
           "aspect_ratio" => "16:9",
-          "video_length" => "6"
+          "video_length" => "8"
       ],
-      "out_task_id" => "omni_ext_t2v_123456"
+      "out_task_id" => "omni_12_t2v_123456"
   ];
 
   $ch = curl_init($url);
@@ -412,10 +358,10 @@ curl --request POST \
     "statusCode": 200,
     "message": "",
     "data": {
-        "out_task_id": "omni_ext_t2v_123456",
+        "out_task_id": "omni_12_t2v_123456",
         "status": "pending",
         "estimated_credits": "<예상 소모 크레딧>",
-        "created_at": "2026-08-28T06:03:28.242Z"
+        "created_at": "2026-11-18T06:03:28.242Z"
     }
 }
   ```

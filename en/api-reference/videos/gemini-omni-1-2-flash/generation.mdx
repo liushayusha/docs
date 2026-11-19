@@ -1,19 +1,17 @@
 ---
-title: 'Gemini Omni Flash Ext Video Generation'
+title: 'Gemini Omni 1.2 Flash Video Generation'
 description: |
-  - Same parameter set with two model IDs: `gemini_omni_flash_ext` (1.0) and `gemini_omni_1_1_flash_ext` (1.1)
+  - Model ID: `gemini_omni_1_2_flash`
   - Asynchronous processing mode, returning a task ID for subsequent queries
-  - Supports text-to-video, up to 7 reference images, and 1 optional reference video; images and video can be passed simultaneously
-  - Supports 720p / 1080p / 4K, duration only 4 / 6 / 8 / 10 seconds
+  - Supports text-to-video, or up to 3 reference images
+  - Native 720p, any length from 3 to 15 seconds; 11–15 seconds is 9:16 only
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
+
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 <Note>
-1.0 and 1.1 share the parameters on this page. To switch models, simply change the `model` field.
-
-* `gemini_omni_flash_ext` — Gemini Omni Flash Ext (1.0)
-* `gemini_omni_1_1_flash_ext` — Gemini Omni 1.1 Flash Ext
+Output is always 720p H.264 MP4: 1280×720 landscape or 720×1280 portrait. 1080p / 4K, reference video, and first/last frames are not supported.
 </Note>
 
 ## Authorizations
@@ -35,12 +33,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  Model name, choose one of two:
-
-  * `gemini_omni_flash_ext`
-  * `gemini_omni_1_1_flash_ext`
-
-  Parameter fields are the same; do not pass `type`.
+  Model name. Always send `gemini_omni_1_2_flash`.
 </ParamField>
 
 <ParamField body="params" type="object" required>
@@ -51,58 +44,34 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
       Text description for video generation. Required.
     </ParamField>
 
-    <ParamField body="video_length" type="string" default="6">
-      Generated video duration in seconds. Accepts strings only:
+    <ParamField body="video_length" type="string" default="8">
+      Video length in seconds. Only whole-second strings from `"3"` to `"15"` are accepted:
 
-      * `"4"`
-      * `"6"` - Default
-      * `"8"`
-      * `"10"`
-
-      Do not pass this field when a reference video is provided; the output duration follows the uploaded video.
+      * `"3"` / `"4"` / `"5"` / `"6"` / `"7"`
+      * `"8"` - Default
+      * `"9"` / `"10"` / `"11"` / `"12"` / `"13"` / `"14"` / `"15"`
 
       <Warning>
-        Do not pass `3`, `5`, `7`, `9`, or other durations in seconds. Enum validation requires a string; please pass `"6"` instead of the number `6`.
+        Enum validation requires a string: send `"8"`, not the number `8`. `"11"` to `"15"` only work with `aspect_ratio` set to `9:16`.
       </Warning>
-    </ParamField>
-
-    <ParamField body="resolution" type="string" default="720p">
-      Output resolution:
-
-      * `720p` - Default
-      * `1080p`
-      * `4K`
-
-      720p and 1080p are the same price; 4K is more expensive.
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="16:9">
       Video aspect ratio:
 
-      * `16:9` - Landscape, Default
-      * `9:16` - Portrait
+      * `16:9` - Landscape 1280×720, Default
+      * `9:16` - Portrait 720×1280
+
+      For 11–15 seconds, only `9:16` is allowed. `16:9` is rejected.
     </ParamField>
 
     <ParamField body="image_url" type="string | string[]">
-      Reference image URL(s), must be directly accessible via the public network. Can also be passed as a single string. If omitted, text-to-video generation will be performed.
+      Reference image URLs, which must be publicly accessible. A single string is also accepted. Omit it for text-to-video.
 
-      * Up to 7 images, **2 images allowed**
-      * Short edge no less than 300px, up to 10MB per image
+      * Up to 3 images; a 4th image is rejected
+      * Shortest side at least 300px, each image up to 10MB
 
-      When passed together with a reference video, number of images + 2 must be ≤ 7.
-    </ParamField>
-
-    <ParamField body="video_url" type="string | string[]">
-      Reference video URL, optional, up to 1 video. Can also be passed as a single string. Can be passed together with reference images.
-
-      Video requirements:
-
-      * Formats: MP4, MOV
-      * Duration not exceeding 10 seconds
-      * Up to 100MB
-      * Short edge no less than 300px
-
-      Do not pass `video_length` when passing a reference video; output duration follows the uploaded video, up to 10 seconds. Reference video counts as 2 slots towards the 7-slot quota.
+      Reference images guide the subject and style. They are not first/last frames, so the clip is not forced to start or end on any of them.
     </ParamField>
   </Expandable>
 </ParamField>
@@ -133,7 +102,7 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 ## Query Task
 
-Both models use asynchronous video generation. After submitting a task, please use `out_task_id` to query the task status. You can also refer to [Get Task Status](/en/api-reference/tasks/status).
+This model uses asynchronous video generation. After submitting a task, please use `out_task_id` to query the task status. You can also refer to [Get Task Status](/en/api-reference/tasks/status).
 
 <ParamField body="out_task_id" type="string" required>
   The initiator task ID passed when submitting the task.
@@ -145,7 +114,7 @@ curl --request POST \
   --header 'Authorization: Bearer <token>' \
   --header 'Content-Type: application/json' \
   --data '{
-    "out_task_id": "omni_ext_t2v_123456"
+    "out_task_id": "omni_12_t2v_123456"
   }'
 ```
 
@@ -153,86 +122,68 @@ Once the query succeeds and is completed, the `output` array in the response wil
 
 ## Parameter Comparison
 
-| Input | `image_url` | `video_url` | Duration |
+| Input | `image_url` | `video_length` | `aspect_ratio` |
 |---|---|---|---|
-| Text-to-Video | Do not pass, or empty array | Do not pass | `video_length` `"4"` / `"6"` / `"8"` / `"10"` |
-| Reference Image | 1–7 images (including 2 images) | Do not pass | Same as above |
-| Reference Video | Do not pass, or empty array | 1 video, up to 10 seconds | Do not pass `video_length`, follows source video |
-| Image + Video | Up to 5 images (number of images + 2 ≤ 7) | 1 video, up to 10 seconds | Do not pass `video_length`, follows source video |
+| Text-to-video | Omit, or empty array | `"3"`–`"10"` | `16:9` or `9:16` |
+| Text-to-video (long) | Omit, or empty array | `"11"`–`"15"` | `9:16` only |
+| Reference images | 1–3 images | `"3"`–`"10"` | `16:9` or `9:16` |
+| Reference images (long) | 1–3 images | `"11"`–`"15"` | `9:16` only |
+
+Unsupported fields: `resolution` (fixed at 720p) and `video_url` (reference video is not supported).
 
 ## Request Examples
 
 <RequestExample>
-  ```bash cURL (Text-to-Video, 1.0)
+  ```bash cURL (Text-to-video)
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
-      "model": "gemini_omni_flash_ext",
+      "model": "gemini_omni_1_2_flash",
       "params": {
-        "prompt": "A girl dancing happily in a sunny garden, cinematic feel",
-        "resolution": "720p",
+        "prompt": "A golden retriever running along a sunny beach, tracking shot, realistic",
         "aspect_ratio": "16:9",
-        "video_length": "6"
+        "video_length": "8"
       },
-      "out_task_id": "omni_ext_t2v_123456"
+      "out_task_id": "omni_12_t2v_123456"
     }'
   ```
 
-  ```bash cURL (2 Reference Images, 1.1)
+  ```bash cURL (3 reference images)
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
-      "model": "gemini_omni_1_1_flash_ext",
+      "model": "gemini_omni_1_2_flash",
       "params": {
-        "prompt": "Keep the characters and outfits from the two reference images, walking in the garden",
+        "prompt": "Keep the character and outfit from the reference images, walking in a garden",
         "image_url": [
           "https://example.com/ref-1.jpg",
-          "https://example.com/ref-2.jpg"
+          "https://example.com/ref-2.jpg",
+          "https://example.com/ref-3.jpg"
         ],
-        "resolution": "1080p",
         "aspect_ratio": "16:9",
         "video_length": "6"
       },
-      "out_task_id": "omni_11_img2_123456"
+      "out_task_id": "omni_12_img3_123456"
     }'
   ```
 
-  ```bash cURL (Reference Video)
+  ```bash cURL (15s portrait)
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
     --header 'Content-Type: application/json' \
     --data '{
-      "model": "gemini_omni_flash_ext",
+      "model": "gemini_omni_1_2_flash",
       "params": {
-        "prompt": "Keep the subject and camera movement from the reference video, with cleaner lighting",
-        "video_url": ["https://example.com/reference.mp4"],
-        "resolution": "4K",
-        "aspect_ratio": "16:9"
+        "prompt": "City night time-lapse with traffic light trails, vertical framing",
+        "aspect_ratio": "9:16",
+        "video_length": "15"
       },
-      "out_task_id": "omni_ext_v2v_123456"
-    }'
-  ```
-
-  ```bash cURL (Image + Reference Video)
-  curl --request POST \
-    --url https://aireiter.com/api/openapi/submit \
-    --header 'Authorization: Bearer <token>' \
-    --header 'Content-Type: application/json' \
-    --data '{
-      "model": "gemini_omni_1_1_flash_ext",
-      "params": {
-        "prompt": "Use the character from the reference image and follow the camera movement from the reference video",
-        "image_url": ["https://example.com/ref-1.jpg"],
-        "video_url": ["https://example.com/reference.mp4"],
-        "resolution": "720p",
-        "aspect_ratio": "16:9"
-      },
-      "out_task_id": "omni_11_img_v2v_123456"
+      "out_task_id": "omni_12_t2v_15s_123456"
     }'
   ```
 
@@ -242,14 +193,13 @@ Once the query succeeds and is completed, the `output` array in the response wil
   url = "https://aireiter.com/api/openapi/submit"
 
   payload = {
-      "model": "gemini_omni_flash_ext",
+      "model": "gemini_omni_1_2_flash",
       "params": {
-          "prompt": "A girl dancing happily in a sunny garden, cinematic feel",
-          "resolution": "720p",
+          "prompt": "A golden retriever running along a sunny beach, tracking shot, realistic",
           "aspect_ratio": "16:9",
-          "video_length": "6"
+          "video_length": "8"
       },
-      "out_task_id": "omni_ext_t2v_123456"
+      "out_task_id": "omni_12_t2v_123456"
   }
 
   headers = {
@@ -266,14 +216,13 @@ Once the query succeeds and is completed, the `output` array in the response wil
   const url = "https://aireiter.com/api/openapi/submit";
 
   const payload = {
-    model: "gemini_omni_flash_ext",
+    model: "gemini_omni_1_2_flash",
     params: {
-      prompt: "A girl dancing happily in a sunny garden, cinematic feel",
-      resolution: "720p",
+      prompt: "A golden retriever running along a sunny beach, tracking shot, realistic",
       aspect_ratio: "16:9",
-      video_length: "6"
+      video_length: "8"
     },
-    out_task_id: "omni_ext_t2v_123456"
+    out_task_id: "omni_12_t2v_123456"
   };
 
   const headers = {
@@ -306,14 +255,13 @@ Once the query succeeds and is completed, the `output` array in the response wil
       url := "https://aireiter.com/api/openapi/submit"
 
       payload := map[string]interface{}{
-          "model": "gemini_omni_flash_ext",
+          "model": "gemini_omni_1_2_flash",
           "params": map[string]interface{}{
-              "prompt":       "A girl dancing happily in a sunny garden, cinematic feel",
-              "resolution":   "720p",
+              "prompt":       "A golden retriever running along a sunny beach, tracking shot, realistic",
               "aspect_ratio": "16:9",
-              "video_length": "6",
+              "video_length": "8",
           },
-          "out_task_id": "omni_ext_t2v_123456",
+          "out_task_id": "omni_12_t2v_123456",
       }
 
       jsonData, _ := json.Marshal(payload)
@@ -346,14 +294,13 @@ Once the query succeeds and is completed, the `output` array in the response wil
 
           String payload = """
               {
-                "model": "gemini_omni_flash_ext",
+                "model": "gemini_omni_1_2_flash",
                 "params": {
-                  "prompt": "A girl dancing happily in a sunny garden, cinematic feel",
-                  "resolution": "720p",
+                  "prompt": "A golden retriever running along a sunny beach, tracking shot, realistic",
                   "aspect_ratio": "16:9",
-                  "video_length": "6"
+                  "video_length": "8"
                 },
-                "out_task_id": "omni_ext_t2v_123456"
+                "out_task_id": "omni_12_t2v_123456"
               }
           """;
 
@@ -379,14 +326,13 @@ Once the query succeeds and is completed, the `output` array in the response wil
   $url = "https://aireiter.com/api/openapi/submit";
 
   $payload = [
-      "model" => "gemini_omni_flash_ext",
+      "model" => "gemini_omni_1_2_flash",
       "params" => [
-          "prompt" => "A girl dancing happily in a sunny garden, cinematic feel",
-          "resolution" => "720p",
+          "prompt" => "A golden retriever running along a sunny beach, tracking shot, realistic",
           "aspect_ratio" => "16:9",
-          "video_length" => "6"
+          "video_length" => "8"
       ],
-      "out_task_id" => "omni_ext_t2v_123456"
+      "out_task_id" => "omni_12_t2v_123456"
   ];
 
   $ch = curl_init($url);
@@ -412,10 +358,10 @@ Once the query succeeds and is completed, the `output` array in the response wil
     "statusCode": 200,
     "message": "",
     "data": {
-        "out_task_id": "omni_ext_t2v_123456",
+        "out_task_id": "omni_12_t2v_123456",
         "status": "pending",
         "estimated_credits": "<Estimated Credits>",
-        "created_at": "2026-08-28T06:03:28.242Z"
+        "created_at": "2026-11-18T06:03:28.242Z"
     }
 }
   ```

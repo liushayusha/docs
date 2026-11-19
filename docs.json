@@ -296,10 +296,10 @@
                 ]
               },
               {
-                "group": "Gemini Omni Flash Ext / 1.1",
+                "group": "Gemini Omni 1.2 Flash",
                 "icon": "video",
                 "pages": [
-                  "zh/api-reference/videos/gemini-omni-flash-ext/generation"
+                  "zh/api-reference/videos/gemini-omni-1-2-flash/generation"
                 ]
               },
               {
@@ -758,10 +758,10 @@
                 ]
               },
               {
-                "group": "Gemini Omni Flash Ext / 1.1",
+                "group": "Gemini Omni 1.2 Flash",
                 "icon": "video",
                 "pages": [
-                  "en/api-reference/videos/gemini-omni-flash-ext/generation"
+                  "en/api-reference/videos/gemini-omni-1-2-flash/generation"
                 ]
               },
               {
@@ -1220,10 +1220,10 @@
                 ]
               },
               {
-                "group": "Gemini Omni Flash Ext / 1.1",
+                "group": "Gemini Omni 1.2 Flash",
                 "icon": "video",
                 "pages": [
-                  "ja/api-reference/videos/gemini-omni-flash-ext/generation"
+                  "ja/api-reference/videos/gemini-omni-1-2-flash/generation"
                 ]
               },
               {
@@ -1682,10 +1682,10 @@
                 ]
               },
               {
-                "group": "Gemini Omni Flash Ext / 1.1",
+                "group": "Gemini Omni 1.2 Flash",
                 "icon": "video",
                 "pages": [
-                  "ko/api-reference/videos/gemini-omni-flash-ext/generation"
+                  "ko/api-reference/videos/gemini-omni-1-2-flash/generation"
                 ]
               },
               {
@@ -1869,19 +1869,35 @@
   "redirects": [
     {
       "source": "/zh/api-reference/videos/gemini-omni-1-1-flash-ext/generation",
-      "destination": "/zh/api-reference/videos/gemini-omni-flash-ext/generation"
+      "destination": "/zh/api-reference/videos/gemini-omni-1-2-flash/generation"
+    },
+    {
+      "source": "/zh/api-reference/videos/gemini-omni-flash-ext/generation",
+      "destination": "/zh/api-reference/videos/gemini-omni-1-2-flash/generation"
     },
     {
       "source": "/en/api-reference/videos/gemini-omni-1-1-flash-ext/generation",
-      "destination": "/en/api-reference/videos/gemini-omni-flash-ext/generation"
+      "destination": "/en/api-reference/videos/gemini-omni-1-2-flash/generation"
+    },
+    {
+      "source": "/en/api-reference/videos/gemini-omni-flash-ext/generation",
+      "destination": "/en/api-reference/videos/gemini-omni-1-2-flash/generation"
     },
     {
       "source": "/ja/api-reference/videos/gemini-omni-1-1-flash-ext/generation",
-      "destination": "/ja/api-reference/videos/gemini-omni-flash-ext/generation"
+      "destination": "/ja/api-reference/videos/gemini-omni-1-2-flash/generation"
+    },
+    {
+      "source": "/ja/api-reference/videos/gemini-omni-flash-ext/generation",
+      "destination": "/ja/api-reference/videos/gemini-omni-1-2-flash/generation"
     },
     {
       "source": "/ko/api-reference/videos/gemini-omni-1-1-flash-ext/generation",
-      "destination": "/ko/api-reference/videos/gemini-omni-flash-ext/generation"
+      "destination": "/ko/api-reference/videos/gemini-omni-1-2-flash/generation"
+    },
+    {
+      "source": "/ko/api-reference/videos/gemini-omni-flash-ext/generation",
+      "destination": "/ko/api-reference/videos/gemini-omni-1-2-flash/generation"
     },
     {
       "source": "/zh/api-reference/videos/sora2/generation",
