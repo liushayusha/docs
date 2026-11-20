@@ -4,14 +4,13 @@ description: |
   - Model ID: `gemini_omni_1_2_flash`
   - Asynchronous processing mode, returning a task ID for subsequent queries
   - Supports text-to-video, or up to 3 reference images
-  - Native 720p, any length from 3 to 15 seconds; 11–15 seconds is 9:16 only
+  - Native 720p, flexible duration from 3–15 seconds; 11–15 seconds supports 9:16 only
 api: 'POST https://aireiter.com/api/openapi/submit'
 ---
-
 import { apiKeyUrl } from '/snippets/_variables.mdx';
 
 <Note>
-Output is always 720p H.264 MP4: 1280×720 landscape or 720×1280 portrait. 1080p / 4K, reference video, and first/last frames are not supported.
+The final video is fixed at 720p H.264 MP4: landscape 1280×720, portrait 720×1280. 1080p / 4K, reference videos, and start/end frames are not supported.
 </Note>
 
 ## Authorizations
@@ -33,11 +32,11 @@ Output is always 720p H.264 MP4: 1280×720 landscape or 720×1280 portrait. 1080
 ## Body
 
 <ParamField body="model" type="string" required>
-  Model name. Always send `gemini_omni_1_2_flash`.
+  Model name. Always pass `gemini_omni_1_2_flash`.
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  Model parameter object.
+  Model parameters object.
 
   <Expandable title="params Object Properties">
     <ParamField body="prompt" type="string" required>
@@ -45,14 +44,14 @@ Output is always 720p H.264 MP4: 1280×720 landscape or 720×1280 portrait. 1080
     </ParamField>
 
     <ParamField body="video_length" type="string" default="8">
-      Video length in seconds. Only whole-second strings from `"3"` to `"15"` are accepted:
+      Duration of the generated video in seconds. Only accepts whole-second strings from `"3"` to `"15"`:
 
       * `"3"` / `"4"` / `"5"` / `"6"` / `"7"`
       * `"8"` - Default
       * `"9"` / `"10"` / `"11"` / `"12"` / `"13"` / `"14"` / `"15"`
 
       <Warning>
-        Enum validation requires a string: send `"8"`, not the number `8`. `"11"` to `"15"` only work with `aspect_ratio` set to `9:16`.
+        Enum validation requires a string; please pass `"8"` instead of the number `8`. Values from `"11"` to `"15"` can only be paired with an `aspect_ratio` of `9:16`.
       </Warning>
     </ParamField>
 
@@ -62,16 +61,16 @@ Output is always 720p H.264 MP4: 1280×720 landscape or 720×1280 portrait. 1080
       * `16:9` - Landscape 1280×720, Default
       * `9:16` - Portrait 720×1280
 
-      For 11–15 seconds, only `9:16` is allowed. `16:9` is rejected.
+      For durations of 11–15 seconds, only `9:16` is allowed; passing `16:9` will be rejected.
     </ParamField>
 
     <ParamField body="image_url" type="string | string[]">
-      Reference image URLs, which must be publicly accessible. A single string is also accepted. Omit it for text-to-video.
+      Reference image URL(s), which must be directly accessible via the public internet. A single string can also be passed. If omitted, text-to-video generation is performed.
 
-      * Up to 3 images; a 4th image is rejected
-      * Shortest side at least 300px, each image up to 10MB
+      * Up to 3 images; a 4th image will be rejected
+      * Short edge must be at least 300px, and each image must not exceed 10MB
 
-      Reference images guide the subject and style. They are not first/last frames, so the clip is not forced to start or end on any of them.
+      Reference images are used to define the subject and style, not as the first or last frame; the final video will not be forced to start or end with any specific image.
     </ParamField>
   </Expandable>
 </ParamField>
@@ -79,7 +78,7 @@ Output is always 720p H.264 MP4: 1280×720 landscape or 720×1280 portrait. 1080
 <ParamField body="out_task_id" type="string" required>
   Initiator task ID.
 
-  User-defined task identifier, required. Only letters, numbers, underscores, and hyphens are supported, with a length of 1-64 characters. You can use this ID later to query the task status and results.
+  User-defined task identifier, required. Only letters, numbers, underscores, and hyphens are supported, with a length of 1-64 characters. This ID can be used later to query the task status and results.
 </ParamField>
 
 ## Response
@@ -102,10 +101,10 @@ Output is always 720p H.264 MP4: 1280×720 landscape or 720×1280 portrait. 1080
 
 ## Query Task
 
-This model uses asynchronous video generation. After submitting a task, please use `out_task_id` to query the task status. You can also refer to [Get Task Status](/en/api-reference/tasks/status).
+This model generates videos asynchronously. After submitting a task, please use `out_task_id` to query the task status. You can also refer to [Get Task Status](/en/api-reference/tasks/status).
 
 <ParamField body="out_task_id" type="string" required>
-  The initiator task ID passed when submitting the task.
+  The caller's task ID passed when submitting the task.
 </ParamField>
 
 ```bash
@@ -118,23 +117,23 @@ curl --request POST \
   }'
 ```
 
-Once the query succeeds and is completed, the `output` array in the response will contain the generated video, with each element containing a `video` field.
+Once the query succeeds and the task is completed, the `output` array in the response will contain the generated videos, with each element containing a `video` field.
 
 ## Parameter Comparison
 
 | Input | `image_url` | `video_length` | `aspect_ratio` |
 |---|---|---|---|
-| Text-to-video | Omit, or empty array | `"3"`–`"10"` | `16:9` or `9:16` |
-| Text-to-video (long) | Omit, or empty array | `"11"`–`"15"` | `9:16` only |
-| Reference images | 1–3 images | `"3"`–`"10"` | `16:9` or `9:16` |
-| Reference images (long) | 1–3 images | `"11"`–`"15"` | `9:16` only |
+| Text-to-Video | Omit or empty array | `"3"`–`"10"` | `16:9` or `9:16` |
+| Text-to-Video (Long) | Omit or empty array | `"11"`–`"15"` | `9:16` only |
+| Reference Image | 1–3 images | `"3"`–`"10"` | `16:9` or `9:16` |
+| Reference Image (Long) | 1–3 images | `"11"`–`"15"` | `9:16` only |
 
-Unsupported fields: `resolution` (fixed at 720p) and `video_url` (reference video is not supported).
+Unsupported fields: `resolution` (fixed at 720p), `video_url` (reference videos not supported).
 
 ## Request Examples
 
 <RequestExample>
-  ```bash cURL (Text-to-video)
+  ```bash cURL (Text-to-Video)
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
@@ -142,7 +141,7 @@ Unsupported fields: `resolution` (fixed at 720p) and `video_url` (reference vide
     --data '{
       "model": "gemini_omni_1_2_flash",
       "params": {
-        "prompt": "A golden retriever running along a sunny beach, tracking shot, realistic",
+        "prompt": "A golden retriever running on a sunny beach, tracking shot, realistic style",
         "aspect_ratio": "16:9",
         "video_length": "8"
       },
@@ -150,7 +149,7 @@ Unsupported fields: `resolution` (fixed at 720p) and `video_url` (reference vide
     }'
   ```
 
-  ```bash cURL (3 reference images)
+  ```bash cURL (3 Reference Images)
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
@@ -158,7 +157,7 @@ Unsupported fields: `resolution` (fixed at 720p) and `video_url` (reference vide
     --data '{
       "model": "gemini_omni_1_2_flash",
       "params": {
-        "prompt": "Keep the character and outfit from the reference images, walking in a garden",
+        "prompt": "Keep the character and clothing from the reference images, walking in a garden",
         "image_url": [
           "https://example.com/ref-1.jpg",
           "https://example.com/ref-2.jpg",
@@ -171,7 +170,7 @@ Unsupported fields: `resolution` (fixed at 720p) and `video_url` (reference vide
     }'
   ```
 
-  ```bash cURL (15s portrait)
+  ```bash cURL (15s Portrait)
   curl --request POST \
     --url https://aireiter.com/api/openapi/submit \
     --header 'Authorization: Bearer <token>' \
@@ -179,7 +178,7 @@ Unsupported fields: `resolution` (fixed at 720p) and `video_url` (reference vide
     --data '{
       "model": "gemini_omni_1_2_flash",
       "params": {
-        "prompt": "City night time-lapse with traffic light trails, vertical framing",
+        "prompt": "City night view time-lapse photography, traffic creating light trails, vertical composition",
         "aspect_ratio": "9:16",
         "video_length": "15"
       },
@@ -195,7 +194,7 @@ Unsupported fields: `resolution` (fixed at 720p) and `video_url` (reference vide
   payload = {
       "model": "gemini_omni_1_2_flash",
       "params": {
-          "prompt": "A golden retriever running along a sunny beach, tracking shot, realistic",
+          "prompt": "A golden retriever running on a sunny beach, tracking shot, realistic style",
           "aspect_ratio": "16:9",
           "video_length": "8"
       },
@@ -218,7 +217,7 @@ Unsupported fields: `resolution` (fixed at 720p) and `video_url` (reference vide
   const payload = {
     model: "gemini_omni_1_2_flash",
     params: {
-      prompt: "A golden retriever running along a sunny beach, tracking shot, realistic",
+      prompt: "A golden retriever running on a sunny beach, tracking shot, realistic style",
       aspect_ratio: "16:9",
       video_length: "8"
     },
@@ -257,7 +256,7 @@ Unsupported fields: `resolution` (fixed at 720p) and `video_url` (reference vide
       payload := map[string]interface{}{
           "model": "gemini_omni_1_2_flash",
           "params": map[string]interface{}{
-              "prompt":       "A golden retriever running along a sunny beach, tracking shot, realistic",
+              "prompt":       "A golden retriever running on a sunny beach, tracking shot, realistic style",
               "aspect_ratio": "16:9",
               "video_length": "8",
           },
@@ -296,7 +295,7 @@ Unsupported fields: `resolution` (fixed at 720p) and `video_url` (reference vide
               {
                 "model": "gemini_omni_1_2_flash",
                 "params": {
-                  "prompt": "A golden retriever running along a sunny beach, tracking shot, realistic",
+                  "prompt": "A golden retriever running on a sunny beach, tracking shot, realistic style",
                   "aspect_ratio": "16:9",
                   "video_length": "8"
                 },
@@ -328,7 +327,7 @@ Unsupported fields: `resolution` (fixed at 720p) and `video_url` (reference vide
   $payload = [
       "model" => "gemini_omni_1_2_flash",
       "params" => [
-          "prompt" => "A golden retriever running along a sunny beach, tracking shot, realistic",
+          "prompt" => "A golden retriever running on a sunny beach, tracking shot, realistic style",
           "aspect_ratio" => "16:9",
           "video_length" => "8"
       ],
@@ -360,7 +359,7 @@ Unsupported fields: `resolution` (fixed at 720p) and `video_url` (reference vide
     "data": {
         "out_task_id": "omni_12_t2v_123456",
         "status": "pending",
-        "estimated_credits": "<Estimated Credits>",
+        "estimated_credits": "<Estimated credit consumption>",
         "created_at": "2026-11-18T06:03:28.242Z"
     }
 }
@@ -385,7 +384,7 @@ Unsupported fields: `resolution` (fixed at 720p) and `video_url` (reference vide
   {
     "error": {
       "code": 433,
-      "message": "Insufficient account balance, please recharge and try again"
+      "message": "Insufficient account balance, please top up and try again"
     }
   }
   ```

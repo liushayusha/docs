@@ -1,0 +1,713 @@
+---
+title: 'Seedream 5.5 Layerize レイヤー分割'
+description: |
+    - 非同期処理モード。後続のクエリに使用するタスクIDを返します
+    - 1枚の画像をベース画像と個別に編集可能な複数の透過 PNG レイヤー（ベース画像を含めて最大 100 枚）に分割します
+    - 各レイヤーには名前、説明、z_index、および bounding_box が含まれます
+    - オプションのテキスト認識により、テキストレイヤーの内容とスタイルを返します
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  すべてのエンドポイントでは、Bearer Tokenを使用した認証が必要です
+
+  API Keyの取得：
+
+  <a href={apiKeyUrl} target="_blank">API Key管理ページ</a>にアクセスして、API Keyを取得してください
+
+  使用時はリクエストヘッダーに以下を追加してください：
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  モデル名
+
+  固定値：`"seedream_v5_5_layerize"`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  モデルパラメータオブジェクト
+
+  <Expandable title="params オブジェクトのプロパティ">
+    <ParamField body="image_url" type="string" required>
+      分割する元画像のURL
+
+      * 必須。指定できる画像は**1枚**のみです
+      * サポートされている画像形式：jpeg、png
+      * 以下の2つの形式をサポートしています：
+        1. 公開アクセス可能なURL
+        2. Base64エンコード形式
+           * 完全なData URI形式を使用する必要があります：`data:image/{形式};base64,{base64データ}`
+           * 例：`data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
+           * ⚠️ 注意：`data:image/jpeg;base64,` プレフィックス部分を含める必要があり、base64画像のサイズは10MB以下である必要があります
+    </ParamField>
+
+    <ParamField body="prompt" type="string">
+      テキストプロンプト（任意）
+
+      分割する要素を指定するために使用します（例：`把标题文字和鹦鹉拆成单独的图层`）。指定しない場合、画像内の要素を自動的に認識します。
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="auto">
+      出力解像度レベル
+
+      * `auto` - 元画像のサイズで出力（デフォルト）：1K未満の元画像は1Kに拡大され、2Kを超える元画像は2Kに縮小されます
+      * `1K` - 1K解像度
+      * `1.5K` - 1.5K解像度
+      * `2K` - 2K解像度
+
+      レベルを指定した場合、ベース画像と各レイヤーは選択したレベルで出力され、それぞれ元のアスペクト比を維持します。アスペクト比の指定やカスタムピクセルサイズには対応していません。
+    </ParamField>
+
+    <ParamField body="max_images" type="integer" default="30">
+      返却される画像枚数の上限（ベース画像を含む）
+
+      * 有効範囲：2–100
+      * 実際に返却される枚数は画像の内容によって決まり、この値を超えることはありません
+      * 30枚を超えると処理時間が長くなり、100枚の場合は約5分かかります
+    </ParamField>
+
+    <ParamField body="text_recognition" type="boolean" default="false">
+      文字認識
+
+      有効にすると、画像内の鮮明で判別可能なテキストレイヤーに対して、テキスト内容とスタイルを認識します
+    </ParamField>
+
+    <ParamField body="output_format" type="string" default="png">
+      ベース画像の出力形式
+
+      * `png` - PNG（デフォルト）
+      * `jpeg` - JPEG
+
+      ベース画像（z_index = 0）にのみ適用され、その他のレイヤーは透過背景のPNGに固定されます
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="callback_url" type="string">
+  タスク完了後のコールバックURL
+</ParamField>
+
+<ParamField body="metadata" type="object">
+  カスタムメタデータ（そのまま返却されます）
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  リクエスト元タスクID
+
+  ユーザー定義のタスク識別子（必須）
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  リクエスト元のタスクID。結果の照会に使用できます
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  初期ステータス（`"pending"` 固定）
+</ResponseField>
+
+<ResponseField name="estimated_credits" type="number">
+  推定消費クレジット
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  作成日時（ISO形式）
+</ResponseField>
+
+<RequestExample>
+  ```bash cURL
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "seedream_v5_5_layerize",
+      "params": {
+        "image_url": "https://static.aireiter.com/content/model-seo/seedream-v5-pro-layerize/layer-0.png",
+        "max_images": 30,
+        "prompt": "Split the sky, the water and the moss platform into separate layers."
+      },
+      "out_task_id": "my_task_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "seedream_v5_5_layerize",
+      "params": {
+          "image_url": "https://static.aireiter.com/content/model-seo/seedream-v5-pro-layerize/layer-0.png",
+          "max_images": 30,
+          "prompt": "Split the sky, the water and the moss platform into separate layers."
+      },
+      "out_task_id": "my_task_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "seedream_v5_5_layerize",
+    params: {
+      image_url: "https://static.aireiter.com/content/model-seo/seedream-v5-pro-layerize/layer-0.png",
+      max_images: 30,
+      prompt: "Split the sky, the water and the moss platform into separate layers."
+    },
+    out_task_id: "my_task_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "seedream_v5_5_layerize",
+          "params": map[string]interface{}{
+              "image_url":  "https://static.aireiter.com/content/model-seo/seedream-v5-pro-layerize/layer-0.png",
+              "max_images": 30,
+              "prompt":     "Split the sky, the water and the moss platform into separate layers.",
+          },
+          "out_task_id": "my_task_123456",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/openapi/submit";
+
+          String payload = """
+          {
+            "model": "seedream_v5_5_layerize",
+            "params": {
+              "image_url": "https://static.aireiter.com/content/model-seo/seedream-v5-pro-layerize/layer-0.png",
+              "max_images": 30,
+              "prompt": "Split the sky, the water and the moss platform into separate layers."
+            },
+            "out_task_id": "my_task_123456"
+          }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = [
+      "model" => "seedream_v5_5_layerize",
+      "params" => [
+          "image_url" => "https://static.aireiter.com/content/model-seo/seedream-v5-pro-layerize/layer-0.png",
+          "max_images" => 30,
+          "prompt" => "Split the sky, the water and the moss platform into separate layers."
+      ],
+      "out_task_id" => "my_task_123456"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url = URI("https://aireiter.com/api/openapi/submit")
+
+  payload = {
+    model: "seedream_v5_5_layerize",
+    params: {
+      image_url: "https://static.aireiter.com/content/model-seo/seedream-v5-pro-layerize/layer-0.png",
+      max_images: 30,
+      prompt: "Split the sky, the water and the moss platform into separate layers."
+    },
+    out_task_id: "my_task_123456"
+  }
+
+  http = Net::HTTP.new(url.host, url.port)
+
+  request = Net::HTTP::Post.new(url)
+  request["Authorization"] = "Bearer <token>"
+  request["Content-Type"] = "application/json"
+  request.body = payload.to_json
+
+  response = http.request(request)
+  puts response.body
+  ```
+
+  ```swift Swift
+  import Foundation
+
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
+
+  let payload: [String: Any] = [
+      "model": "seedream_v5_5_layerize",
+      "params": [
+          "image_url": "https://static.aireiter.com/content/model-seo/seedream-v5-pro-layerize/layer-0.png",
+          "max_images": 30,
+          "prompt": "Split the sky, the water and the moss platform into separate layers."
+      ] as [String: Any],
+      "out_task_id": "my_task_123456"
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      if let error = error {
+          print("Error: \(error)")
+          return
+      }
+
+      if let data = data, let responseString = String(data: data, encoding: .utf8) {
+          print(responseString)
+      }
+  }
+
+  task.resume()
+  ```
+
+  ```csharp C#
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url = "https://aireiter.com/api/openapi/submit";
+
+          var payload = @"{
+              ""model"": ""seedream_v5_5_layerize"",
+              ""params"": {
+                  ""image_url"": ""https://static.aireiter.com/content/model-seo/seedream-v5-pro-layerize/layer-0.png"",
+                  ""max_images"": 30,
+                  ""prompt"": ""Split the sky, the water and the moss platform into separate layers.""
+              },
+              ""out_task_id"": ""my_task_123456""
+          }";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+
+          var content = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          var result = await response.Content.ReadAsStringAsync();
+
+          Console.WriteLine(result);
+      }
+  }
+  ```
+
+  ```c C
+  #include <stdio.h>
+  #include <curl/curl.h>
+
+  int main(void) {
+      CURL *curl;
+      CURLcode res;
+
+      curl_global_init(CURL_GLOBAL_DEFAULT);
+      curl = curl_easy_init();
+
+      if(curl) {
+          const char *url = "https://aireiter.com/api/openapi/submit";
+          const char *payload = "{"
+              "\"model\":\"seedream_v5_5_layerize\","
+              "\"params\":{"
+                  "\"image_url\":\"https://static.aireiter.com/content/model-seo/seedream-v5-pro-layerize/layer-0.png\","
+                  "\"max_images\":30,"
+                  "\"prompt\":\"Split the sky, the water and the moss platform into separate layers.\""
+              "},"
+              "\"out_task_id\":\"my_task_123456\""
+          "}";
+
+          struct curl_slist *headers = NULL;
+          headers = curl_slist_append(headers, "Authorization: Bearer <token>");
+          headers = curl_slist_append(headers, "Content-Type: application/json");
+
+          curl_easy_setopt(curl, CURLOPT_URL, url);
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
+          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+          res = curl_easy_perform(curl);
+
+          if(res != CURLE_OK) {
+              fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                      curl_easy_strerror(res));
+          }
+
+          curl_slist_free_all(headers);
+          curl_easy_cleanup(curl);
+      }
+
+      curl_global_cleanup();
+      return 0;
+  }
+  ```
+
+  ```dart Dart
+  import 'dart:convert';
+  import 'package:http/http.dart' as http;
+
+  void main() async {
+    final url = Uri.parse('https://aireiter.com/api/openapi/submit');
+
+    final payload = {
+      'model': 'seedream_v5_5_layerize',
+      'params': {
+        'image_url': 'https://static.aireiter.com/content/model-seo/seedream-v5-pro-layerize/layer-0.png',
+        'max_images': 30,
+        'prompt': 'Split the sky, the water and the moss platform into separate layers.'
+      },
+      'out_task_id': 'my_task_123456'
+    };
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer <token>',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(payload),
+    );
+
+    print(response.body);
+  }
+  ```
+
+  ```r R
+  library(httr)
+  library(jsonlite)
+
+  url <- "https://aireiter.com/api/openapi/submit"
+
+  payload <- list(
+    model = "seedream_v5_5_layerize",
+    params = list(
+      image_url = "https://static.aireiter.com/content/model-seo/seedream-v5-pro-layerize/layer-0.png",
+      max_images = 30,
+      prompt = "Split the sky, the water and the moss platform into separate layers."
+    ),
+    out_task_id = "my_task_123456"
+  )
+
+  response <- POST(
+    url,
+    add_headers(
+      Authorization = "Bearer <token>",
+      `Content-Type` = "application/json"
+    ),
+    body = toJSON(payload, auto_unbox = TRUE),
+    encode = "raw"
+  )
+
+  cat(content(response, "text"))
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "out_task_id": "my_task_123456",
+        "status": "pending",
+        "estimated_credits": 95.22,
+        "created_at": "2026-08-12T06:03:28.242Z"
+    }
+}
+  ```
+
+  ```json 400
+    {
+        "statusCode": 400,
+        "message": "リクエストパラメータが無効です",
+        "ok": false
+    }
+  ```
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "認証に失敗しました。APIキーを確認してください"
+    }
+  }
+  ```
+```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "アカウントの残高が不足しています。チャージしてから再度お試しください"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "サーバー内部エラーが発生しました。しばらくしてから再度お試しください"
+    }
+  }
+  ```
+</ResponseExample>
+
+## タスク結果のクエリ
+
+タスクの送信後、`POST /api/openapi/query` エンドポイントを使用してタスクのステータスをポーリングします。レイヤー分割には通常数十秒から数分かかります。`out_task_id` を保存して最終ステータスになるまで継続的にクエリを実行し、重複して送信しないでください。タスクが完了すると、`output` フィールドにベース画像とレイヤーのリストが返されます。
+
+<RequestExample>
+  ```bash cURL
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/query \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "out_task_id": "my_task_123456"
+    }'
+  ```
+</RequestExample>
+
+### クエリレスポンス - レイヤー出力構造
+
+タスクが完了すると、`output` は画像オブジェクトの配列になります。最初の項目はベース画像で、残りはレイヤーです。各項目には `url` と `metadata` が含まれます：
+
+<ResponseField name="output" type="array">
+  ベース画像とレイヤーのリスト
+
+  <Expandable title="画像オブジェクトのプロパティ">
+    <ResponseField name="url" type="string">
+      画像 URL（ベース画像は不透明な画像、レイヤーは透過 PNG）
+    </ResponseField>
+
+    <ResponseField name="metadata" type="object">
+      レイヤーメタデータ
+
+      <Expandable title="metadata プロパティ">
+        <ResponseField name="kind" type="string">
+          固定値 `"layer"`、これがレイヤー出力であることを識別します
+        </ResponseField>
+
+        <ResponseField name="z_index" type="number">
+          レイヤー階層インデックス
+
+          * `z_index = 0`：ベースレイヤー（再構築された完全な背景画像）、`bounding_box`、`name`、`description` は `null`
+          * `z_index ≥ 1`：前景レイヤー、数値が大きいほど上に配置されます
+        </ResponseField>
+
+        <ResponseField name="bounding_box" type="object | null">
+          元画像内でのレイヤーの位置領域
+
+          ベースレイヤー（z_index=0）は `null`、その他のレイヤーは座標オブジェクトを返します：
+
+          <Expandable title="bounding_box プロパティ">
+            <ResponseField name="absolute" type="array">
+              ベース画像の解像度に基づく絶対ピクセル座標 `[x1, y1, x2, y2]`
+            </ResponseField>
+
+            <ResponseField name="normalized" type="array">
+              正規化座標 `[x1, y1, x2, y2]`、範囲は 0–1000
+            </ResponseField>
+          </Expandable>
+        </ResponseField>
+
+        <ResponseField name="name" type="string | null">
+          レイヤー名
+        </ResponseField>
+
+        <ResponseField name="description" type="string | null">
+          レイヤーの説明
+        </ResponseField>
+
+        <ResponseField name="background" type="string">
+          背景タイプ：ベース画像は `"opaque"`、レイヤーは `"transparent"`
+        </ResponseField>
+
+        <ResponseField name="output_format" type="string">
+          画像フォーマット（例：`"png"`）
+        </ResponseField>
+
+        <ResponseField name="size" type="string">
+          該当画像のピクセルサイズ、フォーマットは `幅x高さ`
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="credits_used" type="number">
+  実際に消費されたクレジット
+</ResponseField>
+
+### クエリレスポンスの例
+
+<ResponseExample>
+  ```json 200
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "task_id": "task_01M7VGCXTAVJRR86A1NTQZ0HAQ",
+        "out_task_id": "my_task_123456",
+        "status": "completed",
+        "created_at": "2026-11-20T06:03:28.000Z",
+        "completed_at": "2026-11-20T06:04:02.000Z",
+        "credits_used": 10.17,
+        "output": [
+            {
+                "url": "https://static.aireiter.com/example/seedream-v5-5-layerize/layer-0.png",
+                "metadata": {
+                    "kind": "layer",
+                    "z_index": 0,
+                    "bounding_box": null,
+                    "name": null,
+                    "description": null,
+                    "background": "opaque",
+                    "output_format": "png",
+                    "size": "1254x1254"
+                }
+            },
+            {
+                "url": "https://static.aireiter.com/example/seedream-v5-5-layerize/layer-1.png",
+                "metadata": {
+                    "kind": "layer",
+                    "z_index": 1,
+                    "bounding_box": {
+                        "absolute": [398, 149, 758, 501],
+                        "normalized": [317, 119, 604, 400]
+                    },
+                    "name": "Sheet music",
+                    "description": "Off-white sheet music held in both hands",
+                    "background": "transparent",
+                    "output_format": "png",
+                    "size": "1036x1013"
+                }
+            },
+            {
+                "url": "https://static.aireiter.com/example/seedream-v5-5-layerize/layer-2.png",
+                "metadata": {
+                    "kind": "layer",
+                    "z_index": 2,
+                    "bounding_box": {
+                        "absolute": [339, 0, 1131, 645],
+                        "normalized": [270, 0, 902, 514]
+                    },
+                    "name": "Woman in knit sweater",
+                    "description": "Woman with long dark brown curly hair in an off-white knit sweater, smiling at the sheet music",
+                    "background": "transparent",
+                    "output_format": "png",
+                    "size": "1135x924"
+                }
+            }
+        ]
+    }
+}
+  ```
+
+  > 上記の例では 3 枚の画像のみを表示していますが、実際に返される枚数は `max_images` を超えません。`z_index = 0` がベース画像であり、残りのレイヤーは階層順（下から上）に並んでいます。
+</ResponseExample>

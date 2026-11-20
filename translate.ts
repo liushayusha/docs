@@ -606,7 +606,7 @@ async function translateSingleChunk(sourceLang: string, targetLang: string, text
   for (let attempt = 1; attempt <= MAX_TRANSLATE_RETRIES; attempt++) {
     try {
       const response = await openai.chat.completions.create({
-        model: process.env.TRANSLATE_MODEL || "gemini-3.8-flash-high",
+        model: process.env.TRANSLATE_MODEL || "gemini-4-argon-medium",
         messages: [
           { role: "system", content: translateSystemPrompt },
           { role: "user", content: userPrompt },

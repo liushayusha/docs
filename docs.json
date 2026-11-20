@@ -145,6 +145,20 @@
                 ]
               },
               {
+                "group": "Seedream 5.5",
+                "icon": "image",
+                "pages": [
+                  "zh/api-reference/images/seedream-v5-5/generation"
+                ]
+              },
+              {
+                "group": "Seedream 5.5 Layerize",
+                "icon": "image",
+                "pages": [
+                  "zh/api-reference/images/seedream-v5-5-layerize/generation"
+                ]
+              },
+              {
                 "group": "Wan2.7-Image-Pro",
                 "icon": "image",
                 "pages": [
@@ -614,6 +628,20 @@
                 ]
               },
               {
+                "group": "Seedream 5.5",
+                "icon": "image",
+                "pages": [
+                  "en/api-reference/images/seedream-v5-5/generation"
+                ]
+              },
+              {
+                "group": "Seedream 5.5 Layerize",
+                "icon": "image",
+                "pages": [
+                  "en/api-reference/images/seedream-v5-5-layerize/generation"
+                ]
+              },
+              {
                 "group": "Wan2.7-Image-Pro",
                 "icon": "image",
                 "pages": [
@@ -1076,6 +1104,20 @@
                 ]
               },
               {
+                "group": "Seedream 5.5",
+                "icon": "image",
+                "pages": [
+                  "ja/api-reference/images/seedream-v5-5/generation"
+                ]
+              },
+              {
+                "group": "Seedream 5.5 Layerize",
+                "icon": "image",
+                "pages": [
+                  "ja/api-reference/images/seedream-v5-5-layerize/generation"
+                ]
+              },
+              {
                 "group": "Wan2.7-Image-Pro",
                 "icon": "image",
                 "pages": [
@@ -1535,6 +1577,20 @@
                 "icon": "image",
                 "pages": [
                   "ko/api-reference/images/seedream-v5-flash-layerize/generation"
+                ]
+              },
+              {
+                "group": "Seedream 5.5",
+                "icon": "image",
+                "pages": [
+                  "ko/api-reference/images/seedream-v5-5/generation"
+                ]
+              },
+              {
+                "group": "Seedream 5.5 Layerize",
+                "icon": "image",
+                "pages": [
+                  "ko/api-reference/images/seedream-v5-5-layerize/generation"
                 ]
               },
               {
