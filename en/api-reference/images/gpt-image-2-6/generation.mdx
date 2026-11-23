@@ -38,54 +38,54 @@ GPT-Image 2.6 has two model names in AIReiter: `gpt_image_2_6_flare` and `gpt_im
 ## Body
 
 <ParamField body="model" type="string" required>
-  Model name, choose one of two:
+  Model name, choose one of the two:
 
-  * `"gpt_image_2_6_flare"` — Flare, faster image generation, suitable for drafts and batch generation
-  * `"gpt_image_2_6_sunburst"` — Sunburst, more detail-focused, suitable for edits requiring preservation of characters, products, or layouts
+  * `"gpt_image_2_6_flare"` — Flare, faster image generation, suitable for drafts and batch processing
+  * `"gpt_image_2_6_sunburst"` — Sunburst, focuses more on details, suitable for editing that needs to preserve characters, products, or layouts
 
-  When comparing the two models, please keep the prompt, reference images, aspect ratio, and resolution consistent.
+  When comparing the two models, keep the prompt, reference images, aspect ratio, and resolution unchanged.
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  Model parameter object
+  Model parameters object
 
   <Expandable title="params Object Properties">
     <ParamField body="prompt" type="string" required>
       Text description for image generation
 
-      * Supports Chinese and English; detailed descriptions are recommended
-      * When editing images, clearly specify what to change and what must remain unchanged
-      * If a transparent background is required, please specify directly in the prompt (e.g., "transparent background"); whether it is transparent is determined by the model
-      * Submissions undergo platform sensitive words / safety moderation; any violating content will directly return an error
+      * Supports both Chinese and English; detailed descriptions are recommended
+      * When editing images, clearly state what to change and what must remain unchanged
+      * If a transparent background is needed, specify it directly in the prompt (e.g., "transparent background"); whether it is transparent is determined by the model
+      * Submissions undergo platform sensitive word / safety review beforehand; hitting violating content will directly return an error
     </ParamField>
 
     <ParamField body="output_format" type="string" default="png">
-      Output format, default `png`
+      Output format, default is `png`
 
       * `png` - Static image
-      * `gif` - Looping animated image, used with `frame_count` and `frame_duration_ms`
+      * `gif` - Looping animated GIF, used together with `frame_count` and `frame_duration_ms`
 
       <Warning>
-        When `gif`, `image_url` reference images are not supported (passing them will cause the task to fail), `resolution` is not used, and `aspect_ratio` only supports `auto`, `1:1`, `16:9`, `9:16`, `4:3`, `3:4`, `3:2`, `2:3`; passing other ratios returns 400.
+        When set to `gif`, `image_url` reference images are not supported (passing them will cause the task to fail), `resolution` is not used, and `aspect_ratio` only supports `auto`, `1:1`, `16:9`, `9:16`, `4:3`, `3:4`, `3:2`, and `2:3` (passing other aspect ratios returns 400).
       </Warning>
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      Array of reference images; triggers image-to-image / editing mode when provided (only available when `output_format` is `png`)
+      Reference image array; passing this enables image-to-image / editing mode (only available when `output_format` is `png`)
 
       * Up to 10 reference images
-      * If omitted, falls back to text-to-image mode
+      * If not provided, runs pure text-to-image mode
       * Supports the following two formats:
         1. Publicly accessible URL
         2. Base64 encoded format
-           * Must use the complete Data URI format: `data:image/{format};base64,{base64_data}`
+           * Must use the full Data URI format: `data:image/{format};base64,{base64_data}`
            * Supported image formats: jpeg, png, webp
            * Example: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
            * ⚠️ Note: Must include the `data:image/jpeg;base64,` prefix
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="auto">
-      Aspect ratio for image generation, default `auto`
+      Aspect ratio for image generation, default is `auto`
 
       Supports the following values:
 
@@ -95,36 +95,35 @@ GPT-Image 2.6 has two model names in AIReiter: `gpt_image_2_6_flare` and `gpt_im
       * `4:3` / `3:4` - Standard landscape / portrait
       * `3:2` / `2:3` - Classic landscape / portrait
       * `5:4` / `4:5` - Near-square landscape / portrait
-      * `2:1` / `1:2` - Wide landscape / tall portrait
-      * `21:9` / `9:21` - Ultrawide landscape / ultra-tall portrait
+      * `21:9` - Ultra-wide landscape
 
       <Warning>
-        Only aspect ratio strings or `auto` are supported; passing pixel dimensions (e.g., `1024x1024`) will return an error directly. If exact pixels are needed, please use `size`.
+        Only aspect ratio strings or `auto` are supported; passing pixel dimensions (such as `1024x1024`) will directly return an error. For exact pixel dimensions, use `size`.
       </Warning>
     </ParamField>
 
     <ParamField body="resolution" type="string" default="1K">
-      Resolution tier, default `1K`
+      Resolution tier, default is `1K`
 
-      * `1K` - Approx. 1024 baseline
-      * `2K` - Approx. 2048 baseline
-      * `4K` - Approx. 3840 baseline
+      * `1K` - Approx. 1024 base
+      * `2K` - Approx. 2048 base
+      * `4K` - Approx. 3840 base
 
       <Warning>
-        Do not pass `resolution` / `aspect_ratio` when passing `size`; otherwise, 400 will be returned.
+        Do not pass `resolution` / `aspect_ratio` when `size` is provided, otherwise 400 will be returned.
       </Warning>
     </ParamField>
 
     <ParamField body="frame_count" type="integer" default="9">
-      GIF frame count, only takes effect when `output_format` is `gif`, default `9`
+      GIF frame count, only effective when `output_format` is `gif`, default is `9`
 
-      * Value range `2` to `9`; returns 400 if out of range
+      * Value range is `2` ~ `9`; values out of range return 400
     </ParamField>
 
     <ParamField body="frame_duration_ms" type="integer" default="200">
-      GIF frame duration (in milliseconds), only takes effect when `output_format` is `gif`, default `200`
+      Duration per GIF frame (in milliseconds), only effective when `output_format` is `gif`, default is `200`
 
-      * Value range `100` to `500`, rounded to multiples of 10 ms; returns 400 if out of range
+      * Value range is `100` ~ `500`, rounded to the nearest 10 milliseconds; values out of range return 400
       * For example, 9 frames × 200 ms results in a 1.8-second loop
     </ParamField>
 
@@ -135,13 +134,13 @@ GPT-Image 2.6 has two model names in AIReiter: `gpt_image_2_6_flare` and `gpt_im
 
       **Usage Limitations:**
 
-      * Format must be `^\d+x\d+$`
+      * Format must match `^\d+x\d+$`
       * Both width and height must be multiples of 16
       * Each side must not exceed 3840
-      * Long side / short side must not exceed 3:1
+      * Long side / short side ratio must not exceed 3:1
       * Total pixels (width × height) must be between **655,360 ~ 8,294,400**
-      * Mutually exclusive with `aspect_ratio` and `resolution`; passing them simultaneously returns 400
-      * When `gif`, it will be converted proportionally to the closest GIF frame size (see the GIF frame size table below)
+      * Mutually exclusive with `aspect_ratio` and `resolution`; passing them together returns 400
+      * When set to `gif`, it will be converted proportionally to the closest GIF frame size (see the GIF frame size table below)
     </ParamField>
   </Expandable>
 </ParamField>
@@ -149,30 +148,27 @@ GPT-Image 2.6 has two model names in AIReiter: `gpt_image_2_6_flare` and `gpt_im
 <ParamField body="out_task_id" type="string" required>
   Initiator task ID
 
-  User-defined task identifier, required. Use the same value to call `POST /api/openapi/query` when querying results.
+  User-defined task identifier, required. Use the same value to call `POST /api/openapi/query` when querying the result.
 </ParamField>
 
-## 尺寸 × 分辨率映射表
+## Aspect Ratio × Resolution Mapping Table
 
-`aspect_ratio × resolution` → Actual pixels (`auto` is selected by the model and not included in the table):
+`aspect_ratio × resolution` → actual pixels (`auto` is automatically selected by the model and not included in the table):
 
 | aspect\_ratio | `1K`      | `2K`      | `4K`      |
 | ------------- | --------- | --------- | --------- |
 | `1:1`         | 1024×1024 | 2048×2048 | 2880×2880 |
-| `3:2`         | 1536×1024 | 2048×1360 | 3520×2336 |
-| `2:3`         | 1024×1536 | 1360×2048 | 2336×3520 |
-| `4:3`         | 1024×768  | 2048×1536 | 3312×2480 |
-| `3:4`         | 768×1024  | 1536×2048 | 2480×3312 |
-| `5:4`         | 1280×1024 | 2560×2048 | 3216×2576 |
-| `4:5`         | 1024×1280 | 2048×2560 | 2576×3216 |
-| `16:9`        | 1536×864  | 2048×1152 | 3840×2160 |
-| `9:16`        | 864×1536  | 1152×2048 | 2160×3840 |
-| `2:1`         | 1760×880  | 2688×1344 | 3840×1920 |
-| `1:2`         | 880×1760  | 1344×2688 | 1920×3840 |
-| `21:9`        | 1904×816  | 2688×1152 | 3840×1648 |
-| `9:21`        | 816×1904  | 1152×2688 | 1648×3840 |
+| `3:2`         | 1248×832  | 2496×1664 | 3504×2336 |
+| `2:3`         | 832×1248  | 1664×2496 | 2336×3504 |
+| `4:3`         | 1152×864  | 2304×1728 | 3264×2448 |
+| `3:4`         | 864×1152  | 1728×2304 | 2448×3264 |
+| `5:4`         | 1120×896  | 2240×1792 | 3200×2560 |
+| `4:5`         | 896×1120  | 1792×2240 | 2560×3200 |
+| `16:9`        | 1280×720  | 2560×1440 | 3840×2160 |
+| `9:16`        | 720×1280  | 1440×2560 | 2160×3840 |
+| `21:9`        | 1456×624  | 3024×1296 | 3696×1584 |
 
-> `3:2` / `2:3` @ 2K is actually 2048×1360 (approximate ratio). For aspect ratios not in the table, please use `size`.
+> `2:1`, `1:2`, and `9:21` are not supported and will return 400 if passed. Please use `size` for aspect ratios not in the table.
 
 ## GIF 帧尺寸
 

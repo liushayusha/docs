@@ -31,104 +31,103 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  Model Name
+  Model name
 
   Fixed value: `"gpt_image_2"`
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  Model Parameters Object
+  Model parameters object
 
   <Expandable title="params Object Properties">
     <ParamField body="prompt" type="string" required>
-      Text Description for Image Generation
+      Text description for image generation
 
       * Supports Chinese and English; detailed descriptions are recommended
-      * The prompt will undergo platform sensitive word / security review before submission; any violation will result in an error
+      * Subject to platform sensitive word / safety review before submission; hitting violating content will return an error directly
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      Reference Image Array; when provided, image-to-image mode is used
+      Reference image array; uses image-to-image mode when provided
 
       * Up to 10 reference images
       * Supports the following two formats:
-        1. Publicly accessible URLs
+        1. Publicly accessible URL
         2. Base64 encoded format
-           * Must use the full Data URI format: `data:image/{format};base64,{base64 data}`
+           * Must use the full Data URI format: `data:image/{format};base64,{base64_data}`
            * Supported image formats: jpeg, png, webp
            * Example: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
            * ⚠️ Note: Must include the `data:image/jpeg;base64,` prefix
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="auto">
-      Image Generation Aspect Ratio
+      Aspect ratio for image generation
 
-      Default value varies with `resolution`:
+      Default value varies depending on `resolution`:
 
-      * Defaults to `auto` when `resolution` is `1K` / `2K`
-      * Defaults to `16:9` when `resolution` is `4K`
+      * Defaults to `auto` if omitted when `resolution` is `1K` / `2K`
+      * Defaults to `16:9` if omitted when `resolution` is `4K`
 
-      Supported values:
+      Supports the following values:
 
-      * `auto` - Automatically selects the most suitable ratio
+      * `auto` - Automatically select the most suitable aspect ratio
       * `1:1` - Square
-      * `16:9` / `9:16` - Wide horizontal / vertical
-      * `4:3` / `3:4` - Standard horizontal / vertical
-      * `3:2` / `2:3` - Classic horizontal / vertical
-      * `5:4` / `4:5` - Nearly square horizontal / vertical
-      * `2:1` / `1:2` - Wide horizontal / tall vertical
-      * `21:9` / `9:21` - Ultra-wide horizontal / ultra-tall vertical
+      * `16:9` / `9:16` - Widescreen landscape / portrait
+      * `4:3` / `3:4` - Standard landscape / portrait
+      * `3:2` / `2:3` - Classic landscape / portrait
+      * `5:4` / `4:5` - Near-square landscape / portrait
+      * `21:9` - Ultra-wide landscape
 
       <Warning>
-        Only aspect ratio strings or `auto` are supported; passing pixel dimensions (e.g., `1024x1024`) will cause an error
+        Only aspect ratio strings or `auto` are supported; passing pixel dimensions (such as `1024x1024`) will return an error directly
       </Warning>
     </ParamField>
 
     <ParamField body="resolution" type="string" default="1K">
-      Resolution Tier
+      Resolution tier
 
-      Controls the actual output image clarity:
+      Controls actual output image clarity:
 
-      * `1K` - 1024 baseline, cost-effective for daily use (default)
-      * `2K` - 2048 baseline, suitable for posters / high-definition needs
-      * `4K` - 3840 baseline, **supports all 13 ratios**
+      * `1K` - 1024 baseline, cost-effective for daily use (Default)
+      * `2K` - 2048 baseline, suitable for posters / HD needs
+      * `4K` - 3840 baseline, **supported across all 10 aspect ratios**
 
       <Warning>
-        When passing `size`, `resolution` and `aspect_ratio` cannot be passed at the same time; otherwise, a 400 error will be returned.
+        When `size` is provided, neither `resolution` nor `aspect_ratio` can be passed at the same time; otherwise, a 400 error is returned.
       </Warning>
     </ParamField>
 
     <ParamField body="size" type="string">
-      Custom Pixel Dimensions (mutually exclusive with `aspect_ratio` / `resolution`)
+      Custom pixel dimensions (**mutually exclusive** with `aspect_ratio` / `resolution`)
 
-      Format is `widthxheight`, e.g., `2048x1536`, `3840x2160`.
+      Format is `widthxheight`, for example `2048x1536`, `3840x2160`.
 
       **Usage Limitations:**
 
-      * Format must match `^\d+x\d+$`, such as `2048x1536`; other formats are unsupported
-      * Mutually exclusive with `aspect_ratio` and `resolution`; only one of the three can be chosen; passing both will return 400
-      * Total pixels (width × height) must be within **655,360 ~ 8,294,400**
+      * Format must match `^\d+x\d+$`, such as `2048x1536`; other formats are not supported
+      * Mutually exclusive with `aspect_ratio` and `resolution` (only one approach can be chosen); passing them together returns a 400 error
+      * Total pixels (width × height) must be within the range of **655,360 ~ 8,294,400**
 
-      **Practical Pixel Lower Limit:**
+      **Measured Pixel Lower Limit:**
 
       | Total Pixel Range | Upstream Behavior |
       | --- | --- |
-      | ≥ 2,088,960 (approx. 2.0M) | Exact output according to the passed `size` ✅ |
-      | < 2,088,960 | Silently replaced with a similar ratio (~1.57M) (equivalent to not passing `size`) ⚠️ |
+      | ≥ 2,088,960 (approx. 2.0M) | Generates image at the exact `size` passed ✅ |
+      | < 2,088,960 | Silently replaced with a similar aspect ratio at ~1.57M (equivalent to not passing `size`) ⚠️ |
 
       <Warning>
-        When total pixels are below approximately 2,088,960, upstream does not report an error but silently replaces output size. For precise control, **it is recommended to have total pixels ≥ 2,088,960**.
+        When total pixels are below approx. 2,088,960, upstream will not return an error, but will silently replace the output dimensions. For precise control, **total pixels ≥ 2,088,960 are recommended**.
 
-        For small size needs, please use the combination of `aspect_ratio` + `resolution=1K`.
+        For smaller dimensions, please use the `aspect_ratio` + `resolution=1K` combination instead.
       </Warning>
 
-      **Recommendations:**
+      **Selection Recommendations:**
 
       | Requirement | Recommended Method |
       | --- | --- |
-      | Precise pixel size control | `size` with total pixels ≥ 2,088,960 |
-      | Small size (< 2M pixels) | `aspect_ratio` + `resolution=1K` |
-      | Medium to large sizes with any ratio | `size`; 2K / 4K range supports precise output for any ratio |
+      | Precise control over pixel dimensions | `size`, with total pixels ≥ 2,088,960 |
+      | Small dimensions (< 2M pixels) | `aspect_ratio` + `resolution=1K` |
+      | Medium/large dimensions with any aspect ratio | `size`, exact output supported for any aspect ratio within the 2K / 4K range |
     </ParamField>
   </Expandable>
 </ParamField>
@@ -136,55 +135,51 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 <ParamField body="out_task_id" type="string" required>
   Initiator Task ID
 
-  User-defined task identifier, required
+  User-defined task identifier, Required
 </ParamField>
 
-## Size × Resolution Mapping Table
+## Aspect Ratio × Resolution Mapping Table
 
-`aspect_ratio × resolution` → Actual Pixels (13 ratios × 3 levels):
+`aspect_ratio × resolution` → Actual Pixels (10 aspect ratios × 3 tiers):
 
-| aspect\_ratio | `1K`                    | `2K`      | `4K`          |
-| ------------- | ----------------------- | --------- | ------------- |
-| `1:1`         | 1024×1024 / 1254×1254   | 2048×2048 | **2880×2880** |
-| `3:2`         | 1536×1024               | 2048×1360 | **3520×2336** |
-| `2:3`         | 1024×1536               | 1360×2048 | **2336×3520** |
-| `4:3`         | 1024×768                | 2048×1536 | **3312×2480** |
-| `3:4`         | 768×1024                | 1536×2048 | **2480×3312** |
-| `5:4`         | 1280×1024 / 1448×1086   | 2560×2048 | **3216×2576** |
-| `4:5`         | 1024×1280 / 1122×1402   | 2048×2560 | **2576×3216** |
-| `16:9`        | 1536×864 / 1672×941     | 2048×1152 | **3840×2160** |
-| `9:16`        | 864×1536 / 941×1672     | 1152×2048 | **2160×3840** |
-| `2:1`         | 2048×1024 / 1774×887    | 2688×1344 | **3840×1920** |
-| `1:2`         | 1024×2048 / 887×1774    | 1344×2688 | **1920×3840** |
-| `21:9`        | 2016×864 / 1915×821     | 2688×1152 | **3840×1648** |
-| `9:21`        | 864×2016 / 821×1915     | 1152×2688 | **1648×3840** |
+| aspect\_ratio | `1K`      | `2K`      | `4K`      |
+| ------------- | --------- | --------- | --------- |
+| `1:1`         | 1024×1024 | 2048×2048 | **2880×2880** |
+| `3:2`         | 1248×832  | 2496×1664 | **3504×2336** |
+| `2:3`         | 832×1248  | 1664×2496 | **2336×3504** |
+| `4:3`         | 1152×864  | 2304×1728 | **3264×2448** |
+| `3:4`         | 864×1152  | 1728×2304 | **2448×3264** |
+| `5:4`         | 1120×896  | 2240×1792 | **3200×2560** |
+| `4:5`         | 896×1120  | 1792×2240 | **2560×3200** |
+| `16:9`        | 1280×720  | 2560×1440 | **3840×2160** |
+| `9:16`        | 720×1280  | 1440×2560 | **2160×3840** |
+| `21:9`        | 1456×624  | 3024×1296 | **3696×1584** |
 
-> `3:2` / `2:3` @ 2K is actually 2048×1360 (approximate ratio, error < 0.5%); 4K now supports all 13 ratios.
+> 4K supports all 10 aspect ratios; `2:1`, `1:2`, and `9:21` are not supported and will return 400 if passed.
 
-## Custom Size (size parameter)
+## Custom Dimensions (size Parameter)
 
-When you need precise control over pixel dimensions, use the `size` parameter instead of the `aspect_ratio` + `resolution` combination.
+When you need precise control over pixel dimensions, you can use the `size` parameter instead of the `aspect_ratio` + `resolution` combination.
 
-**Valid range:** Total pixels 655,360 ~ 8,294,400 (upstream official limit)
+**Valid Range:** Total pixels 655,360 ~ 8,294,400 (official upstream limit)
 
-**Tested effective lower limit:** Total pixels ≥ **2,088,960** (approximately 1440×1452 or 2048×1020 equivalent area)
+**Tested Effective Lower Limit:** Total pixels ≥ **2,088,960** (equivalent area to approximately 1440×1452 or 2048×1020)
 
-Below this lower limit, the upstream does not report an error but silently replaces it with a close proportion size of about 1.57M pixels.
+Below this lower limit, the upstream will not report an error, but will silently replace it with a ~1.57M pixel size of a similar aspect ratio.
 
-### Common size examples
+### Common size Examples
 
-| size value | Total pixels | Recommended use |
+| size Value | Total Pixels | Recommended Use |
 | --- | --- | --- |
 | `2048x2048` | 4,194,304 | Square HD |
-| `2048x1536` | 3,145,728 | 4:3 landscape |
-| `1536x2048` | 3,145,728 | 3:4 portrait |
-| `2048x1152` | 2,359,296 | 16:9 landscape |
-| `1152x2048` | 2,359,296 | 9:16 portrait |
-| `3840x2160` | 8,294,400 | 4K 16:9 (highest quality) |
-| `2688x1344` | 3,612,672 | 2:1 wide landscape |
+| `2048x1536` | 3,145,728 | 4:3 Landscape |
+| `1536x2048` | 3,145,728 | 3:4 Portrait |
+| `2048x1152` | 2,359,296 | 16:9 Landscape |
+| `1152x2048` | 2,359,296 | 9:16 Portrait |
+| `3840x2160` | 8,294,400 | 4K 16:9 (Highest tier) |
 
 <Warning>
-  **Do not pass together with `aspect_ratio` or `resolution`, otherwise a 400 will be returned.**
+  **Do not pass this simultaneously with `aspect_ratio` or `resolution`**, otherwise a 400 error will be returned.
 </Warning>
 
 ## Response

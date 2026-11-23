@@ -32,16 +32,16 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 ## Body
 
 <ParamField body="model" type="string" required>
-  Model name, choose one of two:
+  Model name, choose one of the two:
 
-  * `"gpt_image_2_5_flare"` — Flare, faster for daily text-to-image / image editing
-  * `"gpt_image_2_5_sunburst"` — Sunburst, more emphasis on editing fidelity (characters, layout, product appearance)
+  * `"gpt_image_2_5_flare"` — Flare, faster for everyday text-to-image / image editing
+  * `"gpt_image_2_5_sunburst"` — Sunburst, greater emphasis on editing fidelity (characters, layout, product appearance)
 
-  There is no bare `gpt-image-2.5` ID. When comparing the two tiers, please keep the prompt, reference images, aspect ratio, and resolution unchanged.
+  There is no bare `gpt-image-2.5` ID. Keep the prompt, reference images, aspect ratio, and resolution identical when comparing the two tiers.
 </ParamField>
 
 <ParamField body="params" type="object" required>
-  Model parameter object
+  Model parameters object
 
   <Expandable title="params Object Properties">
     <ParamField body="prompt" type="string" required>
@@ -49,110 +49,106 @@ import { apiKeyUrl } from '/snippets/_variables.mdx';
 
       * Supports Chinese and English; detailed descriptions are recommended
       * When editing images, clearly specify what to change and what must remain unchanged
-      * Submissions will undergo platform sensitive word / safety review before processing; violating content will return an error directly
+      * Before submission, it will undergo platform sensitive word / safety review; hitting violating content will directly return an error
     </ParamField>
 
     <ParamField body="image_url" type="string[]">
-      Reference image array; if provided, enters image-to-image / editing mode
+      Array of reference images; when passed, it enters image-to-image / editing mode
 
       * Up to 10 reference images
-      * If omitted, pure text-to-image mode is used
+      * If not passed, it uses pure text-to-image mode
       * Supports the following two formats:
         1. Publicly accessible URL
-        2. Base64 encoding format
-           * Must use the full Data URI format: `data:image/{format};base64,{base64_data}`
+        2. Base64 encoded format
+           * Must use the complete Data URI format: `data:image/{格式};base64,{base64数据}`
            * Supported image formats: jpeg, png, webp
            * Example: `data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABg...`
            * ⚠️ Note: Must include the `data:image/jpeg;base64,` prefix
     </ParamField>
 
     <ParamField body="aspect_ratio" type="string" default="auto">
-      Aspect ratio for image generation, default `auto`
+      Aspect ratio for image generation, default is `auto`
 
       Supports the following values:
 
-      * `auto` - Automatically select the most appropriate aspect ratio
+      * `auto` - Automatically select the most suitable aspect ratio
       * `1:1` - Square
       * `16:9` / `9:16` - Widescreen landscape / portrait
       * `4:3` / `3:4` - Standard landscape / portrait
       * `3:2` / `2:3` - Classic landscape / portrait
       * `5:4` / `4:5` - Near-square landscape / portrait
-      * `2:1` / `1:2` - Wide landscape / tall portrait
-      * `21:9` / `9:21` - Ultra-wide landscape / ultra-tall portrait
+      * `21:9` - Ultra-wide landscape
 
       <Warning>
-        Only aspect ratio strings or `auto` are supported; passing pixel dimensions (e.g., `1024x1024`) will directly result in an error. Use `size` for precise pixels.
+        Only aspect ratio strings or `auto` are supported; passing pixel dimensions (such as `1024x1024`) will directly return an error. Use `size` if exact pixels are required.
       </Warning>
     </ParamField>
 
     <ParamField body="resolution" type="string" default="1K">
-      Resolution tier, default `1K`
+      Resolution tier, default is `1K`
 
-      * `1K` - Approx. 1024 baseline
-      * `2K` - Approx. 2048 baseline
-      * `4K` - Approx. 3840 baseline
+      * `1K` - Approx. 1024 base
+      * `2K` - Approx. 2048 base
+      * `4K` - Approx. 3840 base
 
       <Warning>
-        Do not pass `resolution` / `aspect_ratio` when passing `size`, otherwise a 400 error is returned.
+        Do not pass `resolution` / `aspect_ratio` when `size` is passed, otherwise a 400 error will be returned.
       </Warning>
     </ParamField>
 
     <ParamField body="size" type="string">
       Custom pixel dimensions (API only, **mutually exclusive** with `aspect_ratio` / `resolution`)
 
-      Format is `widthxheight`, e.g., `2048x1536`, `3840x2160`.
+      Formatted as `宽x高` (width x height), e.g., `2048x1536`, `3840x2160`.
 
-      **Limitations:**
+      **Usage Limitations:**
 
-      * Format must be `^\d+x\d+$`
+      * Format must match `^\d+x\d+$`
       * Both width and height must be multiples of 16
-      * Neither side can exceed 3840
-      * Ratio of longer side / shorter side cannot exceed 3:1
-      * Total pixels (width × height) between **655,360 ~ 8,294,400**
+      * Each side must not exceed 3840
+      * Long side / short side ratio must not exceed 3:1
+      * Total pixels (width × height) must be between **655,360 ~ 8,294,400**
       * Mutually exclusive with `aspect_ratio` and `resolution`; passing them together returns 400
     </ParamField>
 
     <ParamField body="background" type="string" default="auto">
-      Image output background, default `auto`
+      Output image background, default is `auto`
 
-      * `auto` - Model determines whether it is transparent
+      * `auto` - The model decides whether to make it transparent
       * `opaque` - Opaque background
       * `transparent` - Transparent background, returns PNG with alpha channel
 
       <Warning>
-        When selecting `transparent`, the platform will automatically output in PNG format, no need to pass `output_format`. `output_format` is not available on this page.
+        When `transparent` is selected, the platform automatically outputs in PNG format without needing to pass `output_format`. `output_format` is not available on this page.
       </Warning>
     </ParamField>
   </Expandable>
 </ParamField>
 
 <ParamField body="out_task_id" type="string" required>
-  Caller Task ID
+  Initiator task ID
 
   User-defined task identifier, required. Use the same value to call `POST /api/openapi/query` when querying results.
 </ParamField>
 
 ## Size × Resolution Mapping Table
 
-`aspect_ratio × resolution` → Actual pixels (`auto` is automatically selected by the model and is not listed in the table):
+`aspect_ratio × resolution` → Actual pixels (`auto` is automatically selected by the model and is not in the table):
 
 | aspect\_ratio | `1K`      | `2K`      | `4K`      |
 | ------------- | --------- | --------- | --------- |
 | `1:1`         | 1024×1024 | 2048×2048 | 2880×2880 |
-| `3:2`         | 1536×1024 | 2048×1360 | 3520×2336 |
-| `2:3`         | 1024×1536 | 1360×2048 | 2336×3520 |
-| `4:3`         | 1024×768  | 2048×1536 | 3312×2480 |
-| `3:4`         | 768×1024  | 1536×2048 | 2480×3312 |
-| `5:4`         | 1280×1024 | 2560×2048 | 3216×2576 |
-| `4:5`         | 1024×1280 | 2048×2560 | 2576×3216 |
-| `16:9`        | 1536×864  | 2048×1152 | 3840×2160 |
-| `9:16`        | 864×1536  | 1152×2048 | 2160×3840 |
-| `2:1`         | 2048×1024 | 2688×1344 | 3840×1920 |
-| `1:2`         | 1024×2048 | 1344×2688 | 1920×3840 |
-| `21:9`        | 2016×864  | 2688×1152 | 3840×1648 |
-| `9:21`        | 864×2016  | 1152×2688 | 1648×3840 |
+| `3:2`         | 1248×832  | 2496×1664 | 3504×2336 |
+| `2:3`         | 832×1248  | 1664×2496 | 2336×3504 |
+| `4:3`         | 1152×864  | 2304×1728 | 3264×2448 |
+| `3:4`         | 864×1152  | 1728×2304 | 2448×3264 |
+| `5:4`         | 1120×896  | 2240×1792 | 3200×2560 |
+| `4:5`         | 896×1120  | 1792×2240 | 2560×3200 |
+| `16:9`        | 1280×720  | 2560×1440 | 3840×2160 |
+| `9:16`        | 720×1280  | 1440×2560 | 2160×3840 |
+| `21:9`        | 1456×624  | 3024×1296 | 3696×1584 |
 
-> `3:2` / `2:3` @ 2K is actually 2048×1360 (approximate ratio). If you need aspect ratios not listed in the table, please use `size`.
+> `2:1`, `1:2`, and `9:21` are not supported; passing them returns 400. Please use `size` for aspect ratios not listed in the table.
 
 ## Response
 
