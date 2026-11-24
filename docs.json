@@ -366,6 +366,13 @@
                 ]
               },
               {
+                "group": "Seedance 2.5 Flash",
+                "icon": "video",
+                "pages": [
+                  "zh/api-reference/videos/seedance2_5_flash/generation"
+                ]
+              },
+              {
                 "group": "HappyHorse 1.0",
                 "icon": "video",
                 "pages": [
@@ -839,6 +846,13 @@
                 "icon": "video",
                 "pages": [
                   "en/api-reference/videos/seedance2_5/generation"
+                ]
+              },
+              {
+                "group": "Seedance 2.5 Flash",
+                "icon": "video",
+                "pages": [
+                  "en/api-reference/videos/seedance2_5_flash/generation"
                 ]
               },
               {

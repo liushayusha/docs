@@ -1,0 +1,47 @@
+[
+  {
+    "id": "__frontmatter__",
+    "hash": "38a4f68a",
+    "index": 0
+  },
+  {
+    "id": "__prologue__",
+    "hash": "96ec478d",
+    "index": 1
+  },
+  {
+    "id": "section-0-与-seedance-2-5-的差异",
+    "hash": "a3de0374",
+    "index": 2
+  },
+  {
+    "id": "section-1-authorizations",
+    "hash": "b48bd1c4",
+    "index": 3
+  },
+  {
+    "id": "section-2-body",
+    "hash": "794740f8",
+    "index": 4
+  },
+  {
+    "id": "section-3-response",
+    "hash": "5170b993",
+    "index": 5
+  },
+  {
+    "id": "section-4-query-task",
+    "hash": "374fbb5e",
+    "index": 6
+  },
+  {
+    "id": "section-5-request-examples",
+    "hash": "226e5651",
+    "index": 7
+  },
+  {
+    "id": "section-6-mode-rules",
+    "hash": "a0e851c9",
+    "index": 8
+  }
+]

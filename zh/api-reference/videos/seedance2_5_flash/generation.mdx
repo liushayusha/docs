@@ -1,0 +1,859 @@
+---
+title: 'Seedance 2.5 Flash 视频生成'
+description: |
+  - Seedance 2.5 的快速版，生成速度更快，参考素材上限更少
+  - 支持全参考和首尾帧两种视频生成模式，两种模式互斥
+  - 全参考模式最多 10 张图、5 段视频、5 段音频
+  - 支持 480p / 720p、4-30 秒及同步 AI 音频
+  - 支持 MP4 和高色彩精度 MOV 输出，异步返回任务 ID
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+<Note>
+Seedance 2.5 Flash 在 AIReiter 中的模型名称为 `seedance2_5_flash`，是 Seedance 2.5 的快速版：生成更快，参考素材上限更少，参数结构与 `seedance2_5` 一致。
+</Note>
+
+## 与 Seedance 2.5 的差异
+
+| 项目 | `seedance2_5` | `seedance2_5_flash` |
+| --- | --- | --- |
+| 参考图上限 | 30 张 | 10 张 |
+| 参考视频上限 | 9 段 | 5 段 |
+| 参考音频上限 | 10 段 | 5 段 |
+| 生成速度 | 标准 | 更快 |
+
+除上表外，两种模型的参数、取值范围与素材规格相同。
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  所有接口均需要使用 Bearer Token 进行认证。
+
+  访问 <a href={apiKeyUrl} target="_blank">API Key 管理页面</a> 获取 API Key，并在请求头中添加：
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  模型名称，固定使用：
+
+  * `seedance2_5_flash`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  模型参数对象。
+
+  <Expandable title="params 对象属性">
+    <ParamField body="prompt" type="string" required>
+      视频生成的文本描述。
+
+      建议描述主体、场景、动作、镜头运动、视觉风格、对白及环境声音。
+    </ParamField>
+
+    <ParamField body="type" type="string" default="all_reference">
+      参考模式，决定参考素材的使用方式：
+
+      * `all_reference` - 全参考模式，可使用参考图片、参考视频和参考音频
+      * `first_last_frame` - 首尾帧模式，使用首帧和可选的尾帧图片
+
+      两种模式互斥，一次请求只能使用其中一种。
+    </ParamField>
+
+    <ParamField body="image_url" type="string | string[]">
+      参考图片 URL。
+
+      * `all_reference` 模式：最多 10 张图片；单张最大 30MB；图片最小边长 300px
+      * `first_last_frame` 模式：1-2 张图片，按顺序作为首帧和尾帧；单张最大 10MB
+
+      URL 必须可由公网直接访问。
+    </ParamField>
+
+    <ParamField body="video_url" type="string | string[]">
+      参考视频 URL，仅 `all_reference` 模式有效，最多支持 5 个参考视频。
+
+      视频要求：
+
+      * 单个视频时长 2-30 秒，参考视频总时长不超过 30 秒
+      * 单个视频最大 200MB
+      * 帧率 24-60 FPS
+      * 宽高比范围 0.4-2.5
+      * 宽高范围 300-6000px
+      * 总像素数范围 409600-927408
+
+      <Warning>`first_last_frame` 模式请勿传入此参数。</Warning>
+    </ParamField>
+
+    <ParamField body="audio_url" type="string | string[]">
+      参考音频 URL，仅 `all_reference` 模式有效，最多支持 5 个音频。
+
+      音频要求：
+
+      * 单个音频时长 2-30 秒，参考音频总时长不超过 30 秒
+      * 支持 WAV、MP3
+      * 单个音频最大 15MB
+
+      <Warning>`first_last_frame` 模式请勿传入此参数。</Warning>
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="720p">
+      视频分辨率：
+
+      * `480p`
+      * `720p` - 默认值
+
+      不支持 1080p、4K。
+    </ParamField>
+
+    <ParamField body="video_length" type="integer" default="5">
+      输出视频时长，单位为秒。
+
+      支持 `4` 到 `30` 之间的整数，默认 `5`。
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="16:9">
+      视频宽高比：
+
+      * `21:9` - 超宽屏
+      * `16:9` - 横屏，默认值
+      * `9:16` - 竖屏
+      * `4:3` - 标准横屏
+      * `3:4` - 竖版标准
+      * `1:1` - 方形
+
+      `first_last_frame` 模式下宽高比跟随首帧图片，此参数不生效。
+    </ParamField>
+
+    <ParamField body="generate_audio" type="boolean" default="true">
+      是否生成与视频同步的 AI 音频。
+
+      * `true` - 生成音频，默认值
+      * `false` - 不生成音频
+    </ParamField>
+
+    <ParamField body="output_format" type="string" default="mp4">
+      输出视频格式：
+
+      * `mp4` - 通用格式，文件体积较小，默认值
+      * `mov` - 高色彩精度格式（yuv444p），适合后期扩展和拼接
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  发起方任务 ID。
+
+  由调用方生成并保证唯一，支持字母、数字、下划线和横线，长度为 1-64 个字符。后续使用该 ID 查询任务状态和结果。
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  发起方任务 ID，可用于查询结果。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  初始状态，通常为 `"pending"`。
+</ResponseField>
+
+<ResponseField name="estimated_credits" type="number">
+  预估消耗积分。
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  创建时间，ISO 8601 格式。
+</ResponseField>
+
+## Query Task
+
+Seedance 2.5 Flash 采用异步处理。提交成功后，使用同一个 `out_task_id` 查询任务：
+
+```bash
+curl --request POST \
+  --url https://aireiter.com/api/openapi/query \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "out_task_id": "seedance2_5_flash_task_123456"
+  }'
+```
+
+任务完成后，响应中的 `output` 数组会包含生成的视频 URL。完整字段参见[获取任务状态](/zh/api-reference/tasks/status)。
+
+## Request Examples
+
+<RequestExample>
+  ```bash cURL（全参考模式）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "seedance2_5_flash",
+      "params": {
+        "prompt": "电影感产品短片，保持人物和商品外观一致，镜头平滑环绕，配合自然环境声",
+        "type": "all_reference",
+        "image_url": [
+          "https://example.com/character.jpg",
+          "https://example.com/product.jpg"
+        ],
+        "video_url": ["https://example.com/motion-reference.mp4"],
+        "audio_url": ["https://example.com/music-reference.mp3"],
+        "resolution": "720p",
+        "video_length": 8,
+        "aspect_ratio": "16:9",
+        "generate_audio": true,
+        "output_format": "mov"
+      },
+      "out_task_id": "seedance2_5_flash_reference_123456"
+    }'
+  ```
+
+  ```bash cURL（首尾帧模式）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "seedance2_5_flash",
+      "params": {
+        "prompt": "从清晨的城市天际线自然过渡到夜晚灯光，缓慢推进镜头",
+        "type": "first_last_frame",
+        "image_url": [
+          "https://example.com/first-frame.jpg",
+          "https://example.com/last-frame.jpg"
+        ],
+        "resolution": "720p",
+        "video_length": 10,
+        "generate_audio": true,
+        "output_format": "mp4"
+      },
+      "out_task_id": "seedance2_5_flash_frames_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "seedance2_5_flash",
+      "params": {
+          "prompt": "电影感产品短片，保持人物和商品外观一致，镜头平滑环绕，配合自然环境声",
+          "type": "all_reference",
+          "image_url": ["https://example.com/character.jpg", "https://example.com/product.jpg"],
+          "video_url": ["https://example.com/motion-reference.mp4"],
+          "audio_url": ["https://example.com/music-reference.mp3"],
+          "resolution": "720p",
+          "video_length": 8,
+          "aspect_ratio": "16:9",
+          "generate_audio": True,
+          "output_format": "mov"
+      },
+      "out_task_id": "seedance2_5_flash_reference_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "seedance2_5_flash",
+    params: {
+      prompt: "电影感产品短片，保持人物和商品外观一致，镜头平滑环绕，配合自然环境声",
+      type: "all_reference",
+      image_url: ["https://example.com/character.jpg", "https://example.com/product.jpg"],
+      video_url: ["https://example.com/motion-reference.mp4"],
+      audio_url: ["https://example.com/music-reference.mp3"],
+      resolution: "720p",
+      video_length: 8,
+      aspect_ratio: "16:9",
+      generate_audio: true,
+      output_format: "mov"
+    },
+    out_task_id: "seedance2_5_flash_reference_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "seedance2_5_flash",
+          "params": map[string]interface{}{
+              "prompt": "电影感产品短片，保持人物和商品外观一致，镜头平滑环绕，配合自然环境声",
+              "type": "all_reference",
+              "image_url": []interface{}{
+                  "https://example.com/character.jpg",
+                  "https://example.com/product.jpg",
+              },
+              "video_url": []interface{}{
+                  "https://example.com/motion-reference.mp4",
+              },
+              "audio_url": []interface{}{
+                  "https://example.com/music-reference.mp3",
+              },
+              "resolution": "720p",
+              "video_length": 8,
+              "aspect_ratio": "16:9",
+              "generate_audio": true,
+              "output_format": "mov",
+          },
+          "out_task_id": "seedance2_5_flash_reference_123456",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/openapi/submit";
+
+          String payload = """
+              {
+                "model": "seedance2_5_flash",
+                "params": {
+                  "prompt": "电影感产品短片，保持人物和商品外观一致，镜头平滑环绕，配合自然环境声",
+                  "type": "all_reference",
+                  "image_url": [
+                    "https://example.com/character.jpg",
+                    "https://example.com/product.jpg"
+                  ],
+                  "video_url": [
+                    "https://example.com/motion-reference.mp4"
+                  ],
+                  "audio_url": [
+                    "https://example.com/music-reference.mp3"
+                  ],
+                  "resolution": "720p",
+                  "video_length": 8,
+                  "aspect_ratio": "16:9",
+                  "generate_audio": true,
+                  "output_format": "mov"
+                },
+                "out_task_id": "seedance2_5_flash_reference_123456"
+              }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = [
+      "model" => "seedance2_5_flash",
+      "params" => [
+          "prompt" => "电影感产品短片，保持人物和商品外观一致，镜头平滑环绕，配合自然环境声",
+          "type" => "all_reference",
+          "image_url" => ["https://example.com/character.jpg", "https://example.com/product.jpg"],
+          "video_url" => ["https://example.com/motion-reference.mp4"],
+          "audio_url" => ["https://example.com/music-reference.mp3"],
+          "resolution" => "720p",
+          "video_length" => 8,
+          "aspect_ratio" => "16:9",
+          "generate_audio" => true,
+          "output_format" => "mov"
+      ],
+      "out_task_id" => "seedance2_5_flash_reference_123456"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url = URI("https://aireiter.com/api/openapi/submit")
+
+  payload = {
+    model: "seedance2_5_flash",
+    params: {
+      prompt: "电影感产品短片，保持人物和商品外观一致，镜头平滑环绕，配合自然环境声",
+      type: "all_reference",
+      image_url: ["https://example.com/character.jpg", "https://example.com/product.jpg"],
+      video_url: ["https://example.com/motion-reference.mp4"],
+      audio_url: ["https://example.com/music-reference.mp3"],
+      resolution: "720p",
+      video_length: 8,
+      aspect_ratio: "16:9",
+      generate_audio: true,
+      output_format: "mov"
+    },
+    out_task_id: "seedance2_5_flash_reference_123456"
+  }
+
+  http = Net::HTTP.new(url.host, url.port)
+
+  request = Net::HTTP::Post.new(url)
+  request["Authorization"] = "Bearer <token>"
+  request["Content-Type"] = "application/json"
+  request.body = payload.to_json
+
+  response = http.request(request)
+  puts response.body
+  ```
+
+  ```swift Swift
+  import Foundation
+
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
+
+  let payload: [String: Any] = [
+      "model": "seedance2_5_flash",
+      "params": [
+          "prompt": "电影感产品短片，保持人物和商品外观一致，镜头平滑环绕，配合自然环境声",
+          "type": "all_reference",
+          "image_url": ["https://example.com/character.jpg", "https://example.com/product.jpg"],
+          "video_url": ["https://example.com/motion-reference.mp4"],
+          "audio_url": ["https://example.com/music-reference.mp3"],
+          "resolution": "720p",
+          "video_length": 8,
+          "aspect_ratio": "16:9",
+          "generate_audio": true,
+          "output_format": "mov"
+      ],
+      "out_task_id": "seedance2_5_flash_reference_123456"
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      if let error = error {
+          print("Error: \(error)")
+          return
+      }
+
+      if let data = data, let responseString = String(data: data, encoding: .utf8) {
+          print(responseString)
+      }
+  }
+
+  task.resume()
+  ```
+
+  ```csharp C#
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url = "https://aireiter.com/api/openapi/submit";
+
+          var payload = @"
+                {
+                    ""model"": ""seedance2_5_flash"",
+                    ""params"": {
+                        ""prompt"": ""电影感产品短片，保持人物和商品外观一致，镜头平滑环绕，配合自然环境声"",
+                        ""type"": ""all_reference"",
+                        ""image_url"": [
+                            ""https://example.com/character.jpg"",
+                            ""https://example.com/product.jpg""
+                        ],
+                        ""video_url"": [
+                            ""https://example.com/motion-reference.mp4""
+                        ],
+                        ""audio_url"": [
+                            ""https://example.com/music-reference.mp3""
+                        ],
+                        ""resolution"": ""720p"",
+                        ""video_length"": 8,
+                        ""aspect_ratio"": ""16:9"",
+                        ""generate_audio"": true,
+                        ""output_format"": ""mov""
+                    },
+                    ""out_task_id"": ""seedance2_5_flash_reference_123456""
+                }";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+
+          var content = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          var result = await response.Content.ReadAsStringAsync();
+
+          Console.WriteLine(result);
+      }
+  }
+  ```
+
+  ```c C
+  #include <stdio.h>
+  #include <curl/curl.h>
+
+  int main(void) {
+      CURL *curl;
+      CURLcode res;
+
+      curl_global_init(CURL_GLOBAL_DEFAULT);
+      curl = curl_easy_init();
+
+      if(curl) {
+          const char *url = "https://aireiter.com/api/openapi/submit";
+          const char *payload = "{\"model\":\"seedance2_5_flash\",\"params\":{\"prompt\":\"电影感产品短片，保持人物和商品外观一致，镜头平滑环绕，配合自然环境声\",\"type\":\"all_reference\",\"image_url\":[\"https://example.com/character.jpg\",\"https://example.com/product.jpg\"],\"video_url\":[\"https://example.com/motion-reference.mp4\"],\"audio_url\":[\"https://example.com/music-reference.mp3\"],\"resolution\":\"720p\",\"video_length\":8,\"aspect_ratio\":\"16:9\",\"generate_audio\":true,\"output_format\":\"mov\"},\"out_task_id\":\"seedance2_5_flash_reference_123456\"}";
+
+          struct curl_slist *headers = NULL;
+          headers = curl_slist_append(headers, "Authorization: Bearer <token>");
+          headers = curl_slist_append(headers, "Content-Type: application/json");
+
+          curl_easy_setopt(curl, CURLOPT_URL, url);
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
+          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+          res = curl_easy_perform(curl);
+
+          if(res != CURLE_OK) {
+              fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                      curl_easy_strerror(res));
+          }
+
+          curl_slist_free_all(headers);
+          curl_easy_cleanup(curl);
+      }
+
+      curl_global_cleanup();
+      return 0;
+  }
+  ```
+
+  ```objectivec Objective-C
+  #import <Foundation/Foundation.h>
+
+  int main(int argc, const char * argv[]) {
+      @autoreleasepool {
+          NSURL *url = [NSURL URLWithString:@"https://aireiter.com/api/openapi/submit"];
+
+          NSDictionary *payload = @{
+              @"model": @"seedance2_5_flash",
+              @"params": @{
+                  @"prompt": @"电影感产品短片，保持人物和商品外观一致，镜头平滑环绕，配合自然环境声",
+                  @"type": @"all_reference",
+                  @"image_url": @[
+                      @"https://example.com/character.jpg",
+                      @"https://example.com/product.jpg"
+                  ],
+                  @"video_url": @[@"https://example.com/motion-reference.mp4"],
+                  @"audio_url": @[@"https://example.com/music-reference.mp3"],
+                  @"resolution": @"720p",
+                  @"video_length": @8,
+                  @"aspect_ratio": @"16:9",
+                  @"generate_audio": @YES,
+                  @"output_format": @"mov"
+              },
+              @"out_task_id": @"seedance2_5_flash_reference_123456"
+          };
+
+          NSError *error;
+          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
+                                                            options:0
+                                                              error:&error];
+
+          NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+          [request setHTTPMethod:@"POST"];
+          [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
+          [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+          [request setHTTPBody:jsonData];
+
+          NSURLSessionDataTask *task = [[NSURLSession sharedSession]
+              dataTaskWithRequest:request
+              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+                  if (error) {
+                      NSLog(@"Error: %@", error);
+                      return;
+                  }
+                  NSString *result = [[NSString alloc] initWithData:data
+                                                          encoding:NSUTF8StringEncoding];
+                  NSLog(@"%@", result);
+              }];
+
+          [task resume];
+          [[NSRunLoop mainRunLoop] run];
+      }
+      return 0;
+  }
+  ```
+
+  ```ocaml OCaml
+  (* Requires cohttp and yojson libraries *)
+  open Lwt
+  open Cohttp
+  open Cohttp_lwt_unix
+
+  let url = "https://aireiter.com/api/openapi/submit"
+
+  let payload = {|{
+    "model": "seedance2_5_flash",
+    "params": {
+      "prompt": "电影感产品短片，保持人物和商品外观一致，镜头平滑环绕，配合自然环境声",
+      "type": "all_reference",
+      "image_url": [
+        "https://example.com/character.jpg",
+        "https://example.com/product.jpg"
+      ],
+      "video_url": [
+        "https://example.com/motion-reference.mp4"
+      ],
+      "audio_url": [
+        "https://example.com/music-reference.mp3"
+      ],
+      "resolution": "720p",
+      "video_length": 8,
+      "aspect_ratio": "16:9",
+      "generate_audio": true,
+      "output_format": "mov"
+    },
+    "out_task_id": "seedance2_5_flash_reference_123456"
+  }|}
+
+  let () =
+    let headers = Header.init ()
+      |> fun h -> Header.add h "Authorization" "Bearer <token>"
+      |> fun h -> Header.add h "Content-Type" "application/json"
+    in
+    let body = Cohttp_lwt.Body.of_string payload in
+
+    let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
+      body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
+      print_endline body_str
+    in
+    Lwt_main.run response
+  ```
+
+  ```dart Dart
+  import 'dart:convert';
+  import 'package:http/http.dart' as http;
+
+  void main() async {
+    final url = Uri.parse('https://aireiter.com/api/openapi/submit');
+
+    final payload = {
+          "model": "seedance2_5_flash",
+          "params": {
+              "prompt": "电影感产品短片，保持人物和商品外观一致，镜头平滑环绕，配合自然环境声",
+              "type": "all_reference",
+              "image_url": ["https://example.com/character.jpg", "https://example.com/product.jpg"],
+              "video_url": ["https://example.com/motion-reference.mp4"],
+              "audio_url": ["https://example.com/music-reference.mp3"],
+              "resolution": "720p",
+              "video_length": 8,
+              "aspect_ratio": "16:9",
+              "generate_audio": true,
+              "output_format": "mov"
+          },
+          "out_task_id": "seedance2_5_flash_reference_123456"
+      };
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer <token>',
+        'Content-Type': 'application/json'
+      },
+      body: jsonEncode(payload),
+    );
+
+    print(response.body);
+  }
+  ```
+
+  ```r R
+  library(httr)
+  library(jsonlite)
+
+  url <- "https://aireiter.com/api/openapi/submit"
+
+  payload <- list(
+    model = "seedance2_5_flash",
+    params = list(
+      prompt = "电影感产品短片，保持人物和商品外观一致，镜头平滑环绕，配合自然环境声",
+      type = "all_reference",
+      image_url = list(
+        "https://example.com/character.jpg",
+        "https://example.com/product.jpg"
+      ),
+      video_url = list(
+        "https://example.com/motion-reference.mp4"
+      ),
+      audio_url = list(
+        "https://example.com/music-reference.mp3"
+      ),
+      resolution = "720p",
+      video_length = 8,
+      aspect_ratio = "16:9",
+      generate_audio = TRUE,
+      output_format = "mov"
+    ),
+    out_task_id = "seedance2_5_flash_reference_123456"
+  )
+
+  response <- POST(
+    url,
+    add_headers(
+      Authorization = "Bearer <token>",
+      `Content-Type` = "application/json"
+    ),
+    body = toJSON(payload, auto_unbox = TRUE),
+    encode = "raw"
+  )
+
+  cat(content(response, "text"))
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "out_task_id": "seedance2_5_flash_reference_123456",
+        "status": "pending",
+        "estimated_credits": 100,
+        "created_at": "2025-12-22T06:03:28.242Z"
+    }
+}
+  ```
+
+  ```json 400
+    {
+        "statusCode": 400,
+        "message": "请求参数无效",
+        "ok": false
+    }
+  ```
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "身份验证失败，请检查您的API密钥"
+    }
+  }
+  ```
+```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "账户余额不足，请充值后再试"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "服务器内部错误，请稍后重试"
+    }
+  }
+  ```
+</ResponseExample>
+
+## Mode Rules
+
+| type | 可用素材 | 素材限制 |
+| --- | --- | --- |
+| `all_reference` | `image_url`、`video_url`、`audio_url` | 最多 10 张图片、5 段视频、5 段音频 |
+| `first_last_frame` | `image_url` | 1-2 张图片，按顺序为首帧、尾帧；请勿传 `video_url`、`audio_url`；宽高比跟随首帧图片 |
+
+<Warning>
+请确保所有素材 URL 可由公网直接访问。任务为异步处理，请勿使用提交请求的 HTTP 连接等待最终视频。
+</Warning>

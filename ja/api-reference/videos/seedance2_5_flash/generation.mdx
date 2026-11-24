@@ -1,0 +1,858 @@
+---
+title: 'Seedance 2.5 Flash 動画生成'
+description: |
+  - Seedance 2.5の高速版。生成速度がより速く、参照素材の上限がより少ない
+  - フル参照と開始・終了フレームの2つの動画生成モードをサポート（両モードは排他的）
+  - フル参照モードは最大で画像10枚、動画5本、音声5本まで対応
+  - 480p / 720p、4〜30秒、および同期AI音声をサポート
+  - MP4および高色精度MOV出力をサポートし、タスクIDを非同期で返却
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+<Note>
+AIReiterにおけるSeedance 2.5 Flashのモデル名は `seedance2_5_flash` です。これはSeedance 2.5の高速版であり、生成がより速く、参照素材の上限が少なくなっており、パラメータ構造は `seedance2_5` と同じです。
+</Note>
+
+## Seedance 2.5 との違い
+
+| 項目 | `seedance2_5` | `seedance2_5_flash` |
+| --- | --- | --- |
+| 参照画像の上限 | 30枚 | 10枚 |
+| 参照動画の上限 | 9本 | 5本 |
+| 参照音声の上限 | 10本 | 5本 |
+| 生成速度 | 標準 | より高速 |
+
+上記の表を除き、両モデルのパラメータ、値の範囲、および素材仕様は同じです。
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  すべてのエンドポイントで、Bearer Tokenを使用した認証が必要です。
+
+  <a href={apiKeyUrl} target="_blank">API Key管理ページ</a>にアクセスしてAPI Keyを取得し、リクエストヘッダーに追加してください：
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  モデル名。以下の固定値を使用します：
+
+  * `seedance2_5_flash`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  モデルパラメータオブジェクト。
+
+  <Expandable title="params オブジェクトのプロパティ">
+    <ParamField body="prompt" type="string" required>
+      動画生成のためのテキスト説明。
+
+      被写体、シーン、動作、カメラワーク、ビジュアルスタイル、セリフ、および環境音を記述することをお勧めします。
+    </ParamField>
+
+    <ParamField body="type" type="string" default="all_reference">
+      参照モード。参照素材の使用方法を決定します：
+
+      * `all_reference` - 全参照モード。参照画像、参照動画、および参照音声を使用できます
+      * `first_last_frame` - 開始・終了フレームモード。開始フレーム画像とオプションの終了フレーム画像を使用します
+
+      2つのモードは排他的であり、1回のリクエストでいずれか一方のみを使用できます。
+    </ParamField>
+
+    <ParamField body="image_url" type="string | string[]">
+      参照画像の URL。
+
+      * `all_reference` モード：最大 10 枚の画像、1 枚あたり最大 30MB、画像の最小辺 300px
+      * `first_last_frame` モード：1〜2 枚の画像（順番に開始フレームと終了フレームとして使用）、1 枚あたり最大 10MB
+
+      URL はパブリックネットワークから直接アクセス可能である必要があります。
+    </ParamField>
+
+    <ParamField body="video_url" type="string | string[]">
+      参照動画の URL。`all_reference` モードでのみ有効で、最大 5 個の参照動画に対応しています。
+
+      動画の要件：
+
+      * 単一動画の長さは 2〜30 秒、参照動画の合計時間は 30 秒以内
+      * 単一動画は最大 200MB
+      * フレームレートは 24〜60 FPS
+      * アスペクト比の範囲は 0.4〜2.5
+      * 幅と高さの範囲は 300〜6000px
+      * 総ピクセル数の範囲は 409600〜927408
+
+      <Warning>`first_last_frame` モードではこのパラメータを渡さないでください。</Warning>
+    </ParamField>
+
+    <ParamField body="audio_url" type="string | string[]">
+      参照音声の URL。`all_reference` モードでのみ有効で、最大 5 個の音声に対応しています。
+
+      音声の要件：
+
+      * 単一音声の長さは 2〜30 秒、参照音声の合計時間は 30 秒以内
+      * WAV、MP3 に対応
+      * 単一音声は最大 15MB
+
+      <Warning>`first_last_frame` モードではこのパラメータを渡さないでください。</Warning>
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="720p">
+      動画の解像度：
+
+      * `480p`
+      * `720p` - デフォルト値
+
+      1080p、4K には対応していません。
+    </ParamField>
+
+    <ParamField body="video_length" type="integer" default="5">
+      出力動画の長さ（秒単位）。
+
+      `4` から `30` までの整数に対応しており、デフォルトは `5` です。
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="16:9">
+      動画のアスペクト比：
+
+      * `21:9` - ウルトラワイド
+      * `16:9` - 横向き、デフォルト値
+      * `9:16` - 縦向き
+      * `4:3` - 標準横向き
+      * `3:4` - 標準縦向き
+      * `1:1` - 正方形
+
+      `first_last_frame` モードではアスペクト比は開始フレーム画像に従うため、このパラメータは無効になります。
+    </ParamField>
+
+    <ParamField body="generate_audio" type="boolean" default="true">
+      動画と同期した AI 音声を生成するかどうか。
+
+      * `true` - 音声を生成する、デフォルト値
+      * `false` - 音声を生成しない
+    </ParamField>
+
+    <ParamField body="output_format" type="string" default="mp4">
+      出力動画のフォーマット：
+
+      * `mp4` - 汎用フォーマット。ファイルサイズが比較的小さく、デフォルト値です
+      * `mov` - 高色精度フォーマット（yuv444p）。編集での拡張や結合に適しています
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  リクエスト元のタスク ID。
+
+  呼び出し元が生成し、一意性を保証する必要があります。英数字、アンダースコア（_）、ハイフン（-）に対応しており、長さは 1〜64 文字です。後続の処理でこの ID を使用してタスクのステータスと結果を照会します。
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  リクエスト元のタスク ID。結果の照会に使用できます。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  初期ステータス。通常は `"pending"` です。
+</ResponseField>
+
+<ResponseField name="estimated_credits" type="number">
+  推定消費クレジット。
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  作成日時（ISO 8601 形式）。
+</ResponseField>
+
+## Query Task
+
+Seedance 2.5 Flashは非同期処理を採用しています。送信が成功したら、同じ `out_task_id` を使用してタスクをクエリします：
+
+```bash
+curl --request POST \
+  --url https://aireiter.com/api/openapi/query \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "out_task_id": "seedance2_5_flash_task_123456"
+  }'
+```
+
+タスクが完了すると、レスポンスの `output` 配列に生成された動画のURLが含まれます。完全なフィールドについては、[タスクステータスの取得](/ja/api-reference/tasks/status)を参照してください。
+
+## Request Examples
+
+<RequestExample>
+  ```bash cURL（全参照モード）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "seedance2_5_flash",
+      "params": {
+        "prompt": "シネマティックな製品ショートフィルム。人物と製品の外観を一貫させ、カメラが滑らかに回り込み、自然な環境音を合わせる",
+        "type": "all_reference",
+        "image_url": [
+          "https://example.com/character.jpg",
+          "https://example.com/product.jpg"
+        ],
+        "video_url": ["https://example.com/motion-reference.mp4"],
+        "audio_url": ["https://example.com/music-reference.mp3"],
+        "resolution": "720p",
+        "video_length": 8,
+        "aspect_ratio": "16:9",
+        "generate_audio": true,
+        "output_format": "mov"
+      },
+      "out_task_id": "seedance2_5_flash_reference_123456"
+    }'
+  ```
+
+  ```bash cURL（開始・終了フレームモード）
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "seedance2_5_flash",
+      "params": {
+        "prompt": "早朝の都市のスカイラインから夜の夜景へと自然に移り変わり、ゆっくりとズームインするカメラ",
+        "type": "first_last_frame",
+        "image_url": [
+          "https://example.com/first-frame.jpg",
+          "https://example.com/last-frame.jpg"
+        ],
+        "resolution": "720p",
+        "video_length": 10,
+        "generate_audio": true,
+        "output_format": "mp4"
+      },
+      "out_task_id": "seedance2_5_flash_frames_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "seedance2_5_flash",
+      "params": {
+          "prompt": "シネマティックな製品ショートフィルム。人物と製品の外観を一貫させ、カメラが滑らかに回り込み、自然な環境音を合わせる",
+          "type": "all_reference",
+          "image_url": ["https://example.com/character.jpg", "https://example.com/product.jpg"],
+          "video_url": ["https://example.com/motion-reference.mp4"],
+          "audio_url": ["https://example.com/music-reference.mp3"],
+          "resolution": "720p",
+          "video_length": 8,
+          "aspect_ratio": "16:9",
+          "generate_audio": True,
+          "output_format": "mov"
+      },
+      "out_task_id": "seedance2_5_flash_reference_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "seedance2_5_flash",
+    params: {
+      prompt: "シネマティックな製品ショートフィルム。人物と製品の外観を一貫させ、カメラが滑らかに回り込み、自然な環境音を合わせる",
+      type: "all_reference",
+      image_url: ["https://example.com/character.jpg", "https://example.com/product.jpg"],
+      video_url: ["https://example.com/motion-reference.mp4"],
+      audio_url: ["https://example.com/music-reference.mp3"],
+      resolution: "720p",
+      video_length: 8,
+      aspect_ratio: "16:9",
+      generate_audio: true,
+      output_format: "mov"
+    },
+    out_task_id: "seedance2_5_flash_reference_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "seedance2_5_flash",
+          "params": map[string]interface{}{
+              "prompt": "シネマティックな製品ショートフィルム。人物と製品の外観を一貫させ、カメラが滑らかに回り込み、自然な環境音を合わせる",
+              "type": "all_reference",
+              "image_url": []interface{}{
+                  "https://example.com/character.jpg",
+                  "https://example.com/product.jpg",
+              },
+              "video_url": []interface{}{
+                  "https://example.com/motion-reference.mp4",
+              },
+              "audio_url": []interface{}{
+                  "https://example.com/music-reference.mp3",
+              },
+              "resolution": "720p",
+              "video_length": 8,
+              "aspect_ratio": "16:9",
+              "generate_audio": true,
+              "output_format": "mov",
+          },
+          "out_task_id": "seedance2_5_flash_reference_123456",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/openapi/submit";
+
+          String payload = """
+              {
+                "model": "seedance2_5_flash",
+                "params": {
+                  "prompt": "シネマティックな製品ショート動画、人物と商品の外観の一貫性を保ち、カメラが滑らかに周囲を回り込み、自然な環境音を合わせる",
+                  "type": "all_reference",
+                  "image_url": [
+                    "https://example.com/character.jpg",
+                    "https://example.com/product.jpg"
+                  ],
+                  "video_url": [
+                    "https://example.com/motion-reference.mp4"
+                  ],
+                  "audio_url": [
+                    "https://example.com/music-reference.mp3"
+                  ],
+                  "resolution": "720p",
+                  "video_length": 8,
+                  "aspect_ratio": "16:9",
+                  "generate_audio": true,
+                  "output_format": "mov"
+                },
+                "out_task_id": "seedance2_5_flash_reference_123456"
+              }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = [
+      "model" => "seedance2_5_flash",
+      "params" => [
+          "prompt" => "シネマティックな製品ショート動画、人物と商品の外観の一貫性を保ち、カメラが滑らかに周囲を回り込み、自然な環境音を合わせる",
+          "type" => "all_reference",
+          "image_url" => ["https://example.com/character.jpg", "https://example.com/product.jpg"],
+          "video_url" => ["https://example.com/motion-reference.mp4"],
+          "audio_url" => ["https://example.com/music-reference.mp3"],
+          "resolution" => "720p",
+          "video_length" => 8,
+          "aspect_ratio" => "16:9",
+          "generate_audio" => true,
+          "output_format" => "mov"
+      ],
+      "out_task_id" => "seedance2_5_flash_reference_123456"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url = URI("https://aireiter.com/api/openapi/submit")
+
+  payload = {
+    model: "seedance2_5_flash",
+    params: {
+      prompt: "シネマティックな製品ショート動画、人物と商品の外観の一貫性を保ち、カメラが滑らかに周囲を回り込み、自然な環境音を合わせる",
+      type: "all_reference",
+      image_url: ["https://example.com/character.jpg", "https://example.com/product.jpg"],
+      video_url: ["https://example.com/motion-reference.mp4"],
+      audio_url: ["https://example.com/music-reference.mp3"],
+      resolution: "720p",
+      video_length: 8,
+      aspect_ratio: "16:9",
+      generate_audio: true,
+      output_format: "mov"
+    },
+    out_task_id: "seedance2_5_flash_reference_123456"
+  }
+
+  http = Net::HTTP.new(url.host, url.port)
+
+  request = Net::HTTP::Post.new(url)
+  request["Authorization"] = "Bearer <token>"
+  request["Content-Type"] = "application/json"
+  request.body = payload.to_json
+
+  response = http.request(request)
+  puts response.body
+  ```
+
+  ```swift Swift
+  import Foundation
+
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
+
+  let payload: [String: Any] = [
+      "model": "seedance2_5_flash",
+      "params": [
+          "prompt": "シネマティックな製品ショート動画、人物と商品の外観の一貫性を保ち、カメラが滑らかに周囲を回り込み、自然な環境音を合わせる",
+          "type": "all_reference",
+          "image_url": ["https://example.com/character.jpg", "https://example.com/product.jpg"],
+          "video_url": ["https://example.com/motion-reference.mp4"],
+          "audio_url": ["https://example.com/music-reference.mp3"],
+          "resolution": "720p",
+          "video_length": 8,
+          "aspect_ratio": "16:9",
+          "generate_audio": true,
+          "output_format": "mov"
+      ],
+      "out_task_id": "seedance2_5_flash_reference_123456"
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      if let error = error {
+          print("Error: \(error)")
+          return
+      }
+
+      if let data = data, let responseString = String(data: data, encoding: .utf8) {
+          print(responseString)
+      }
+  }
+
+  task.resume()
+  ```
+
+  ```csharp C#
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url = "https://aireiter.com/api/openapi/submit";
+
+          var payload = @"
+                {
+                    ""model"": ""seedance2_5_flash"",
+                    ""params"": {
+                        ""prompt"": ""シネマティックな製品ショートフィルム、人物と商品の外観の一貫性を保ち、カメラが滑らかに回り込み、自然な環境音を合わせる"",
+                        ""type"": ""all_reference"",
+                        ""image_url"": [
+                            ""https://example.com/character.jpg"",
+                            ""https://example.com/product.jpg""
+                        ],
+                        ""video_url"": [
+                            ""https://example.com/motion-reference.mp4""
+                        ],
+                        ""audio_url"": [
+                            ""https://example.com/music-reference.mp3""
+                        ],
+                        ""resolution"": ""720p"",
+                        ""video_length"": 8,
+                        ""aspect_ratio"": ""16:9"",
+                        ""generate_audio"": true,
+                        ""output_format"": ""mov""
+                    },
+                    ""out_task_id"": ""seedance2_5_flash_reference_123456""
+                }";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+
+          var content = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          var result = await response.Content.ReadAsStringAsync();
+
+          Console.WriteLine(result);
+      }
+  }
+  ```
+
+  ```c C
+  #include <stdio.h>
+  #include <curl/curl.h>
+
+  int main(void) {
+      CURL *curl;
+      CURLcode res;
+
+      curl_global_init(CURL_GLOBAL_DEFAULT);
+      curl = curl_easy_init();
+
+      if(curl) {
+          const char *url = "https://aireiter.com/api/openapi/submit";
+          const char *payload = "{\"model\":\"seedance2_5_flash\",\"params\":{\"prompt\":\"シネマティックな製品ショートフィルム、人物と商品の外観の一貫性を保ち、カメラが滑らかに回り込み、自然な環境音を合わせる\",\"type\":\"all_reference\",\"image_url\":[\"https://example.com/character.jpg\",\"https://example.com/product.jpg\"],\"video_url\":[\"https://example.com/motion-reference.mp4\"],\"audio_url\":[\"https://example.com/music-reference.mp3\"],\"resolution\":\"720p\",\"video_length\":8,\"aspect_ratio\":\"16:9\",\"generate_audio\":true,\"output_format\":\"mov\"},\"out_task_id\":\"seedance2_5_flash_reference_123456\"}";
+
+          struct curl_slist *headers = NULL;
+          headers = curl_slist_append(headers, "Authorization: Bearer <token>");
+          headers = curl_slist_append(headers, "Content-Type: application/json");
+
+          curl_easy_setopt(curl, CURLOPT_URL, url);
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
+          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+          res = curl_easy_perform(curl);
+
+          if(res != CURLE_OK) {
+              fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                      curl_easy_strerror(res));
+          }
+
+          curl_slist_free_all(headers);
+          curl_easy_cleanup(curl);
+      }
+
+      curl_global_cleanup();
+      return 0;
+  }
+  ```
+
+  ```objectivec Objective-C
+  #import <Foundation/Foundation.h>
+
+  int main(int argc, const char * argv[]) {
+      @autoreleasepool {
+          NSURL *url = [NSURL URLWithString:@"https://aireiter.com/api/openapi/submit"];
+
+          NSDictionary *payload = @{
+              @"model": @"seedance2_5_flash",
+              @"params": @{
+                  @"prompt": @"シネマティックな製品ショートフィルム、人物と商品の外観の一貫性を保ち、カメラが滑らかに回り込み、自然な環境音を合わせる",
+                  @"type": @"all_reference",
+                  @"image_url": @[
+                      @"https://example.com/character.jpg",
+                      @"https://example.com/product.jpg"
+                  ],
+                  @"video_url": @[@"https://example.com/motion-reference.mp4"],
+                  @"audio_url": @[@"https://example.com/music-reference.mp3"],
+                  @"resolution": @"720p",
+                  @"video_length": @8,
+                  @"aspect_ratio": @"16:9",
+                  @"generate_audio": @YES,
+                  @"output_format": @"mov"
+              },
+              @"out_task_id": @"seedance2_5_flash_reference_123456"
+          };
+
+          NSError *error;
+          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
+                                                            options:0
+                                                              error:&error];
+
+          NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+          [request setHTTPMethod:@"POST"];
+          [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
+          [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+          [request setHTTPBody:jsonData];
+
+          NSURLSessionDataTask *task = [[NSURLSession sharedSession]
+              dataTaskWithRequest:request
+              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+                  if (error) {
+                      NSLog(@"Error: %@", error);
+                      return;
+                  }
+                  NSString *result = [[NSString alloc] initWithData:data
+                                                          encoding:NSUTF8StringEncoding];
+                  NSLog(@"%@", result);
+              }];
+
+          [task resume];
+          [[NSRunLoop mainRunLoop] run];
+      }
+      return 0;
+  }
+  ```
+
+  ```ocaml OCaml
+  (* Requires cohttp and yojson libraries *)
+  open Lwt
+  open Cohttp
+  open Cohttp_lwt_unix
+
+  let url = "https://aireiter.com/api/openapi/submit"
+
+  let payload = {|{
+    "model": "seedance2_5_flash",
+    "params": {
+      "prompt": "シネマティックな製品ショート動画、人物と商品の外観の一貫性を保ち、カメラが滑らかに回り込み、自然な環境音を合わせる",
+      "type": "all_reference",
+      "image_url": [
+        "https://example.com/character.jpg",
+        "https://example.com/product.jpg"
+      ],
+      "video_url": [
+        "https://example.com/motion-reference.mp4"
+      ],
+      "audio_url": [
+        "https://example.com/music-reference.mp3"
+      ],
+      "resolution": "720p",
+      "video_length": 8,
+      "aspect_ratio": "16:9",
+      "generate_audio": true,
+      "output_format": "mov"
+    },
+    "out_task_id": "seedance2_5_flash_reference_123456"
+  }|}
+
+  let () =
+    let headers = Header.init ()
+      |> fun h -> Header.add h "Authorization" "Bearer <token>"
+      |> fun h -> Header.add h "Content-Type" "application/json"
+    in
+    let body = Cohttp_lwt.Body.of_string payload in
+
+    let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
+      body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
+      print_endline body_str
+    in
+    Lwt_main.run response
+  ```
+
+  ```dart Dart
+  import 'dart:convert';
+  import 'package:http/http.dart' as http;
+
+  void main() async {
+    final url = Uri.parse('https://aireiter.com/api/openapi/submit');
+
+    final payload = {
+          "model": "seedance2_5_flash",
+          "params": {
+              "prompt": "シネマティックな製品ショート動画、人物と商品の外観の一貫性を保ち、カメラが滑らかに回り込み、自然な環境音を合わせる",
+              "type": "all_reference",
+              "image_url": ["https://example.com/character.jpg", "https://example.com/product.jpg"],
+              "video_url": ["https://example.com/motion-reference.mp4"],
+              "audio_url": ["https://example.com/music-reference.mp3"],
+              "resolution": "720p",
+              "video_length": 8,
+              "aspect_ratio": "16:9",
+              "generate_audio": true,
+              "output_format": "mov"
+          },
+          "out_task_id": "seedance2_5_flash_reference_123456"
+      };
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer <token>',
+        'Content-Type': 'application/json'
+      },
+      body: jsonEncode(payload),
+    );
+
+    print(response.body);
+  }
+  ```
+
+  ```r R
+  library(httr)
+  library(jsonlite)
+
+  url <- "https://aireiter.com/api/openapi/submit"
+
+  payload <- list(
+    model = "seedance2_5_flash",
+    params = list(
+      prompt = "シネマティックな製品ショート動画、人物と商品の外観の一貫性を保ち、カメラが滑らかに回り込み、自然な環境音を合わせる",
+      type = "all_reference",
+      image_url = list(
+        "https://example.com/character.jpg",
+        "https://example.com/product.jpg"
+      ),
+      video_url = list(
+        "https://example.com/motion-reference.mp4"
+      ),
+      audio_url = list(
+        "https://example.com/music-reference.mp3"
+      ),
+      resolution = "720p",
+      video_length = 8,
+      aspect_ratio = "16:9",
+      generate_audio = TRUE,
+      output_format = "mov"
+    ),
+    out_task_id = "seedance2_5_flash_reference_123456"
+  )
+
+  response <- POST(
+    url,
+    add_headers(
+      Authorization = "Bearer <token>",
+      `Content-Type` = "application/json"
+    ),
+    body = toJSON(payload, auto_unbox = TRUE),
+    encode = "raw"
+  )
+
+  cat(content(response, "text"))
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "out_task_id": "seedance2_5_flash_reference_123456",
+        "status": "pending",
+        "estimated_credits": 100,
+        "created_at": "2025-12-22T06:03:28.242Z"
+    }
+}
+  ```
+
+  ```json 400
+    {
+        "statusCode": 400,
+        "message": "リクエストパラメータが無効です",
+        "ok": false
+    }
+  ```
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "認証に失敗しました。APIキーを確認してください"
+    }
+  }
+  ```
+```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "アカウントの残高が不足しています。チャージしてから再度お試しください"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "サーバー内部エラーが発生しました。しばらくしてから再度お試しください"
+    }
+  }
+  ```
+</ResponseExample>
+
+## Mode Rules
+
+| type | 利用可能な素材 | 素材の制限 |
+| --- | --- | --- |
+| `all_reference` | `image_url`、`video_url`、`audio_url` | 最大10枚の画像、5本の動画、5本の音声 |
+| `first_last_frame` | `image_url` | 1〜2枚の画像（順番に最初のフレーム、最後のフレーム）。`video_url`、`audio_url`は渡さないでください。アスペクト比は最初のフレームの画像に従います |
+
+<Warning>
+すべての素材のURLにパブリックネットワークから直接アクセスできることを確認してください。タスクは非同期で処理されるため、リクエストを送信したHTTP接続で最終的な動画の完了を待機しないでください。
+</Warning>

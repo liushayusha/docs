@@ -1,0 +1,858 @@
+---
+title: 'Seedance 2.5 Flash Video Generation'
+description: |
+  - The fast version of Seedance 2.5, featuring faster generation speed and lower reference asset limits
+  - Supports two mutually exclusive video generation modes: Full Reference and First/Last Frame
+  - Full Reference mode supports up to 10 images, 5 video clips, and 5 audio clips
+  - Supports 480p / 720p, 4-30 seconds duration, and synchronized AI audio
+  - Supports MP4 and high-color-precision MOV outputs, returning a task ID asynchronously
+api: 'POST https://aireiter.com/api/openapi/submit'
+---
+import { apiKeyUrl } from '/snippets/_variables.mdx';
+
+<Note>
+The model name for Seedance 2.5 Flash in AIReiter is `seedance2_5_flash`. It is the fast version of Seedance 2.5: it generates faster, has a lower limit on reference materials, and shares the same parameter structure as `seedance2_5`.
+</Note>
+
+## Differences from Seedance 2.5
+
+| Item | `seedance2_5` | `seedance2_5_flash` |
+| --- | --- | --- |
+| Reference Image Limit | 30 images | 10 images |
+| Reference Video Limit | 9 clips | 5 clips |
+| Reference Audio Limit | 10 clips | 5 clips |
+| Generation Speed | Standard | Faster |
+
+Aside from the table above, both models share the same parameters, value ranges, and asset specifications.
+
+## Authorizations
+
+<ParamField header="Authorization" type="string" required>
+  All endpoints require authentication using a Bearer Token.
+
+  Visit the <a href={apiKeyUrl} target="_blank">API Key Management Page</a> to get your API Key, and add it to the request headers:
+
+  ```
+  Authorization: Bearer YOUR_API_KEY
+  ```
+</ParamField>
+
+## Body
+
+<ParamField body="model" type="string" required>
+  Model name, fixed as:
+
+  * `seedance2_5_flash`
+</ParamField>
+
+<ParamField body="params" type="object" required>
+  Model parameters object.
+
+  <Expandable title="params Object Properties">
+    <ParamField body="prompt" type="string" required>
+      Text description for video generation.
+
+      It is recommended to describe the subject, scene, action, camera movement, visual style, dialogue, and ambient sound.
+    </ParamField>
+
+    <ParamField body="type" type="string" default="all_reference">
+      Reference mode, which determines how reference materials are used:
+
+      * `all_reference` - Full reference mode, allows using reference images, reference videos, and reference audio
+      * `first_last_frame` - First and last frame mode, uses a first frame image and an optional last frame image
+
+      The two modes are mutually exclusive; only one can be used per request.
+    </ParamField>
+
+    <ParamField body="image_url" type="string | string[]">
+      Reference image URL.
+
+      * `all_reference` mode: Up to 10 images; max 30MB per image; minimum side length of 300px
+      * `first_last_frame` mode: 1-2 images, used sequentially as the first frame and last frame; max 10MB per image
+
+      The URL must be directly accessible from the public internet.
+    </ParamField>
+
+    <ParamField body="video_url" type="string | string[]">
+      Reference video URL, valid only in `all_reference` mode. Supports up to 5 reference videos.
+
+      Video requirements:
+
+      * Single video duration: 2-30 seconds; total duration of reference videos must not exceed 30 seconds
+      * Max 200MB per video
+      * Frame rate: 24-60 FPS
+      * Aspect ratio range: 0.4-2.5
+      * Width and height range: 300-6000px
+      * Total pixel count range: 409600-927408
+
+      <Warning>Do not pass this parameter in `first_last_frame` mode.</Warning>
+    </ParamField>
+
+    <ParamField body="audio_url" type="string | string[]">
+      Reference audio URL, valid only in `all_reference` mode. Supports up to 5 audio files.
+
+      Audio requirements:
+
+      * Single audio duration: 2-30 seconds; total duration of reference audio must not exceed 30 seconds
+      * Supports WAV, MP3
+      * Max 15MB per audio file
+
+      <Warning>Do not pass this parameter in `first_last_frame` mode.</Warning>
+    </ParamField>
+
+    <ParamField body="resolution" type="string" default="720p">
+      Video resolution:
+
+      * `480p`
+      * `720p` - Default
+
+      1080p and 4K are not supported.
+    </ParamField>
+
+    <ParamField body="video_length" type="integer" default="5">
+      Output video duration in seconds.
+
+      Supports integers between `4` and `30`, default is `5`.
+    </ParamField>
+
+    <ParamField body="aspect_ratio" type="string" default="16:9">
+      Video aspect ratio:
+
+      * `21:9` - Ultra-widescreen
+      * `16:9` - Landscape, default
+      * `9:16` - Portrait
+      * `4:3` - Standard landscape
+      * `3:4` - Standard portrait
+      * `1:1` - Square
+
+      In `first_last_frame` mode, the aspect ratio follows the first frame image, and this parameter does not take effect.
+    </ParamField>
+
+    <ParamField body="generate_audio" type="boolean" default="true">
+      Whether to generate AI audio synchronized with the video.
+
+      * `true` - Generate audio, default
+      * `false` - Do not generate audio
+    </ParamField>
+
+    <ParamField body="output_format" type="string" default="mp4">
+      Output video format:
+
+      * `mp4` - Universal format with smaller file size, default
+      * `mov` - High color precision format (yuv444p), suitable for post-processing extension and splicing
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField body="out_task_id" type="string" required>
+  Initiator task ID.
+
+  Generated by the caller and guaranteed to be unique. Supports letters, numbers, underscores, and hyphens, with a length of 1-64 characters. This ID will be used subsequently to query the task status and results.
+</ParamField>
+
+## Response
+
+<ResponseField name="out_task_id" type="string">
+  Initiator task ID, which can be used to query the result.
+</ResponseField>
+
+<ResponseField name="status" type="string">
+  Initial status, typically `"pending"`.
+</ResponseField>
+
+<ResponseField name="estimated_credits" type="number">
+  Estimated credits consumed.
+</ResponseField>
+
+<ResponseField name="created_at" type="string">
+  Creation time in ISO 8601 format.
+</ResponseField>
+
+## Query Task
+
+Seedance 2.5 Flash uses asynchronous processing. After a successful submission, use the same `out_task_id` to query the task:
+
+```bash
+curl --request POST \
+  --url https://aireiter.com/api/openapi/query \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "out_task_id": "seedance2_5_flash_task_123456"
+  }'
+```
+
+Once the task is completed, the `output` array in the response will contain the generated video URLs. For the full list of fields, see [Get Task Status](/en/api-reference/tasks/status).
+
+## Request Examples
+
+<RequestExample>
+  ```bash cURL (All-Reference Mode)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "seedance2_5_flash",
+      "params": {
+        "prompt": "Cinematic product short film, keeping character and product appearance consistent, smooth camera orbit, accompanied by natural ambient sound",
+        "type": "all_reference",
+        "image_url": [
+          "https://example.com/character.jpg",
+          "https://example.com/product.jpg"
+        ],
+        "video_url": ["https://example.com/motion-reference.mp4"],
+        "audio_url": ["https://example.com/music-reference.mp3"],
+        "resolution": "720p",
+        "video_length": 8,
+        "aspect_ratio": "16:9",
+        "generate_audio": true,
+        "output_format": "mov"
+      },
+      "out_task_id": "seedance2_5_flash_reference_123456"
+    }'
+  ```
+
+  ```bash cURL (First-and-Last-Frame Mode)
+  curl --request POST \
+    --url https://aireiter.com/api/openapi/submit \
+    --header 'Authorization: Bearer <token>' \
+    --header 'Content-Type: application/json' \
+    --data '{
+      "model": "seedance2_5_flash",
+      "params": {
+        "prompt": "Naturally transition from an early morning city skyline to night lights, slow camera push-in",
+        "type": "first_last_frame",
+        "image_url": [
+          "https://example.com/first-frame.jpg",
+          "https://example.com/last-frame.jpg"
+        ],
+        "resolution": "720p",
+        "video_length": 10,
+        "generate_audio": true,
+        "output_format": "mp4"
+      },
+      "out_task_id": "seedance2_5_flash_frames_123456"
+    }'
+  ```
+
+  ```python Python
+  import requests
+
+  url = "https://aireiter.com/api/openapi/submit"
+
+  payload = {
+      "model": "seedance2_5_flash",
+      "params": {
+          "prompt": "Cinematic product short film, keeping character and product appearance consistent, smooth camera orbit, accompanied by natural ambient sound",
+          "type": "all_reference",
+          "image_url": ["https://example.com/character.jpg", "https://example.com/product.jpg"],
+          "video_url": ["https://example.com/motion-reference.mp4"],
+          "audio_url": ["https://example.com/music-reference.mp3"],
+          "resolution": "720p",
+          "video_length": 8,
+          "aspect_ratio": "16:9",
+          "generate_audio": True,
+          "output_format": "mov"
+      },
+      "out_task_id": "seedance2_5_flash_reference_123456"
+  }
+
+  headers = {
+      "Authorization": "Bearer <token>",
+      "Content-Type": "application/json"
+  }
+
+  response = requests.post(url, json=payload, headers=headers)
+
+  print(response.json())
+  ```
+
+  ```javascript JavaScript
+  const url = "https://aireiter.com/api/openapi/submit";
+
+  const payload = {
+    model: "seedance2_5_flash",
+    params: {
+      prompt: "Cinematic product short film, keeping character and product appearance consistent, smooth camera orbit, accompanied by natural ambient sound",
+      type: "all_reference",
+      image_url: ["https://example.com/character.jpg", "https://example.com/product.jpg"],
+      video_url: ["https://example.com/motion-reference.mp4"],
+      audio_url: ["https://example.com/music-reference.mp3"],
+      resolution: "720p",
+      video_length: 8,
+      aspect_ratio: "16:9",
+      generate_audio: true,
+      output_format: "mov"
+    },
+    out_task_id: "seedance2_5_flash_reference_123456"
+  };
+
+  const headers = {
+    "Authorization": "Bearer <token>",
+    "Content-Type": "application/json"
+  };
+
+  fetch(url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(payload)
+  })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+  ```
+
+  ```go Go
+  package main
+
+  import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "io/ioutil"
+      "net/http"
+  )
+
+  func main() {
+      url := "https://aireiter.com/api/openapi/submit"
+
+      payload := map[string]interface{}{
+          "model": "seedance2_5_flash",
+          "params": map[string]interface{}{
+              "prompt": "Cinematic product short film, keeping character and product appearance consistent, smooth camera orbit, accompanied by natural ambient sound",
+              "type": "all_reference",
+              "image_url": []interface{}{
+                  "https://example.com/character.jpg",
+                  "https://example.com/product.jpg",
+              },
+              "video_url": []interface{}{
+                  "https://example.com/motion-reference.mp4",
+              },
+              "audio_url": []interface{}{
+                  "https://example.com/music-reference.mp3",
+              },
+              "resolution": "720p",
+              "video_length": 8,
+              "aspect_ratio": "16:9",
+              "generate_audio": true,
+              "output_format": "mov",
+          },
+          "out_task_id": "seedance2_5_flash_reference_123456",
+      }
+
+      jsonData, _ := json.Marshal(payload)
+
+      req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+      req.Header.Set("Authorization", "Bearer <token>")
+      req.Header.Set("Content-Type", "application/json")
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+          panic(err)
+      }
+      defer resp.Body.Close()
+
+      body, _ := ioutil.ReadAll(resp.Body)
+      fmt.Println(string(body))
+  }
+  ```
+
+  ```java Java
+  import java.net.http.HttpClient;
+  import java.net.http.HttpRequest;
+  import java.net.http.HttpResponse;
+  import java.net.URI;
+
+  public class Main {
+      public static void main(String[] args) throws Exception {
+          String url = "https://aireiter.com/api/openapi/submit";
+
+          String payload = """
+              {
+                "model": "seedance2_5_flash",
+                "params": {
+                  "prompt": "Cinematic product short film, maintaining consistent character and product appearance, smooth orbiting camera movement, paired with natural ambient sound",
+                  "type": "all_reference",
+                  "image_url": [
+                    "https://example.com/character.jpg",
+                    "https://example.com/product.jpg"
+                  ],
+                  "video_url": [
+                    "https://example.com/motion-reference.mp4"
+                  ],
+                  "audio_url": [
+                    "https://example.com/music-reference.mp3"
+                  ],
+                  "resolution": "720p",
+                  "video_length": 8,
+                  "aspect_ratio": "16:9",
+                  "generate_audio": true,
+                  "output_format": "mov"
+                },
+                "out_task_id": "seedance2_5_flash_reference_123456"
+              }
+          """;
+
+          HttpClient client = HttpClient.newHttpClient();
+          HttpRequest request = HttpRequest.newBuilder()
+              .uri(URI.create(url))
+              .header("Authorization", "Bearer <token>")
+              .header("Content-Type", "application/json")
+              .POST(HttpRequest.BodyPublishers.ofString(payload))
+              .build();
+
+          HttpResponse<String> response = client.send(request,
+              HttpResponse.BodyHandlers.ofString());
+
+          System.out.println(response.body());
+      }
+  }
+  ```
+
+  ```php PHP
+  <?php
+
+  $url = "https://aireiter.com/api/openapi/submit";
+
+  $payload = [
+      "model" => "seedance2_5_flash",
+      "params" => [
+          "prompt" => "Cinematic product short film, maintaining consistent character and product appearance, smooth orbiting camera movement, paired with natural ambient sound",
+          "type" => "all_reference",
+          "image_url" => ["https://example.com/character.jpg", "https://example.com/product.jpg"],
+          "video_url" => ["https://example.com/motion-reference.mp4"],
+          "audio_url" => ["https://example.com/music-reference.mp3"],
+          "resolution" => "720p",
+          "video_length" => 8,
+          "aspect_ratio" => "16:9",
+          "generate_audio" => true,
+          "output_format" => "mov"
+      ],
+      "out_task_id" => "seedance2_5_flash_reference_123456"
+  ];
+
+  $ch = curl_init($url);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch, CURLOPT_POST, true);
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+  curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      "Authorization: Bearer <token>",
+      "Content-Type: application/json"
+  ]);
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+
+  echo $response;
+  ?>
+  ```
+
+  ```ruby Ruby
+  require 'net/http'
+  require 'json'
+  require 'uri'
+
+  url = URI("https://aireiter.com/api/openapi/submit")
+
+  payload = {
+    model: "seedance2_5_flash",
+    params: {
+      prompt: "Cinematic product short film, maintaining consistent character and product appearance, smooth orbiting camera movement, paired with natural ambient sound",
+      type: "all_reference",
+      image_url: ["https://example.com/character.jpg", "https://example.com/product.jpg"],
+      video_url: ["https://example.com/motion-reference.mp4"],
+      audio_url: ["https://example.com/music-reference.mp3"],
+      resolution: "720p",
+      video_length: 8,
+      aspect_ratio: "16:9",
+      generate_audio: true,
+      output_format: "mov"
+    },
+    out_task_id: "seedance2_5_flash_reference_123456"
+  }
+
+  http = Net::HTTP.new(url.host, url.port)
+
+  request = Net::HTTP::Post.new(url)
+  request["Authorization"] = "Bearer <token>"
+  request["Content-Type"] = "application/json"
+  request.body = payload.to_json
+
+  response = http.request(request)
+  puts response.body
+  ```
+
+  ```swift Swift
+  import Foundation
+
+  let url = URL(string: "https://aireiter.com/api/openapi/submit")!
+
+  let payload: [String: Any] = [
+      "model": "seedance2_5_flash",
+      "params": [
+          "prompt": "Cinematic product short film, maintaining consistent character and product appearance, smooth orbiting camera movement, paired with natural ambient sound",
+          "type": "all_reference",
+          "image_url": ["https://example.com/character.jpg", "https://example.com/product.jpg"],
+          "video_url": ["https://example.com/motion-reference.mp4"],
+          "audio_url": ["https://example.com/music-reference.mp3"],
+          "resolution": "720p",
+          "video_length": 8,
+          "aspect_ratio": "16:9",
+          "generate_audio": true,
+          "output_format": "mov"
+      ],
+      "out_task_id": "seedance2_5_flash_reference_123456"
+  ]
+
+  var request = URLRequest(url: url)
+  request.httpMethod = "POST"
+  request.setValue("Bearer <token>", forHTTPHeaderField: "Authorization")
+  request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+  request.httpBody = try? JSONSerialization.data(withJSONObject: payload)
+
+  let task = URLSession.shared.dataTask(with: request) { data, response, error in
+      if let error = error {
+          print("Error: \(error)")
+          return
+      }
+
+      if let data = data, let responseString = String(data: data, encoding: .utf8) {
+          print(responseString)
+      }
+  }
+
+  task.resume()
+  ```
+
+  ```csharp C#
+  using System;
+  using System.Net.Http;
+  using System.Text;
+  using System.Threading.Tasks;
+
+  class Program
+  {
+      static async Task Main(string[] args)
+      {
+          var url = "https://aireiter.com/api/openapi/submit";
+
+          var payload = @"
+                {
+                    ""model"": ""seedance2_5_flash"",
+                    ""params"": {
+                        ""prompt"": ""Cinematic product short film, maintaining consistent character and product appearance, smooth orbiting camera movement, accompanied by natural ambient sounds"",
+                        ""type"": ""all_reference"",
+                        ""image_url"": [
+                            ""https://example.com/character.jpg"",
+                            ""https://example.com/product.jpg""
+                        ],
+                        ""video_url"": [
+                            ""https://example.com/motion-reference.mp4""
+                        ],
+                        ""audio_url"": [
+                            ""https://example.com/music-reference.mp3""
+                        ],
+                        ""resolution"": ""720p"",
+                        ""video_length"": 8,
+                        ""aspect_ratio"": ""16:9"",
+                        ""generate_audio"": true,
+                        ""output_format"": ""mov""
+                    },
+                    ""out_task_id"": ""seedance2_5_flash_reference_123456""
+                }";
+
+          using var client = new HttpClient();
+          client.DefaultRequestHeaders.Add("Authorization", "Bearer <token>");
+
+          var content = new StringContent(payload, Encoding.UTF8, "application/json");
+          var response = await client.PostAsync(url, content);
+          var result = await response.Content.ReadAsStringAsync();
+
+          Console.WriteLine(result);
+      }
+  }
+  ```
+
+  ```c C
+  #include <stdio.h>
+  #include <curl/curl.h>
+
+  int main(void) {
+      CURL *curl;
+      CURLcode res;
+
+      curl_global_init(CURL_GLOBAL_DEFAULT);
+      curl = curl_easy_init();
+
+      if(curl) {
+          const char *url = "https://aireiter.com/api/openapi/submit";
+          const char *payload = "{\"model\":\"seedance2_5_flash\",\"params\":{\"prompt\":\"Cinematic product short film, maintaining consistent character and product appearance, smooth orbiting camera movement, accompanied by natural ambient sounds\",\"type\":\"all_reference\",\"image_url\":[\"https://example.com/character.jpg\",\"https://example.com/product.jpg\"],\"video_url\":[\"https://example.com/motion-reference.mp4\"],\"audio_url\":[\"https://example.com/music-reference.mp3\"],\"resolution\":\"720p\",\"video_length\":8,\"aspect_ratio\":\"16:9\",\"generate_audio\":true,\"output_format\":\"mov\"},\"out_task_id\":\"seedance2_5_flash_reference_123456\"}";
+
+          struct curl_slist *headers = NULL;
+          headers = curl_slist_append(headers, "Authorization: Bearer <token>");
+          headers = curl_slist_append(headers, "Content-Type: application/json");
+
+          curl_easy_setopt(curl, CURLOPT_URL, url);
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload);
+          curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+
+          res = curl_easy_perform(curl);
+
+          if(res != CURLE_OK) {
+              fprintf(stderr, "curl_easy_perform() failed: %s\n",
+                      curl_easy_strerror(res));
+          }
+
+          curl_slist_free_all(headers);
+          curl_easy_cleanup(curl);
+      }
+
+      curl_global_cleanup();
+      return 0;
+  }
+  ```
+
+  ```objectivec Objective-C
+  #import <Foundation/Foundation.h>
+
+  int main(int argc, const char * argv[]) {
+      @autoreleasepool {
+          NSURL *url = [NSURL URLWithString:@"https://aireiter.com/api/openapi/submit"];
+
+          NSDictionary *payload = @{
+              @"model": @"seedance2_5_flash",
+              @"params": @{
+                  @"prompt": @"Cinematic product short film, maintaining consistent character and product appearance, smooth orbiting camera movement, accompanied by natural ambient sounds",
+                  @"type": @"all_reference",
+                  @"image_url": @[
+                      @"https://example.com/character.jpg",
+                      @"https://example.com/product.jpg"
+                  ],
+                  @"video_url": @[@"https://example.com/motion-reference.mp4"],
+                  @"audio_url": @[@"https://example.com/music-reference.mp3"],
+                  @"resolution": @"720p",
+                  @"video_length": @8,
+                  @"aspect_ratio": @"16:9",
+                  @"generate_audio": @YES,
+                  @"output_format": @"mov"
+              },
+              @"out_task_id": @"seedance2_5_flash_reference_123456"
+          };
+
+          NSError *error;
+          NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload
+                                                            options:0
+                                                              error:&error];
+
+          NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
+          [request setHTTPMethod:@"POST"];
+          [request setValue:@"Bearer <token>" forHTTPHeaderField:@"Authorization"];
+          [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+          [request setHTTPBody:jsonData];
+
+          NSURLSessionDataTask *task = [[NSURLSession sharedSession]
+              dataTaskWithRequest:request
+              completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+                  if (error) {
+                      NSLog(@"Error: %@", error);
+                      return;
+                  }
+                  NSString *result = [[NSString alloc] initWithData:data
+                                                          encoding:NSUTF8StringEncoding];
+                  NSLog(@"%@", result);
+              }];
+
+          [task resume];
+          [[NSRunLoop mainRunLoop] run];
+      }
+      return 0;
+  }
+  ```
+
+  ```ocaml OCaml
+  (* Requires cohttp and yojson libraries *)
+  open Lwt
+  open Cohttp
+  open Cohttp_lwt_unix
+
+  let url = "https://aireiter.com/api/openapi/submit"
+
+  let payload = {|{
+    "model": "seedance2_5_flash",
+    "params": {
+      "prompt": "Cinematic product short film, maintaining consistent appearance of character and product, smooth orbiting camera movement, accompanied by natural ambient sound",
+      "type": "all_reference",
+      "image_url": [
+        "https://example.com/character.jpg",
+        "https://example.com/product.jpg"
+      ],
+      "video_url": [
+        "https://example.com/motion-reference.mp4"
+      ],
+      "audio_url": [
+        "https://example.com/music-reference.mp3"
+      ],
+      "resolution": "720p",
+      "video_length": 8,
+      "aspect_ratio": "16:9",
+      "generate_audio": true,
+      "output_format": "mov"
+    },
+    "out_task_id": "seedance2_5_flash_reference_123456"
+  }|}
+
+  let () =
+    let headers = Header.init ()
+      |> fun h -> Header.add h "Authorization" "Bearer <token>"
+      |> fun h -> Header.add h "Content-Type" "application/json"
+    in
+    let body = Cohttp_lwt.Body.of_string payload in
+
+    let response = Client.post ~headers ~body (Uri.of_string url) >>= fun (resp, body) ->
+      body |> Cohttp_lwt.Body.to_string >|= fun body_str ->
+      print_endline body_str
+    in
+    Lwt_main.run response
+  ```
+
+  ```dart Dart
+  import 'dart:convert';
+  import 'package:http/http.dart' as http;
+
+  void main() async {
+    final url = Uri.parse('https://aireiter.com/api/openapi/submit');
+
+    final payload = {
+          "model": "seedance2_5_flash",
+          "params": {
+              "prompt": "Cinematic product short film, maintaining consistent appearance of character and product, smooth orbiting camera movement, accompanied by natural ambient sound",
+              "type": "all_reference",
+              "image_url": ["https://example.com/character.jpg", "https://example.com/product.jpg"],
+              "video_url": ["https://example.com/motion-reference.mp4"],
+              "audio_url": ["https://example.com/music-reference.mp3"],
+              "resolution": "720p",
+              "video_length": 8,
+              "aspect_ratio": "16:9",
+              "generate_audio": true,
+              "output_format": "mov"
+          },
+          "out_task_id": "seedance2_5_flash_reference_123456"
+      };
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer <token>',
+        'Content-Type': 'application/json'
+      },
+      body: jsonEncode(payload),
+    );
+
+    print(response.body);
+  }
+  ```
+
+  ```r R
+  library(httr)
+  library(jsonlite)
+
+  url <- "https://aireiter.com/api/openapi/submit"
+
+  payload <- list(
+    model = "seedance2_5_flash",
+    params = list(
+      prompt = "Cinematic product short film, maintaining consistent appearance of character and product, smooth orbiting camera movement, accompanied by natural ambient sound",
+      type = "all_reference",
+      image_url = list(
+        "https://example.com/character.jpg",
+        "https://example.com/product.jpg"
+      ),
+      video_url = list(
+        "https://example.com/motion-reference.mp4"
+      ),
+      audio_url = list(
+        "https://example.com/music-reference.mp3"
+      ),
+      resolution = "720p",
+      video_length = 8,
+      aspect_ratio = "16:9",
+      generate_audio = TRUE,
+      output_format = "mov"
+    ),
+    out_task_id = "seedance2_5_flash_reference_123456"
+  )
+
+  response <- POST(
+    url,
+    add_headers(
+      Authorization = "Bearer <token>",
+      `Content-Type` = "application/json"
+    ),
+    body = toJSON(payload, auto_unbox = TRUE),
+    encode = "raw"
+  )
+
+  cat(content(response, "text"))
+  ```
+</RequestExample>
+
+<ResponseExample>
+  ```json 200
+{
+    "statusCode": 200,
+    "message": "",
+    "data": {
+        "out_task_id": "seedance2_5_flash_reference_123456",
+        "status": "pending",
+        "estimated_credits": 100,
+        "created_at": "2025-12-22T06:03:28.242Z"
+    }
+}
+  ```
+
+  ```json 400
+    {
+        "statusCode": 400,
+        "message": "Invalid request parameters",
+        "ok": false
+    }
+  ```
+  ```json 401
+  {
+    "error": {
+      "code": 401,
+      "message": "Authentication failed, please check your API key"
+    }
+  }
+  ```
+```json 433
+  {
+    "error": {
+      "code": 433,
+      "message": "Insufficient account balance, please top up and try again"
+    }
+  }
+  ```
+
+  ```json 500
+  {
+    "error": {
+      "code": 500,
+      "message": "Internal server error, please try again later"
+    }
+  }
+  ```
+</ResponseExample>
+
+## Mode Rules
+
+| type | Available Assets | Asset Limits |
+| --- | --- | --- |
+| `all_reference` | `image_url`, `video_url`, `audio_url` | Up to 10 images, 5 videos, 5 audio clips |
+| `first_last_frame` | `image_url` | 1-2 images, serving as the first frame and last frame in order; do not pass `video_url` or `audio_url`; aspect ratio follows the first frame image |
+
+<Warning>
+Please ensure all asset URLs are directly accessible from the public internet. Tasks are processed asynchronously; do not use the HTTP connection that submitted the request to wait for the final video.
+</Warning>
